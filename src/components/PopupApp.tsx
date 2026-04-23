@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert } from 'antd';
+import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert, Space } from 'antd';
 import {
   PlayCircleOutlined,
   ReloadOutlined,
@@ -11,6 +11,8 @@ import {
   ClockCircleOutlined,
   HistoryOutlined,
   FileSearchOutlined,
+  ArrowLeftOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import type { AuditHistoryEntry, AuditResult, Violation, VisionSimulationFilter } from '@/types';
 import {
@@ -58,6 +60,7 @@ export const PopupApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null);
   const [activeTabKey, setActiveTabKey] = useState('summary');
   const [priorityIndex, setPriorityIndex] = useState(0);
+  const [showAboutView, setShowAboutView] = useState(false);
 
   const loadAuditForCurrentTab = useCallback(async () => {
     try {
@@ -68,12 +71,14 @@ export const PopupApp: React.FC = () => {
       setAuditResult(result);
       setAuditHistory(history);
       setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null);
+      setShowAboutView(false);
       setPriorityIndex(0);
     } catch (error) {
       console.error('Erro ao carregar resultado da aba ativa:', error);
       setAuditResult(null);
       setAuditHistory([]);
       setSelectedHistoryId(null);
+      setShowAboutView(false);
       setPriorityIndex(0);
     }
   }, []);
@@ -132,6 +137,7 @@ export const PopupApp: React.FC = () => {
       const history = await getAuditHistoryForUrl(tab.url);
       setAuditHistory(history);
       setSelectedHistoryId(null);
+      setShowAboutView(false);
       setPriorityIndex(0);
       message.success(`Auditoria concluída: ${result.totalViolations} item(ns) encontrado(s).`);
     } catch (error) {
@@ -149,6 +155,7 @@ export const PopupApp: React.FC = () => {
       await resetAuditCache();
       setAuditResult(null);
       setSelectedHistoryId(auditHistory[0]?.id || null);
+      setShowAboutView(false);
       setPriorityIndex(0);
       message.success('Auditoria limpa para esta aba');
     } catch (error) {
@@ -329,17 +336,30 @@ export const PopupApp: React.FC = () => {
   return (
     <Layout className="popup-app">
       <Header className="popup-header">
-        <div className="header-content">
-          <h1>Guardião NBR 17225</h1>
-          <p>
-            {activeTab?.title ? `Aba ativa: ${activeTab.title}` : 'Verificação por aba com foco em requisitos e recomendações.'}
-          </p>
+        <div className="header-row">
+          <div className="header-content">
+            <h1>Guardião NBR 17225</h1>
+            <p>
+              {activeTab?.title ? `Aba ativa: ${activeTab.title}` : 'Verificação por aba com foco em requisitos e recomendações.'}
+            </p>
+          </div>
+          <Space>
+            {showAboutView ? (
+              <Button icon={<ArrowLeftOutlined />} onClick={() => setShowAboutView(false)}>
+                Voltar
+              </Button>
+            ) : (
+              <Button icon={<InfoCircleOutlined />} onClick={() => setShowAboutView(true)}>
+                Sobre
+              </Button>
+            )}
+          </Space>
         </div>
       </Header>
 
       <Content className="popup-content">
         <Spin spinning={loading} tip="Analisando página...">
-          {!viewedAuditResult ? (
+          {showAboutView || !viewedAuditResult ? (
             <div className="empty-state empty-state-with-about">
               <div className="about-card">
                 <span className="about-eyebrow">Sobre</span>
@@ -353,15 +373,22 @@ export const PopupApp: React.FC = () => {
                   e manter um histórico local das auditorias já executadas.
                 </p>
               </div>
-              <Button
-                type="primary"
-                size="large"
-                icon={<PlayCircleOutlined />}
-                onClick={handleRunAudit}
-                loading={loading}
-              >
-                Iniciar verificação
-              </Button>
+              <Space>
+                {viewedAuditResult && (
+                  <Button icon={<ArrowLeftOutlined />} onClick={() => setShowAboutView(false)}>
+                    Voltar à auditoria
+                  </Button>
+                )}
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<PlayCircleOutlined />}
+                  onClick={handleRunAudit}
+                  loading={loading}
+                >
+                  Iniciar verificação
+                </Button>
+              </Space>
             </div>
           ) : (
             <>
