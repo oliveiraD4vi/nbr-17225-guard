@@ -17,7 +17,7 @@ Funcionalidades principais:
 
 ## Cobertura de Regras
 
-O escopo da versão 1 vem de `docs/Analise_Documental_NBR17225.xlsx`. Nesta revisão, o arquivo foi conferido diretamente pela estrutura XML interna do `.xlsx`, e ele lista 94 itens de escopo para a v1.
+O escopo da versão 1 vem de `docs/Analise_Documental_NBR17225.xlsx`. O catálogo local da v1 contém 94 itens.
 
 O estado atual desse catálogo v1 é:
 
@@ -30,7 +30,7 @@ O estado atual desse catálogo v1 é:
 | Semi-automatizáveis | 53 |
 | Não automatizáveis | 1 |
 
-As duas lacunas encontradas nesta revisão foram corrigidas:
+As duas lacunas anteriormente encontradas no mapeamento foram corrigidas:
 
 - `5.9.3 Rótulo de campo associado`
 - `5.12.9 Uso de texto especial`
@@ -65,13 +65,13 @@ O script verifica:
 
 ## Escopo Público x Escopo V1
 
-Durante esta revisão, o catálogo local de 94 itens foi confrontado com fontes públicas da NBR 17225. O resultado é:
+O catálogo local de 94 itens foi confrontado com fontes públicas da NBR 17225. O resultado é:
 
 - o repositório está consistente com o escopo v1 definido no `xlsx`;
 - a cópia pública da norma e checklists públicos mostram itens adicionais fora do escopo v1 atual;
 - esses itens não serão adicionados agora, mas devem ficar explícitos como backlog para contribuições futuras ao repositório público.
 
-Itens públicos adicionais já identificados fora do escopo v1:
+Itens públicos adicionais fora do escopo v1:
 
 - `5.2.6`;
 - `5.4.3`;

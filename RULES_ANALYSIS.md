@@ -2,7 +2,7 @@
 
 Esta análise consolida as regras extraídas de `docs/Analise_Documental_NBR17225.xlsx` e compara a cobertura com os módulos em `src/rules`.
 
-Nesta revisão, o `.xlsx` foi conferido diretamente pela estrutura XML interna do arquivo. O catálogo local da v1 contém 94 itens de escopo.
+O catálogo local da v1 contém 94 itens de escopo, conforme `docs/Analise_Documental_NBR17225.xlsx`.
 
 ## Resumo Atual
 
@@ -15,7 +15,7 @@ Nesta revisão, o `.xlsx` foi conferido diretamente pela estrutura XML interna d
 | Semi-automatizáveis | 53 | Implementadas como heurísticas assistidas e exigem revisão humana em parte do julgamento |
 | Não automatizáveis | 1 | `5.12.9 Uso de texto especial`, registrado como revisão manual |
 
-Antes desta revisão, duas entradas estavam declaradas no mapeamento, mas sem regra própria no código:
+Duas entradas já estiveram declaradas no mapeamento sem regra própria no código:
 
 - `5.9.3 Rótulo de campo associado`
 - `5.12.9 Uso de texto especial`
@@ -47,7 +47,7 @@ Essas entradas agora possuem regras dedicadas e são verificadas pelo script `np
 
 O escopo da v1 é o catálogo de 94 itens do `xlsx` local. Fontes públicas da NBR 17225 expõem itens adicionais fora desse recorte. Eles não entram nesta versão, mas devem ser tratados como backlog de contribuição futura.
 
-Itens públicos já identificados fora do escopo v1:
+Itens públicos fora do escopo v1:
 
 - `5.2.6`
 - `5.4.3`
@@ -65,7 +65,7 @@ Para o confronto formal regra a regra com a referência normativa pública, cons
 
 ## Regras Totalmente Automatizáveis
 
-As regras totalmente automatizáveis no catálogo v1 possuem verificação automática no motor. Nesta revisão, as implementações mais frágeis foram tornadas mais conservadoras para reduzir falso positivo e instabilidade entre execuções, especialmente em regras dependentes de foco, orientação, contraste, idioma e animação.
+As regras totalmente automatizáveis no catálogo v1 possuem verificação automática no motor. As implementações mais frágeis foram tornadas mais conservadoras para reduzir falso positivo e instabilidade entre execuções, especialmente em regras dependentes de foco, orientação, contraste, idioma e animação.
 
 5.1.13, 5.2.1, 5.2.2, 5.3.1, 5.3.5, 5.4.1, 5.4.5, 5.5.1, 5.6.1, 5.6.3, 5.6.5, 5.7.1, 5.7.12, 5.8.1, 5.8.7, 5.9.1, 5.9.3, 5.9.6, 5.9.7, 5.9.8, 5.10.3, 5.10.4, 5.11.3, 5.11.4, 5.11.5, 5.11.6, 5.12.1, 5.12.2, 5.12.3, 5.12.4, 5.12.6, 5.12.8, 5.13.1, 5.13.2, 5.13.3, 5.13.4, 5.13.5, 5.13.8, 5.13.10, 5.13.13, 5.14.7, 5.15.4.
 
