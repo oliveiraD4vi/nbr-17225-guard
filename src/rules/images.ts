@@ -108,7 +108,7 @@ export const complexImageDescriptionRule: Rule = {
   name: 'Descrição para imagens complexas',
   description: 'Imagens complexas devem possuir descrição adicional quando necessário',
   severity: 'warning',
-  wcagLevel: 'AA',
+  wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];

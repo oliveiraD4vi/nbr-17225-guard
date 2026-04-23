@@ -84,7 +84,7 @@ export const zoomAllowedRule: Rule = {
   name: 'Zoom não bloqueado',
   description: 'A página não deve bloquear zoom do navegador',
   severity: 'error',
-  wcagLevel: 'A',
+  wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];

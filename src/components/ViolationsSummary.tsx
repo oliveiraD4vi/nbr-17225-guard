@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, Statistic, Row, Col, Empty, Spin } from 'antd';
-import { BugOutlined, WarningOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Card, Empty, Spin, Tag } from 'antd';
+import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined, LinkOutlined, CalendarOutlined } from '@ant-design/icons';
 import type { AuditResult } from '@/types';
 import '../styles/violations-summary.css';
 
@@ -27,46 +27,93 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
     );
   }
 
+  const hasViolations = result.totalViolations > 0;
+
   return (
     <div className="violations-summary">
       <Card className="summary-card">
-        <h2>Sumário da Auditoria</h2>
-        <p className="summary-url">{result.url}</p>
-        <p className="summary-timestamp">
-          {new Date(result.timestamp).toLocaleString('pt-BR')}
-        </p>
+        <div className="summary-hero">
+          <div className="summary-hero-copy">
+            <span className="summary-eyebrow">Resumo da auditoria</span>
+            <h2>{hasViolations ? 'Ajustes pendentes identificados' : 'Nenhuma violação detectada'}</h2>
+            <p>
+              {hasViolations
+                ? 'Os pontos abaixo priorizam os requisitos obrigatórios e separam recomendações para revisão incremental.'
+                : 'A página auditada não apresentou violações nas regras atualmente verificadas pelo motor.'}
+            </p>
+          </div>
+          <div className={`summary-status-pill ${hasViolations ? 'is-warning' : 'is-success'}`}>
+            {hasViolations ? <WarningOutlined /> : <CheckCircleOutlined />}
+            <span>{hasViolations ? 'Ação necessária' : 'Conforme verificado'}</span>
+          </div>
+        </div>
 
-        <Row gutter={[16, 16]} className="statistics-row">
-          <Col xs={24} sm={8}>
-            <Statistic
-              title="Total de Violações"
-              value={result.totalViolations}
-              prefix={<BugOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Col>
-          <Col xs={24} sm={8}>
-            <Statistic
-              title="Requisitos Não Atendidos"
-              value={result.errors}
-              prefix={<BugOutlined />}
-              valueStyle={{ color: '#f5222d' }}
-            />
-          </Col>
-          <Col xs={24} sm={8}>
-            <Statistic
-              title="Recomendações"
-              value={result.warnings}
-              prefix={<WarningOutlined />}
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Col>
-        </Row>
+        <div className="summary-meta">
+          <div className="summary-meta-item">
+            <LinkOutlined />
+            <span>{result.url}</span>
+          </div>
+          <div className="summary-meta-item">
+            <CalendarOutlined />
+            <span>{new Date(result.timestamp).toLocaleString('pt-BR')}</span>
+          </div>
+        </div>
 
-        {result.totalViolations === 0 && (
+        <div className="summary-stat-grid">
+          <div className="summary-stat-card is-total">
+            <span className="summary-stat-label">Total</span>
+            <strong>{result.totalViolations}</strong>
+            <small>itens encontrados</small>
+          </div>
+          <div className="summary-stat-card is-error">
+            <span className="summary-stat-label">Requisitos</span>
+            <strong>{result.errors}</strong>
+            <small>não atendidos</small>
+          </div>
+          <div className="summary-stat-card is-warning">
+            <span className="summary-stat-label">Recomendações</span>
+            <strong>{result.warnings}</strong>
+            <small>para revisão</small>
+          </div>
+        </div>
+
+        <div className="summary-breakdown">
+          <div className="summary-breakdown-header">
+            <h3>Prioridade de revisão</h3>
+            <Tag color={hasViolations ? 'orange' : 'green'}>
+              {hasViolations ? 'Comece pelos requisitos' : 'Nenhuma prioridade aberta'}
+            </Tag>
+          </div>
+
+          <div className="summary-priority-list">
+            <div className="summary-priority-item">
+              <span className="summary-priority-icon is-error">
+                <CloseCircleOutlined />
+              </span>
+              <div>
+                <strong>Requisitos obrigatórios</strong>
+                <p>Itens marcados como requisito devem ser tratados primeiro, porque representam não conformidades diretas.</p>
+              </div>
+              <span className="summary-priority-value">{result.errors}</span>
+            </div>
+
+            <div className="summary-priority-item">
+              <span className="summary-priority-icon is-warning">
+                <WarningOutlined />
+              </span>
+              <div>
+                <strong>Recomendações e heurísticas</strong>
+                <p>Esses itens dependem de validação contextual e ajudam a fechar lacunas de usabilidade e conformidade.</p>
+              </div>
+              <span className="summary-priority-value">{result.warnings}</span>
+            </div>
+          </div>
+        </div>
+
+        {!hasViolations && (
           <div className="success-message">
-            <CheckCircleOutlined style={{ fontSize: '48px', color: '#52c41a' }} />
-            <p>Parabéns! Nenhuma violação detectada.</p>
+            <CheckCircleOutlined style={{ fontSize: '40px', color: '#166534' }} />
+            <p>Auditoria concluída sem violações no conjunto atual de regras verificadas.</p>
           </div>
         )}
       </Card>

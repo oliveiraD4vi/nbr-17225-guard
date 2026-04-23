@@ -1,0 +1,170 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const requirements = [
+  ['5.1.1', 'Indicador de foco visivel', 'AA', 'Semi-Automatizavel'],
+  ['5.1.2', 'Elemento em foco totalmente visivel', 'AAA', 'Semi-Automatizavel'],
+  ['5.1.3', 'Elemento em foco parcialmente visivel', 'A', 'Semi-Automatizavel'],
+  ['5.1.4', 'Ordem de foco previsivel', 'A', 'Semi-Automatizavel'],
+  ['5.1.6', 'Armadilha de foco', 'A', 'Semi-Automatizavel'],
+  ['5.1.8', 'Conteudo adicional persistente', 'AA', 'Semi-Automatizavel'],
+  ['5.1.9', 'Conteudo adicional dispensavel', 'AA', 'Semi-Automatizavel'],
+  ['5.1.11', 'Atalhos de teclado sem tecla modificadora', 'A', 'Semi-Automatizavel'],
+  ['5.1.13', 'Acessibilidade por teclado parcial', 'A', 'Totalmente Automatizavel'],
+  ['5.2.1', 'Texto alternativo para imagens de conteudo', 'A', 'Totalmente Automatizavel'],
+  ['5.2.2', 'Texto alternativo para imagens funcionais', 'A', 'Totalmente Automatizavel'],
+  ['5.2.3', 'Texto alternativo para imagens decorativas', 'A', 'Semi-Automatizavel'],
+  ['5.2.4', 'Descricao para imagens complexas', 'A', 'Semi-Automatizavel'],
+  ['5.2.5', 'Imagens de texto', 'AA', 'Semi-Automatizavel'],
+  ['5.3.1', 'Semantica de cabecalho', 'A', 'Totalmente Automatizavel'],
+  ['5.3.2', 'Uso de cabecalhos', 'A', 'Semi-Automatizavel'],
+  ['5.3.5', 'Estrutura de cabecalhos', 'A', 'Totalmente Automatizavel'],
+  ['5.4.1', 'Semantica de regiao', 'A', 'Totalmente Automatizavel'],
+  ['5.4.2', 'Uso de regioes', 'A', 'Semi-Automatizavel'],
+  ['5.4.5', 'Regioes identificadas unicamente', 'A', 'Totalmente Automatizavel'],
+  ['5.5.1', 'Semantica de lista', 'A', 'Totalmente Automatizavel'],
+  ['5.5.2', 'Uso de listas', 'A', 'Semi-Automatizavel'],
+  ['5.6.1', 'Semantica de tabela', 'A', 'Totalmente Automatizavel'],
+  ['5.6.2', 'Uso de tabelas', 'A', 'Semi-Automatizavel'],
+  ['5.6.3', 'Cabecalhos de tabela', 'A', 'Totalmente Automatizavel'],
+  ['5.6.5', 'Titulo de tabela associado', 'A', 'Totalmente Automatizavel'],
+  ['5.7.1', 'Semantica de link', 'A', 'Totalmente Automatizavel'],
+  ['5.7.2', 'Uso de links', 'A', 'Semi-Automatizavel'],
+  ['5.7.4', 'Proposito do link no contexto', 'A', 'Semi-Automatizavel'],
+  ['5.7.12', 'Links para contornar blocos de conteudo em conjunto de paginas', 'A', 'Totalmente Automatizavel'],
+  ['5.7.15', 'Navegacao consistente', 'AA', 'Semi-Automatizavel'],
+  ['5.7.16', 'Ajuda consistente', 'A', 'Semi-Automatizavel'],
+  ['5.8.1', 'Semantica de botao', 'A', 'Totalmente Automatizavel'],
+  ['5.8.2', 'Uso de botoes', 'A', 'Semi-Automatizavel'],
+  ['5.8.3', 'Proposito do botao', 'A', 'Semi-Automatizavel'],
+  ['5.8.5', 'Identificacao consistente em conjunto de paginas', 'AA', 'Semi-Automatizavel'],
+  ['5.8.7', 'Area de acionamento minima', 'AA', 'Totalmente Automatizavel'],
+  ['5.8.9', 'Mudanca de contexto previsivel no foco', 'A', 'Semi-Automatizavel'],
+  ['5.8.10', 'Mudanca de contexto previsivel na entrada', 'A', 'Semi-Automatizavel'],
+  ['5.8.11', 'Acionamento por ponteiro unico', 'A', 'Semi-Automatizavel'],
+  ['5.8.12', 'Operacao por gestos de ponteiro', 'A', 'Semi-Automatizavel'],
+  ['5.8.13', 'Operacao por movimento de arrastar', 'AA', 'Semi-Automatizavel'],
+  ['5.8.14', 'Operacao por movimento', 'A', 'Semi-Automatizavel'],
+  ['5.9.1', 'Rotulo de campo', 'A', 'Totalmente Automatizavel'],
+  ['5.9.2', 'Rotulo de campo previsivel', 'A', 'Semi-Automatizavel'],
+  ['5.9.3', 'Rotulo de campo associado', 'A', 'Totalmente Automatizavel'],
+  ['5.9.4', 'Rotulo de campo descritivo', 'A', 'Semi-Automatizavel'],
+  ['5.9.5', 'Textos de ajuda previsiveis', 'A', 'Semi-Automatizavel'],
+  ['5.9.6', 'Campos relacionados', 'A', 'Totalmente Automatizavel'],
+  ['5.9.7', 'Campos obrigatorios', 'A', 'Totalmente Automatizavel'],
+  ['5.9.8', 'Tipo de dado determinado', 'AA', 'Totalmente Automatizavel'],
+  ['5.9.9', 'Mensagem de erro descritiva', 'A', 'Semi-Automatizavel'],
+  ['5.9.10', 'Sugestao de correcao', 'AA', 'Semi-Automatizavel'],
+  ['5.9.12', 'Prevencao de erro para formularios criticos', 'AA', 'Semi-Automatizavel'],
+  ['5.9.15', 'Reentrada de dados', 'A', 'Semi-Automatizavel'],
+  ['5.9.16', 'Validacao sensorial ou por movimento', 'A', 'Semi-Automatizavel'],
+  ['5.9.18', 'Autenticacao acessivel minima', 'AA', 'Semi-Automatizavel'],
+  ['5.10.1', 'Caracteristicas sensoriais', 'A', 'Semi-Automatizavel'],
+  ['5.10.2', 'Ordem de apresentacao', 'A', 'Semi-Automatizavel'],
+  ['5.10.3', 'Orientacao de exibicao', 'AA', 'Totalmente Automatizavel'],
+  ['5.10.4', 'Design responsivo', 'AA', 'Totalmente Automatizavel'],
+  ['5.11.1', 'Uso de cores', 'A', 'Semi-Automatizavel'],
+  ['5.11.3', 'Contraste para texto minimo', 'AA', 'Totalmente Automatizavel'],
+  ['5.11.4', 'Contraste para componentes', 'AA', 'Totalmente Automatizavel'],
+  ['5.11.5', 'Contraste para objetos graficos', 'AA', 'Totalmente Automatizavel'],
+  ['5.11.6', 'Contraste para indicador de foco visual', 'AA', 'Totalmente Automatizavel'],
+  ['5.12.1', 'Espacamento entre as linhas', 'AA', 'Totalmente Automatizavel'],
+  ['5.12.2', 'Espacamento entre os paragrafos', 'AA', 'Totalmente Automatizavel'],
+  ['5.12.3', 'Espacamento entre as letras', 'AA', 'Totalmente Automatizavel'],
+  ['5.12.4', 'Espacamento entre as palavras', 'AA', 'Totalmente Automatizavel'],
+  ['5.12.6', 'Largura de blocos de texto', 'AA', 'Totalmente Automatizavel'],
+  ['5.12.7', 'Texto redimensionado', 'AA', 'Semi-Automatizavel'],
+  ['5.12.8', 'Semantica de texto especial', 'A', 'Totalmente Automatizavel'],
+  ['5.12.9', 'Uso de texto especial', 'A', 'Nao Automatizavel'],
+  ['5.13.1', 'Titulo da pagina', 'A', 'Totalmente Automatizavel'],
+  ['5.13.2', 'Idioma da pagina', 'A', 'Totalmente Automatizavel'],
+  ['5.13.3', 'Idioma das partes da pagina', 'AA', 'Totalmente Automatizavel'],
+  ['5.13.4', 'Titulo do frame', 'A', 'Totalmente Automatizavel'],
+  ['5.13.5', 'Zoom nao bloqueado', 'AA', 'Totalmente Automatizavel'],
+  ['5.13.6', 'Ordem de leitura', 'A', 'Semi-Automatizavel'],
+  ['5.13.7', 'Texto visivel no nome acessivel', 'A', 'Semi-Automatizavel'],
+  ['5.13.8', 'Mensagens de status', 'AA', 'Totalmente Automatizavel'],
+  ['5.13.10', 'Componentes com nome acessivel', 'A', 'Totalmente Automatizavel'],
+  ['5.13.12', 'Semantica de componentes customizados', 'A', 'Semi-Automatizavel'],
+  ['5.13.13', 'Estados, propriedades e valores de componentes customizados', 'A', 'Totalmente Automatizavel'],
+  ['5.14.1', 'Alternativa em texto para audio', 'A', 'Semi-Automatizavel'],
+  ['5.14.2', 'Legendas descritivas para video', 'A', 'Semi-Automatizavel'],
+  ['5.14.4', 'Audiodescricao para video', 'A', 'Semi-Automatizavel'],
+  ['5.14.7', 'Controle de audio', 'A', 'Totalmente Automatizavel'],
+  ['5.14.9', 'Legendas para audio e video ao vivo', 'AA', 'Semi-Automatizavel'],
+  ['5.15.1', 'Controle de animacao', 'A', 'Semi-Automatizavel'],
+  ['5.15.4', 'Flash intermitente limitado', 'A', 'Totalmente Automatizavel'],
+  ['5.16.2', 'Limite de tempo ajustavel', 'A', 'Semi-Automatizavel'],
+  ['5.16.3', 'Controle de atualizacao', 'A', 'Semi-Automatizavel'],
+].map(([reference, name, wcagLevel, category]) => ({ reference, name, wcagLevel, category }));
+
+const normalize = (value) => value
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/ç/g, 'c')
+  .replace(/Ç/g, 'C');
+
+const rulesDir = join(process.cwd(), 'src', 'rules');
+const ruleFiles = readdirSync(rulesDir).filter((file) => file.endsWith('.ts') && file !== 'index.ts');
+const source = ruleFiles.map((file) => ({ file, content: readFileSync(join(rulesDir, file), 'utf8') }));
+const rules = [];
+
+for (const { file, content } of source) {
+  const blocks = content.matchAll(/export const\s+(\w+):\s*Rule\s*=\s*{([\s\S]*?)\n};/g);
+  for (const match of blocks) {
+    const [, exportName, body] = match;
+    const get = (key) => body.match(new RegExp(`${key}:\\s*'([^']+)'`))?.[1];
+    const id = get('id');
+    const reference = get('nbrReference');
+    const name = get('name');
+    const wcagLevel = get('wcagLevel');
+    const category = get('category');
+    rules.push({ exportName, file, id, reference, name, wcagLevel, category: normalize(category || '') });
+  }
+}
+
+const byReference = new Map();
+for (const rule of rules) {
+  if (!rule.reference) continue;
+  if (!byReference.has(rule.reference)) byReference.set(rule.reference, []);
+  byReference.get(rule.reference).push(rule);
+}
+
+const failures = [];
+
+for (const requirement of requirements) {
+  const matches = byReference.get(requirement.reference) || [];
+  if (!matches.length) {
+    failures.push(`MISSING ${requirement.reference} ${requirement.name}`);
+    continue;
+  }
+
+  for (const rule of matches) {
+    if (rule.wcagLevel !== requirement.wcagLevel) {
+      failures.push(`WCAG ${requirement.reference} expected ${requirement.wcagLevel}, got ${rule.wcagLevel} in ${rule.file}:${rule.exportName}`);
+    }
+    if (rule.category !== requirement.category) {
+      failures.push(`CATEGORY ${requirement.reference} expected ${requirement.category}, got ${rule.category} in ${rule.file}:${rule.exportName}`);
+    }
+  }
+}
+
+for (const rule of rules) {
+  if (!requirements.some((requirement) => requirement.reference === rule.reference)) {
+    failures.push(`EXTRA ${rule.reference || '<none>'} ${rule.file}:${rule.exportName}`);
+  }
+}
+
+for (const [reference, matches] of byReference.entries()) {
+  if (matches.length > 1) {
+    failures.push(`DUPLICATE ${reference} ${matches.map((rule) => `${rule.file}:${rule.exportName}`).join(', ')}`);
+  }
+}
+
+if (failures.length) {
+  console.error(`Rule verification failed with ${failures.length} issue(s):`);
+  for (const failure of failures) console.error(`- ${failure}`);
+  process.exit(1);
+}
+
+console.log(`Rule verification passed: ${requirements.length} documented requirements mapped to ${rules.length} rule implementation(s).`);

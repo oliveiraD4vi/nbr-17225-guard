@@ -33,6 +33,40 @@ export const fieldLabelRule: Rule = {
   },
 };
 
+export const associatedFieldLabelRule: Rule = {
+  id: 'field-label-associated',
+  nbrReference: '5.9.3',
+  name: 'Rótulo de campo associado',
+  description: 'Rótulos de campos devem estar associados programaticamente ao respectivo controle',
+  severity: 'error',
+  wcagLevel: 'A',
+  category: 'Totalmente Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = [];
+
+    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(formFieldsSelector).forEach((field) => {
+      if (!isElementVisible(field as unknown as HTMLElement)) return;
+
+      const hasProgrammaticLabel =
+        !!getAssociatedLabelText(field).trim() ||
+        !!field.getAttribute('aria-label')?.trim() ||
+        !!field.getAttribute('aria-labelledby')?.trim();
+
+      if (!hasProgrammaticLabel) {
+        violations.push(createViolation(associatedFieldLabelRule, {
+          element: field as unknown as HTMLElement,
+          message: 'Campo de formulário sem associação programática de rótulo.',
+          suggestion: 'Associe o rótulo ao campo com for/id, aria-label ou aria-labelledby.',
+          remediationAdvice: `<label for="nome">Nome</label>\n<input id="nome" name="nome" />`,
+          customIdPrefix: 'field-label-associated',
+        }));
+      }
+    });
+
+    return violations;
+  },
+};
+
 export const relatedFieldsRule: Rule = {
   id: 'related-fields',
   nbrReference: '5.9.6',
@@ -108,7 +142,7 @@ export const dataTypeRule: Rule = {
   name: 'Tipo de dado determinado',
   description: 'Campos devem usar tipos adequados ao dado solicitado',
   severity: 'error',
-  wcagLevel: 'A',
+  wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
@@ -164,6 +198,7 @@ export const accessibleAuthenticationRule: Rule = {
 
 export const formRules: Rule[] = [
   fieldLabelRule,
+  associatedFieldLabelRule,
   relatedFieldsRule,
   requiredFieldsRule,
   dataTypeRule,

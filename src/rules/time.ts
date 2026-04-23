@@ -7,7 +7,7 @@ export const refreshControlRule: Rule = {
   name: 'Controle de atualização',
   description: 'Atualizações automáticas da página devem ser controláveis',
   severity: 'warning',
-  wcagLevel: 'AA',
+  wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];

@@ -1,13 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Layout, Button, Space, Tabs, message, Spin } from 'antd';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Layout, Button, Tabs, message, Spin, Tag } from 'antd';
 import {
   PlayCircleOutlined,
   ReloadOutlined,
   DownloadOutlined,
-  EyeOutlined
+  EyeOutlined,
+  DeleteOutlined,
+  StopOutlined,
+  FlagOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import type { AuditResult, Violation, VisionSimulationFilter } from '@/types';
-import { runAccessibilityAudit, saveAuditResult, getAuditResult } from '@/utils/audit-engine';
+import {
+  getActiveTab,
+  getAuditResult,
+  resetAuditCache,
+  runAccessibilityAudit,
+  saveAuditResult,
+} from '@/utils/audit-engine';
 import { ViolationsSummary } from './ViolationsSummary';
 import { ViolationsList } from './ViolationsList';
 import { VisionSimulator } from './VisionSimulator';
@@ -15,33 +25,102 @@ import '../styles/popup.css';
 
 const { Header, Content, Footer } = Layout;
 
+const severityRank: Record<Violation['severity'], number> = {
+  error: 0,
+  warning: 1,
+};
+
+function getPriorityViolations(violations: Violation[]): Violation[] {
+  const seenRules = new Set<string>();
+
+  return [...violations]
+    .sort((left, right) => {
+      const severityCompare = severityRank[left.severity] - severityRank[right.severity];
+      if (severityCompare !== 0) return severityCompare;
+      return left.nbrReference.localeCompare(right.nbrReference, 'pt-BR');
+    })
+    .filter((violation) => {
+      if (seenRules.has(violation.ruleId)) return false;
+      seenRules.add(violation.ruleId);
+      return true;
+    })
+    .slice(0, 3);
+}
+
 export const PopupApp: React.FC = () => {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('summary');
+  const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null);
+  const [activeTabKey, setActiveTabKey] = useState('summary');
+  const [priorityIndex, setPriorityIndex] = useState(0);
 
-  useEffect(() => {
-    loadAuditResult();
+  const loadAuditForCurrentTab = useCallback(async () => {
+    try {
+      const tab = await getActiveTab();
+      setActiveTab(tab);
+      const result = await getAuditResult(tab.id);
+      setAuditResult(result);
+      setPriorityIndex(0);
+    } catch (error) {
+      console.error('Erro ao carregar resultado da aba ativa:', error);
+      setAuditResult(null);
+      setPriorityIndex(0);
+    }
   }, []);
 
-  const loadAuditResult = async () => {
+  useEffect(() => {
+    loadAuditForCurrentTab();
+
+    const handleTabActivated = () => {
+      loadAuditForCurrentTab();
+    };
+
+    const handleTabUpdated = (tabId: number, changeInfo: { status?: string; url?: string }) => {
+      if (!activeTab?.id || tabId !== activeTab.id) return;
+      if (changeInfo.status === 'complete' || 'url' in changeInfo) {
+        loadAuditForCurrentTab();
+      }
+    };
+
+    chrome.tabs.onActivated.addListener(handleTabActivated);
+    chrome.tabs.onUpdated.addListener(handleTabUpdated);
+
+    return () => {
+      chrome.tabs.onActivated.removeListener(handleTabActivated);
+      chrome.tabs.onUpdated.removeListener(handleTabUpdated);
+    };
+  }, [activeTab?.id, loadAuditForCurrentTab]);
+
+  const sendMessageToActiveTab = useCallback(async (payload: Record<string, unknown>) => {
+    const tab = activeTab ?? await getActiveTab();
+    await chrome.tabs.sendMessage(tab.id, payload);
+  }, [activeTab]);
+
+  const clearHighlightsOnPage = useCallback(async (showFeedback = false) => {
     try {
-      const result = await getAuditResult();
-      if (result) {
-        setAuditResult(result);
+      await sendMessageToActiveTab({ action: 'CLEAR_HIGHLIGHTS' });
+      if (showFeedback) {
+        message.success('Destaques removidos da página');
       }
     } catch (error) {
-      console.error('Erro ao carregar resultado:', error);
+      console.error('Erro ao limpar destaques:', error);
+      if (showFeedback) {
+        message.error('Não foi possível limpar os destaques');
+      }
     }
-  };
+  }, [sendMessageToActiveTab]);
 
   const handleRunAudit = async () => {
     setLoading(true);
     try {
+      await clearHighlightsOnPage(false);
       const result = await runAccessibilityAudit();
+      const tab = await getActiveTab();
+      setActiveTab(tab);
       setAuditResult(result);
-      await saveAuditResult(result);
-      message.success(`Auditoria concluída! ${result.totalViolations} violações encontradas.`);
+      setPriorityIndex(0);
+      await saveAuditResult(result, tab.id);
+      message.success(`Auditoria concluída: ${result.totalViolations} item(ns) encontrado(s).`);
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
       message.error(error instanceof Error ? error.message : 'Erro ao executar auditoria');
@@ -53,12 +132,14 @@ export const PopupApp: React.FC = () => {
   const handleResetAudit = async () => {
     setLoading(true);
     try {
-      await chrome.storage.local.remove('auditResult');
+      await clearHighlightsOnPage(false);
+      await resetAuditCache();
       setAuditResult(null);
-      message.success('Auditoria resetada');
+      setPriorityIndex(0);
+      message.success('Auditoria limpa para esta aba');
     } catch (error) {
       console.error('Erro ao resetar:', error);
-      message.error('Erro ao resetar auditoria');
+      message.error('Erro ao limpar auditoria');
     } finally {
       setLoading(false);
     }
@@ -88,17 +169,17 @@ export const PopupApp: React.FC = () => {
     }
 
     const headers = ['ID', 'Regra', 'Referência NBR', 'Severidade', 'Mensagem', 'Sugestão'];
-    const rows = auditResult.violations.map(v => [
-      v.id,
-      v.ruleName,
-      v.nbrReference,
-      v.severity,
-      v.message,
-      v.suggestion,
+    const rows = auditResult.violations.map((violation) => [
+      violation.id,
+      violation.ruleName,
+      violation.nbrReference,
+      violation.severity,
+      violation.message,
+      violation.suggestion,
     ]);
 
     const csv = [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -114,49 +195,116 @@ export const PopupApp: React.FC = () => {
   const handleFilterChange = async (filter: VisionSimulationFilter) => {
     await chrome.storage.local.set({ visionFilter: filter });
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tabId = tabs[0]?.id;
-      if (!tabId) return;
+    if (!activeTab?.id) return;
 
-      chrome.tabs.sendMessage(tabId, {
-        action: 'APPLY_VISION_FILTER',
-        filter,
-      });
+    chrome.tabs.sendMessage(activeTab.id, {
+      action: 'APPLY_VISION_FILTER',
+      filter,
     });
   };
 
-  const handleHighlightAll = () => {
+  const handleHighlightAll = async () => {
     if (!auditResult) return;
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'HIGHLIGHT_ALL_VIOLATIONS',
-          violations: auditResult.violations,
-        });
-      }
-    });
-
-    message.success('Todos os elementos foram destacados na página');
+    try {
+      await sendMessageToActiveTab({
+        action: 'HIGHLIGHT_ALL_VIOLATIONS',
+        violations: auditResult.violations,
+      });
+      message.success('Destaques aplicados na página');
+    } catch (error) {
+      console.error('Erro ao destacar violações:', error);
+      message.error('Não foi possível destacar os elementos');
+    }
   };
 
-  const handleHighlightViolation = (violation: Violation) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'HIGHLIGHT_VIOLATION',
-          violation,
-        });
-      }
-    });
+  const handleHighlightViolation = async (violation: Violation) => {
+    try {
+      await sendMessageToActiveTab({
+        action: 'HIGHLIGHT_VIOLATION',
+        violation,
+      });
+    } catch (error) {
+      console.error('Erro ao destacar violação:', error);
+    }
   };
+
+  const priorityViolations = useMemo(() => (
+    auditResult ? getPriorityViolations(auditResult.violations) : []
+  ), [auditResult]);
+
+  const handleNextPriorityIssue = async () => {
+    if (priorityViolations.length === 0) {
+      message.info('Nenhum item prioritário disponível nesta aba');
+      return;
+    }
+
+    const nextViolation = priorityViolations[priorityIndex % priorityViolations.length];
+    await handleHighlightViolation(nextViolation);
+    setPriorityIndex((current) => (current + 1) % priorityViolations.length);
+    message.success(`Foco no item prioritário: ${nextViolation.ruleName}`);
+  };
+
+  const footerActions = useMemo(() => {
+    if (!auditResult) return [];
+
+    return [
+      {
+        key: 'rerun',
+        label: 'Reexecutar',
+        icon: <ReloadOutlined />,
+        onClick: handleRunAudit,
+        loading,
+      },
+      {
+        key: 'highlight',
+        label: 'Destacar tudo',
+        icon: <EyeOutlined />,
+        onClick: handleHighlightAll,
+        type: 'primary' as const,
+      },
+      {
+        key: 'priority',
+        label: 'Próximo prioritário',
+        icon: <FlagOutlined />,
+        onClick: handleNextPriorityIssue,
+      },
+      {
+        key: 'clear-highlight',
+        label: 'Limpar destaques',
+        icon: <StopOutlined />,
+        onClick: () => clearHighlightsOnPage(true),
+      },
+      {
+        key: 'json',
+        label: 'Exportar JSON',
+        icon: <DownloadOutlined />,
+        onClick: handleExportJSON,
+      },
+      {
+        key: 'csv',
+        label: 'Exportar CSV',
+        icon: <DownloadOutlined />,
+        onClick: handleExportCSV,
+      },
+      {
+        key: 'clear',
+        label: 'Limpar auditoria',
+        icon: <DeleteOutlined />,
+        onClick: handleResetAudit,
+        danger: true,
+      },
+    ];
+  }, [auditResult, clearHighlightsOnPage, handleHighlightAll, handleNextPriorityIssue, loading]);
 
   return (
     <Layout className="popup-app">
       <Header className="popup-header">
         <div className="header-content">
           <h1>Guardião NBR 17225</h1>
-          <p>Verificador de Acessibilidade Web</p>
+          <p>
+            {activeTab?.title ? `Aba ativa: ${activeTab.title}` : 'Verificação por aba com foco em requisitos e recomendações.'}
+          </p>
         </div>
       </Header>
 
@@ -171,79 +319,83 @@ export const PopupApp: React.FC = () => {
                 onClick={handleRunAudit}
                 loading={loading}
               >
-                Iniciar Verificação
+                Iniciar verificação
               </Button>
             </div>
           ) : (
-            <Tabs
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              items={[
-                {
-                  key: 'summary',
-                  label: 'Sumário',
-                  children: <ViolationsSummary result={auditResult} />,
-                },
-                {
-                  key: 'violations',
-                  label: `Violações (${auditResult.totalViolations})`,
-                  children: (
-                    <ViolationsList
-                      violations={auditResult.violations}
-                      onSelectViolation={handleHighlightViolation}
-                    />
-                  ),
-                },
-                {
-                  key: 'simulator',
-                  label: 'Simulador de Visão',
-                  children: <VisionSimulator onFilterChange={handleFilterChange} />,
-                },
-              ]}
-            />
+            <>
+              <div className="tab-status-strip">
+                <div className="tab-status-item">
+                  <span className="tab-status-label">Aba atual</span>
+                  <strong>{activeTab?.title || activeTab?.url || 'Sem título'}</strong>
+                </div>
+                <div className="tab-status-item">
+                  <span className="tab-status-label">Auditado em</span>
+                  <strong><ClockCircleOutlined /> {new Date(auditResult.timestamp).toLocaleString('pt-BR')}</strong>
+                </div>
+                <Tag color="blue">Por aba</Tag>
+              </div>
+
+              <Tabs
+                activeKey={activeTabKey}
+                onChange={setActiveTabKey}
+                items={[
+                  {
+                    key: 'summary',
+                    label: 'Resumo',
+                    children: <ViolationsSummary result={auditResult} />,
+                  },
+                  {
+                    key: 'violations',
+                    label: `Violações (${auditResult.totalViolations})`,
+                    children: (
+                      <ViolationsList
+                        violations={auditResult.violations}
+                        onSelectViolation={handleHighlightViolation}
+                      />
+                    ),
+                  },
+                  {
+                    key: 'simulator',
+                    label: 'Simulador de Visão',
+                    children: <VisionSimulator onFilterChange={handleFilterChange} />,
+                  },
+                ]}
+              />
+            </>
           )}
         </Spin>
       </Content>
 
       <Footer className="popup-footer">
-        <Space wrap>
-          {auditResult && (
-            <>
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={handleRunAudit}
-                loading={loading}
-              >
-                Re-executar
-              </Button>
-              <Button
-                type="primary"
-                icon={<EyeOutlined />}
-                onClick={handleHighlightAll}
-              >
-                Ver na Página
-              </Button>
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={handleExportJSON}
-              >
-                JSON
-              </Button>
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={handleExportCSV}
-              >
-                CSV
-              </Button>
-              <Button
-                danger
-                onClick={handleResetAudit}
-              >
-                Limpar
-              </Button>
-            </>
-          )}
-        </Space>
+        {footerActions.length > 0 && (
+          <div className="footer-actions-grid">
+            {footerActions.map((action, index) => {
+              const lastIndex = footerActions.length - 1;
+              const remainder = footerActions.length % 3;
+              const shouldSpanTwo = remainder === 2 && index === lastIndex;
+              const shouldSpanThree = remainder === 1 && index === lastIndex;
+
+              return (
+                <Button
+                  key={action.key}
+                  className={[
+                    'footer-action',
+                    shouldSpanTwo ? 'footer-action-span-2' : '',
+                    shouldSpanThree ? 'footer-action-span-3' : '',
+                  ].filter(Boolean).join(' ')}
+                  type={action.type}
+                  icon={action.icon}
+                  onClick={action.onClick}
+                  loading={action.loading}
+                  danger={action.danger}
+                >
+                  {action.label}
+                </Button>
+              );
+            })}
+          </div>
+        )}
       </Footer>
     </Layout>
   );

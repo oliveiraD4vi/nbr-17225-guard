@@ -179,7 +179,7 @@ export const helpConsistencyRule: Rule = {
   name: 'Ajuda consistente',
   description: 'Mecanismos recorrentes de ajuda devem permanecer consistentes',
   severity: 'warning',
-  wcagLevel: 'AA',
+  wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => {
     const helpLinks = Array.from(document.querySelectorAll<HTMLAnchorElement | HTMLButtonElement>('a[href], button')).filter((element) => {
@@ -349,7 +349,7 @@ export const dragMovementRule: Rule = {
   name: 'Operação por movimento de arrastar',
   description: 'Arrastar deve ter alternativa sem arraste',
   severity: 'warning',
-  wcagLevel: 'A',
+  wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     dragMovementRule,

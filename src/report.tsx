@@ -6,6 +6,7 @@ import ptBR from 'antd/locale/pt_BR';
 import type { AuditResult } from './types';
 import { ViolationsList } from './components/ViolationsList';
 import { ViolationsSummary } from './components/ViolationsSummary';
+import { getActiveTab, getAuditResult } from './utils/audit-engine';
 import './styles/popup.css';
 
 const { Header, Content, Footer } = Layout;
@@ -20,10 +21,9 @@ export const ReportApp: React.FC = () => {
 
   const loadAuditResult = async () => {
     try {
-      const data = await chrome.storage.local.get('auditResult');
-      if (data.auditResult) {
-        setAuditResult(data.auditResult as AuditResult);
-      }
+      const tab = await getActiveTab();
+      const result = await getAuditResult(tab.id);
+      setAuditResult(result);
     } catch (error) {
       console.error('Erro ao carregar resultado:', error);
     } finally {
@@ -50,19 +50,19 @@ export const ReportApp: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-        <h1 style={{ margin: 0, fontSize: '24px' }}>Guardião NBR 17225 - Relatório Detalhado</h1>
+      <Header style={{ background: '#ffffff', color: '#0f172a', borderBottom: '1px solid #e2e8f0' }}>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>Guardião NBR 17225 - Relatório detalhado</h1>
       </Header>
 
       <Content style={{ padding: '24px' }}>
         <Spin spinning={loading} tip="Carregando relatório...">
           {!auditResult ? (
-            <Empty description="Nenhum relatório disponível" />
+            <Empty description="Nenhum relatório disponível para a aba ativa" />
           ) : (
             <>
               <ViolationsSummary result={auditResult} />
               <div style={{ marginTop: '24px' }}>
-                <h2>Detalhes das Violações</h2>
+                <h2>Detalhes das violações</h2>
                 <ViolationsList violations={auditResult.violations} />
               </div>
             </>
@@ -70,7 +70,7 @@ export const ReportApp: React.FC = () => {
         </Spin>
       </Content>
 
-      <Footer style={{ textAlign: 'center', background: '#f5f5f5', padding: '16px' }}>
+      <Footer style={{ textAlign: 'center', background: '#f8fafc', padding: '16px' }}>
         <Space>
           <Button icon={<PrinterOutlined />} onClick={handlePrint}>
             Imprimir

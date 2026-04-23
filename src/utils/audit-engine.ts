@@ -3,17 +3,27 @@
  */
 import type { AuditResult } from '@/types';
 
+export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const activeTab = tabs[0];
+
+  if (!activeTab?.id) {
+    throw new Error('Nenhuma aba ativa encontrada.');
+  }
+
+  return activeTab as chrome.tabs.Tab & { id: number };
+}
+
+function getTabStorageKey(tabId: number): string {
+  return String(tabId);
+}
+
 /**
  * Executa a auditoria de acessibilidade na aba ativa
  */
 export async function runAccessibilityAudit(): Promise<AuditResult> {
   try {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-    const activeTab = tabs[0];
-
-    if (!activeTab?.id) {
-      throw new Error('Nenhuma aba ativa encontrada.');
-    }
+    const activeTab = await getActiveTab();
 
     if (!activeTab.url || !isSupportedTabUrl(activeTab.url)) {
       throw new Error('A auditoria só pode ser executada em páginas http(s) ou arquivos locais com permissão.');
@@ -30,7 +40,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
     }
 
     if (!response?.result) {
-      throw new Error('Erro ao executar auditoria no content script.');
+      throw new Error('Erro ao executar a auditoria no content script.');
     }
 
     const result: AuditResult = response.result;
@@ -75,12 +85,22 @@ function isSupportedTabUrl(url: string): boolean {
 }
 
 /**
- * Reseta o cache de auditoria
+ * Reseta o cache de auditoria da aba ativa
  */
 export async function resetAuditCache(): Promise<void> {
   try {
-    await chrome.storage.local.remove('auditResult');
-    console.log('[Guardião NBR 17225] Cache de auditoria limpo');
+    const activeTab = await getActiveTab();
+    const data = await chrome.storage.local.get('auditResultsByTab');
+    const auditResultsByTab = { ...(data.auditResultsByTab as Record<string, AuditResult> | undefined) };
+
+    delete auditResultsByTab[getTabStorageKey(activeTab.id)];
+
+    await chrome.storage.local.set({
+      auditResult: null,
+      auditResultsByTab,
+    });
+
+    console.log('[Guardião NBR 17225] Cache de auditoria limpo para a aba ativa');
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao limpar cache:', error);
   }
@@ -89,9 +109,20 @@ export async function resetAuditCache(): Promise<void> {
 /**
  * Salva resultado da auditoria no storage
  */
-export async function saveAuditResult(result: AuditResult): Promise<void> {
+export async function saveAuditResult(result: AuditResult, tabId?: number): Promise<void> {
   try {
-    await chrome.storage.local.set({ auditResult: result });
+    const resolvedTabId = tabId ?? (await getActiveTab()).id;
+    const data = await chrome.storage.local.get('auditResultsByTab');
+    const auditResultsByTab = {
+      ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
+      [getTabStorageKey(resolvedTabId)]: result,
+    };
+
+    await chrome.storage.local.set({
+      auditResult: result,
+      auditResultsByTab,
+    });
+
     console.log('[Guardião NBR 17225] Resultado da auditoria salvo');
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao salvar resultado:', error);
@@ -101,10 +132,16 @@ export async function saveAuditResult(result: AuditResult): Promise<void> {
 /**
  * Recupera resultado da auditoria do storage
  */
-export async function getAuditResult(): Promise<AuditResult | null> {
+export async function getAuditResult(tabId?: number): Promise<AuditResult | null> {
   try {
-    const data = await chrome.storage.local.get('auditResult');
-    return (data.auditResult as AuditResult) || null;
+    const resolvedTabId = tabId ?? (await getActiveTab()).id;
+    const data = await chrome.storage.local.get(['auditResult', 'auditResultsByTab']);
+    const auditResultsByTab = data.auditResultsByTab as Record<string, AuditResult> | undefined;
+    const result = auditResultsByTab?.[getTabStorageKey(resolvedTabId)] || null;
+
+    await chrome.storage.local.set({ auditResult: result });
+
+    return result;
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao recuperar resultado:', error);
     return null;

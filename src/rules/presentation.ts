@@ -7,7 +7,7 @@ export const responsiveDesignRule: Rule = {
   name: 'Design responsivo',
   description: 'Páginas devem declarar viewport adequada para responsividade',
   severity: 'error',
-  wcagLevel: 'A',
+  wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];

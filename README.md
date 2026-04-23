@@ -1,213 +1,170 @@
 # Guardião NBR 17225
 
-**Verificador Profissional de Acessibilidade Web conforme ABNT NBR 17225:2025**
+Verificador de acessibilidade web para navegadores Chromium, alinhado aos requisitos documentados da ABNT NBR 17225:2025.
 
-Uma extensão de navegador moderna e intuitiva que ajuda desenvolvedores a identificar e corrigir problemas de acessibilidade em websites, seguindo rigorosamente os requisitos da norma brasileira ABNT NBR 17225:2025.
+## Visão Geral
 
-## 🎯 Visão Geral
+O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e retorna violações com referência normativa, severidade, sugestão de correção e trecho do elemento afetado.
 
-O **Guardião NBR 17225** transforma a verificação de acessibilidade web em um processo simples e educativo. Ao invés de apenas apontar problemas, a extensão oferece:
+Funcionalidades principais:
 
-- **Análise Automática:** Verifica mais de 30 requisitos de acessibilidade em tempo real
-- **Sugestões Práticas:** Recomendações de correção com exemplos de código
-- **Simulador de Visão:** Teste como pessoas com daltonismo ou baixa visão veem seu site
-- **Exportação Flexível:** Relatórios em JSON e CSV para integração em fluxos de trabalho
-- **Interface Intuitiva:** Desenvolvida com React e Ant Design para máxima usabilidade
+- análise de regras da NBR 17225 por módulos em `src/rules`;
+- destaque visual de problemas na página;
+- painel de detalhes com sugestões contextualizadas;
+- simulação de visão para protanopia, deuteranopia, tritanopia e desfoque;
+- exportação de resultados em JSON e CSV;
+- página de relatório detalhado.
 
-## ✨ Funcionalidades Principais
+## Cobertura de Regras
 
-### 1. **Verificação de Acessibilidade**
-Análise automática de elementos interativos, imagens, cabeçalhos, contraste de cores, formulários e muito mais.
+A lista de requisitos vem de `docs/Analise_Documental_NBR17225.xlsx`. O estado atual é:
 
-### 2. **Destaque Visual na Página**
-Ícones e bordas destacam os problemas diretamente no contexto da página, facilitando a localização e correção.
+| Situação | Quantidade |
+| --- | ---: |
+| Requisitos documentados | 94 |
+| Regras implementadas no motor | 94 |
+| Regras ausentes | 0 |
+| Totalmente automatizáveis | 40 |
+| Semi-automatizáveis | 53 |
+| Não automatizáveis | 1 |
 
-### 3. **Painel de Detalhes**
-Cada violação inclui:
-- Referência específica da NBR 17225
-- Descrição clara do problema
-- Sugestão de correção
-- Exemplo de código corrigido
-- Nível WCAG correspondente
+As duas lacunas encontradas nesta revisão foram corrigidas:
 
-### 4. **Simulador de Visão**
-Simule diferentes tipos de deficiência visual:
-- **Protanopia:** Dificuldade em distinguir vermelho e verde
-- **Deuteranopia:** Forma mais comum de daltonismo
-- **Tritanopia:** Dificuldade em distinguir azul e amarelo
-- **Desfoque:** Simula baixa visão
+- `5.9.3 Rótulo de campo associado`
+- `5.12.9 Uso de texto especial`
 
-### 5. **Exportação de Relatórios**
-- **JSON:** Para integração com ferramentas e scripts
-- **CSV:** Para análise em planilhas (Google Sheets, Excel)
-- **Impressão:** Relatório detalhado em PDF
+Consulte:
 
-## 🚀 Instalação
+- `RULES_ANALYSIS.md` para o resumo por seção, status e critérios de automação;
+- `RULES_CODE_MAPPING.md` para o mapeamento regra a regra com o arquivo e a constante correspondente;
+- `scripts/verify-rules.mjs` para a verificação automática de cobertura.
 
-### Pré-requisitos
-- Google Chrome, Edge ou navegador baseado em Chromium (versão 88+)
-- Node.js 16+ (para desenvolvimento)
+## Verificação
 
-### Instalação da Extensão
-
-1. **Clone ou baixe o repositório:**
-   ```bash
-   git clone https://github.com/seu-usuario/nbr-17225-guard.git
-   cd nbr-17225-guard
-   ```
-
-2. **Instale as dependências:**
-   ```bash
-   pnpm install
-   ```
-
-3. **Compile o projeto:**
-   ```bash
-   pnpm build
-   ```
-
-4. **Carregue a extensão no navegador:**
-   - Abra `chrome://extensions/`
-   - Ative o "Modo de desenvolvedor" (canto superior direito)
-   - Clique em "Carregar extensão não empacotada"
-   - Selecione a pasta `dist/`
-
-## 📋 Regras Implementadas
-
-A extensão verifica os seguintes requisitos da ABNT NBR 17225:2025:
-
-### Seção 5.1 - Interação por Teclado
-- ✅ Acessibilidade por teclado parcial (5.1.13)
-- ⚠️ Indicador de foco visível (5.1.1)
-
-### Seção 5.2 - Imagens
-- ✅ Texto alternativo para imagens de conteúdo (5.2.1)
-- ✅ Texto alternativo para imagens funcionais (5.2.2)
-
-### Seção 5.3 - Cabeçalhos
-- ✅ Semântica de cabeçalho (5.3.1)
-- ✅ Estrutura de cabeçalhos (5.3.5)
-
-### Seção 5.11 - Cores e Contraste
-- ✅ Contraste para texto (5.11.3)
-- ✅ Contraste para componentes (5.11.4)
-
-**Legenda:**
-- ✅ Totalmente Automatizável
-- ⚠️ Semi-Automatizável (requer validação manual)
-
-## 💻 Desenvolvimento
-
-### Estrutura do Projeto
-
-```
-nbr-17225-guard/
-├── src/
-│   ├── components/          # Componentes React
-│   ├── rules/              # Regras de acessibilidade
-│   ├── types/              # Tipos TypeScript
-│   ├── utils/              # Utilitários
-│   ├── styles/             # Estilos CSS
-│   ├── popup.tsx           # Interface do popup
-│   ├── popup.html          # HTML do popup
-│   ├── report.tsx          # Página de relatório
-│   ├── report.html         # HTML do relatório
-│   ├── content.ts          # Content script
-│   └── background.ts       # Service worker
-├── public/
-│   ├── manifest.json       # Manifest da extensão
-│   └── icons/              # Ícones
-├── vite.config.ts          # Configuração do Vite
-└── package.json            # Dependências
-```
-
-### Scripts Disponíveis
+Para validar cada regra individualmente contra os requisitos documentados:
 
 ```bash
-# Desenvolvimento com hot reload
-pnpm dev
-
-# Build para produção
-pnpm build
-
-# Lint do código
-pnpm lint
-
-# Type checking
-pnpm type-check
+npm run verify:rules
 ```
 
-### Adicionando Novas Regras
+O script verifica:
 
-1. Crie um novo arquivo em `src/rules/`:
-   ```typescript
-   // src/rules/my-rule.ts
-   import { Rule, Violation } from '@/types';
-   
-   export const myRule: Rule = {
-     id: 'my-rule',
-     nbrReference: '5.X.X',
-     name: 'Nome da Regra',
-     description: 'Descrição',
-     severity: 'error',
-     wcagLevel: 'A',
-     category: 'Totalmente Automatizável',
-     check: async (): Promise<Violation[]> => {
-       // Implementar lógica
-       return [];
-     },
-   };
-   ```
+- se cada requisito possui uma regra com o mesmo `nbrReference`;
+- se o nível WCAG da regra corresponde ao documento;
+- se a categoria de automação corresponde ao documento;
+- se não existem referências duplicadas;
+- se não existem regras extras fora do catálogo documentado.
 
-2. Exporte a regra em `src/rules/index.ts`:
-   ```typescript
-   import { myRule } from './my-rule';
-   export const allRules: Rule[] = [
-     // ... outras regras
-     myRule,
-   ];
-   ```
+Resultado esperado:
 
-## 📚 Referências Importantes
+```text
+Rule verification passed: 94 documented requirements mapped to 94 rule implementation(s).
+```
 
-- **[ABNT NBR 17225:2025](https://www.abnt.org.br/)** - Norma oficial de acessibilidade web
-- **[WCAG 2.1](https://www.w3.org/WAI/WCAG21/quickref/)** - Web Content Accessibility Guidelines
-- **[React](https://react.dev/)** - Biblioteca de UI
-- **[Ant Design](https://ant.design/)** - Componentes de UI
-- **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática para JavaScript
+## Instalação
 
-## 🔧 Tecnologias Utilizadas
+Pré-requisitos:
 
-- **React 19** - Biblioteca de UI
-- **TypeScript 5** - Linguagem tipada
-- **Vite 8** - Build tool moderno
-- **Ant Design 6** - Componentes de UI
-- **Chrome Extensions API** - API de extensões
+- Node.js 16+;
+- pnpm;
+- Chrome, Edge ou navegador Chromium compatível com Manifest V3.
 
-## 📄 Licença
+Instale as dependências:
 
-Este projeto é licenciado sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+```bash
+pnpm install
+```
 
-## 🤝 Contribuindo
+Compile a extensão:
 
-Contribuições são bem-vindas! Por favor:
+```bash
+pnpm build
+```
 
-1. Faça um fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+Carregue a pasta `dist/` em `chrome://extensions/` usando a opção "Carregar extensão não empacotada".
 
-## 📞 Suporte
+## Scripts
 
-Para relatar bugs ou sugerir melhorias, abra uma issue no repositório.
+```bash
+pnpm dev
+pnpm build
+pnpm lint
+pnpm type-check
+npm run verify:rules
+```
 
-## 👨‍💻 Autor
+## Estrutura
 
-Desenvolvido com ❤️ para melhorar a acessibilidade web no Brasil.
+```text
+nbr-17225-guard/
+├── docs/                         # Documentos-fonte de requisitos e funcionalidades
+├── scripts/                      # Verificações de cobertura do projeto
+├── src/
+│   ├── components/               # Componentes React
+│   ├── rules/                    # Regras de acessibilidade
+│   ├── styles/                   # Estilos
+│   ├── types/                    # Tipos TypeScript
+│   ├── utils/                    # Utilitários
+│   ├── background.ts             # Service worker
+│   ├── content.ts                # Content script
+│   ├── popup.tsx                 # Popup da extensão
+│   └── report.tsx                # Relatório detalhado
+├── public/                       # Manifest, bootstrap e ícones
+├── package.json
+└── vite.config.ts
+```
 
----
+## Desenvolvimento de Regras
 
-**Versão:** 1.0.0  
-**Última atualização:** Março de 2026  
-**Status:** Em desenvolvimento ativo
+Cada regra implementa a interface `Rule` e deve declarar:
+
+- `id`;
+- `nbrReference`;
+- `name`;
+- `description`;
+- `severity`;
+- `wcagLevel`;
+- `category`;
+- `check`.
+
+Exemplo:
+
+```typescript
+import type { Rule, Violation } from '@/types';
+
+export const myRule: Rule = {
+  id: 'my-rule',
+  nbrReference: '5.X.X',
+  name: 'Nome da regra',
+  description: 'Descrição objetiva da regra',
+  severity: 'error',
+  wcagLevel: 'A',
+  category: 'Totalmente Automatizável',
+  check: async (): Promise<Violation[]> => {
+    return [];
+  },
+};
+```
+
+Após adicionar uma regra, exporte-a em `src/rules/index.ts` e execute:
+
+```bash
+npm run verify:rules
+pnpm type-check
+pnpm build
+```
+
+## Referências
+
+- ABNT NBR 17225:2025
+- WCAG
+- React
+- Ant Design
+- TypeScript
+- Chrome Extensions API
+
+## Status
+
+Versão: 1.0.0  
+Última atualização: abril de 2026  
+Status: em desenvolvimento ativo

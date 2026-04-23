@@ -312,7 +312,7 @@ export const orientationRule: Rule = {
   description: 'O conteúdo deve funcionar em retrato e paisagem, salvo exceções justificadas',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     orientationRule,
     Array.from(document.querySelectorAll<HTMLElement>('p, span, li, small, strong, em'))
@@ -350,7 +350,7 @@ export const graphicContrastRule: Rule = {
   description: 'Objetos gráficos informativos devem ter contraste suficiente',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => {
     const violations: Violation[] = [];
 
@@ -383,7 +383,7 @@ export const focusIndicatorContrastRule: Rule = {
   description: 'Indicadores de foco devem ter contraste perceptível com áreas adjacentes',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => {
     const violations: Violation[] = [];
 
@@ -423,7 +423,7 @@ export const lineSpacingRule: Rule = {
   description: 'Conteúdo textual deve suportar aumento de espaçamento entre linhas',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     lineSpacingRule,
     getTextBlocks().filter((element) => {
@@ -444,7 +444,7 @@ export const paragraphSpacingRule: Rule = {
   description: 'Parágrafos devem suportar aumento de espaçamento sem perda de conteúdo',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     paragraphSpacingRule,
     Array.from(document.querySelectorAll<HTMLElement>('article, section, main, div'))
@@ -467,7 +467,7 @@ export const letterSpacingRule: Rule = {
   description: 'Texto deve suportar aumento de espaçamento entre letras',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     letterSpacingRule,
     getTextBlocks().filter((element) => {
@@ -488,7 +488,7 @@ export const wordSpacingRule: Rule = {
   description: 'Texto deve suportar aumento de espaçamento entre palavras',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     wordSpacingRule,
     getTextBlocks().filter((element) => {
@@ -509,7 +509,7 @@ export const textWidthRule: Rule = {
   description: 'Linhas longas demais dificultam leitura confortável',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     textWidthRule,
     getTextBlocks().filter((element) => parseFloat(window.getComputedStyle(element).width || '0') > 1000),
@@ -550,7 +550,7 @@ export const pagePartLanguageRule: Rule = {
   description: 'Trechos em idioma diferente devem ser marcados com lang apropriado',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => {
     const pageLang = document.documentElement.getAttribute('lang') || '';
     return createWarnings(
@@ -639,7 +639,7 @@ export const statusMessageRule: Rule = {
   description: 'Mensagens dinâmicas de status devem ser anunciáveis programaticamente',
   severity: 'warning',
   wcagLevel: 'AA',
-  category: 'Semi-Automatizável',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     statusMessageRule,
     Array.from(document.querySelectorAll<HTMLElement>('.status, .toast, .snackbar, .alert, .success, .error-message, [data-status], [data-toast]'))
@@ -722,7 +722,7 @@ export const audioDescriptionRule: Rule = {
   name: 'Audiodescrição para vídeo',
   description: 'Vídeos com informação visual relevante devem oferecer audiodescrição ou alternativa equivalente',
   severity: 'warning',
-  wcagLevel: 'AA',
+  wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     audioDescriptionRule,
@@ -801,8 +801,8 @@ export const flashingContentRule: Rule = {
   name: 'Flash intermitente limitado',
   description: 'Conteúdo não deve piscar de forma potencialmente perigosa',
   severity: 'warning',
-  wcagLevel: 'AAA',
-  category: 'Semi-Automatizável',
+  wcagLevel: 'A',
+  category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     flashingContentRule,
     Array.from(document.querySelectorAll<HTMLElement>('*'))

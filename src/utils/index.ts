@@ -1,14 +1,14 @@
 import type { Rule, SeverityLevel, Violation, WCAGLevel } from '@/types';
 
 /**
- * Utilitarios gerais para a extensao
+ * Utilitários gerais para a extensão
  */
 
 export const VERIFIER_ID = 'NBR17225GUARD';
 export const VERIFIER_NAME = 'Guardião NBR 17225';
 
 /**
- * Gera um ID unico para violacoes
+ * Gera um ID único para violações
  */
 export function generateCustomId(prefix = ''): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -36,7 +36,7 @@ export function escapeHtml(str: string): string {
 }
 
 /**
- * Obtem o seletor CSS de um elemento
+ * Obtém o seletor CSS de um elemento
  */
 export function getElementSelector(element: HTMLElement): string {
   if (element.id) return `#${element.id}`;
@@ -62,7 +62,7 @@ export function getElementSelector(element: HTMLElement): string {
 }
 
 /**
- * Aguarda um elemento estar disponivel no DOM
+ * Aguarda um elemento estar disponível no DOM
  */
 export function waitForElement(selector: string, timeout = 5000): Promise<HTMLElement | null> {
   return new Promise((resolve) => {
@@ -93,7 +93,7 @@ export function waitForElement(selector: string, timeout = 5000): Promise<HTMLEl
 }
 
 /**
- * Calcula a razao de contraste WCAG entre duas cores
+ * Calcula a razão de contraste WCAG entre duas cores
  */
 export function getContrastRatio(hex1: string, hex2: string): number {
   const getLuminance = (hex: string) => {
@@ -119,7 +119,7 @@ export function getContrastRatio(hex1: string, hex2: string): number {
 }
 
 /**
- * Obtem a cor de fundo efetiva de um elemento
+ * Obtém a cor de fundo efetiva de um elemento
  */
 export function getEffectiveBackgroundColor(element: HTMLElement): string {
   let el = element;
@@ -151,7 +151,7 @@ export function rgbToHex(rgb: string): string {
 }
 
 /**
- * Verifica se um elemento esta visivel
+ * Verifica se um elemento está visível
  */
 export function isElementVisible(element: HTMLElement): boolean {
   if (!element) return false;
@@ -166,7 +166,7 @@ export function isElementVisible(element: HTMLElement): boolean {
 }
 
 /**
- * Obtem o texto visivel de um elemento
+ * Obtém o texto visível de um elemento
  */
 export function getVisibleText(element: HTMLElement): string {
   if (!element) return '';
@@ -194,7 +194,7 @@ export function getAccessibleName(element: HTMLElement): string {
   if (labelledBy) {
     const text = labelledBy
       .split(/\s+/)
-      .map(id => document.getElementById(id)?.textContent?.trim() || '')
+      .map((id) => document.getElementById(id)?.textContent?.trim() || '')
       .filter(Boolean)
       .join(' ')
       .trim();
@@ -204,7 +204,7 @@ export function getAccessibleName(element: HTMLElement): string {
   if (element instanceof HTMLInputElement) {
     if (element.labels?.length) {
       const text = Array.from(element.labels)
-        .map(label => getVisibleText(label))
+        .map((label) => getVisibleText(label))
         .join(' ')
         .trim();
       if (text) return text;
@@ -220,7 +220,7 @@ export function getAccessibleName(element: HTMLElement): string {
   if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
     if (element.labels?.length) {
       const text = Array.from(element.labels)
-        .map(label => getVisibleText(label))
+        .map((label) => getVisibleText(label))
         .join(' ')
         .trim();
       if (text) return text;
@@ -241,7 +241,7 @@ export function getAssociatedLabelText(
 ): string {
   if (element.labels?.length) {
     return Array.from(element.labels)
-      .map(label => getVisibleText(label))
+      .map((label) => getVisibleText(label))
       .join(' ')
       .trim();
   }
@@ -253,7 +253,7 @@ export function getAssociatedLabelText(
   if (labelledBy) {
     return labelledBy
       .split(/\s+/)
-      .map(id => document.getElementById(id)?.textContent?.trim() || '')
+      .map((id) => document.getElementById(id)?.textContent?.trim() || '')
       .filter(Boolean)
       .join(' ')
       .trim();
@@ -291,6 +291,9 @@ export function createViolation(
     suggestion: options.suggestion,
     remediationAdvice: options.remediationAdvice,
     elementSelector: element ? getElementSelector(element) : undefined,
+    elementTagName: element ? element.tagName.toLowerCase() : undefined,
+    elementAccessibleName: element ? getAccessibleName(element) || undefined : undefined,
+    elementVisibleText: element ? getVisibleText(element) || undefined : undefined,
     customId: generateCustomId(options.customIdPrefix || rule.id),
   };
 }
@@ -347,7 +350,7 @@ export function getAssociatedDescriptionText(element: HTMLElement): string {
 
   return describedBy
     .split(/\s+/)
-    .map(id => document.getElementById(id)?.textContent?.trim() || '')
+    .map((id) => document.getElementById(id)?.textContent?.trim() || '')
     .filter(Boolean)
     .join(' ')
     .trim();

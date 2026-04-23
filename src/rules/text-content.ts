@@ -30,4 +30,28 @@ export const specialTextSemanticRule: Rule = {
   },
 };
 
-export const textContentRules: Rule[] = [specialTextSemanticRule];
+export const specialTextUsageRule: Rule = {
+  id: 'special-text-usage',
+  nbrReference: '5.12.9',
+  name: 'Uso de texto especial',
+  description: 'O uso de texto especial deve preservar o significado pretendido no contexto',
+  severity: 'warning',
+  wcagLevel: 'A',
+  category: 'Não Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const candidates = Array.from(document.querySelectorAll<HTMLElement>('strong, em, abbr, cite, mark, b, i'))
+      .filter((element) => isElementVisible(element) && getVisibleText(element).trim());
+
+    if (!candidates.length) return [];
+
+    return [createViolation(specialTextUsageRule, {
+      element: candidates[0],
+      message: 'Texto especial detectado; a adequação semântica do uso exige revisão humana.',
+      suggestion: 'Confirme se a marcação usada comunica corretamente importância, ênfase, abreviação, citação ou outro significado pretendido.',
+      remediationAdvice: `Revise o contexto do texto especial e substitua marcação puramente visual por elemento semântico quando aplicável.`,
+      customIdPrefix: 'special-text-usage',
+    })];
+  },
+};
+
+export const textContentRules: Rule[] = [specialTextSemanticRule, specialTextUsageRule];

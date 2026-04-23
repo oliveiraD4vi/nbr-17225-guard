@@ -4,7 +4,7 @@
 
 export type SeverityLevel = 'error' | 'warning';
 export type WCAGLevel = 'A' | 'AA' | 'AAA';
-export type AutomationCategory = 'Totalmente Automatizável' | 'Semi-Automatizável';
+export type AutomationCategory = 'Totalmente Automatizável' | 'Semi-Automatizável' | 'Não Automatizável';
 
 export interface Rule {
   id: string;
@@ -31,6 +31,9 @@ export interface Violation {
   remediationAdvice: string;
   element?: HTMLElement;
   elementSelector?: string;
+  elementTagName?: string;
+  elementAccessibleName?: string;
+  elementVisibleText?: string;
   customId: string;
 }
 
@@ -61,7 +64,8 @@ export interface ExtensionMessage {
 }
 
 export interface StorageData {
-  auditResult?: AuditResult;
+  auditResult?: AuditResult | null;
+  auditResultsByTab?: Record<string, AuditResult>;
   highlightState?: HighlightState;
   visionFilter?: VisionSimulationFilter;
 }
