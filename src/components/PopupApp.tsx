@@ -343,6 +343,14 @@ export const PopupApp: React.FC = () => {
       `- Problemas persistentes: ${comparisonSummary.persistentViolations.length}`,
       `- Itens com anotação: ${comparisonSummary.baselineNoteCount} -> ${comparisonSummary.targetNoteCount} (${comparisonSummary.notesDeltaPercentage}%)`,
       `- Confirmações humanas: ${comparisonSummary.baselineConfirmedReviews} -> ${comparisonSummary.targetConfirmedReviews} (${comparisonSummary.confirmedReviewsDeltaPercentage}%)`,
+      `- Revisão humana concluída: ${comparisonSummary.baselineConfirmedReviews + comparisonSummary.baselineDismissedReviews} -> ${comparisonSummary.targetConfirmedReviews + comparisonSummary.targetDismissedReviews}`,
+      `- Revisão humana pendente: ${comparisonSummary.baselinePendingReviews} -> ${comparisonSummary.targetPendingReviews}`,
+      '',
+      '## Revisão humana',
+      '',
+      `- Confirmados manualmente: ${comparisonSummary.baselineConfirmedReviews} -> ${comparisonSummary.targetConfirmedReviews}`,
+      `- Descartados manualmente: ${comparisonSummary.baselineDismissedReviews} -> ${comparisonSummary.targetDismissedReviews}`,
+      `- Pendentes de revisão: ${comparisonSummary.baselinePendingReviews} -> ${comparisonSummary.targetPendingReviews}`,
       '',
       '## Leitura rápida',
       '',
@@ -352,7 +360,6 @@ export const PopupApp: React.FC = () => {
           ? 'A comparação indica aumento de problemas visíveis na URL auditada.'
           : 'A comparação não mostrou alteração no volume de problemas visíveis.',
     ];
-
     const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -389,6 +396,8 @@ export const PopupApp: React.FC = () => {
     const rows = [
       ['indicador', 'base', 'comparada', 'variacao_percentual'],
       ['itens_visiveis', comparisonSummary.baselineOpenCount, comparisonSummary.targetOpenCount, comparisonSummary.openIssuesDeltaPercentage],
+      ['revisao_humana_concluida', comparisonSummary.baselineConfirmedReviews + comparisonSummary.baselineDismissedReviews, comparisonSummary.targetConfirmedReviews + comparisonSummary.targetDismissedReviews, ''],
+      ['revisao_humana_pendente', comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
       ['confirmados_humanamente', comparisonSummary.baselineConfirmedReviews, comparisonSummary.targetConfirmedReviews, comparisonSummary.confirmedReviewsDeltaPercentage],
       ['descartados_humanamente', comparisonSummary.baselineDismissedReviews, comparisonSummary.targetDismissedReviews, ''],
       ['pendentes_humanos', comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
@@ -588,12 +597,16 @@ export const PopupApp: React.FC = () => {
                   )}
                   description={(
                     <div className="history-item-meta">
-                      <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
-                      <span>{entry.totalViolations} item(ns)</span>
-                      <span>{confirmedReviews} confirmado(s) manualmente</span>
-                      <span>{dismissedReviews} descartado(s) manualmente</span>
-                      <span>{pendingReviews} ainda pendente(s) de revisão humana</span>
-                      <span>{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} com anotações</span>
+                      <div className="history-item-meta-row">
+                        <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
+                        <span>{entry.totalViolations} item(ns)</span>
+                      </div>
+                      <div className="history-item-tag-row">
+                        <Tag color="red">{confirmedReviews} confirmados</Tag>
+                        <Tag>{dismissedReviews} descartados</Tag>
+                        <Tag color="gold">{pendingReviews} pendentes</Tag>
+                        <Tag color="blue">{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} anotações</Tag>
+                      </div>
                     </div>
                   )}
                 />

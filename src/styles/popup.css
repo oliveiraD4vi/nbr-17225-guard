@@ -318,10 +318,26 @@
 
 .history-item-meta {
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
   color: #64748b;
   font-size: 12px;
+}
+
+.history-item-meta-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.history-item-tag-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.history-item-tag-row .ant-tag {
+  margin-inline-end: 0;
 }
 
 .popup-content::-webkit-scrollbar {
