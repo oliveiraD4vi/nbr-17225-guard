@@ -2,6 +2,8 @@
 
 Esta análise consolida as regras extraídas de `docs/Analise_Documental_NBR17225.xlsx` e compara a cobertura com os módulos em `src/rules`.
 
+Nesta revisão, o `.xlsx` foi conferido diretamente pela estrutura XML interna do arquivo. O catálogo local da v1 contém 94 itens de escopo.
+
 ## Resumo Atual
 
 | Situação | Quantidade | Observação |
@@ -41,9 +43,29 @@ Essas entradas agora possuem regras dedicadas e são verificadas pelo script `np
 | 5.15 | Animação | 2 | 2 | 0 |
 | 5.16 | Tempo | 2 | 2 | 0 |
 
+## Escopo da V1 e Limite Normativo
+
+O escopo da v1 é o catálogo de 94 itens do `xlsx` local. Fontes públicas da NBR 17225 expõem itens adicionais fora desse recorte. Eles não entram nesta versão, mas devem ser tratados como backlog de contribuição futura.
+
+Itens públicos já identificados fora do escopo v1:
+
+- `5.2.6`
+- `5.4.3`
+- `5.4.4`
+- `5.7.3`
+- `5.8.4`
+- `5.12.10`
+- `5.12.11`
+- `5.12.12`
+- `5.12.13`
+- `5.13.9`
+- `5.13.11`
+
+Para o confronto formal regra a regra com a referência normativa pública, consulte `RULES_NORMATIVE_MATRIX.md`.
+
 ## Regras Totalmente Automatizáveis
 
-As regras totalmente automatizáveis possuem verificação objetiva baseada em DOM, CSS computado, atributos ARIA, estrutura semântica ou metadados da página.
+As regras totalmente automatizáveis no catálogo v1 possuem verificação automática no motor. Nesta revisão, as implementações mais frágeis foram tornadas mais conservadoras para reduzir falso positivo e instabilidade entre execuções, especialmente em regras dependentes de foco, orientação, contraste, idioma e animação.
 
 5.1.13, 5.2.1, 5.2.2, 5.3.1, 5.3.5, 5.4.1, 5.4.5, 5.5.1, 5.6.1, 5.6.3, 5.6.5, 5.7.1, 5.7.12, 5.8.1, 5.8.7, 5.9.1, 5.9.3, 5.9.6, 5.9.7, 5.9.8, 5.10.3, 5.10.4, 5.11.3, 5.11.4, 5.11.5, 5.11.6, 5.12.1, 5.12.2, 5.12.3, 5.12.4, 5.12.6, 5.12.8, 5.13.1, 5.13.2, 5.13.3, 5.13.4, 5.13.5, 5.13.8, 5.13.10, 5.13.13, 5.14.7, 5.15.4.
 
@@ -83,3 +105,5 @@ O script valida individualmente cada requisito documentado contra o código:
 - categoria de automação igual ao documento;
 - ausência de referências duplicadas;
 - ausência de regras extras não documentadas.
+
+Observação: o script valida contra o catálogo v1 derivado do `xlsx`, não contra uma leitura dinâmica do arquivo em tempo de execução.

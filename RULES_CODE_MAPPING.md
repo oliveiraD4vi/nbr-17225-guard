@@ -2,6 +2,8 @@
 
 Este documento relaciona as regras de `docs/Analise_Documental_NBR17225.xlsx` com as rotinas em `src/rules`.
 
+O escopo aqui documentado é o catálogo v1 de 94 itens confirmado no `.xlsx` local.
+
 Legenda:
 
 - `Implementada`: existe regra dedicada no motor com `nbrReference` próprio.
@@ -15,6 +17,24 @@ Legenda:
 | Implementadas | 94 |
 | Ausentes | 0 |
 | Corrigidas nesta revisão | 2 (`5.9.3`, `5.12.9`) |
+
+## Fora do Escopo da V1
+
+Na confrontação com fontes públicas da NBR 17225, foram identificados itens adicionais que não fazem parte do catálogo v1 local e, portanto, não têm implementação nesta versão:
+
+- `5.2.6`
+- `5.4.3`
+- `5.4.4`
+- `5.7.3`
+- `5.8.4`
+- `5.12.10`
+- `5.12.11`
+- `5.12.12`
+- `5.12.13`
+- `5.13.9`
+- `5.13.11`
+
+Esses itens devem ser tratados como backlog para contribuições futuras, e não como falhas da cobertura declarada da v1.
 
 ## Mapeamento por Regra
 

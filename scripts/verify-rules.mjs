@@ -1,6 +1,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+// Catálogo v1 derivado de docs/Analise_Documental_NBR17225.xlsx.
+// A verificação garante consistência entre esse catálogo e src/rules.
 const requirements = [
   ['5.1.1', 'Indicador de foco visivel', 'AA', 'Semi-Automatizavel'],
   ['5.1.2', 'Elemento em foco totalmente visivel', 'AAA', 'Semi-Automatizavel'],

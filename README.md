@@ -17,7 +17,9 @@ Funcionalidades principais:
 
 ## Cobertura de Regras
 
-A lista de requisitos vem de `docs/Analise_Documental_NBR17225.xlsx`. O estado atual é:
+O escopo da versão 1 vem de `docs/Analise_Documental_NBR17225.xlsx`. Nesta revisão, o arquivo foi conferido diretamente pela estrutura XML interna do `.xlsx`, e ele lista 94 itens de escopo para a v1.
+
+O estado atual desse catálogo v1 é:
 
 | Situação | Quantidade |
 | --- | ---: |
@@ -33,10 +35,16 @@ As duas lacunas encontradas nesta revisão foram corrigidas:
 - `5.9.3 Rótulo de campo associado`
 - `5.12.9 Uso de texto especial`
 
+Importante:
+
+- `pnpm verify:rules` valida o motor contra o catálogo v1 derivado desse `.xlsx`;
+- ele não faz parsing dinâmico do `.xlsx` nem tenta cobrir automaticamente todos os itens visíveis em checklists públicos mais amplos da NBR 17225.
+
 Consulte:
 
 - `RULES_ANALYSIS.md` para o resumo por seção, status e critérios de automação;
 - `RULES_CODE_MAPPING.md` para o mapeamento regra a regra com o arquivo e a constante correspondente;
+- `RULES_NORMATIVE_MATRIX.md` para a matriz formal entre regra v1, referência normativa pública, implementação e divergência residual;
 - `scripts/verify-rules.mjs` para a verificação automática de cobertura.
 
 ## Verificação
@@ -54,6 +62,27 @@ O script verifica:
 - se a categoria de automação corresponde ao documento;
 - se não existem referências duplicadas;
 - se não existem regras extras fora do catálogo documentado.
+
+## Escopo Público x Escopo V1
+
+Durante esta revisão, o catálogo local de 94 itens foi confrontado com fontes públicas da NBR 17225. O resultado é:
+
+- o repositório está consistente com o escopo v1 definido no `xlsx`;
+- a cópia pública da norma e checklists públicos mostram itens adicionais fora do escopo v1 atual;
+- esses itens não serão adicionados agora, mas devem ficar explícitos como backlog para contribuições futuras ao repositório público.
+
+Itens públicos adicionais já identificados fora do escopo v1:
+
+- `5.2.6`;
+- `5.4.3`;
+- `5.4.4`;
+- `5.7.3`;
+- `5.8.4`;
+- `5.12.10`, `5.12.11`, `5.12.12`, `5.12.13`;
+- `5.13.9`;
+- `5.13.11`.
+
+Esses itens devem ser tratados como contribuições futuras, não como lacunas da implementação da v1.
 
 Resultado esperado:
 
