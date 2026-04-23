@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Empty, Spin, Tag } from 'antd';
 import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined, LinkOutlined, CalendarOutlined } from '@ant-design/icons';
 import type { AuditResult } from '@/types';
+import { getRequirementScoreData } from '@/utils/audit-score';
 import '../styles/violations-summary.css';
 
 interface ViolationsSummaryProps {
@@ -28,6 +29,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
   }
 
   const hasViolations = result.totalViolations > 0;
+  const requirementScore = getRequirementScoreData(result);
 
   return (
     <div className="violations-summary">
@@ -56,6 +58,26 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
           <div className="summary-meta-item">
             <CalendarOutlined />
             <span>{new Date(result.timestamp).toLocaleString('pt-BR')}</span>
+          </div>
+        </div>
+
+        <div className="summary-score-card">
+          <div className="summary-score-copy">
+            <span className="summary-stat-label">Nota de requisitos</span>
+            <strong>{requirementScore.score}</strong>
+            <p>
+              Considera apenas os requisitos obrigatórios do escopo v1. Itens ainda pendentes de confirmação humana não entram nesta nota.
+            </p>
+          </div>
+          <div className="summary-score-meta">
+            <Tag color={requirementScore.score >= 90 ? 'green' : requirementScore.score >= 70 ? 'gold' : 'red'}>
+              {requirementScore.violatedRequirementRules} regra(s) obrigatória(s) com falha
+            </Tag>
+            {requirementScore.pendingHumanRequirementRules > 0 && (
+              <Tag color="gold">
+                {requirementScore.pendingHumanRequirementRules} regra(s) aguardando confirmação humana
+              </Tag>
+            )}
           </div>
         </div>
 
