@@ -525,6 +525,86 @@ export const PopupApp: React.FC = () => {
     ];
   }, [viewedAuditResult, isHistoricalView, clearHighlightsOnPage, handleHighlightAll, handleNextPriorityIssue, loading]);
 
+  const pendingHistoryEntries = useMemo(
+    () => auditHistory.filter((entry) => getPendingHumanReviewCount(entry) > 0),
+    [auditHistory]
+  );
+
+  const completedHistoryEntries = useMemo(
+    () => auditHistory.filter((entry) => getPendingHumanReviewCount(entry) === 0),
+    [auditHistory]
+  );
+
+  const renderHistoryList = (entries: AuditHistoryEntry[], sectionTitle: string, emptyDescription: string) => (
+    <div className="history-section">
+      <div className="history-section-header">
+        <strong>{sectionTitle}</strong>
+        <span>{entries.length} auditoria(s)</span>
+      </div>
+      {entries.length === 0 ? (
+        <Empty description={emptyDescription} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      ) : (
+        <List
+          dataSource={entries}
+          renderItem={(entry, index) => {
+            const isCurrent = !selectedHistoryId ? entry.id === auditHistory[0]?.id : entry.id === selectedHistoryId;
+            const pendingReviews = getPendingHumanReviewCount(entry);
+            const confirmedReviews = getConfirmedHumanReviewCount(entry);
+            const dismissedReviews = getDismissedHumanReviewCount(entry);
+
+            return (
+              <List.Item
+                className={`history-item${entry.id === selectedHistoryId ? ' is-selected' : ''}${pendingReviews > 0 ? ' is-pending' : ' is-complete'}`}
+                actions={[
+                  <Button
+                    key="view"
+                    type={entry.id === selectedHistoryId ? 'primary' : 'default'}
+                    size="small"
+                    icon={<HistoryOutlined />}
+                    disabled={entry.id === selectedHistoryId && !auditResult}
+                    onClick={() => {
+                      setSelectedHistoryId(entry.id === selectedHistoryId ? null : entry.id);
+                      setPriorityIndex(0);
+                    }}
+                  >
+                    {entry.id === selectedHistoryId
+                      ? (auditResult ? 'Voltar para atual' : 'Usando histórico')
+                      : 'Visualizar'}
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  avatar={<FileSearchOutlined />}
+                  title={(
+                    <div className="history-item-title">
+                      <span>{entry.pageTitle || activeTab?.title || entry.url}</span>
+                      {!selectedHistoryId && entry.id === auditHistory[0]?.id && <Tag color="blue">Mais recente</Tag>}
+                      {entry.id === selectedHistoryId && <Tag color="gold">Em visualização</Tag>}
+                      {isCurrent && selectedHistoryId && <Tag color="blue">Atual em foco</Tag>}
+                      <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
+                        {pendingReviews > 0 ? 'Revisão pendente' : 'Revisão concluída'}
+                      </Tag>
+                    </div>
+                  )}
+                  description={(
+                    <div className="history-item-meta">
+                      <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
+                      <span>{entry.totalViolations} item(ns)</span>
+                      <span>{confirmedReviews} confirmado(s) manualmente</span>
+                      <span>{dismissedReviews} descartado(s) manualmente</span>
+                      <span>{pendingReviews} ainda pendente(s) de revisão humana</span>
+                      <span>{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} com anotações</span>
+                    </div>
+                  )}
+                />
+              </List.Item>
+            );
+          }}
+        />
+      )}
+    </div>
+  );
+
   return (
     <Layout className="popup-app">
       <Header className="popup-header">
@@ -712,56 +792,18 @@ export const PopupApp: React.FC = () => {
                         {auditHistory.length === 0 ? (
                           <Empty description="Nenhuma auditoria anterior encontrada para esta URL" />
                         ) : (
-                          <List
-                            dataSource={auditHistory}
-                            renderItem={(entry, index) => {
-                              const isCurrent = !selectedHistoryId ? index === 0 : entry.id === selectedHistoryId;
-                              return (
-                                <List.Item
-                                  className={`history-item${entry.id === selectedHistoryId ? ' is-selected' : ''}`}
-                                  actions={[
-                                    <Button
-                                      key="view"
-                                      type={entry.id === selectedHistoryId ? 'primary' : 'default'}
-                                      size="small"
-                                      icon={<HistoryOutlined />}
-                                      disabled={entry.id === selectedHistoryId && !auditResult}
-                                      onClick={() => {
-                                        setSelectedHistoryId(entry.id === selectedHistoryId ? null : entry.id);
-                                        setPriorityIndex(0);
-                                      }}
-                                    >
-                                      {entry.id === selectedHistoryId
-                                        ? (auditResult ? 'Voltar para atual' : 'Usando histórico')
-                                        : 'Visualizar'}
-                                    </Button>,
-                                  ]}
-                                >
-                                  <List.Item.Meta
-                                    avatar={<FileSearchOutlined />}
-                                    title={
-                                      <div className="history-item-title">
-                                        <span>{entry.pageTitle || activeTab?.title || entry.url}</span>
-                                        {index === 0 && !selectedHistoryId && <Tag color="blue">Mais recente</Tag>}
-                                        {entry.id === selectedHistoryId && <Tag color="gold">Em visualização</Tag>}
-                                        {isCurrent && selectedHistoryId && <Tag color="blue">Atual em foco</Tag>}
-                                      </div>
-                                    }
-                                    description={
-                                      <div className="history-item-meta">
-                                        <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
-                                        <span>{entry.totalViolations} item(ns)</span>
-                                        <span>{getConfirmedHumanReviewCount(entry)} confirmado(s) manualmente</span>
-                                        <span>{getDismissedHumanReviewCount(entry)} descartado(s) manualmente</span>
-                                        <span>{getPendingHumanReviewCount(entry)} ainda pendente(s) de revisão humana</span>
-                                        <span>{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} com anotações</span>
-                                      </div>
-                                    }
-                                  />
-                                </List.Item>
-                              );
-                            }}
-                          />
+                          <>
+                            {renderHistoryList(
+                              pendingHistoryEntries,
+                              'Revisão pendente',
+                              'Nenhuma auditoria com revisão humana pendente'
+                            )}
+                            {renderHistoryList(
+                              completedHistoryEntries,
+                              'Revisão concluída',
+                              'Nenhuma auditoria com revisão humana concluída'
+                            )}
+                          </>
                         )}
                       </div>
                     ),
