@@ -134,11 +134,21 @@
   gap: 8px;
 }
 
-.summary-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.summary-total-wrapper {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.summary-total-wrapper > .summary-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .summary-stat-card {
@@ -171,6 +181,7 @@
 
 .summary-stat-card.is-total {
   background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
 .summary-stat-card.is-error {

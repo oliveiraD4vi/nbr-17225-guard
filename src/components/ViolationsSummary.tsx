@@ -81,26 +81,29 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
           </div>
         </div>
 
-        <div className="summary-stat-grid">
+        <div className="summary-total-wrapper">
           <div className="summary-stat-card is-total">
             <span className="summary-stat-label">Total</span>
             <strong>{result.totalViolations}</strong>
             <small>itens encontrados</small>
           </div>
-          <div className="summary-stat-card is-error">
-            <span className="summary-stat-label">Requisitos</span>
-            <strong>{result.errors}</strong>
-            <small>não atendidos</small>
-          </div>
-          <div className="summary-stat-card is-warning">
-            <span className="summary-stat-label">Recomendações</span>
-            <strong>{result.warnings}</strong>
-            <small>para revisão</small>
-          </div>
-          <div className="summary-stat-card is-review">
-            <span className="summary-stat-label">Verificação humana</span>
-            <strong>{result.humanReviewItems}</strong>
-            <small>itens a confirmar</small>
+
+          <div className="summary-stat-grid">
+            <div className="summary-stat-card is-error">
+              <span className="summary-stat-label">Requisitos</span>
+              <strong>{result.errors}</strong>
+              <small>não atendidos</small>
+            </div>
+            <div className="summary-stat-card is-warning">
+              <span className="summary-stat-label">Recomendações</span>
+              <strong>{result.warnings}</strong>
+              <small>para revisão</small>
+            </div>
+            <div className="summary-stat-card is-review">
+              <span className="summary-stat-label">Verificação humana</span>
+              <strong>{result.humanReviewItems}</strong>
+              <small>itens a confirmar</small>
+            </div>
           </div>
         </div>
 
