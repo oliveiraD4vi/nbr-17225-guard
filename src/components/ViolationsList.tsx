@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs } from 'antd';
-import { CopyOutlined, LinkOutlined, InfoCircleOutlined, PushpinFilled } from '@ant-design/icons';
+import { CopyOutlined, LinkOutlined, InfoCircleOutlined, PushpinFilled, SearchOutlined } from '@ant-design/icons';
 import type { Violation } from '@/types';
 import '../styles/violations-list.css';
 
@@ -26,6 +26,10 @@ function getSeverityColor(severity: string): string {
 
 function getSeverityLabel(severity: string): string {
   return severity === 'error' ? 'Requisito' : 'Recomendação';
+}
+
+function getReviewLabel(violation: Violation): string {
+  return violation.requiresHumanReview ? 'Precisa de confirmação humana' : 'Detecção automática';
 }
 
 function getViolationSignature(violation: Violation): string {
@@ -110,6 +114,7 @@ function renderViolationGroups(
             <Tag color={getSeverityColor(firstViolation.severity)}>
               {getSeverityLabel(firstViolation.severity)}
             </Tag>
+            {firstViolation.requiresHumanReview && <Tag color="gold">Confirmação humana</Tag>}
             <Tag>{group.violations.length} ocorrência(s)</Tag>
             <span className="violation-nbr-ref">NBR {firstViolation.nbrReference}</span>
           </div>
@@ -172,6 +177,13 @@ function renderViolationCard(
       </div>
 
       <div className="violation-item-content">
+        {violation.requiresHumanReview && (
+          <div className="violation-human-review-card">
+            <strong>Confirmação necessária</strong>
+            <p>Eu acho que pode haver um problema aqui, mas preciso que você confirme manualmente no contexto real da página.</p>
+          </div>
+        )}
+
         <div className="violation-element-card">
           <strong>Elemento afetado</strong>
           <div className="violation-element-title">{getElementTitle(violation)}</div>
@@ -229,6 +241,7 @@ function renderViolationCard(
               type="text"
               size="small"
               icon={<LinkOutlined />}
+              disabled={!onSelectViolation}
               onClick={(event) => {
                 event.stopPropagation();
                 onSelectViolation?.(violation);
@@ -237,6 +250,9 @@ function renderViolationCard(
           </Tooltip>
           <span className="violation-wcag-level">
             <InfoCircleOutlined /> {getSeverityLabel(violation.severity)}
+          </span>
+          <span className="violation-review-state">
+            <SearchOutlined /> {getReviewLabel(violation)}
           </span>
         </Space>
       </div>
@@ -255,6 +271,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
   const sortedViolations = sortViolations(violations);
   const requirementViolations = sortedViolations.filter((violation) => violation.severity === 'error');
   const recommendationViolations = sortedViolations.filter((violation) => violation.severity !== 'error');
+  const reviewViolations = sortedViolations.filter((violation) => violation.requiresHumanReview);
 
   return (
     <div className="violations-list">
@@ -275,6 +292,11 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
             key: 'recommendations',
             label: `Recomendações (${recommendationViolations.length})`,
             children: renderViolationGroups(recommendationViolations, onSelectViolation),
+          },
+          {
+            key: 'review',
+            label: `Verificação humana (${reviewViolations.length})`,
+            children: renderViolationGroups(reviewViolations, onSelectViolation),
           },
         ]}
       />

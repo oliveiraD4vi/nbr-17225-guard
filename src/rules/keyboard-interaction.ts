@@ -33,7 +33,16 @@ export const keyboardAccessibilityRule: Rule = {
       if (!isElementVisible(el)) return;
 
       const tabIndex = el.getAttribute('tabindex');
-      const isNaturallyFocusable = ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName);
+      const hasHref = el.tagName !== 'A' || !!el.getAttribute('href');
+      const isNaturallyFocusable = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) || (el.tagName === 'A' && hasHref);
+      const isGenericOnClickOnly =
+        el.hasAttribute('onclick') &&
+        !el.hasAttribute('role') &&
+        el.tagName !== 'A' &&
+        el.tagName !== 'BUTTON' &&
+        !el.matches('input, select, textarea');
+
+      if (isGenericOnClickOnly && !el.textContent?.trim()) return;
 
       if (!isNaturallyFocusable && (!tabIndex || parseInt(tabIndex, 10) < 0)) {
         violations.push(createViolation(keyboardAccessibilityRule, {
@@ -63,23 +72,31 @@ export const focusIndicatorRule: Rule = {
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
+    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (!activeElement || !isElementVisible(activeElement) || !getFocusableElements().includes(activeElement)) {
+      return violations;
+    }
 
-    getFocusableElements().forEach((el) => {
-      const styles = window.getComputedStyle(el);
-      const outlineStyle = styles.outlineStyle;
-      const outlineWidth = parseFloat(styles.outlineWidth || '0');
-      const boxShadow = styles.boxShadow;
+    const styles = window.getComputedStyle(activeElement);
+    const outlineStyle = styles.outlineStyle;
+    const outlineWidth = parseFloat(styles.outlineWidth || '0');
+    const boxShadow = styles.boxShadow;
+    const borderStyle = styles.borderStyle;
+    const borderWidth = parseFloat(styles.borderWidth || '0');
 
-      if ((outlineStyle === 'none' || outlineWidth === 0) && (!boxShadow || boxShadow === 'none')) {
-        violations.push(createViolation(focusIndicatorRule, {
-          element: el,
-          message: `Elemento ${el.tagName} pode não possuir indicador de foco visível.`,
-          suggestion: 'Defina outline, box-shadow ou estilo perceptível em :focus/:focus-visible.',
-          remediationAdvice: `button:focus-visible { outline: 2px solid #005fcc; outline-offset: 2px; }`,
-          customIdPrefix: 'focus',
-        }));
-      }
-    });
+    if (
+      (outlineStyle === 'none' || outlineWidth === 0) &&
+      (!boxShadow || boxShadow === 'none') &&
+      (borderStyle === 'none' || borderWidth === 0)
+    ) {
+      violations.push(createViolation(focusIndicatorRule, {
+        element: activeElement,
+        message: `Elemento ${activeElement.tagName} em foco pode não possuir indicador de foco visível.`,
+        suggestion: 'Defina outline, box-shadow ou estilo perceptível em :focus/:focus-visible.',
+        remediationAdvice: `button:focus-visible { outline: 2px solid #005fcc; outline-offset: 2px; }`,
+        customIdPrefix: 'focus',
+      }));
+    }
 
     return violations;
   },
@@ -97,15 +114,20 @@ export const focusFullyVisibleRule: Rule = {
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    return getFocusableElements()
-      .filter((el) => !isElementFullyInViewport(el))
-      .map((el) => createViolation(focusFullyVisibleRule, {
-        element: el,
+    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (!activeElement || !isElementVisible(activeElement) || !getFocusableElements().includes(activeElement)) {
+      return [];
+    }
+
+    return !isElementFullyInViewport(activeElement)
+      ? [createViolation(focusFullyVisibleRule, {
+        element: activeElement,
         message: 'Elemento focável está fora da viewport ou potencialmente cortado.',
         suggestion: 'Garanta scroll adequado e evite conteúdo fixo que cubra o foco.',
         remediationAdvice: `scroll-margin-top: 16px;`,
         customIdPrefix: 'focus-full',
-      }));
+      })]
+      : [];
   },
 };
 
@@ -121,15 +143,20 @@ export const focusPartiallyVisibleRule: Rule = {
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    return getFocusableElements()
-      .filter((el) => !isElementPartiallyInViewport(el))
-      .map((el) => createViolation(focusPartiallyVisibleRule, {
-        element: el,
+    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (!activeElement || !isElementVisible(activeElement) || !getFocusableElements().includes(activeElement)) {
+      return [];
+    }
+
+    return !isElementPartiallyInViewport(activeElement)
+      ? [createViolation(focusPartiallyVisibleRule, {
+        element: activeElement,
         message: 'Elemento focável pode ficar invisível ao navegar por teclado.',
         suggestion: 'Reposicione o elemento ou permita rolagem até ele.',
         remediationAdvice: `element.scrollIntoView({ block: 'nearest' })`,
         customIdPrefix: 'focus-partial',
-      }));
+      })]
+      : [];
   },
 };
 

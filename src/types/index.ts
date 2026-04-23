@@ -25,6 +25,8 @@ export interface Violation {
   description: string;
   severity: SeverityLevel;
   wcagLevel: WCAGLevel;
+  automationCategory: AutomationCategory;
+  requiresHumanReview: boolean;
   message: string;
   snippet: string;
   suggestion: string;
@@ -40,12 +42,19 @@ export interface Violation {
 export interface AuditResult {
   timestamp: number;
   url: string;
+  pageTitle?: string;
   totalViolations: number;
   errors: number;
   warnings: number;
+  humanReviewItems: number;
+  automatedFindings: number;
   violations: Violation[];
   violationsByRule: Record<string, Violation[]>;
   violationsBySeverity: Record<SeverityLevel, Violation[]>;
+}
+
+export interface AuditHistoryEntry extends AuditResult {
+  id: string;
 }
 
 export interface HighlightState {
@@ -66,6 +75,7 @@ export interface ExtensionMessage {
 export interface StorageData {
   auditResult?: AuditResult | null;
   auditResultsByTab?: Record<string, AuditResult>;
+  auditHistoryByUrl?: Record<string, AuditHistoryEntry[]>;
   highlightState?: HighlightState;
   visionFilter?: VisionSimulationFilter;
 }

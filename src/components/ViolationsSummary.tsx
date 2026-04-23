@@ -75,6 +75,11 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
             <strong>{result.warnings}</strong>
             <small>para revisão</small>
           </div>
+          <div className="summary-stat-card is-review">
+            <span className="summary-stat-label">Verificação humana</span>
+            <strong>{result.humanReviewItems}</strong>
+            <small>itens a confirmar</small>
+          </div>
         </div>
 
         <div className="summary-breakdown">
@@ -106,6 +111,17 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
                 <p>Esses itens dependem de validação contextual e ajudam a fechar lacunas de usabilidade e conformidade.</p>
               </div>
               <span className="summary-priority-value">{result.warnings}</span>
+            </div>
+
+            <div className="summary-priority-item">
+              <span className="summary-priority-icon is-review">
+                <WarningOutlined />
+              </span>
+              <div>
+                <strong>Confirmação humana</strong>
+                <p>Esses itens são indícios fortes, mas a conclusão depende de verificar o comportamento real, o contexto visual ou o fluxo da interface.</p>
+              </div>
+              <span className="summary-priority-value">{result.humanReviewItems}</span>
             </div>
           </div>
         </div>

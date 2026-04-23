@@ -68,6 +68,8 @@ if (contentScope.__nbrGuardContentLoaded) {
 
   async function runAuditInPage(): Promise<AuditResult> {
     await ensureDocumentReady();
+    clearHighlights();
+    await waitForAuditStability();
 
     const violations: Violation[] = [];
     for (const rule of allRules) {
@@ -79,30 +81,57 @@ if (contentScope.__nbrGuardContentLoaded) {
       }
     }
 
-    const violationsByRule = violations.reduce<Record<string, Violation[]>>((acc, violation) => {
+    const dedupedViolations = dedupeViolations(violations);
+
+    const violationsByRule = dedupedViolations.reduce<Record<string, Violation[]>>((acc, violation) => {
       acc[violation.ruleId] ??= [];
       acc[violation.ruleId].push(violation);
       return acc;
     }, {});
 
-    const violationsBySeverity = violations.reduce<Record<'error' | 'warning', Violation[]>>(
+    const violationsBySeverity = dedupedViolations.reduce<Record<'error' | 'warning', Violation[]>>(
       (acc, violation) => {
         acc[violation.severity].push(violation);
         return acc;
       },
       { error: [], warning: [] }
     );
+    const humanReviewItems = dedupedViolations.filter((violation) => violation.requiresHumanReview).length;
+    const automatedFindings = dedupedViolations.length - humanReviewItems;
 
     return {
-      violations,
-      totalViolations: violations.length,
+      violations: dedupedViolations,
+      totalViolations: dedupedViolations.length,
       errors: violationsBySeverity.error.length,
       warnings: violationsBySeverity.warning.length,
+      humanReviewItems,
+      automatedFindings,
       timestamp: Date.now(),
       url: window.location.href,
+      pageTitle: document.title,
       violationsByRule,
       violationsBySeverity,
     };
+  }
+
+  function dedupeViolations(violations: Violation[]): Violation[] {
+    const seen = new Set<string>();
+
+    return violations.filter((violation) => {
+      const signature = [
+        violation.ruleId,
+        violation.elementSelector || '',
+        violation.message,
+        violation.suggestion,
+      ].join('|');
+
+      if (seen.has(signature)) {
+        return false;
+      }
+
+      seen.add(signature);
+      return true;
+    });
   }
 
   function highlightViolation(violation: Violation) {
@@ -379,6 +408,36 @@ if (contentScope.__nbrGuardContentLoaded) {
 
     return new Promise((resolve) => {
       document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
+    });
+  }
+
+  async function waitForAuditStability(): Promise<void> {
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      let settleTimer = window.setTimeout(finish, 300);
+      const timeoutId = window.setTimeout(finish, 1500);
+      const observer = new MutationObserver(() => {
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(finish, 300);
+      });
+
+      function finish() {
+        if (settled) return;
+        settled = true;
+        observer.disconnect();
+        window.clearTimeout(settleTimer);
+        window.clearTimeout(timeoutId);
+        resolve();
+      }
+
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true,
+      });
     });
   }
 

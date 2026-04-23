@@ -99,6 +99,46 @@
   min-height: 300px;
 }
 
+.empty-state-with-about {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.about-card {
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.about-eyebrow {
+  display: inline-flex;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.about-card h2 {
+  margin: 0 0 10px;
+  color: #0f172a;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.about-card p {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.about-card p + p {
+  margin-top: 10px;
+}
+
 .empty-state button {
   font-size: 16px;
   padding: 8px 32px;
@@ -139,6 +179,38 @@
 
 .popup-content .ant-tabs-tab {
   font-weight: 600;
+}
+
+.history-alert {
+  margin-bottom: 12px;
+}
+
+.history-tab {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-item {
+  padding-inline: 0 !important;
+}
+
+.history-item.is-selected {
+  background: #fffbeb;
+}
+
+.history-item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.history-item-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: #64748b;
+  font-size: 12px;
 }
 
 .popup-content::-webkit-scrollbar {

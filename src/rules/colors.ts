@@ -5,8 +5,7 @@
 
 import type { Rule, Violation } from '@/types';
 import { 
-  generateCustomId, 
-  getElementSelector, 
+  createViolation,
   getContrastRatio, 
   rgbToHex,
   getEffectiveBackgroundColor,
@@ -28,6 +27,7 @@ export const textContrastRule: Rule = {
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
+    const seenParents = new Set<HTMLElement>();
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT,
@@ -43,6 +43,9 @@ export const textContrastRule: Rule = {
 
       const parent = textNode.parentElement;
       if (!parent || !isElementVisible(parent)) continue;
+      if (seenParents.has(parent)) continue;
+
+      seenParents.add(parent);
 
       const textColor = window.getComputedStyle(parent).color;
       const bgColor = getEffectiveBackgroundColor(parent);
@@ -59,29 +62,14 @@ export const textContrastRule: Rule = {
       const minRatio = isLargeText ? 3 : 4.5;
 
       if (ratio < minRatio) {
-        violations.push({
-          id: generateCustomId(),
-          ruleId: 'text-contrast',
-          ruleName: 'Contraste para texto (mínimo)',
-          nbrReference: '5.11.3',
+        violations.push(createViolation(textContrastRule, {
+          element: parent,
           description: `Contraste insuficiente: ${ratio.toFixed(2)}:1 (mínimo: ${minRatio}:1)`,
-          severity: 'error',
-          wcagLevel: 'AA',
           message: `Razão de contraste ${ratio.toFixed(2)}:1 é menor que ${minRatio}:1`,
-          snippet: parent.outerHTML.substring(0, 200),
           suggestion: 'Aumentar o contraste entre texto e fundo',
-          remediationAdvice: `
-            Opções para melhorar o contraste:
-            1. Escureça o texto (cor mais escura)
-            2. Clarifique o fundo (cor mais clara)
-            3. Aumente o tamanho da fonte
-            
-            Razão de contraste atual: ${ratio.toFixed(2)}:1
-            Razão mínima necessária: ${minRatio}:1
-          `,
-          elementSelector: getElementSelector(parent),
-          customId: generateCustomId('contrast'),
-        });
+          remediationAdvice: `Escureça o texto, clareie o fundo ou aumente o tamanho/peso visual quando aplicável. Razão atual: ${ratio.toFixed(2)}:1. Razão mínima: ${minRatio}:1.`,
+          customIdPrefix: 'contrast',
+        }));
       }
     }
 
@@ -110,40 +98,32 @@ export const componentContrastRule: Rule = {
       if (!isElementVisible(component as HTMLElement)) return;
 
       const el = component as HTMLElement;
-      const borderColor = window.getComputedStyle(el).borderColor;
-      const bgColor = window.getComputedStyle(el).backgroundColor;
+      const styles = window.getComputedStyle(el);
+      const borderWidth = parseFloat(styles.borderWidth || '0');
+      const borderColor = styles.borderColor;
+      const bgColor = styles.backgroundColor;
+      const surroundingColor = getEffectiveBackgroundColor(el.parentElement as HTMLElement || el);
+
+      if (borderWidth <= 0) return;
+      if (borderColor === 'transparent' || bgColor === 'transparent') return;
 
       const borderHex = rgbToHex(borderColor);
       const bgHex = rgbToHex(bgColor);
+      const surroundingHex = rgbToHex(surroundingColor);
 
-      const ratio = getContrastRatio(borderHex, bgHex);
+      const internalRatio = getContrastRatio(borderHex, bgHex);
+      const externalRatio = getContrastRatio(borderHex, surroundingHex);
+      const ratio = Math.max(internalRatio, externalRatio);
 
       if (ratio < 3) {
-        violations.push({
-          id: generateCustomId(),
-          ruleId: 'component-contrast',
-          ruleName: 'Contraste para componentes',
-          nbrReference: '5.11.4',
+        violations.push(createViolation(componentContrastRule, {
+          element: el,
           description: `Contraste de componente insuficiente: ${ratio.toFixed(2)}:1`,
-          severity: 'error',
-          wcagLevel: 'AA',
           message: `Componente ${el.tagName} com contraste ${ratio.toFixed(2)}:1 (mínimo: 3:1)`,
-          snippet: el.outerHTML.substring(0, 200),
           suggestion: 'Aumentar o contraste entre a borda/fundo do componente',
-          remediationAdvice: `
-            Melhore o contraste do componente:
-            
-            button {
-              border: 2px solid #333;
-              background-color: #f0f0f0;
-            }
-            
-            Razão de contraste atual: ${ratio.toFixed(2)}:1
-            Razão mínima necessária: 3:1
-          `,
-          elementSelector: getElementSelector(el),
-          customId: generateCustomId('component-contrast'),
-        });
+          remediationAdvice: `Garanta contraste mínimo de 3:1 entre o indicador visual do componente e as áreas adjacentes. Razão atual: ${ratio.toFixed(2)}:1.`,
+          customIdPrefix: 'component-contrast',
+        }));
       }
     });
 

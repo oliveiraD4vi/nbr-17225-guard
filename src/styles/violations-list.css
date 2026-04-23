@@ -163,6 +163,7 @@
 }
 
 .violation-element-card,
+.violation-human-review-card,
 .violation-suggestion,
 .violation-remediation {
   padding: 12px;
@@ -172,6 +173,18 @@
 
 .violation-element-card {
   background: #f8fafc;
+}
+
+.violation-human-review-card {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.violation-human-review-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #9a3412;
 }
 
 .violation-element-card strong,
@@ -263,6 +276,14 @@
   margin-left: auto;
   font-size: 12px;
   color: #475569;
+}
+
+.violation-review-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #92400e;
 }
 
 @media (max-width: 640px) {

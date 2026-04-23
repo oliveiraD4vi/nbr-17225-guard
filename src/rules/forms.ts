@@ -152,10 +152,12 @@ export const dataTypeRule: Rule = {
       if (['hidden', 'submit', 'button', 'reset', 'checkbox', 'radio', 'file'].includes(field.type)) return;
 
       const label = `${getAssociatedLabelText(field)} ${field.name} ${field.id} ${field.placeholder}`.toLowerCase();
+      const autocomplete = field.getAttribute('autocomplete')?.toLowerCase() || '';
+      const inputMode = field.getAttribute('inputmode')?.toLowerCase() || '';
       const expectedType =
-        label.includes('email') ? 'email' :
-        label.includes('telefone') || label.includes('phone') || label.includes('celular') ? 'tel' :
-        label.includes('url') || label.includes('site') || label.includes('website') ? 'url' :
+        /\b(e-?mail|email)\b/.test(label) || autocomplete === 'email' ? 'email' :
+        /\b(telefone|phone|celular|whatsapp)\b/.test(label) || autocomplete === 'tel' || inputMode === 'tel' ? 'tel' :
+        /\b(url|site|website|link)\b/.test(label) || inputMode === 'url' ? 'url' :
         '';
 
       if (expectedType && field.type === 'text') {
@@ -183,7 +185,7 @@ export const accessibleAuthenticationRule: Rule = {
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
-    document.querySelectorAll<HTMLElement>('canvas, iframe, [class*="captcha" i], [id*="captcha" i]').forEach((element) => {
+    document.querySelectorAll<HTMLElement>('[class*="captcha" i], [id*="captcha" i], [title*="captcha" i], [aria-label*="captcha" i], [src*="captcha" i], [data-sitekey]').forEach((element) => {
       violations.push(createViolation(accessibleAuthenticationRule, {
         element,
         message: 'Possível mecanismo de CAPTCHA detectado; exige validação manual de acessibilidade.',

@@ -1,7 +1,7 @@
 /**
  * Motor de auditoria de acessibilidade
  */
-import type { AuditResult } from '@/types';
+import type { AuditHistoryEntry, AuditResult } from '@/types';
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -16,6 +16,30 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> 
 
 function getTabStorageKey(tabId: number): string {
   return String(tabId);
+}
+
+function getUrlStorageKey(url: string): string {
+  try {
+    const parsed = new URL(url);
+    parsed.hash = '';
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null {
+  if (!result) return null;
+
+  const humanReviewItems = result.violations.filter((violation) => violation.requiresHumanReview).length;
+  const automatedFindings = result.violations.length - humanReviewItems;
+
+  return {
+    ...result,
+    humanReviewItems: result.humanReviewItems ?? humanReviewItems,
+    automatedFindings: result.automatedFindings ?? automatedFindings,
+    pageTitle: result.pageTitle ?? '',
+  };
 }
 
 /**
@@ -43,7 +67,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
       throw new Error('Erro ao executar a auditoria no content script.');
     }
 
-    const result: AuditResult = response.result;
+    const result: AuditResult = normalizeAuditResult(response.result)!;
     result.url = activeTab.url;
     result.timestamp = Date.now();
 
@@ -112,15 +136,31 @@ export async function resetAuditCache(): Promise<void> {
 export async function saveAuditResult(result: AuditResult, tabId?: number): Promise<void> {
   try {
     const resolvedTabId = tabId ?? (await getActiveTab()).id;
-    const data = await chrome.storage.local.get('auditResultsByTab');
+    const data = await chrome.storage.local.get(['auditResultsByTab', 'auditHistoryByUrl']);
+    const urlKey = getUrlStorageKey(result.url);
+    const history = (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {};
+    const currentHistory = history[urlKey] ?? [];
+    const historyEntry: AuditHistoryEntry = {
+      ...normalizeAuditResult(result)!,
+      id: `${urlKey}|${result.timestamp}`,
+    };
     const auditResultsByTab = {
       ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
-      [getTabStorageKey(resolvedTabId)]: result,
+      [getTabStorageKey(resolvedTabId)]: normalizeAuditResult(result)!,
+    };
+    const auditHistoryByUrl = {
+      ...history,
+      [urlKey]: [historyEntry, ...currentHistory]
+        .filter((entry, index, entries) =>
+          entries.findIndex((candidate) => candidate.id === entry.id) === index
+        )
+        .slice(0, 10),
     };
 
     await chrome.storage.local.set({
-      auditResult: result,
+      auditResult: normalizeAuditResult(result)!,
       auditResultsByTab,
+      auditHistoryByUrl,
     });
 
     console.log('[Guardião NBR 17225] Resultado da auditoria salvo');
@@ -137,7 +177,7 @@ export async function getAuditResult(tabId?: number): Promise<AuditResult | null
     const resolvedTabId = tabId ?? (await getActiveTab()).id;
     const data = await chrome.storage.local.get(['auditResult', 'auditResultsByTab']);
     const auditResultsByTab = data.auditResultsByTab as Record<string, AuditResult> | undefined;
-    const result = auditResultsByTab?.[getTabStorageKey(resolvedTabId)] || null;
+    const result = normalizeAuditResult(auditResultsByTab?.[getTabStorageKey(resolvedTabId)] || null);
 
     await chrome.storage.local.set({ auditResult: result });
 
@@ -145,5 +185,19 @@ export async function getAuditResult(tabId?: number): Promise<AuditResult | null
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao recuperar resultado:', error);
     return null;
+  }
+}
+
+export async function getAuditHistoryForUrl(url?: string): Promise<AuditHistoryEntry[]> {
+  try {
+    const resolvedUrl = url ?? (await getActiveTab()).url;
+    if (!resolvedUrl) return [];
+
+    const data = await chrome.storage.local.get('auditHistoryByUrl');
+    const auditHistoryByUrl = data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined;
+    return (auditHistoryByUrl?.[getUrlStorageKey(resolvedUrl)] || []).map((entry) => normalizeAuditResult(entry) as AuditHistoryEntry);
+  } catch (error) {
+    console.error('[Guardião NBR 17225] Erro ao recuperar histórico:', error);
+    return [];
   }
 }

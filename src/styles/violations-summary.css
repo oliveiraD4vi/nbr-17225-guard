@@ -97,7 +97,7 @@
 
 .summary-stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -140,6 +140,10 @@
 
 .summary-stat-card.is-warning {
   background: #fff7ed;
+}
+
+.summary-stat-card.is-review {
+  background: #fffbeb;
 }
 
 .summary-breakdown {
@@ -210,6 +214,11 @@
 .summary-priority-icon.is-warning {
   background: #ffedd5;
   color: #c2410c;
+}
+
+.summary-priority-icon.is-review {
+  background: #fef3c7;
+  color: #a16207;
 }
 
 .summary-priority-value {

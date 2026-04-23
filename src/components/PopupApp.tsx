@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, Button, Tabs, message, Spin, Tag } from 'antd';
+import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert } from 'antd';
 import {
   PlayCircleOutlined,
   ReloadOutlined,
@@ -9,10 +9,13 @@ import {
   StopOutlined,
   FlagOutlined,
   ClockCircleOutlined,
+  HistoryOutlined,
+  FileSearchOutlined,
 } from '@ant-design/icons';
-import type { AuditResult, Violation, VisionSimulationFilter } from '@/types';
+import type { AuditHistoryEntry, AuditResult, Violation, VisionSimulationFilter } from '@/types';
 import {
   getActiveTab,
+  getAuditHistoryForUrl,
   getAuditResult,
   resetAuditCache,
   runAccessibilityAudit,
@@ -49,6 +52,8 @@ function getPriorityViolations(violations: Violation[]): Violation[] {
 
 export const PopupApp: React.FC = () => {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
+  const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([]);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null);
   const [activeTabKey, setActiveTabKey] = useState('summary');
@@ -59,11 +64,16 @@ export const PopupApp: React.FC = () => {
       const tab = await getActiveTab();
       setActiveTab(tab);
       const result = await getAuditResult(tab.id);
+      const history = await getAuditHistoryForUrl(tab.url);
       setAuditResult(result);
+      setAuditHistory(history);
+      setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null);
       setPriorityIndex(0);
     } catch (error) {
       console.error('Erro ao carregar resultado da aba ativa:', error);
       setAuditResult(null);
+      setAuditHistory([]);
+      setSelectedHistoryId(null);
       setPriorityIndex(0);
     }
   }, []);
@@ -118,8 +128,11 @@ export const PopupApp: React.FC = () => {
       const tab = await getActiveTab();
       setActiveTab(tab);
       setAuditResult(result);
-      setPriorityIndex(0);
       await saveAuditResult(result, tab.id);
+      const history = await getAuditHistoryForUrl(tab.url);
+      setAuditHistory(history);
+      setSelectedHistoryId(null);
+      setPriorityIndex(0);
       message.success(`Auditoria concluída: ${result.totalViolations} item(ns) encontrado(s).`);
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
@@ -135,6 +148,7 @@ export const PopupApp: React.FC = () => {
       await clearHighlightsOnPage(false);
       await resetAuditCache();
       setAuditResult(null);
+      setSelectedHistoryId(auditHistory[0]?.id || null);
       setPriorityIndex(0);
       message.success('Auditoria limpa para esta aba');
     } catch (error) {
@@ -146,12 +160,12 @@ export const PopupApp: React.FC = () => {
   };
 
   const handleExportJSON = () => {
-    if (!auditResult) {
+    if (!viewedAuditResult) {
       message.warning('Nenhuma auditoria para exportar');
       return;
     }
 
-    const dataStr = JSON.stringify(auditResult, null, 2);
+    const dataStr = JSON.stringify(viewedAuditResult, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -163,13 +177,13 @@ export const PopupApp: React.FC = () => {
   };
 
   const handleExportCSV = () => {
-    if (!auditResult || auditResult.violations.length === 0) {
+    if (!viewedAuditResult || viewedAuditResult.violations.length === 0) {
       message.warning('Nenhuma violação para exportar');
       return;
     }
 
     const headers = ['ID', 'Regra', 'Referência NBR', 'Severidade', 'Mensagem', 'Sugestão'];
-    const rows = auditResult.violations.map((violation) => [
+    const rows = viewedAuditResult.violations.map((violation) => [
       violation.id,
       violation.ruleName,
       violation.nbrReference,
@@ -204,12 +218,12 @@ export const PopupApp: React.FC = () => {
   };
 
   const handleHighlightAll = async () => {
-    if (!auditResult) return;
+    if (!viewedAuditResult || isHistoricalView) return;
 
     try {
       await sendMessageToActiveTab({
         action: 'HIGHLIGHT_ALL_VIOLATIONS',
-        violations: auditResult.violations,
+        violations: viewedAuditResult.violations,
       });
       message.success('Destaques aplicados na página');
     } catch (error) {
@@ -229,11 +243,23 @@ export const PopupApp: React.FC = () => {
     }
   };
 
+  const viewedAuditResult = useMemo(() => {
+    if (!selectedHistoryId) return auditResult;
+    return auditHistory.find((entry) => entry.id === selectedHistoryId) || auditResult;
+  }, [auditHistory, auditResult, selectedHistoryId]);
+
+  const isHistoricalView = !!selectedHistoryId;
+
   const priorityViolations = useMemo(() => (
-    auditResult ? getPriorityViolations(auditResult.violations) : []
-  ), [auditResult]);
+    viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []
+  ), [isHistoricalView, viewedAuditResult]);
 
   const handleNextPriorityIssue = async () => {
+    if (isHistoricalView) {
+      message.info('Destaque indisponível em auditorias do histórico');
+      return;
+    }
+
     if (priorityViolations.length === 0) {
       message.info('Nenhum item prioritário disponível nesta aba');
       return;
@@ -246,7 +272,7 @@ export const PopupApp: React.FC = () => {
   };
 
   const footerActions = useMemo(() => {
-    if (!auditResult) return [];
+    if (!viewedAuditResult) return [];
 
     return [
       {
@@ -262,18 +288,21 @@ export const PopupApp: React.FC = () => {
         icon: <EyeOutlined />,
         onClick: handleHighlightAll,
         type: 'primary' as const,
+        disabled: isHistoricalView,
       },
       {
         key: 'priority',
         label: 'Próximo prioritário',
         icon: <FlagOutlined />,
         onClick: handleNextPriorityIssue,
+        disabled: isHistoricalView,
       },
       {
         key: 'clear-highlight',
         label: 'Limpar destaques',
         icon: <StopOutlined />,
         onClick: () => clearHighlightsOnPage(true),
+        disabled: isHistoricalView,
       },
       {
         key: 'json',
@@ -295,7 +324,7 @@ export const PopupApp: React.FC = () => {
         danger: true,
       },
     ];
-  }, [auditResult, clearHighlightsOnPage, handleHighlightAll, handleNextPriorityIssue, loading]);
+  }, [viewedAuditResult, isHistoricalView, clearHighlightsOnPage, handleHighlightAll, handleNextPriorityIssue, loading]);
 
   return (
     <Layout className="popup-app">
@@ -310,8 +339,20 @@ export const PopupApp: React.FC = () => {
 
       <Content className="popup-content">
         <Spin spinning={loading} tip="Analisando página...">
-          {!auditResult ? (
-            <div className="empty-state">
+          {!viewedAuditResult ? (
+            <div className="empty-state empty-state-with-about">
+              <div className="about-card">
+                <span className="about-eyebrow">Sobre</span>
+                <h2>Auditoria assistida da ABNT NBR 17225</h2>
+                <p>
+                  O Guardião avalia o escopo da versão 1 do catálogo normativo do projeto e separa
+                  automaticamente requisitos, recomendações e itens que ainda precisam de confirmação humana.
+                </p>
+                <p>
+                  Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página
+                  e manter um histórico local das auditorias já executadas.
+                </p>
+              </div>
               <Button
                 type="primary"
                 size="large"
@@ -330,11 +371,21 @@ export const PopupApp: React.FC = () => {
                   <strong>{activeTab?.title || activeTab?.url || 'Sem título'}</strong>
                 </div>
                 <div className="tab-status-item">
-                  <span className="tab-status-label">Auditado em</span>
-                  <strong><ClockCircleOutlined /> {new Date(auditResult.timestamp).toLocaleString('pt-BR')}</strong>
+                  <span className="tab-status-label">{isHistoricalView ? 'Histórico de' : 'Auditado em'}</span>
+                  <strong><ClockCircleOutlined /> {new Date(viewedAuditResult.timestamp).toLocaleString('pt-BR')}</strong>
                 </div>
-                <Tag color="blue">Por aba</Tag>
+                <Tag color={isHistoricalView ? 'gold' : 'blue'}>{isHistoricalView ? 'Histórico por URL' : 'Auditoria atual'}</Tag>
               </div>
+
+              {isHistoricalView && (
+                <Alert
+                  className="history-alert"
+                  type="warning"
+                  showIcon
+                  message="Você está visualizando uma auditoria do histórico"
+                  description="Os dados abaixo pertencem a uma execução anterior da mesma URL. Destaques visuais na página atual podem não corresponder a esse estado."
+                />
+              )}
 
               <Tabs
                 activeKey={activeTabKey}
@@ -343,16 +394,75 @@ export const PopupApp: React.FC = () => {
                   {
                     key: 'summary',
                     label: 'Resumo',
-                    children: <ViolationsSummary result={auditResult} />,
+                    children: <ViolationsSummary result={viewedAuditResult} />,
                   },
                   {
                     key: 'violations',
-                    label: `Violações (${auditResult.totalViolations})`,
+                    label: `Violações (${viewedAuditResult.totalViolations})`,
                     children: (
                       <ViolationsList
-                        violations={auditResult.violations}
-                        onSelectViolation={handleHighlightViolation}
+                        violations={viewedAuditResult.violations}
+                        onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
                       />
+                    ),
+                  },
+                  {
+                    key: 'history',
+                    label: `Histórico (${auditHistory.length})`,
+                    children: (
+                      <div className="history-tab">
+                        {auditHistory.length === 0 ? (
+                          <Empty description="Nenhuma auditoria anterior encontrada para esta URL" />
+                        ) : (
+                          <List
+                            dataSource={auditHistory}
+                            renderItem={(entry, index) => {
+                              const isCurrent = !selectedHistoryId ? index === 0 : entry.id === selectedHistoryId;
+                              return (
+                                <List.Item
+                                  className={`history-item${entry.id === selectedHistoryId ? ' is-selected' : ''}`}
+                                  actions={[
+                                    <Button
+                                      key="view"
+                                      type={entry.id === selectedHistoryId ? 'primary' : 'default'}
+                                      size="small"
+                                      icon={<HistoryOutlined />}
+                                      disabled={entry.id === selectedHistoryId && !auditResult}
+                                      onClick={() => {
+                                        setSelectedHistoryId(entry.id === selectedHistoryId ? null : entry.id);
+                                        setPriorityIndex(0);
+                                      }}
+                                    >
+                                      {entry.id === selectedHistoryId
+                                        ? (auditResult ? 'Voltar para atual' : 'Usando histórico')
+                                        : 'Visualizar'}
+                                    </Button>,
+                                  ]}
+                                >
+                                  <List.Item.Meta
+                                    avatar={<FileSearchOutlined />}
+                                    title={
+                                      <div className="history-item-title">
+                                        <span>{entry.pageTitle || activeTab?.title || entry.url}</span>
+                                        {index === 0 && !selectedHistoryId && <Tag color="blue">Mais recente</Tag>}
+                                        {entry.id === selectedHistoryId && <Tag color="gold">Em visualização</Tag>}
+                                        {isCurrent && selectedHistoryId && <Tag color="blue">Atual em foco</Tag>}
+                                      </div>
+                                    }
+                                    description={
+                                      <div className="history-item-meta">
+                                        <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
+                                        <span>{entry.totalViolations} item(ns)</span>
+                                        <span>{entry.humanReviewItems} dependem de confirmação humana</span>
+                                      </div>
+                                    }
+                                  />
+                                </List.Item>
+                              );
+                            }}
+                          />
+                        )}
+                      </div>
                     ),
                   },
                   {
@@ -389,6 +499,7 @@ export const PopupApp: React.FC = () => {
                   onClick={action.onClick}
                   loading={action.loading}
                   danger={action.danger}
+                  disabled={action.disabled}
                 >
                   {action.label}
                 </Button>

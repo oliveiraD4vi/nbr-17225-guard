@@ -6,11 +6,28 @@ import type { Rule, SeverityLevel, Violation, WCAGLevel } from '@/types';
 
 export const VERIFIER_ID = 'NBR17225GUARD';
 export const VERIFIER_NAME = 'Guardião NBR 17225';
+const HIGHLIGHT_ID_PREFIX = 'nbr-highlight-';
+const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host';
+
+function hashString(value: string): string {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(36);
+}
 
 /**
  * Gera um ID único para violações
  */
-export function generateCustomId(prefix = ''): string {
+export function generateCustomId(prefix = '', seed?: string): string {
+  if (seed) {
+    return `${prefix || VERIFIER_ID.toLowerCase()}-${hashString(seed)}`;
+  }
+
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const getRandomChar = () => chars.charAt(Math.floor(Math.random() * chars.length));
 
@@ -39,26 +56,45 @@ export function escapeHtml(str: string): string {
  * Obtém o seletor CSS de um elemento
  */
 export function getElementSelector(element: HTMLElement): string {
-  if (element.id) return `#${element.id}`;
+  if (element.id) return `#${CSS.escape(element.id)}`;
 
   const names: string[] = [];
   while (element.parentElement) {
     if (element.id) {
-      names.unshift(`#${element.id}`);
+      names.unshift(`#${CSS.escape(element.id)}`);
       break;
     } else {
       if (element === element.ownerDocument.documentElement) {
         names.unshift(element.tagName.toLowerCase());
       } else {
-        let c = 1;
-        let e: Element | null = element;
-        for (; e?.previousElementSibling; e = e.previousElementSibling, c++);
-        names.unshift(`${element.tagName.toLowerCase()}:nth-child(${c})`);
+        let index = 1;
+        let sibling = element.previousElementSibling;
+
+        while (sibling) {
+          if (sibling.tagName === element.tagName) {
+            index += 1;
+          }
+          sibling = sibling.previousElementSibling;
+        }
+
+        names.unshift(`${element.tagName.toLowerCase()}:nth-of-type(${index})`);
       }
       element = element.parentElement;
     }
   }
   return names.join(' > ');
+}
+
+export function isGuardInjectedElement(element: Element | null): boolean {
+  if (!element) return false;
+  if (!(element instanceof HTMLElement || element instanceof SVGElement)) return false;
+
+  const ownId = element.id || '';
+  if (ownId === VISION_FILTER_HOST_ID || ownId.startsWith(HIGHLIGHT_ID_PREFIX)) {
+    return true;
+  }
+
+  return !!element.closest?.(`#${VISION_FILTER_HOST_ID}, [id^="${HIGHLIGHT_ID_PREFIX}"]`);
 }
 
 /**
@@ -155,6 +191,8 @@ export function rgbToHex(rgb: string): string {
  */
 export function isElementVisible(element: HTMLElement): boolean {
   if (!element) return false;
+  if (isGuardInjectedElement(element)) return false;
+  if (element.hidden || element.getAttribute('aria-hidden') === 'true') return false;
 
   const style = window.getComputedStyle(element);
   if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
@@ -170,16 +208,21 @@ export function isElementVisible(element: HTMLElement): boolean {
  */
 export function getVisibleText(element: HTMLElement): string {
   if (!element) return '';
+  if (isGuardInjectedElement(element)) return '';
+  if (element.hidden || element.getAttribute('aria-hidden') === 'true') return '';
+  if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE'].includes(element.tagName)) return '';
 
   const style = window.getComputedStyle(element);
-  if (style.display === 'none') return '';
+  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return '';
 
   let text = '';
   for (const node of element.childNodes) {
     if (node.nodeType === Node.TEXT_NODE) {
       text += node.textContent || '';
-    } else if (node.nodeType === Node.ELEMENT_NODE && node instanceof HTMLElement) {
-      text += getVisibleText(node);
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      if (node instanceof HTMLElement) {
+        text += getVisibleText(node);
+      }
     }
   }
 
@@ -263,7 +306,7 @@ export function getAssociatedLabelText(
 }
 
 export function createViolation(
-  rule: Pick<Rule, 'id' | 'name' | 'nbrReference' | 'severity' | 'wcagLevel' | 'description'>,
+  rule: Pick<Rule, 'id' | 'name' | 'nbrReference' | 'severity' | 'wcagLevel' | 'description' | 'category'>,
   options: {
     element?: HTMLElement;
     message: string;
@@ -277,24 +320,34 @@ export function createViolation(
   }
 ): Violation {
   const element = options.element;
+  const selector = element ? getElementSelector(element) : undefined;
+  const stableSeed = [
+    rule.id,
+    selector || '',
+    options.message,
+    options.suggestion,
+    options.description || rule.description,
+  ].join('|');
 
   return {
-    id: generateCustomId(),
+    id: generateCustomId(rule.id, stableSeed),
     ruleId: rule.id,
     ruleName: rule.name,
     nbrReference: rule.nbrReference,
     description: options.description || rule.description,
     severity: options.severity || rule.severity,
     wcagLevel: options.wcagLevel || rule.wcagLevel,
+    automationCategory: rule.category,
+    requiresHumanReview: rule.category !== 'Totalmente Automatizável',
     message: options.message,
     snippet: options.snippet || (element?.outerHTML.substring(0, 200) || '<document>'),
     suggestion: options.suggestion,
     remediationAdvice: options.remediationAdvice,
-    elementSelector: element ? getElementSelector(element) : undefined,
+    elementSelector: selector,
     elementTagName: element ? element.tagName.toLowerCase() : undefined,
     elementAccessibleName: element ? getAccessibleName(element) || undefined : undefined,
     elementVisibleText: element ? getVisibleText(element) || undefined : undefined,
-    customId: generateCustomId(options.customIdPrefix || rule.id),
+    customId: generateCustomId(options.customIdPrefix || rule.id, stableSeed),
   };
 }
 

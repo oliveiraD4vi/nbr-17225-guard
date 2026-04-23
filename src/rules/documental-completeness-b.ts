@@ -36,6 +36,71 @@ const formFieldsSelector = 'input:not([type="hidden"]):not([type="submit"]):not(
 const interactiveSelector = 'button, a[href], input:not([type="hidden"]), select, textarea, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [tabindex]';
 const vagueLabels = ['campo', 'valor', 'digite', 'info', 'informacao', 'informação', 'texto'];
 
+function getActiveFocusableElement(): HTMLElement | null {
+  const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  if (!activeElement || !isElementVisible(activeElement)) return null;
+  return getFocusableElements().includes(activeElement) ? activeElement : null;
+}
+
+function hasRestrictiveOrientationStyles(): boolean {
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList;
+
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      continue;
+    }
+
+    for (const rule of Array.from(rules)) {
+      if (!(rule instanceof CSSMediaRule)) continue;
+
+      const mediaText = rule.media.mediaText.toLowerCase();
+      if (!mediaText.includes('orientation')) continue;
+
+      for (const nestedRule of Array.from(rule.cssRules)) {
+        if (!(nestedRule instanceof CSSStyleRule)) continue;
+
+        const selector = nestedRule.selectorText.toLowerCase();
+        const targetsMainLayout = /(body|html|main|#app|#root|\.app|\.main)/.test(selector);
+        const hidesLayout =
+          nestedRule.style.display === 'none' ||
+          nestedRule.style.visibility === 'hidden' ||
+          nestedRule.style.pointerEvents === 'none';
+
+        if (targetsMainLayout && hidesLayout) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+function looksLikeForeignLanguageBlock(text: string): boolean {
+  const normalized = text.trim().toLowerCase();
+  if (normalized.length < 32) return false;
+
+  const englishSignals = [
+    'privacy policy',
+    'terms of service',
+    'sign in',
+    'sign up',
+    'create account',
+    'checkout',
+    'shipping',
+    'download now',
+  ];
+  const englishStopwords = [' the ', ' and ', ' for ', ' with ', ' your ', ' from '];
+
+  const signalCount = englishSignals.filter((signal) => normalized.includes(signal)).length;
+  const stopwordCount = englishStopwords.filter((word) => ` ${normalized} `.includes(word)).length;
+
+  return signalCount >= 1 || stopwordCount >= 3;
+}
+
 export const predictableFieldLabelRule: Rule = {
   id: 'predictable-field-label',
   nbrReference: '5.9.2',
@@ -288,7 +353,8 @@ export const presentationOrderRule: Rule = {
       }
     });
 
-    document.querySelectorAll<HTMLElement>('*').forEach((element) => {
+    document.querySelectorAll<HTMLElement>(interactiveSelector).forEach((element) => {
+      if (!isElementVisible(element)) return;
       const style = window.getComputedStyle(element);
       if ((style.display.includes('flex') || style.display.includes('grid')) && style.order !== '0') {
         violations.push(createViolation(presentationOrderRule, {
@@ -313,15 +379,19 @@ export const orientationRule: Rule = {
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
-  check: async () => createWarnings(
-    orientationRule,
-    Array.from(document.querySelectorAll<HTMLElement>('p, span, li, small, strong, em'))
-      .filter((element) => /gire o dispositivo|use apenas em modo paisagem|use apenas em modo retrato/.test(getVisibleText(element).toLowerCase())),
-    (element) => `Conteúdo indica restrição de orientação: "${getVisibleText(element)}".`,
-    'Valide se a funcionalidade opera em ambas as orientações ou justifique a exceção.',
-    `Evite bloquear a interface para uma única orientação sem necessidade essencial.`,
-    'orientation'
-  ),
+  check: async () => {
+    if (!hasRestrictiveOrientationStyles()) {
+      return [];
+    }
+
+    return [createViolation(orientationRule, {
+      element: document.body,
+      message: 'Foram encontradas regras de estilo com media query de orientação que podem ocultar o layout principal.',
+      suggestion: 'Valide se a interface continua operável em retrato e paisagem ou documente a exceção essencial.',
+      remediationAdvice: `Evite ocultar ou bloquear o conteúdo principal apenas por orientação de tela.`,
+      customIdPrefix: 'orientation',
+    })];
+  },
 };
 
 export const colorUsageRule: Rule = {
@@ -354,10 +424,11 @@ export const graphicContrastRule: Rule = {
   check: async () => {
     const violations: Violation[] = [];
 
-    document.querySelectorAll<HTMLElement>('svg, canvas, [role="img"]').forEach((element) => {
+    document.querySelectorAll<HTMLElement>('svg').forEach((element) => {
       if (!isElementVisible(element)) return;
       const style = window.getComputedStyle(element);
-      const foreground = rgbToHex(style.color || style.fill || '#000000');
+      if (!style.fill && !style.stroke && !style.color) return;
+      const foreground = rgbToHex(style.fill || style.stroke || style.color || '#000000');
       const background = rgbToHex(getEffectiveBackgroundColor(element));
       const ratio = getContrastRatio(foreground, background);
 
@@ -387,25 +458,28 @@ export const focusIndicatorContrastRule: Rule = {
   check: async () => {
     const violations: Violation[] = [];
 
-    getFocusableElements().forEach((element) => {
-      const style = window.getComputedStyle(element);
-      const outlineWidth = parseFloat(style.outlineWidth || '0');
-      if (outlineWidth <= 0 || style.outlineStyle === 'none') return;
+    const activeElement = getActiveFocusableElement();
+    if (!activeElement) {
+      return violations;
+    }
 
-      const outlineColor = rgbToHex(style.outlineColor || '#000000');
-      const background = rgbToHex(getEffectiveBackgroundColor(element));
-      const ratio = getContrastRatio(outlineColor, background);
+    const style = window.getComputedStyle(activeElement);
+    const outlineWidth = parseFloat(style.outlineWidth || '0');
+    if (outlineWidth <= 0 || style.outlineStyle === 'none') return violations;
 
-      if (ratio < 3) {
-        violations.push(createViolation(focusIndicatorContrastRule, {
-          element,
-          message: `Indicador de foco com contraste estimado de ${ratio.toFixed(2)}:1.`,
-          suggestion: 'Aumente o contraste do outline, box-shadow ou anel de foco.',
-          remediationAdvice: `button:focus-visible { outline: 3px solid #005fcc; }`,
-          customIdPrefix: 'focus-contrast',
-        }));
-      }
-    });
+    const outlineColor = rgbToHex(style.outlineColor || '#000000');
+    const background = rgbToHex(getEffectiveBackgroundColor(activeElement));
+    const ratio = getContrastRatio(outlineColor, background);
+
+    if (ratio < 3) {
+      violations.push(createViolation(focusIndicatorContrastRule, {
+        element: activeElement,
+        message: `Indicador de foco com contraste estimado de ${ratio.toFixed(2)}:1.`,
+        suggestion: 'Aumente o contraste do outline, box-shadow ou anel de foco.',
+        remediationAdvice: `button:focus-visible { outline: 3px solid #005fcc; }`,
+        customIdPrefix: 'focus-contrast',
+      }));
+    }
 
     return violations;
   },
@@ -530,11 +604,12 @@ export const resizedTextRule: Rule = {
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     resizedTextRule,
-    Array.from(document.querySelectorAll<HTMLElement>('*'))
+    Array.from(document.querySelectorAll<HTMLElement>('p, li, td, th, label, button, a, div, section, article'))
       .filter((element) => {
         if (!isElementVisible(element) || getVisibleText(element).length < 40) return false;
         const style = window.getComputedStyle(element);
-        return style.overflow === 'hidden' && parseFloat(style.height || '0') > 0;
+        const fixedHeight = parseFloat(style.height || '0') > 0 && style.height !== 'auto';
+        return fixedHeight && style.overflow === 'hidden' && style.whiteSpace !== 'normal';
       }),
     () => 'Conteúdo textual com altura fixa e overflow oculto pode falhar ao ampliar o texto.',
     'Permita crescimento vertical do conteúdo ao ampliar o texto.',
@@ -558,9 +633,9 @@ export const pagePartLanguageRule: Rule = {
       Array.from(document.querySelectorAll<HTMLElement>('blockquote, q, span, em, strong, p, li'))
         .filter((element) => {
           const text = getVisibleText(element).trim();
-          if (text.length < 15) return false;
-          const hasForeignHint = /\b(login|download|home|privacy policy|terms|checkout|leaderboard|start|finish)\b/i.test(text);
-          return hasForeignHint && getElementLanguage(element) === pageLang;
+          if (element.closest('[lang]') && getElementLanguage(element) !== pageLang) return false;
+          if (!looksLikeForeignLanguageBlock(text)) return false;
+          return getElementLanguage(element) === pageLang && text.split(/\s+/).length >= 5;
         }),
       (element) => `Trecho com possível conteúdo em idioma diferente sem marcação de lang: "${getVisibleText(element).slice(0, 80)}".`,
       'Marque trechos em outro idioma com o atributo lang correspondente.',
@@ -591,7 +666,8 @@ export const readingOrderRule: Rule = {
       }));
     });
 
-    document.querySelectorAll<HTMLElement>('*').forEach((element) => {
+    document.querySelectorAll<HTMLElement>(interactiveSelector).forEach((element) => {
+      if (!isElementVisible(element)) return;
       const style = window.getComputedStyle(element);
       if ((style.display.includes('flex') || style.display.includes('grid')) && style.order !== '0') {
         violations.push(createViolation(readingOrderRule, {
@@ -643,7 +719,13 @@ export const statusMessageRule: Rule = {
   check: async () => createWarnings(
     statusMessageRule,
     Array.from(document.querySelectorAll<HTMLElement>('.status, .toast, .snackbar, .alert, .success, .error-message, [data-status], [data-toast]'))
-      .filter((element) => !element.hasAttribute('role') && !element.hasAttribute('aria-live')),
+      .filter((element) => {
+        if (!isElementVisible(element)) return false;
+        if (element.hasAttribute('role') || element.hasAttribute('aria-live')) return false;
+        const text = getVisibleText(element).trim().toLowerCase();
+        if (text.length < 4 || text.length > 160) return false;
+        return /(salvo|enviado|atualizado|erro|falha|sucesso|carregado|copiado|removido|adicionado)/.test(text);
+      }),
     () => 'Possível mensagem de status sem role ou aria-live.',
     'Adicione role="status", role="alert" ou aria-live adequado ao conteúdo dinâmico.',
     `<div role="status" aria-live="polite">Salvo com sucesso</div>`,
@@ -805,12 +887,16 @@ export const flashingContentRule: Rule = {
   category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     flashingContentRule,
-    Array.from(document.querySelectorAll<HTMLElement>('*'))
+    Array.from(document.querySelectorAll<HTMLElement>('video, canvas, svg, [role="img"], [class*="animation" i], [class*="blink" i]'))
       .filter((element) => {
+        if (!isElementVisible(element)) return false;
         const style = window.getComputedStyle(element);
+        if (style.animationName === 'none') return false;
         const duration = parseFloat(style.animationDuration || '0');
         const infinite = style.animationIterationCount === 'infinite';
-        return duration > 0 && duration < 0.34 && infinite;
+        const area = element.getBoundingClientRect().width * element.getBoundingClientRect().height;
+        const nearbyControls = getVisibleText((element.parentElement as HTMLElement | null) || element).toLowerCase();
+        return duration > 0.08 && duration < 0.24 && infinite && area >= 4900 && !/pausar|parar animação|reduzir movimento/.test(nearbyControls);
       }),
     () => 'Animação rápida e infinita detectada; valide risco de flashes intermitentes.',
     'Evite cintilação rápida ou reduza frequência/intensidade do efeito.',
@@ -832,18 +918,24 @@ export const adjustableTimeLimitRule: Rule = {
     const refreshMeta = document.querySelector<HTMLMetaElement>('meta[http-equiv="refresh"]');
 
     if (refreshMeta) {
+      const refreshContent = refreshMeta.getAttribute('content') || '';
+      const refreshSeconds = Number.parseInt(refreshContent.split(';')[0] || '', 10);
       violations.push(createViolation(adjustableTimeLimitRule, {
         element: refreshMeta as unknown as HTMLElement,
-        message: 'Atualização temporizada detectada sem mecanismo visível de ajuste ou extensão.',
+        message: Number.isFinite(refreshSeconds) && refreshSeconds > 0
+          ? `Atualização temporizada detectada em aproximadamente ${refreshSeconds} segundo(s), sem mecanismo visível de ajuste ou extensão.`
+          : 'Atualização temporizada detectada sem mecanismo visível de ajuste ou extensão.',
         suggestion: 'Ofereça extensão, pausa ou desativação do limite de tempo.',
         remediationAdvice: `Evite meta refresh ou forneça controle equivalente ao usuário.`,
         customIdPrefix: 'adjustable-time',
       }));
     }
 
-    document.querySelectorAll<HTMLElement>('p, span, strong, small, div, section').forEach((element) => {
+    document.querySelectorAll<HTMLElement>('[role="timer"], [aria-live], .countdown, .timer, .session-timeout, p, span, strong, small, div, section').forEach((element) => {
       const text = getVisibleText(element).toLowerCase();
-      if (/segundos restantes|tempo restante|sess[aã]o expira|expira em/.test(text) && !/estender|renovar|continuar sessão/.test(text)) {
+      const localContext = getVisibleText((element.parentElement as HTMLElement | null) || element).toLowerCase();
+      const hasControlNearby = /estender|renovar|continuar sessão|pausar|desativar temporizador/.test(localContext);
+      if (/segundos restantes|tempo restante|sess[aã]o expira|expira em/.test(text) && !hasControlNearby) {
         violations.push(createViolation(adjustableTimeLimitRule, {
           element,
           message: 'Contagem de tempo detectada sem mecanismo visível de extensão ou ajuste.',

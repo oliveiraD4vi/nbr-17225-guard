@@ -81,12 +81,14 @@ export const imageDecorativeRule: Rule = {
     const violations: Violation[] = [];
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
+      if (!isElementVisible(img)) return;
       const alt = img.getAttribute('alt');
       const role = img.getAttribute('role');
       const ariaHidden = img.getAttribute('aria-hidden');
       const className = img.className.toLowerCase();
+      const isSmallAsset = img.width <= 48 && img.height <= 48;
 
-      const looksDecorative = ['icon', 'decor', 'divider', 'spacer', 'background'].some((token) => className.includes(token));
+      const looksDecorative = isSmallAsset && ['icon', 'decor', 'divider', 'spacer', 'background'].some((token) => className.includes(token));
       if (looksDecorative && !(alt === '' || role === 'presentation' || role === 'none' || ariaHidden === 'true')) {
         violations.push(createViolation(imageDecorativeRule, {
           element: img,
@@ -114,15 +116,17 @@ export const complexImageDescriptionRule: Rule = {
     const violations: Violation[] = [];
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
+      if (!isElementVisible(img)) return;
       const alt = img.getAttribute('alt') || '';
       const className = img.className.toLowerCase();
       const src = img.src.toLowerCase();
+      const sufficientlyLarge = img.width >= 120 || img.height >= 120;
       const looksComplex = ['chart', 'graph', 'map', 'diagram', 'infographic'].some((token) =>
         className.includes(token) || src.includes(token) || alt.toLowerCase().includes(token)
       );
       const hasLongDescription = !!(img.getAttribute('longdesc') || img.getAttribute('aria-describedby'));
 
-      if (looksComplex && !hasLongDescription) {
+      if (looksComplex && sufficientlyLarge && !hasLongDescription) {
         violations.push(createViolation(complexImageDescriptionRule, {
           element: img,
           message: 'Possível imagem complexa sem descrição longa associada.',
@@ -149,8 +153,12 @@ export const imageOfTextRule: Rule = {
     const violations: Violation[] = [];
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
+      if (!isElementVisible(img)) return;
       const alt = (img.getAttribute('alt') || '').trim();
-      if (alt.length >= 20 && !img.closest('a, button')) {
+      const metadata = `${img.src} ${img.className} ${alt}`.toLowerCase();
+      const looksLikeTextAsset = /\b(text|texto|title|titulo|headline|heading|banner|cta|button)\b/.test(metadata);
+
+      if (looksLikeTextAsset && alt.length >= 12 && !img.closest('a, button')) {
         violations.push(createViolation(imageOfTextRule, {
           element: img,
           message: 'Imagem com texto alternativo extenso pode representar imagem de texto.',
