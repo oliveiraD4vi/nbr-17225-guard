@@ -1,0 +1,107 @@
+.popup-app {
+  max-width: 600px !important;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+}
+
+.popup-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  border-radius: .5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.popup-header .header-content h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.popup-header .header-content p {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.popup-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.popup-content .ant-spin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.empty-state button {
+  font-size: 16px;
+  padding: 8px 32px;
+  height: 40px;
+}
+
+.popup-footer {
+  background: white;
+  padding: 12px 16px !important;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.popup-footer button {
+  margin: 4px;
+}
+
+/* Tabs */
+.popup-content .ant-tabs {
+  background: white;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.popup-content .ant-tabs-tab {
+  font-weight: 500;
+}
+
+/* Scrollbar */
+.popup-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.popup-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.popup-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.popup-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+@media (max-width: 640px) {
+  .popup-app {
+    width: 100vw;
+    max-width: 100%;
+  }
+}
+
+.ant-spin-container {
+  max-width: 100%;
+}

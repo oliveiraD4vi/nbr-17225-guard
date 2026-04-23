@@ -1,0 +1,62 @@
+.vision-simulator {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.vision-simulator .ant-card-head {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-bottom: none;
+}
+
+.vision-simulator .ant-card-head-title {
+  color: white;
+  font-weight: 600;
+}
+
+.vision-simulator .ant-space {
+  width: 100%;
+}
+
+.vision-simulator label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #1f1f1f;
+  font-size: 14px;
+}
+
+.vision-simulator .ant-select {
+  width: 100%;
+}
+
+.vision-simulator .ant-slider {
+  margin: 12px 0;
+}
+
+.simulator-info {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 3px solid #667eea;
+}
+
+.simulator-info p {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.simulator-info p:first-child {
+  margin-top: 0;
+}
+
+.simulator-info p:last-child {
+  margin-bottom: 0;
+}
+
+.simulator-info strong {
+  color: #1f1f1f;
+  font-weight: 600;
+}

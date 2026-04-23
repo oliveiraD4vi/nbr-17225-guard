@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Guardião NBR 17225",
+  "version": "1.0.0",
+  "description": "Verificador profissional de acessibilidade web conforme ABNT NBR 17225:2025",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "downloads",
+    "scripting",
+    "windows"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content.js",
+        "utils.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "icons/icon.png",
+      "48": "icons/icon.png",
+      "128": "icons/icon.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-bootstrap.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon.png",
+    "48": "icons/icon.png",
+    "128": "icons/icon.png"
+  }
+}

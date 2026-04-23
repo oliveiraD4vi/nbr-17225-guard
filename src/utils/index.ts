@@ -1,0 +1,354 @@
+import type { Rule, SeverityLevel, Violation, WCAGLevel } from '@/types';
+
+/**
+ * Utilitarios gerais para a extensao
+ */
+
+export const VERIFIER_ID = 'NBR17225GUARD';
+export const VERIFIER_NAME = 'Guardião NBR 17225';
+
+/**
+ * Gera um ID unico para violacoes
+ */
+export function generateCustomId(prefix = ''): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const getRandomChar = () => chars.charAt(Math.floor(Math.random() * chars.length));
+
+  let result = '';
+  for (let i = 0; i < 24; i++) {
+    result += getRandomChar();
+  }
+
+  const formatted = `${result.slice(0, 4)}-${result.slice(4, 14)}-${result.slice(14, 24)}`;
+  return `${prefix || VERIFIER_ID.toLowerCase()}-${formatted}`;
+}
+
+/**
+ * Escapa caracteres HTML especiais
+ */
+export function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Obtem o seletor CSS de um elemento
+ */
+export function getElementSelector(element: HTMLElement): string {
+  if (element.id) return `#${element.id}`;
+
+  const names: string[] = [];
+  while (element.parentElement) {
+    if (element.id) {
+      names.unshift(`#${element.id}`);
+      break;
+    } else {
+      if (element === element.ownerDocument.documentElement) {
+        names.unshift(element.tagName.toLowerCase());
+      } else {
+        let c = 1;
+        let e: Element | null = element;
+        for (; e?.previousElementSibling; e = e.previousElementSibling, c++);
+        names.unshift(`${element.tagName.toLowerCase()}:nth-child(${c})`);
+      }
+      element = element.parentElement;
+    }
+  }
+  return names.join(' > ');
+}
+
+/**
+ * Aguarda um elemento estar disponivel no DOM
+ */
+export function waitForElement(selector: string, timeout = 5000): Promise<HTMLElement | null> {
+  return new Promise((resolve) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      resolve(element as HTMLElement);
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const element = document.querySelector(selector);
+      if (element) {
+        observer.disconnect();
+        resolve(element as HTMLElement);
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(null);
+    }, timeout);
+  });
+}
+
+/**
+ * Calcula a razao de contraste WCAG entre duas cores
+ */
+export function getContrastRatio(hex1: string, hex2: string): number {
+  const getLuminance = (hex: string) => {
+    const rgb = parseInt(hex.slice(1), 16);
+    const r = (rgb >> 16) & 255;
+    const g = (rgb >> 8) & 255;
+    const b = rgb & 255;
+
+    const [rs, gs, bs] = [r, g, b].map((x) => {
+      x = x / 255;
+      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    });
+
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+  };
+
+  const l1 = getLuminance(hex1);
+  const l2 = getLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * Obtem a cor de fundo efetiva de um elemento
+ */
+export function getEffectiveBackgroundColor(element: HTMLElement): string {
+  let el = element;
+  while (el) {
+    const bgColor = window.getComputedStyle(el).backgroundColor;
+    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+      return bgColor;
+    }
+    el = el.parentElement as HTMLElement;
+  }
+  return '#ffffff';
+}
+
+/**
+ * Converte RGB para HEX
+ */
+export function rgbToHex(rgb: string): string {
+  const match = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!match) return '#ffffff';
+
+  const r = parseInt(match[1]);
+  const g = parseInt(match[2]);
+  const b = parseInt(match[3]);
+
+  return '#' + [r, g, b].map((x) => {
+    const hex = x.toString(16);
+    return hex.length === 1 ? `0${hex}` : hex;
+  }).join('');
+}
+
+/**
+ * Verifica se um elemento esta visivel
+ */
+export function isElementVisible(element: HTMLElement): boolean {
+  if (!element) return false;
+
+  const style = window.getComputedStyle(element);
+  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+    return false;
+  }
+
+  const rect = element.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0;
+}
+
+/**
+ * Obtem o texto visivel de um elemento
+ */
+export function getVisibleText(element: HTMLElement): string {
+  if (!element) return '';
+
+  const style = window.getComputedStyle(element);
+  if (style.display === 'none') return '';
+
+  let text = '';
+  for (const node of element.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent || '';
+    } else if (node.nodeType === Node.ELEMENT_NODE && node instanceof HTMLElement) {
+      text += getVisibleText(node);
+    }
+  }
+
+  return text.trim();
+}
+
+export function getAccessibleName(element: HTMLElement): string {
+  const ariaLabel = element.getAttribute('aria-label');
+  if (ariaLabel?.trim()) return ariaLabel.trim();
+
+  const labelledBy = element.getAttribute('aria-labelledby');
+  if (labelledBy) {
+    const text = labelledBy
+      .split(/\s+/)
+      .map(id => document.getElementById(id)?.textContent?.trim() || '')
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    if (text) return text;
+  }
+
+  if (element instanceof HTMLInputElement) {
+    if (element.labels?.length) {
+      const text = Array.from(element.labels)
+        .map(label => getVisibleText(label))
+        .join(' ')
+        .trim();
+      if (text) return text;
+    }
+
+    if (['button', 'submit', 'reset'].includes(element.type) && element.value?.trim()) {
+      return element.value.trim();
+    }
+
+    if (element.placeholder?.trim()) return element.placeholder.trim();
+  }
+
+  if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
+    if (element.labels?.length) {
+      const text = Array.from(element.labels)
+        .map(label => getVisibleText(label))
+        .join(' ')
+        .trim();
+      if (text) return text;
+    }
+  }
+
+  const alt = element.getAttribute('alt');
+  if (alt?.trim()) return alt.trim();
+
+  const title = element.getAttribute('title');
+  if (title?.trim()) return title.trim();
+
+  return getVisibleText(element);
+}
+
+export function getAssociatedLabelText(
+  element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+): string {
+  if (element.labels?.length) {
+    return Array.from(element.labels)
+      .map(label => getVisibleText(label))
+      .join(' ')
+      .trim();
+  }
+
+  const ariaLabel = element.getAttribute('aria-label');
+  if (ariaLabel?.trim()) return ariaLabel.trim();
+
+  const labelledBy = element.getAttribute('aria-labelledby');
+  if (labelledBy) {
+    return labelledBy
+      .split(/\s+/)
+      .map(id => document.getElementById(id)?.textContent?.trim() || '')
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+  }
+
+  return '';
+}
+
+export function createViolation(
+  rule: Pick<Rule, 'id' | 'name' | 'nbrReference' | 'severity' | 'wcagLevel' | 'description'>,
+  options: {
+    element?: HTMLElement;
+    message: string;
+    suggestion: string;
+    remediationAdvice: string;
+    snippet?: string;
+    description?: string;
+    severity?: SeverityLevel;
+    wcagLevel?: WCAGLevel;
+    customIdPrefix?: string;
+  }
+): Violation {
+  const element = options.element;
+
+  return {
+    id: generateCustomId(),
+    ruleId: rule.id,
+    ruleName: rule.name,
+    nbrReference: rule.nbrReference,
+    description: options.description || rule.description,
+    severity: options.severity || rule.severity,
+    wcagLevel: options.wcagLevel || rule.wcagLevel,
+    message: options.message,
+    snippet: options.snippet || (element?.outerHTML.substring(0, 200) || '<document>'),
+    suggestion: options.suggestion,
+    remediationAdvice: options.remediationAdvice,
+    elementSelector: element ? getElementSelector(element) : undefined,
+    customId: generateCustomId(options.customIdPrefix || rule.id),
+  };
+}
+
+export function getFocusableElements(root: ParentNode = document): HTMLElement[] {
+  const selector = [
+    'a[href]',
+    'button',
+    'input:not([type="hidden"])',
+    'select',
+    'textarea',
+    'summary',
+    'iframe',
+    '[tabindex]',
+    '[contenteditable="true"]',
+    '[role="button"]',
+    '[role="link"]',
+    '[role="checkbox"]',
+    '[role="radio"]',
+    '[role="switch"]',
+    '[role="tab"]',
+  ].join(', ');
+
+  return Array.from(root.querySelectorAll<HTMLElement>(selector)).filter((element) => {
+    if (!isElementVisible(element)) return false;
+    const tabIndex = element.getAttribute('tabindex');
+    return tabIndex === null || Number(tabIndex) >= 0;
+  });
+}
+
+export function isElementFullyInViewport(element: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  return rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= window.innerHeight &&
+    rect.right <= window.innerWidth;
+}
+
+export function isElementPartiallyInViewport(element: HTMLElement): boolean {
+  const rect = element.getBoundingClientRect();
+  return rect.bottom > 0 &&
+    rect.right > 0 &&
+    rect.top < window.innerHeight &&
+    rect.left < window.innerWidth;
+}
+
+export function getElementLanguage(element: HTMLElement): string {
+  return element.getAttribute('lang') || element.closest<HTMLElement>('[lang]')?.getAttribute('lang') || '';
+}
+
+export function getAssociatedDescriptionText(element: HTMLElement): string {
+  const describedBy = element.getAttribute('aria-describedby');
+  if (!describedBy) return '';
+
+  return describedBy
+    .split(/\s+/)
+    .map(id => document.getElementById(id)?.textContent?.trim() || '')
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+}

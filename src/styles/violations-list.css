@@ -1,0 +1,165 @@
+.violations-list {
+  padding: 8px 0;
+}
+
+.violation-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.violation-rule-name {
+  font-weight: 600;
+  color: #1f1f1f;
+  flex: 1;
+}
+
+.violation-nbr-ref {
+  font-size: 12px;
+  color: #999;
+  margin-left: auto;
+}
+
+.violation-details {
+  padding: 12px 0;
+}
+
+.violation-description {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.violation-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.violation-item-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+}
+
+.violation-item-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.violation-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.violation-item-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.violation-item-message {
+  flex: 1;
+  color: #1f1f1f;
+  font-weight: 500;
+}
+
+.violation-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.violation-snippet {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 3px solid #667eea;
+}
+
+.violation-snippet strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.violation-snippet pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 12px;
+}
+
+.violation-snippet code {
+  color: #d63384;
+}
+
+.violation-suggestion {
+  padding: 12px;
+  background: #fff7e6;
+  border-radius: 4px;
+  border-left: 3px solid #faad14;
+}
+
+.violation-suggestion strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #ad6800;
+}
+
+.violation-suggestion p {
+  margin: 0;
+  font-size: 13px;
+  color: #ad6800;
+}
+
+.violation-remediation {
+  padding: 12px;
+  background: #e6f7ff;
+  border-radius: 4px;
+  border-left: 3px solid #1890ff;
+}
+
+.violation-remediation strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #0050b3;
+}
+
+.violation-remediation pre {
+  margin: 0;
+  overflow-x: auto;
+  font-size: 12px;
+}
+
+.violation-remediation code {
+  color: #0050b3;
+}
+
+.violation-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e8e8e8;
+}
+
+.violation-wcag-level {
+  font-size: 12px;
+  color: #666;
+  margin-left: auto;
+}

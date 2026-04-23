@@ -1,0 +1,73 @@
+.violations-summary {
+  padding: 16px 0;
+}
+
+.violations-summary-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.summary-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card h2 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.summary-url {
+  font-size: 12px;
+  color: #666;
+  word-break: break-all;
+  margin: 8px 0;
+}
+
+.summary-timestamp {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+.statistics-row {
+  margin: 24px 0;
+}
+
+.statistics-row .ant-statistic {
+  text-align: center;
+}
+
+.statistics-row .ant-statistic-title {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.statistics-row .ant-statistic-content {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.success-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background: #f6ffed;
+  border-radius: 8px;
+  border: 1px solid #b7eb8f;
+}
+
+.success-message p {
+  margin: 16px 0 0 0;
+  font-size: 16px;
+  color: #52c41a;
+  font-weight: 500;
+}
