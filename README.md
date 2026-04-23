@@ -78,8 +78,6 @@ Itens adicionais fora do escopo v1:
 
 Esses itens devem ser tratados como contribuições futuras, não como lacunas da implementação da v1.
 
-Resultado esperado:
-
 ## Instalação
 
 Pré-requisitos:

@@ -134,8 +134,12 @@ if (contentScope.__nbrGuardContentLoaded) {
     });
   }
 
-  function highlightViolation(violation: Violation) {
+  function highlightViolation(violation: Violation) {    
     clearHighlights();
+    
+    const existingHighlight = document.getElementById(`nbr-highlight-${violation.customId}`);
+    if (existingHighlight) return;
+
     renderViolationHighlight(violation, true);
 
     if (!violation.elementSelector) return;
