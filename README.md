@@ -30,11 +30,6 @@ O estado atual desse catálogo v1 é:
 | Semi-automatizáveis | 53 |
 | Não automatizáveis | 1 |
 
-As duas lacunas anteriormente encontradas no mapeamento foram corrigidas:
-
-- `5.9.3 Rótulo de campo associado`
-- `5.12.9 Uso de texto especial`
-
 Importante:
 
 - `pnpm verify:rules` valida o motor contra o catálogo v1 derivado desse `.xlsx`;
@@ -63,15 +58,14 @@ O script verifica:
 - se não existem referências duplicadas;
 - se não existem regras extras fora do catálogo documentado.
 
-## Escopo Público x Escopo V1
+## Escopo da ABNT NBR 17225 x Escopo V1
 
-O catálogo local de 94 itens foi confrontado com fontes públicas da NBR 17225. O resultado é:
+Importante notar:
 
-- o repositório está consistente com o escopo v1 definido no `xlsx`;
-- a cópia pública da norma e checklists públicos mostram itens adicionais fora do escopo v1 atual;
-- esses itens não serão adicionados agora, mas devem ficar explícitos como backlog para contribuições futuras ao repositório público.
+- a norma original possui itens adicionais fora do escopo v1 atual;
+- esses itens não serão adicionados agora, mas estão aqui explícitos como backlog para contribuições futuras.
 
-Itens públicos adicionais fora do escopo v1:
+Itens adicionais fora do escopo v1:
 
 - `5.2.6`;
 - `5.4.3`;
@@ -85,10 +79,6 @@ Itens públicos adicionais fora do escopo v1:
 Esses itens devem ser tratados como contribuições futuras, não como lacunas da implementação da v1.
 
 Resultado esperado:
-
-```text
-Rule verification passed: 94 documented requirements mapped to 94 rule implementation(s).
-```
 
 ## Instalação
 
@@ -194,6 +184,6 @@ pnpm build
 
 ## Status
 
-Versão: 1.0.0  
+Versão: 0.9.1
 Última atualização: abril de 2026  
 Status: em desenvolvimento ativo
