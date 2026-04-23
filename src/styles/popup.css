@@ -195,6 +195,77 @@
 .history-tab {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.history-comparison-card {
+  padding: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.history-comparison-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-comparison-header strong {
+  color: #0f172a;
+}
+
+.history-comparison-header p {
+  margin: 4px 0 0;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.history-comparison-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.history-comparison-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-comparison-field span {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.history-comparison-body {
+  margin-top: 12px;
+}
+
+.history-comparison-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.history-comparison-stats .ant-statistic {
+  padding: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.history-comparison-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  color: #475569;
+  font-size: 12px;
 }
 
 .history-item {
@@ -258,6 +329,13 @@
 
   .footer-action-span-3 {
     grid-column: 1 / -1;
+  }
+
+  .history-comparison-header,
+  .history-comparison-selectors,
+  .history-comparison-stats {
+    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
 

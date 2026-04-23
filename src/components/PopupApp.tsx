@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert, Space } from 'antd';
+import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert, Space, Select, Statistic } from 'antd';
 import {
   PlayCircleOutlined,
   ReloadOutlined,
@@ -13,6 +13,9 @@ import {
   FileSearchOutlined,
   ArrowLeftOutlined,
   InfoCircleOutlined,
+  RiseOutlined,
+  FallOutlined,
+  MinusOutlined,
 } from '@ant-design/icons';
 import type { AuditHistoryEntry, AuditResult, HumanReviewStatus, Violation, VisionSimulationFilter } from '@/types';
 import {
@@ -24,6 +27,7 @@ import {
   saveAuditResult,
   updateStoredAuditResult,
 } from '@/utils/audit-engine';
+import { compareAuditResults } from '@/utils/audit-comparison';
 import { ViolationsSummary } from './ViolationsSummary';
 import { ViolationsList } from './ViolationsList';
 import { VisionSimulator } from './VisionSimulator';
@@ -62,6 +66,8 @@ export const PopupApp: React.FC = () => {
   const [activeTabKey, setActiveTabKey] = useState('summary');
   const [priorityIndex, setPriorityIndex] = useState(0);
   const [showAboutView, setShowAboutView] = useState(false);
+  const [comparisonBaselineId, setComparisonBaselineId] = useState<string | undefined>(undefined);
+  const [comparisonTargetId, setComparisonTargetId] = useState<string | undefined>(undefined);
 
   const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
     setAuditHistory((currentHistory) =>
@@ -81,6 +87,8 @@ export const PopupApp: React.FC = () => {
       setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null);
       setShowAboutView(false);
       setPriorityIndex(0);
+      setComparisonTargetId(history[0]?.id);
+      setComparisonBaselineId(history[1]?.id || history[0]?.id);
     } catch (error) {
       console.error('Erro ao carregar resultado da aba ativa:', error);
       setAuditResult(null);
@@ -88,6 +96,8 @@ export const PopupApp: React.FC = () => {
       setSelectedHistoryId(null);
       setShowAboutView(false);
       setPriorityIndex(0);
+      setComparisonBaselineId(undefined);
+      setComparisonTargetId(undefined);
     }
   }, []);
 
@@ -147,6 +157,8 @@ export const PopupApp: React.FC = () => {
       setSelectedHistoryId(null);
       setShowAboutView(false);
       setPriorityIndex(0);
+      setComparisonTargetId(history[0]?.id);
+      setComparisonBaselineId(history[1]?.id || history[0]?.id);
       message.success(`Auditoria concluída: ${result.totalViolations} item(ns) encontrado(s).`);
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
@@ -165,6 +177,8 @@ export const PopupApp: React.FC = () => {
       setSelectedHistoryId(auditHistory[0]?.id || null);
       setShowAboutView(false);
       setPriorityIndex(0);
+      setComparisonTargetId(auditHistory[0]?.id);
+      setComparisonBaselineId(auditHistory[1]?.id || auditHistory[0]?.id);
       message.success('Auditoria limpa para esta aba');
     } catch (error) {
       console.error('Erro ao resetar:', error);
@@ -264,6 +278,43 @@ export const PopupApp: React.FC = () => {
   }, [auditHistory, auditResult, selectedHistoryId]);
 
   const isHistoricalView = !!selectedHistoryId;
+
+  const comparisonEntries = useMemo(() => {
+    const byId = new Map<string, AuditHistoryEntry>();
+    auditHistory.forEach((entry) => {
+      byId.set(entry.id, entry);
+    });
+    if (auditResult?.id) {
+      byId.set(auditResult.id, auditResult as AuditHistoryEntry);
+    }
+    return Array.from(byId.values()).sort((left, right) => right.timestamp - left.timestamp);
+  }, [auditHistory, auditResult]);
+
+  const comparisonSummary = useMemo(() => {
+    if (!comparisonBaselineId || !comparisonTargetId || comparisonBaselineId === comparisonTargetId) {
+      return null;
+    }
+
+    const baseline = comparisonEntries.find((entry) => entry.id === comparisonBaselineId);
+    const target = comparisonEntries.find((entry) => entry.id === comparisonTargetId);
+    if (!baseline || !target) return null;
+
+    return compareAuditResults(baseline, target);
+  }, [comparisonBaselineId, comparisonEntries, comparisonTargetId]);
+
+  const comparisonTrend = useMemo(() => {
+    if (!comparisonSummary) return null;
+
+    const delta = comparisonSummary.targetOpenCount - comparisonSummary.baselineOpenCount;
+    if (delta < 0) {
+      return { icon: <RiseOutlined />, label: 'Melhoria', color: 'green' as const };
+    }
+    if (delta > 0) {
+      return { icon: <FallOutlined />, label: 'Regressão', color: 'red' as const };
+    }
+
+    return { icon: <MinusOutlined />, label: 'Estável', color: 'default' as const };
+  }, [comparisonSummary]);
 
   const priorityViolations = useMemo(() => (
     viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []
@@ -485,6 +536,69 @@ export const PopupApp: React.FC = () => {
                     label: `Histórico (${auditHistory.length})`,
                     children: (
                       <div className="history-tab">
+                        {comparisonEntries.length >= 2 && (
+                          <div className="history-comparison-card">
+                            <div className="history-comparison-header">
+                              <div>
+                                <strong>Comparar auditorias</strong>
+                                <p>Compare a evolução desta URL entre duas execuções salvas.</p>
+                              </div>
+                              {comparisonTrend && (
+                                <Tag color={comparisonTrend.color}>
+                                  {comparisonTrend.icon} {comparisonTrend.label}
+                                </Tag>
+                              )}
+                            </div>
+
+                            <div className="history-comparison-selectors">
+                              <div className="history-comparison-field">
+                                <span>Base</span>
+                                <Select
+                                  value={comparisonBaselineId}
+                                  onChange={setComparisonBaselineId}
+                                  options={comparisonEntries.map((entry) => ({
+                                    value: entry.id,
+                                    label: `${new Date(entry.timestamp).toLocaleString('pt-BR')} • ${entry.totalViolations} item(ns)`,
+                                  }))}
+                                />
+                              </div>
+                              <div className="history-comparison-field">
+                                <span>Comparar com</span>
+                                <Select
+                                  value={comparisonTargetId}
+                                  onChange={setComparisonTargetId}
+                                  options={comparisonEntries.map((entry) => ({
+                                    value: entry.id,
+                                    label: `${new Date(entry.timestamp).toLocaleString('pt-BR')} • ${entry.totalViolations} item(ns)`,
+                                  }))}
+                                />
+                              </div>
+                            </div>
+
+                            {comparisonSummary ? (
+                              <div className="history-comparison-body">
+                                <div className="history-comparison-stats">
+                                  <Statistic title="Novos problemas" value={comparisonSummary.newViolations.length} />
+                                  <Statistic title="Problemas resolvidos" value={comparisonSummary.resolvedViolations.length} />
+                                  <Statistic title="Problemas persistentes" value={comparisonSummary.persistentViolations.length} />
+                                </div>
+
+                                <div className="history-comparison-meta">
+                                  <span>Notas: {comparisonSummary.baselineNoteCount} {'->'} {comparisonSummary.targetNoteCount}</span>
+                                  <span>Confirmações humanas: {comparisonSummary.baselineConfirmedReviews} {'->'} {comparisonSummary.targetConfirmedReviews}</span>
+                                  <span>Itens visíveis: {comparisonSummary.baselineOpenCount} {'->'} {comparisonSummary.targetOpenCount}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <Alert
+                                type="info"
+                                showIcon
+                                message="Selecione duas auditorias diferentes para comparar"
+                              />
+                            )}
+                          </div>
+                        )}
+
                         {auditHistory.length === 0 ? (
                           <Empty description="Nenhuma auditoria anterior encontrada para esta URL" />
                         ) : (
@@ -528,6 +642,7 @@ export const PopupApp: React.FC = () => {
                                         <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
                                         <span>{entry.totalViolations} item(ns)</span>
                                         <span>{entry.humanReviewItems} dependem de confirmação humana</span>
+                                        <span>{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} com anotações</span>
                                       </div>
                                     }
                                   />
