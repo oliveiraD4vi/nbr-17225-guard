@@ -339,6 +339,7 @@ export function createViolation(
     wcagLevel: options.wcagLevel || rule.wcagLevel,
     automationCategory: rule.category,
     requiresHumanReview: rule.category !== 'Totalmente Automatizável',
+    humanReviewStatus: rule.category !== 'Totalmente Automatizável' ? 'pending' : 'not_applicable',
     message: options.message,
     snippet: options.snippet || (element?.outerHTML.substring(0, 200) || '<document>'),
     suggestion: options.suggestion,

@@ -31,11 +31,18 @@ function getUrlStorageKey(url: string): string {
 function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null {
   if (!result) return null;
 
-  const humanReviewItems = result.violations.filter((violation) => violation.requiresHumanReview).length;
+  const violations = result.violations.map((violation) => ({
+    ...violation,
+    humanReviewStatus: violation.humanReviewStatus ?? (violation.requiresHumanReview ? 'pending' : 'not_applicable'),
+  }));
+  const humanReviewItems = violations.filter((violation) => violation.requiresHumanReview).length;
   const automatedFindings = result.violations.length - humanReviewItems;
+  const auditId = result.id || `${getUrlStorageKey(result.url)}|${result.timestamp}`;
 
   return {
     ...result,
+    id: auditId,
+    violations,
     humanReviewItems: result.humanReviewItems ?? humanReviewItems,
     automatedFindings: result.automatedFindings ?? automatedFindings,
     pageTitle: result.pageTitle ?? '',
@@ -140,13 +147,11 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     const urlKey = getUrlStorageKey(result.url);
     const history = (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {};
     const currentHistory = history[urlKey] ?? [];
-    const historyEntry: AuditHistoryEntry = {
-      ...normalizeAuditResult(result)!,
-      id: `${urlKey}|${result.timestamp}`,
-    };
+    const normalizedResult = normalizeAuditResult(result)!;
+    const historyEntry: AuditHistoryEntry = normalizedResult as AuditHistoryEntry;
     const auditResultsByTab = {
       ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
-      [getTabStorageKey(resolvedTabId)]: normalizeAuditResult(result)!,
+      [getTabStorageKey(resolvedTabId)]: normalizedResult,
     };
     const auditHistoryByUrl = {
       ...history,
@@ -158,7 +163,7 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     };
 
     await chrome.storage.local.set({
-      auditResult: normalizeAuditResult(result)!,
+      auditResult: normalizedResult,
       auditResultsByTab,
       auditHistoryByUrl,
     });
@@ -199,5 +204,41 @@ export async function getAuditHistoryForUrl(url?: string): Promise<AuditHistoryE
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao recuperar histórico:', error);
     return [];
+  }
+}
+
+export async function updateStoredAuditResult(updatedResult: AuditResult, tabId?: number): Promise<void> {
+  try {
+    const normalizedResult = normalizeAuditResult(updatedResult);
+    if (!normalizedResult) return;
+
+    const resolvedTabId = tabId ?? (await getActiveTab()).id;
+    const data = await chrome.storage.local.get(['auditResult', 'auditResultsByTab', 'auditHistoryByUrl']);
+    const storedAuditResult = normalizeAuditResult(data.auditResult as AuditResult | null);
+    const auditResultsByTab = {
+      ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
+    };
+    const currentTabResult = auditResultsByTab[getTabStorageKey(resolvedTabId)];
+
+    if (currentTabResult?.id === normalizedResult.id) {
+      auditResultsByTab[getTabStorageKey(resolvedTabId)] = normalizedResult;
+    }
+
+    const auditHistoryByUrl = {
+      ...((data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}),
+    };
+    const urlKey = getUrlStorageKey(normalizedResult.url);
+    const currentHistory = auditHistoryByUrl[urlKey] ?? [];
+    auditHistoryByUrl[urlKey] = currentHistory.map((entry) =>
+      entry.id === normalizedResult.id ? normalizedResult as AuditHistoryEntry : entry
+    );
+
+    await chrome.storage.local.set({
+      auditResult: storedAuditResult?.id === normalizedResult.id ? normalizedResult : storedAuditResult,
+      auditResultsByTab,
+      auditHistoryByUrl,
+    });
+  } catch (error) {
+    console.error('[Guardião NBR 17225] Erro ao atualizar auditoria persistida:', error);
   }
 }

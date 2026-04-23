@@ -1,12 +1,13 @@
 import React from 'react';
-import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs } from 'antd';
+import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs, Checkbox } from 'antd';
 import { CopyOutlined, LinkOutlined, InfoCircleOutlined, PushpinFilled, SearchOutlined } from '@ant-design/icons';
-import type { Violation } from '@/types';
+import type { HumanReviewStatus, Violation } from '@/types';
 import '../styles/violations-list.css';
 
 interface ViolationsListProps {
   violations: Violation[];
   onSelectViolation?: (violation: Violation) => void;
+  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void;
 }
 
 interface ViolationGroup {
@@ -29,7 +30,14 @@ function getSeverityLabel(severity: string): string {
 }
 
 function getReviewLabel(violation: Violation): string {
-  return violation.requiresHumanReview ? 'Precisa de confirmação humana' : 'Detecção automática';
+  if (!violation.requiresHumanReview) return 'Detecção automática';
+  if (violation.humanReviewStatus === 'confirmed') return 'Confirmado e precisa de correção';
+  if (violation.humanReviewStatus === 'dismissed') return 'Descartado na revisão humana';
+  return 'Precisa de confirmação humana';
+}
+
+function isVisibleInMainLists(violation: Violation): boolean {
+  return !(violation.requiresHumanReview && violation.humanReviewStatus === 'dismissed');
 }
 
 function getViolationSignature(violation: Violation): string {
@@ -81,7 +89,8 @@ function getElementTitle(violation: Violation): string {
 
 function renderViolationGroups(
   violations: Violation[],
-  onSelectViolation?: (violation: Violation) => void
+  onSelectViolation?: (violation: Violation) => void,
+  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void
 ): React.ReactNode {
   if (violations.length === 0) {
     return <Empty description="Nenhum item nesta categoria" />;
@@ -128,7 +137,7 @@ function renderViolationGroups(
               <span>{group.topIssueCount} ponto(s) prioritário(s)</span>
             </div>
             <div className="violation-items">
-              {topIssues.map((violation, index) => renderViolationCard(violation, index, onSelectViolation, true))}
+              {topIssues.map((violation, index) => renderViolationCard(violation, index, onSelectViolation, onHumanReviewStatusChange, true))}
             </div>
           </div>
 
@@ -140,7 +149,7 @@ function renderViolationGroups(
               </div>
               <div className="violation-items">
                 {remainingIssues.map((violation, index) =>
-                  renderViolationCard(violation, topIssues.length + index, onSelectViolation, false)
+                  renderViolationCard(violation, topIssues.length + index, onSelectViolation, onHumanReviewStatusChange, false)
                 )}
               </div>
             </div>
@@ -157,6 +166,7 @@ function renderViolationCard(
   violation: Violation,
   index: number,
   onSelectViolation?: (violation: Violation) => void,
+  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
   pinned = false
 ): React.ReactNode {
   return (
@@ -181,6 +191,31 @@ function renderViolationCard(
           <div className="violation-human-review-card">
             <strong>Confirmação necessária</strong>
             <p>Eu acho que pode haver um problema aqui, mas preciso que você confirme manualmente no contexto real da página.</p>
+            <Tag color={
+              violation.humanReviewStatus === 'confirmed'
+                ? 'red'
+                : violation.humanReviewStatus === 'dismissed'
+                  ? 'default'
+                  : 'gold'
+            }>
+              {getReviewLabel(violation)}
+            </Tag>
+            <div className="violation-human-review-controls">
+              <Checkbox
+                checked={violation.humanReviewStatus === 'confirmed'}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => onHumanReviewStatusChange?.(violation, event.target.checked ? 'confirmed' : 'pending')}
+              >
+                É um problema e precisa de correção
+              </Checkbox>
+              <Checkbox
+                checked={violation.humanReviewStatus === 'dismissed'}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => onHumanReviewStatusChange?.(violation, event.target.checked ? 'dismissed' : 'pending')}
+              >
+                Não é um problema neste contexto
+              </Checkbox>
+            </div>
           </div>
         )}
 
@@ -263,14 +298,16 @@ function renderViolationCard(
 export const ViolationsList: React.FC<ViolationsListProps> = ({
   violations,
   onSelectViolation,
+  onHumanReviewStatusChange,
 }) => {
   if (!violations || violations.length === 0) {
     return <Empty description="Nenhuma violação encontrada" />;
   }
 
   const sortedViolations = sortViolations(violations);
-  const requirementViolations = sortedViolations.filter((violation) => violation.severity === 'error');
-  const recommendationViolations = sortedViolations.filter((violation) => violation.severity !== 'error');
+  const visibleViolations = sortedViolations.filter(isVisibleInMainLists);
+  const requirementViolations = visibleViolations.filter((violation) => violation.severity === 'error');
+  const recommendationViolations = visibleViolations.filter((violation) => violation.severity !== 'error');
   const reviewViolations = sortedViolations.filter((violation) => violation.requiresHumanReview);
 
   return (
@@ -280,23 +317,23 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
         items={[
           {
             key: 'all',
-            label: `Todos (${sortedViolations.length})`,
-            children: renderViolationGroups(sortedViolations, onSelectViolation),
+            label: `Todos (${visibleViolations.length})`,
+            children: renderViolationGroups(visibleViolations, onSelectViolation, onHumanReviewStatusChange),
           },
           {
             key: 'requirements',
             label: `Requisitos (${requirementViolations.length})`,
-            children: renderViolationGroups(requirementViolations, onSelectViolation),
+            children: renderViolationGroups(requirementViolations, onSelectViolation, onHumanReviewStatusChange),
           },
           {
             key: 'recommendations',
             label: `Recomendações (${recommendationViolations.length})`,
-            children: renderViolationGroups(recommendationViolations, onSelectViolation),
+            children: renderViolationGroups(recommendationViolations, onSelectViolation, onHumanReviewStatusChange),
           },
           {
             key: 'review',
             label: `Verificação humana (${reviewViolations.length})`,
-            children: renderViolationGroups(reviewViolations, onSelectViolation),
+            children: renderViolationGroups(reviewViolations, onSelectViolation, onHumanReviewStatusChange),
           },
         ]}
       />

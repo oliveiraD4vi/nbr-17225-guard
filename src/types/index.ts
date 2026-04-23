@@ -5,6 +5,7 @@
 export type SeverityLevel = 'error' | 'warning';
 export type WCAGLevel = 'A' | 'AA' | 'AAA';
 export type AutomationCategory = 'Totalmente Automatizável' | 'Semi-Automatizável' | 'Não Automatizável';
+export type HumanReviewStatus = 'not_applicable' | 'pending' | 'confirmed' | 'dismissed';
 
 export interface Rule {
   id: string;
@@ -27,6 +28,7 @@ export interface Violation {
   wcagLevel: WCAGLevel;
   automationCategory: AutomationCategory;
   requiresHumanReview: boolean;
+  humanReviewStatus: HumanReviewStatus;
   message: string;
   snippet: string;
   suggestion: string;
@@ -40,6 +42,7 @@ export interface Violation {
 }
 
 export interface AuditResult {
+  id?: string;
   timestamp: number;
   url: string;
   pageTitle?: string;

@@ -14,7 +14,7 @@ import {
   ArrowLeftOutlined,
   InfoCircleOutlined,
 } from '@ant-design/icons';
-import type { AuditHistoryEntry, AuditResult, Violation, VisionSimulationFilter } from '@/types';
+import type { AuditHistoryEntry, AuditResult, HumanReviewStatus, Violation, VisionSimulationFilter } from '@/types';
 import {
   getActiveTab,
   getAuditHistoryForUrl,
@@ -22,6 +22,7 @@ import {
   resetAuditCache,
   runAccessibilityAudit,
   saveAuditResult,
+  updateStoredAuditResult,
 } from '@/utils/audit-engine';
 import { ViolationsSummary } from './ViolationsSummary';
 import { ViolationsList } from './ViolationsList';
@@ -61,6 +62,13 @@ export const PopupApp: React.FC = () => {
   const [activeTabKey, setActiveTabKey] = useState('summary');
   const [priorityIndex, setPriorityIndex] = useState(0);
   const [showAboutView, setShowAboutView] = useState(false);
+
+  const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
+    setAuditHistory((currentHistory) =>
+      currentHistory.map((entry) => (entry.id === updatedResult.id ? updatedResult as AuditHistoryEntry : entry))
+    );
+    setAuditResult((currentResult) => (currentResult?.id === updatedResult.id ? updatedResult : currentResult));
+  }, []);
 
   const loadAuditForCurrentTab = useCallback(async () => {
     try {
@@ -261,6 +269,22 @@ export const PopupApp: React.FC = () => {
     viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []
   ), [isHistoricalView, viewedAuditResult]);
 
+  const handleHumanReviewStatusChange = useCallback(async (violation: Violation, status: HumanReviewStatus) => {
+    if (!viewedAuditResult) return;
+
+    const updatedResult: AuditResult = {
+      ...viewedAuditResult,
+      violations: viewedAuditResult.violations.map((currentViolation) =>
+        currentViolation.id === violation.id
+          ? { ...currentViolation, humanReviewStatus: status }
+          : currentViolation
+      ),
+    };
+
+    syncAuditResultUpdate(updatedResult);
+    await updateStoredAuditResult(updatedResult, activeTab?.id);
+  }, [activeTab?.id, syncAuditResultUpdate, viewedAuditResult]);
+
   const handleNextPriorityIssue = async () => {
     if (isHistoricalView) {
       message.info('Destaque indisponível em auditorias do histórico');
@@ -430,6 +454,7 @@ export const PopupApp: React.FC = () => {
                       <ViolationsList
                         violations={viewedAuditResult.violations}
                         onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
+                        onHumanReviewStatusChange={handleHumanReviewStatusChange}
                       />
                     ),
                   },
