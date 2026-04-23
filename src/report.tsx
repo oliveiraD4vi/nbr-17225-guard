@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ConfigProvider, Layout, Spin, Empty, Button, Space } from 'antd';
-import { DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
+import { ConfigProvider, Layout, Spin, Empty, Button, Space, Alert, Tag } from 'antd';
+import { DownloadOutlined, PrinterOutlined, RobotOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import ptBR from 'antd/locale/pt_BR';
 import type { AuditResult } from './types';
 import { ViolationsList } from './components/ViolationsList';
@@ -60,6 +60,19 @@ export const ReportApp: React.FC = () => {
             <Empty description="Nenhum relatório disponível para a aba ativa" />
           ) : (
             <>
+              <Alert
+                style={{ marginBottom: '16px' }}
+                type="info"
+                showIcon
+                message="Leitura do relatório"
+                description={(
+                  <Space wrap size={[8, 8]}>
+                    <Tag icon={<RobotOutlined />} color="blue">Detecção automática</Tag>
+                    <Tag icon={<UserSwitchOutlined />} color="gold">Confirmação humana</Tag>
+                    <span>Itens com confirmação humana indicam suspeita relevante, mas exigem validação manual no contexto real.</span>
+                  </Space>
+                )}
+              />
               <ViolationsSummary result={auditResult} />
               <div style={{ marginTop: '24px' }}>
                 <h2>Detalhes das violações</h2>
