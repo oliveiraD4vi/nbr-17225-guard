@@ -14,6 +14,17 @@ export interface AuditComparisonSummary {
   targetNoteCount: number;
   baselineConfirmedReviews: number;
   targetConfirmedReviews: number;
+  openIssuesDeltaPercentage: number;
+  notesDeltaPercentage: number;
+  confirmedReviewsDeltaPercentage: number;
+}
+
+export function getPercentageDelta(baselineValue: number, targetValue: number): number {
+  if (baselineValue === 0) {
+    return targetValue === 0 ? 0 : 100;
+  }
+
+  return Number((((targetValue - baselineValue) / baselineValue) * 100).toFixed(1));
 }
 
 export function isViolationVisibleInMainLists(violation: Violation): boolean {
@@ -61,5 +72,11 @@ export function compareAuditResults(
     targetNoteCount: getAuditNoteCount(target),
     baselineConfirmedReviews: getConfirmedHumanReviewCount(baseline),
     targetConfirmedReviews: getConfirmedHumanReviewCount(target),
+    openIssuesDeltaPercentage: getPercentageDelta(baselineOpenViolations.length, targetOpenViolations.length),
+    notesDeltaPercentage: getPercentageDelta(getAuditNoteCount(baseline), getAuditNoteCount(target)),
+    confirmedReviewsDeltaPercentage: getPercentageDelta(
+      getConfirmedHumanReviewCount(baseline),
+      getConfirmedHumanReviewCount(target)
+    ),
   };
 }

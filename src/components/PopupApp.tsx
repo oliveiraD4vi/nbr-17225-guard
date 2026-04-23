@@ -316,6 +316,48 @@ export const PopupApp: React.FC = () => {
     return { icon: <MinusOutlined />, label: 'Estável', color: 'default' as const };
   }, [comparisonSummary]);
 
+  const handleExportComparisonReport = useCallback(() => {
+    if (!comparisonSummary || !comparisonTrend) {
+      message.warning('Selecione duas auditorias diferentes para exportar a comparação');
+      return;
+    }
+
+    const lines = [
+      '# Relatório de comparação de auditorias',
+      '',
+      `- URL: ${activeTab?.url || viewedAuditResult?.url || ''}`,
+      `- Base: ${new Date(comparisonSummary.baselineTimestamp).toLocaleString('pt-BR')}`,
+      `- Comparada: ${new Date(comparisonSummary.targetTimestamp).toLocaleString('pt-BR')}`,
+      `- Resultado: ${comparisonTrend.label}`,
+      '',
+      '## Indicadores',
+      '',
+      `- Itens visíveis: ${comparisonSummary.baselineOpenCount} -> ${comparisonSummary.targetOpenCount} (${comparisonSummary.openIssuesDeltaPercentage}%)`,
+      `- Novos problemas: ${comparisonSummary.newViolations.length}`,
+      `- Problemas resolvidos: ${comparisonSummary.resolvedViolations.length}`,
+      `- Problemas persistentes: ${comparisonSummary.persistentViolations.length}`,
+      `- Itens com anotação: ${comparisonSummary.baselineNoteCount} -> ${comparisonSummary.targetNoteCount} (${comparisonSummary.notesDeltaPercentage}%)`,
+      `- Confirmações humanas: ${comparisonSummary.baselineConfirmedReviews} -> ${comparisonSummary.targetConfirmedReviews} (${comparisonSummary.confirmedReviewsDeltaPercentage}%)`,
+      '',
+      '## Leitura rápida',
+      '',
+      comparisonTrend.label === 'Melhoria'
+        ? 'A comparação indica redução de problemas visíveis na URL auditada.'
+        : comparisonTrend.label === 'Regressão'
+          ? 'A comparação indica aumento de problemas visíveis na URL auditada.'
+          : 'A comparação não mostrou alteração no volume de problemas visíveis.',
+    ];
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    message.success('Comparação exportada');
+  }, [activeTab?.url, comparisonSummary, comparisonTrend, viewedAuditResult?.url]);
+
   const priorityViolations = useMemo(() => (
     viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []
   ), [isHistoricalView, viewedAuditResult]);
@@ -543,11 +585,21 @@ export const PopupApp: React.FC = () => {
                                 <strong>Comparar auditorias</strong>
                                 <p>Compare a evolução desta URL entre duas execuções salvas.</p>
                               </div>
-                              {comparisonTrend && (
-                                <Tag color={comparisonTrend.color}>
-                                  {comparisonTrend.icon} {comparisonTrend.label}
-                                </Tag>
-                              )}
+                              <Space>
+                                {comparisonTrend && (
+                                  <Tag color={comparisonTrend.color}>
+                                    {comparisonTrend.icon} {comparisonTrend.label}
+                                  </Tag>
+                                )}
+                                <Button
+                                  size="small"
+                                  icon={<DownloadOutlined />}
+                                  onClick={handleExportComparisonReport}
+                                  disabled={!comparisonSummary}
+                                >
+                                  Exportar
+                                </Button>
+                              </Space>
                             </div>
 
                             <div className="history-comparison-selectors">
@@ -587,6 +639,7 @@ export const PopupApp: React.FC = () => {
                                   <span>Notas: {comparisonSummary.baselineNoteCount} {'->'} {comparisonSummary.targetNoteCount}</span>
                                   <span>Confirmações humanas: {comparisonSummary.baselineConfirmedReviews} {'->'} {comparisonSummary.targetConfirmedReviews}</span>
                                   <span>Itens visíveis: {comparisonSummary.baselineOpenCount} {'->'} {comparisonSummary.targetOpenCount}</span>
+                                  <span>Variação: {comparisonSummary.openIssuesDeltaPercentage}%</span>
                                 </div>
                               </div>
                             ) : (
