@@ -27,7 +27,12 @@ import {
   saveAuditResult,
   updateStoredAuditResult,
 } from '@/utils/audit-engine';
-import { compareAuditResults } from '@/utils/audit-comparison';
+import {
+  compareAuditResults,
+  getConfirmedHumanReviewCount,
+  getDismissedHumanReviewCount,
+  getPendingHumanReviewCount,
+} from '@/utils/audit-comparison';
 import { ViolationsSummary } from './ViolationsSummary';
 import { ViolationsList } from './ViolationsList';
 import { VisionSimulator } from './VisionSimulator';
@@ -358,6 +363,55 @@ export const PopupApp: React.FC = () => {
     message.success('Comparação exportada');
   }, [activeTab?.url, comparisonSummary, comparisonTrend, viewedAuditResult?.url]);
 
+  const handleExportComparisonJson = useCallback(() => {
+    if (!comparisonSummary) {
+      message.warning('Selecione duas auditorias diferentes para exportar a comparação');
+      return;
+    }
+
+    const dataStr = JSON.stringify(comparisonSummary, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    message.success('Comparação exportada como JSON');
+  }, [comparisonSummary]);
+
+  const handleExportComparisonCsv = useCallback(() => {
+    if (!comparisonSummary) {
+      message.warning('Selecione duas auditorias diferentes para exportar a comparação');
+      return;
+    }
+
+    const rows = [
+      ['indicador', 'base', 'comparada', 'variacao_percentual'],
+      ['itens_visiveis', comparisonSummary.baselineOpenCount, comparisonSummary.targetOpenCount, comparisonSummary.openIssuesDeltaPercentage],
+      ['confirmados_humanamente', comparisonSummary.baselineConfirmedReviews, comparisonSummary.targetConfirmedReviews, comparisonSummary.confirmedReviewsDeltaPercentage],
+      ['descartados_humanamente', comparisonSummary.baselineDismissedReviews, comparisonSummary.targetDismissedReviews, ''],
+      ['pendentes_humanos', comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
+      ['anotacoes', comparisonSummary.baselineNoteCount, comparisonSummary.targetNoteCount, comparisonSummary.notesDeltaPercentage],
+      ['novos_problemas', '', comparisonSummary.newViolations.length, ''],
+      ['problemas_resolvidos', comparisonSummary.resolvedViolations.length, '', ''],
+      ['problemas_persistentes', '', comparisonSummary.persistentViolations.length, ''],
+    ];
+
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    message.success('Comparação exportada como CSV');
+  }, [comparisonSummary]);
+
   const priorityViolations = useMemo(() => (
     viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []
   ), [isHistoricalView, viewedAuditResult]);
@@ -591,13 +645,14 @@ export const PopupApp: React.FC = () => {
                                     {comparisonTrend.icon} {comparisonTrend.label}
                                   </Tag>
                                 )}
-                                <Button
-                                  size="small"
-                                  icon={<DownloadOutlined />}
-                                  onClick={handleExportComparisonReport}
-                                  disabled={!comparisonSummary}
-                                >
-                                  Exportar
+                                <Button size="small" icon={<DownloadOutlined />} onClick={handleExportComparisonReport} disabled={!comparisonSummary}>
+                                  Exportar MD
+                                </Button>
+                                <Button size="small" icon={<DownloadOutlined />} onClick={handleExportComparisonJson} disabled={!comparisonSummary}>
+                                  JSON
+                                </Button>
+                                <Button size="small" icon={<DownloadOutlined />} onClick={handleExportComparisonCsv} disabled={!comparisonSummary}>
+                                  CSV
                                 </Button>
                               </Space>
                             </div>
@@ -638,6 +693,8 @@ export const PopupApp: React.FC = () => {
                                 <div className="history-comparison-meta">
                                   <span>Notas: {comparisonSummary.baselineNoteCount} {'->'} {comparisonSummary.targetNoteCount}</span>
                                   <span>Confirmações humanas: {comparisonSummary.baselineConfirmedReviews} {'->'} {comparisonSummary.targetConfirmedReviews}</span>
+                                  <span>Descartes humanos: {comparisonSummary.baselineDismissedReviews} {'->'} {comparisonSummary.targetDismissedReviews}</span>
+                                  <span>Pendentes humanos: {comparisonSummary.baselinePendingReviews} {'->'} {comparisonSummary.targetPendingReviews}</span>
                                   <span>Itens visíveis: {comparisonSummary.baselineOpenCount} {'->'} {comparisonSummary.targetOpenCount}</span>
                                   <span>Variação: {comparisonSummary.openIssuesDeltaPercentage}%</span>
                                 </div>
@@ -694,7 +751,9 @@ export const PopupApp: React.FC = () => {
                                       <div className="history-item-meta">
                                         <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
                                         <span>{entry.totalViolations} item(ns)</span>
-                                        <span>{entry.humanReviewItems} dependem de confirmação humana</span>
+                                        <span>{getConfirmedHumanReviewCount(entry)} confirmado(s) manualmente</span>
+                                        <span>{getDismissedHumanReviewCount(entry)} descartado(s) manualmente</span>
+                                        <span>{getPendingHumanReviewCount(entry)} ainda pendente(s) de revisão humana</span>
                                         <span>{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} com anotações</span>
                                       </div>
                                     }

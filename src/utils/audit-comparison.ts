@@ -14,6 +14,10 @@ export interface AuditComparisonSummary {
   targetNoteCount: number;
   baselineConfirmedReviews: number;
   targetConfirmedReviews: number;
+  baselineDismissedReviews: number;
+  targetDismissedReviews: number;
+  baselinePendingReviews: number;
+  targetPendingReviews: number;
   openIssuesDeltaPercentage: number;
   notesDeltaPercentage: number;
   confirmedReviewsDeltaPercentage: number;
@@ -48,6 +52,17 @@ export function getConfirmedHumanReviewCount(result: AuditResult): number {
   return result.violations.filter((violation) => violation.humanReviewStatus === 'confirmed').length;
 }
 
+export function getDismissedHumanReviewCount(result: AuditResult): number {
+  return result.violations.filter((violation) => violation.humanReviewStatus === 'dismissed').length;
+}
+
+export function getPendingHumanReviewCount(result: AuditResult): number {
+  return result.violations.filter((violation) => (
+    violation.requiresHumanReview &&
+    violation.humanReviewStatus === 'pending'
+  )).length;
+}
+
 export function compareAuditResults(
   baseline: AuditResult,
   target: AuditResult
@@ -72,6 +87,10 @@ export function compareAuditResults(
     targetNoteCount: getAuditNoteCount(target),
     baselineConfirmedReviews: getConfirmedHumanReviewCount(baseline),
     targetConfirmedReviews: getConfirmedHumanReviewCount(target),
+    baselineDismissedReviews: getDismissedHumanReviewCount(baseline),
+    targetDismissedReviews: getDismissedHumanReviewCount(target),
+    baselinePendingReviews: getPendingHumanReviewCount(baseline),
+    targetPendingReviews: getPendingHumanReviewCount(target),
     openIssuesDeltaPercentage: getPercentageDelta(baselineOpenViolations.length, targetOpenViolations.length),
     notesDeltaPercentage: getPercentageDelta(getAuditNoteCount(baseline), getAuditNoteCount(target)),
     confirmedReviewsDeltaPercentage: getPercentageDelta(
