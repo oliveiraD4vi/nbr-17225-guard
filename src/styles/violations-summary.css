@@ -202,6 +202,64 @@
   gap: 14px;
 }
 
+.summary-review-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.summary-review-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-review-progress-header h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.summary-review-progress-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-review-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.summary-review-card strong {
+  font-size: 28px;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.summary-review-card small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.summary-review-card.is-confirmed {
+  background: #fef2f2;
+}
+
+.summary-review-card.is-dismissed {
+  background: #f8fafc;
+}
+
+.summary-review-card.is-pending {
+  background: #fffbeb;
+}
+
 .summary-breakdown-header {
   display: flex;
   align-items: center;
@@ -301,7 +359,8 @@
 @media (max-width: 640px) {
   .summary-hero,
   .summary-breakdown-header,
-  .summary-score-card {
+  .summary-score-card,
+  .summary-review-progress-header {
     flex-direction: column;
     align-items: stretch;
   }
@@ -310,7 +369,8 @@
     align-items: flex-start;
   }
 
-  .summary-stat-grid {
+  .summary-stat-grid,
+  .summary-review-progress-grid {
     grid-template-columns: 1fr;
   }
 

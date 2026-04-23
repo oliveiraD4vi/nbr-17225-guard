@@ -7,6 +7,11 @@ import type { AuditResult } from './types';
 import { ViolationsList } from './components/ViolationsList';
 import { ViolationsSummary } from './components/ViolationsSummary';
 import { getActiveTab, getAuditResult } from './utils/audit-engine';
+import {
+  getConfirmedHumanReviewCount,
+  getDismissedHumanReviewCount,
+  getPendingHumanReviewCount,
+} from './utils/audit-comparison';
 import './styles/popup.css';
 
 const { Header, Content, Footer } = Layout;
@@ -48,6 +53,10 @@ export const ReportApp: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const confirmedReviews = auditResult ? getConfirmedHumanReviewCount(auditResult) : 0;
+  const dismissedReviews = auditResult ? getDismissedHumanReviewCount(auditResult) : 0;
+  const pendingReviews = auditResult ? getPendingHumanReviewCount(auditResult) : 0;
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ background: '#ffffff', color: '#0f172a', borderBottom: '1px solid #e2e8f0' }}>
@@ -70,6 +79,9 @@ export const ReportApp: React.FC = () => {
                     <Tag icon={<RobotOutlined />} color="blue">Detecção automática</Tag>
                     <Tag icon={<UserSwitchOutlined />} color="gold">Confirmação humana</Tag>
                     <span>Itens com confirmação humana indicam suspeita relevante, mas exigem validação manual no contexto real.</span>
+                    <Tag color="red">{confirmedReviews} confirmados</Tag>
+                    <Tag>{dismissedReviews} descartados</Tag>
+                    <Tag color="gold">{pendingReviews} pendentes</Tag>
                   </Space>
                 )}
               />

@@ -3,6 +3,11 @@ import { Card, Empty, Spin, Tag } from 'antd';
 import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined, LinkOutlined, CalendarOutlined } from '@ant-design/icons';
 import type { AuditResult } from '@/types';
 import { getRequirementScoreData } from '@/utils/audit-score';
+import {
+  getConfirmedHumanReviewCount,
+  getDismissedHumanReviewCount,
+  getPendingHumanReviewCount,
+} from '@/utils/audit-comparison';
 import '../styles/violations-summary.css';
 
 interface ViolationsSummaryProps {
@@ -30,6 +35,9 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
 
   const hasViolations = result.totalViolations > 0;
   const requirementScore = getRequirementScoreData(result);
+  const confirmedReviews = getConfirmedHumanReviewCount(result);
+  const dismissedReviews = getDismissedHumanReviewCount(result);
+  const pendingReviews = getPendingHumanReviewCount(result);
 
   return (
     <div className="violations-summary">
@@ -103,6 +111,32 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
               <span className="summary-stat-label">Verificação humana</span>
               <strong>{result.humanReviewItems}</strong>
               <small>itens a confirmar</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="summary-review-progress">
+          <div className="summary-review-progress-header">
+            <h3>Progresso da revisão humana</h3>
+            <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
+              {pendingReviews > 0 ? 'Há confirmações pendentes' : 'Revisão humana concluída'}
+            </Tag>
+          </div>
+          <div className="summary-review-progress-grid">
+            <div className="summary-review-card is-confirmed">
+              <span className="summary-stat-label">Confirmados</span>
+              <strong>{confirmedReviews}</strong>
+              <small>continuam como problema</small>
+            </div>
+            <div className="summary-review-card is-dismissed">
+              <span className="summary-stat-label">Descartados</span>
+              <strong>{dismissedReviews}</strong>
+              <small>não se confirmaram no contexto</small>
+            </div>
+            <div className="summary-review-card is-pending">
+              <span className="summary-stat-label">Pendentes</span>
+              <strong>{pendingReviews}</strong>
+              <small>ainda precisam de revisão humana</small>
             </div>
           </div>
         </div>
