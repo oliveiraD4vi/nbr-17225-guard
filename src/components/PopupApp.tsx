@@ -285,6 +285,27 @@ export const PopupApp: React.FC = () => {
     await updateStoredAuditResult(updatedResult, activeTab?.id);
   }, [activeTab?.id, syncAuditResultUpdate, viewedAuditResult]);
 
+  const handleViolationNoteChange = useCallback(async (violation: Violation, note: string) => {
+    if (!viewedAuditResult) return;
+
+    const updatedResult: AuditResult = {
+      ...viewedAuditResult,
+      violations: viewedAuditResult.violations.map((currentViolation) =>
+        currentViolation.id === violation.id
+          ? {
+              ...currentViolation,
+              userNote: note || undefined,
+              noteUpdatedAt: note ? Date.now() : undefined,
+            }
+          : currentViolation
+      ),
+    };
+
+    syncAuditResultUpdate(updatedResult);
+    await updateStoredAuditResult(updatedResult, activeTab?.id);
+    message.success(note ? 'Anotação salva' : 'Anotação removida');
+  }, [activeTab?.id, syncAuditResultUpdate, viewedAuditResult]);
+
   const handleNextPriorityIssue = async () => {
     if (isHistoricalView) {
       message.info('Destaque indisponível em auditorias do histórico');
@@ -455,6 +476,7 @@ export const PopupApp: React.FC = () => {
                         violations={viewedAuditResult.violations}
                         onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
                         onHumanReviewStatusChange={handleHumanReviewStatusChange}
+                        onViolationNoteChange={handleViolationNoteChange}
                       />
                     ),
                   },

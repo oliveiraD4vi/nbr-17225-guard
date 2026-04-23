@@ -1,6 +1,18 @@
 import React from 'react';
-import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs, Checkbox } from 'antd';
-import { CopyOutlined, LinkOutlined, InfoCircleOutlined, PushpinFilled, SearchOutlined } from '@ant-design/icons';
+import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs, Checkbox, Input } from 'antd';
+import {
+  CopyOutlined,
+  LinkOutlined,
+  InfoCircleOutlined,
+  PushpinFilled,
+  SearchOutlined,
+  FileTextOutlined,
+  BoldOutlined,
+  ItalicOutlined,
+  UnorderedListOutlined,
+  SaveOutlined,
+  ClearOutlined,
+} from '@ant-design/icons';
 import type { HumanReviewStatus, Violation } from '@/types';
 import '../styles/violations-list.css';
 
@@ -8,6 +20,7 @@ interface ViolationsListProps {
   violations: Violation[];
   onSelectViolation?: (violation: Violation) => void;
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void;
+  onViolationNoteChange?: (violation: Violation, note: string) => void;
 }
 
 interface ViolationGroup {
@@ -90,7 +103,8 @@ function getElementTitle(violation: Violation): string {
 function renderViolationGroups(
   violations: Violation[],
   onSelectViolation?: (violation: Violation) => void,
-  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void
+  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
+  onViolationNoteChange?: (violation: Violation, note: string) => void
 ): React.ReactNode {
   if (violations.length === 0) {
     return <Empty description="Nenhum item nesta categoria" />;
@@ -137,7 +151,9 @@ function renderViolationGroups(
               <span>{group.topIssueCount} ponto(s) prioritário(s)</span>
             </div>
             <div className="violation-items">
-              {topIssues.map((violation, index) => renderViolationCard(violation, index, onSelectViolation, onHumanReviewStatusChange, true))}
+              {topIssues.map((violation, index) =>
+                renderViolationCard(violation, index, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange, true)
+              )}
             </div>
           </div>
 
@@ -149,7 +165,14 @@ function renderViolationGroups(
               </div>
               <div className="violation-items">
                 {remainingIssues.map((violation, index) =>
-                  renderViolationCard(violation, topIssues.length + index, onSelectViolation, onHumanReviewStatusChange, false)
+                  renderViolationCard(
+                    violation,
+                    topIssues.length + index,
+                    onSelectViolation,
+                    onHumanReviewStatusChange,
+                    onViolationNoteChange,
+                    false
+                  )
                 )}
               </div>
             </div>
@@ -167,8 +190,56 @@ function renderViolationCard(
   index: number,
   onSelectViolation?: (violation: Violation) => void,
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
+  onViolationNoteChange?: (violation: Violation, note: string) => void,
   pinned = false
 ): React.ReactNode {
+  return (
+    <ViolationCard
+      violation={violation}
+      index={index}
+      onSelectViolation={onSelectViolation}
+      onHumanReviewStatusChange={onHumanReviewStatusChange}
+      onViolationNoteChange={onViolationNoteChange}
+      pinned={pinned}
+    />
+  );
+}
+
+interface ViolationCardProps {
+  violation: Violation;
+  index: number;
+  onSelectViolation?: (violation: Violation) => void;
+  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void;
+  onViolationNoteChange?: (violation: Violation, note: string) => void;
+  pinned?: boolean;
+}
+
+const { TextArea } = Input;
+
+const ViolationCard: React.FC<ViolationCardProps> = ({
+  violation,
+  index,
+  onSelectViolation,
+  onHumanReviewStatusChange,
+  onViolationNoteChange,
+  pinned = false,
+}) => {
+  const [isNotesOpen, setIsNotesOpen] = React.useState(false);
+  const [noteDraft, setNoteDraft] = React.useState(violation.userNote || '');
+
+  React.useEffect(() => {
+    setNoteDraft(violation.userNote || '');
+  }, [violation.id, violation.userNote]);
+
+  const insertAtEnd = (value: string) => {
+    setNoteDraft((current) => `${current}${current ? '\n' : ''}${value}`);
+  };
+
+  const handleSaveNote = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    onViolationNoteChange?.(violation, noteDraft.trim());
+  };
+
   return (
     <Card
       key={violation.id}
@@ -260,6 +331,17 @@ function renderViolationCard(
         </div>
 
         <Space className="violation-actions">
+          <Tooltip title="Anotações">
+            <Button
+              type={violation.userNote ? 'default' : 'text'}
+              size="small"
+              icon={<FileTextOutlined />}
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsNotesOpen((current) => !current);
+              }}
+            />
+          </Tooltip>
           <Tooltip title="Copiar seletor do elemento">
             <Button
               type="text"
@@ -290,15 +372,70 @@ function renderViolationCard(
             <SearchOutlined /> {getReviewLabel(violation)}
           </span>
         </Space>
+
+        {isNotesOpen && (
+          <div className="violation-notes-card" onClick={(event) => event.stopPropagation()}>
+            <div className="violation-notes-header">
+              <strong>Anotações</strong>
+              <span>{noteDraft.length}/600</span>
+            </div>
+
+            <Space className="violation-notes-toolbar" wrap>
+              <Tooltip title="Inserir destaque em negrito">
+                <Button type="text" size="small" icon={<BoldOutlined />} onClick={(event) => {
+                  event.stopPropagation();
+                  insertAtEnd('**texto**');
+                }} />
+              </Tooltip>
+              <Tooltip title="Inserir destaque em itálico">
+                <Button type="text" size="small" icon={<ItalicOutlined />} onClick={(event) => {
+                  event.stopPropagation();
+                  insertAtEnd('*texto*');
+                }} />
+              </Tooltip>
+              <Tooltip title="Inserir lista">
+                <Button type="text" size="small" icon={<UnorderedListOutlined />} onClick={(event) => {
+                  event.stopPropagation();
+                  insertAtEnd('- item');
+                }} />
+              </Tooltip>
+              <Tooltip title="Limpar rascunho">
+                <Button type="text" size="small" icon={<ClearOutlined />} onClick={(event) => {
+                  event.stopPropagation();
+                  setNoteDraft('');
+                }} />
+              </Tooltip>
+              <Tooltip title="Salvar anotação">
+                <Button type="text" size="small" icon={<SaveOutlined />} onClick={handleSaveNote} />
+              </Tooltip>
+            </Space>
+
+            <TextArea
+              rows={4}
+              maxLength={600}
+              placeholder="Registre contexto, decisão tomada ou próximos passos."
+              value={noteDraft}
+              onClick={(event) => event.stopPropagation()}
+              onChange={(event) => setNoteDraft(event.target.value)}
+            />
+
+            {violation.noteUpdatedAt && (
+              <span className="violation-notes-meta">
+                Atualizada em {new Date(violation.noteUpdatedAt).toLocaleString('pt-BR')}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   );
-}
+};
 
 export const ViolationsList: React.FC<ViolationsListProps> = ({
   violations,
   onSelectViolation,
   onHumanReviewStatusChange,
+  onViolationNoteChange,
 }) => {
   if (!violations || violations.length === 0) {
     return <Empty description="Nenhuma violação encontrada" />;
@@ -318,22 +455,22 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
           {
             key: 'all',
             label: `Todos (${visibleViolations.length})`,
-            children: renderViolationGroups(visibleViolations, onSelectViolation, onHumanReviewStatusChange),
+            children: renderViolationGroups(visibleViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
           },
           {
             key: 'requirements',
             label: `Requisitos (${requirementViolations.length})`,
-            children: renderViolationGroups(requirementViolations, onSelectViolation, onHumanReviewStatusChange),
+            children: renderViolationGroups(requirementViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
           },
           {
             key: 'recommendations',
             label: `Recomendações (${recommendationViolations.length})`,
-            children: renderViolationGroups(recommendationViolations, onSelectViolation, onHumanReviewStatusChange),
+            children: renderViolationGroups(recommendationViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
           },
           {
             key: 'review',
             label: `Verificação humana (${reviewViolations.length})`,
-            children: renderViolationGroups(reviewViolations, onSelectViolation, onHumanReviewStatusChange),
+            children: renderViolationGroups(reviewViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
           },
         ]}
       />

@@ -38,6 +38,8 @@ export interface Violation {
   elementTagName?: string;
   elementAccessibleName?: string;
   elementVisibleText?: string;
+  userNote?: string;
+  noteUpdatedAt?: number;
   customId: string;
 }
 

@@ -275,9 +275,51 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 4px;
   padding-top: 12px;
   border-top: 1px solid #e2e8f0;
+}
+
+.violation-notes-card {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+}
+
+.violation-notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.violation-notes-header strong {
+  color: #1e3a8a;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.violation-notes-header span,
+.violation-notes-meta {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.violation-notes-toolbar {
+  margin-bottom: 8px;
+}
+
+.violation-notes-card .ant-input {
+  resize: vertical;
+}
+
+.violation-notes-meta {
+  display: block;
+  margin-top: 8px;
 }
 
 .violation-wcag-level {
