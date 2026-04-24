@@ -60,7 +60,30 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.popup-loading-state {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
   min-height: 300px;
+}
+
+.popup-loading-title {
+  width: 48% !important;
+  min-width: 180px;
+}
+
+.popup-loading-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.popup-loading-grid .ant-skeleton-button {
+  width: 100% !important;
+  height: 64px !important;
 }
 
 .tab-status-strip {
@@ -383,6 +406,10 @@
   .tab-status-strip {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .popup-loading-grid {
+    grid-template-columns: 1fr;
   }
 
   .footer-actions-grid {

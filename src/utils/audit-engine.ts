@@ -1,7 +1,7 @@
 /**
  * Motor de auditoria de acessibilidade
  */
-import type { AuditHistoryEntry, AuditResult } from '@/types';
+import type { AuditHistoryEntry, AuditResult, Violation } from '@/types';
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -28,6 +28,55 @@ function getUrlStorageKey(url: string): string {
   }
 }
 
+function getViolationPersistenceKey(violation: Violation): string {
+  return violation.id || [
+    violation.ruleId,
+    violation.elementSelector || '',
+    violation.message,
+    violation.suggestion,
+  ].join('|');
+}
+
+function inheritPersistedViolationState(
+  result: AuditResult,
+  historyEntries: AuditHistoryEntry[]
+): AuditResult {
+  const persistedViolations = new Map<string, Violation>();
+
+  historyEntries.forEach((entry) => {
+    entry.violations.forEach((violation) => {
+      const hasPersistedState = (
+        violation.humanReviewStatus !== 'not_applicable' &&
+        violation.humanReviewStatus !== 'pending'
+      ) || Boolean(violation.userNote?.trim());
+
+      if (!hasPersistedState) return;
+
+      const key = getViolationPersistenceKey(violation);
+      if (!persistedViolations.has(key)) {
+        persistedViolations.set(key, violation);
+      }
+    });
+  });
+
+  return {
+    ...result,
+    violations: result.violations.map((violation) => {
+      const persistedViolation = persistedViolations.get(getViolationPersistenceKey(violation));
+      if (!persistedViolation) return violation;
+
+      return {
+        ...violation,
+        humanReviewStatus: violation.requiresHumanReview
+          ? persistedViolation.humanReviewStatus ?? violation.humanReviewStatus
+          : violation.humanReviewStatus,
+        userNote: persistedViolation.userNote ?? violation.userNote,
+        noteUpdatedAt: persistedViolation.noteUpdatedAt ?? violation.noteUpdatedAt,
+      };
+    }),
+  };
+}
+
 function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null {
   if (!result) return null;
 
@@ -36,7 +85,7 @@ function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null
     humanReviewStatus: violation.humanReviewStatus ?? (violation.requiresHumanReview ? 'pending' : 'not_applicable'),
   }));
   const humanReviewItems = violations.filter((violation) => violation.requiresHumanReview).length;
-  const automatedFindings = result.violations.length - humanReviewItems;
+  const automatedFindings = violations.length - humanReviewItems;
   const auditId = result.id || `${getUrlStorageKey(result.url)}|${result.timestamp}`;
 
   return {
@@ -86,10 +135,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
 }
 
 async function ensureContentScriptReady(tabId: number): Promise<void> {
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    if (await pingContentScript(tabId)) return;
-    await new Promise((resolve) => setTimeout(resolve, 150));
-  }
+  if (await pingContentScript(tabId)) return;
 
   try {
     await chrome.scripting.executeScript({
@@ -100,7 +146,10 @@ async function ensureContentScriptReady(tabId: number): Promise<void> {
     console.warn('[Guardião NBR 17225] Erro ao injetar content script:', error);
   }
 
-  if (await pingContentScript(tabId)) return;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    if (await pingContentScript(tabId)) return;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
 
   throw new Error('Não foi possível acessar o DOM da página. Recarregue a aba e tente novamente.');
 }
@@ -143,14 +192,14 @@ export async function resetAuditCache(): Promise<void> {
 /**
  * Salva resultado da auditoria no storage
  */
-export async function saveAuditResult(result: AuditResult, tabId?: number): Promise<void> {
+export async function saveAuditResult(result: AuditResult, tabId?: number): Promise<AuditResult> {
   try {
     const resolvedTabId = tabId ?? (await getActiveTab()).id;
     const data = await chrome.storage.local.get(['auditResultsByTab', 'auditHistoryByUrl']);
     const urlKey = getUrlStorageKey(result.url);
     const history = (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {};
     const currentHistory = history[urlKey] ?? [];
-    const normalizedResult = normalizeAuditResult(result)!;
+    const normalizedResult = inheritPersistedViolationState(normalizeAuditResult(result)!, currentHistory);
     const historyEntry: AuditHistoryEntry = normalizedResult as AuditHistoryEntry;
     const auditResultsByTab = {
       ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
@@ -172,8 +221,10 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     });
 
     console.log('[Guardião NBR 17225] Resultado da auditoria salvo');
+    return normalizedResult;
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao salvar resultado:', error);
+    return result;
   }
 }
 

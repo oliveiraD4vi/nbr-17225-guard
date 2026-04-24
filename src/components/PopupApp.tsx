@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert, Space, Select, Statistic } from 'antd';
+import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert, Space, Select, Statistic, Skeleton } from 'antd';
 import {
   PlayCircleOutlined,
   ReloadOutlined,
@@ -67,6 +67,7 @@ export const PopupApp: React.FC = () => {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([]);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null);
   const [activeTabKey, setActiveTabKey] = useState('summary');
@@ -104,6 +105,8 @@ export const PopupApp: React.FC = () => {
       setPriorityIndex(0);
       setComparisonBaselineId(undefined);
       setComparisonTargetId(undefined);
+    } finally {
+      setInitialLoading(false);
     }
   }, []);
 
@@ -156,8 +159,8 @@ export const PopupApp: React.FC = () => {
       const result = await runAccessibilityAudit();
       const tab = await getActiveTab();
       setActiveTab(tab);
-      setAuditResult(result);
-      await saveAuditResult(result, tab.id);
+      const persistedResult = await saveAuditResult(result, tab.id);
+      setAuditResult(persistedResult);
       const history = await getAuditHistoryForUrl(tab.url);
       setAuditHistory(history);
       setSelectedHistoryId(null);
@@ -645,7 +648,17 @@ export const PopupApp: React.FC = () => {
 
       <Content className="popup-content">
         <Spin spinning={loading} tip="Analisando página...">
-          {showAboutView || !viewedAuditResult ? (
+          {initialLoading ? (
+            <div className="popup-loading-state" aria-live="polite" aria-busy="true">
+              <Skeleton.Button active block className="popup-loading-title" />
+              <Skeleton active paragraph={{ rows: 3 }} title={false} />
+              <div className="popup-loading-grid">
+                <Skeleton.Button active block />
+                <Skeleton.Button active block />
+                <Skeleton.Button active block />
+              </div>
+            </div>
+          ) : showAboutView || !viewedAuditResult ? (
             <div className="empty-state empty-state-with-about">
               <div className="about-card">
                 <span className="about-eyebrow">Sobre</span>
