@@ -113,6 +113,8 @@
 }
 
 .about-card {
+  width: 100%;
+  box-sizing: border-box;
   padding: 16px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -150,6 +152,21 @@
   font-size: 16px;
   padding: 8px 32px;
   height: 44px;
+}
+
+.empty-state-with-about .ant-space {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.empty-state-with-about .ant-space .ant-space-item {
+  width: 100%;
+}
+
+.empty-state-with-about .ant-space .ant-btn {
+  width: 100%;
 }
 
 .popup-footer {
@@ -361,10 +378,6 @@
   .popup-app {
     width: 100vw;
     max-width: 100%;
-  }
-
-  .header-row {
-    flex-direction: column;
   }
 
   .tab-status-strip {

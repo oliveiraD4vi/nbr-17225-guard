@@ -33,6 +33,7 @@ import {
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
 } from '@/utils/audit-comparison';
+import { buildExportableAuditResult } from '@/utils/audit-export';
 import { ViolationsSummary } from './ViolationsSummary';
 import { ViolationsList } from './ViolationsList';
 import { VisionSimulator } from './VisionSimulator';
@@ -199,7 +200,7 @@ export const PopupApp: React.FC = () => {
       return;
     }
 
-    const dataStr = JSON.stringify(viewedAuditResult, null, 2);
+    const dataStr = JSON.stringify(buildExportableAuditResult(viewedAuditResult), null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

@@ -86,7 +86,10 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
 }
 
 async function ensureContentScriptReady(tabId: number): Promise<void> {
-  if (await pingContentScript(tabId)) return;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    if (await pingContentScript(tabId)) return;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
 
   try {
     await chrome.scripting.executeScript({

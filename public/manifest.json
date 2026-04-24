@@ -16,7 +16,9 @@
   "web_accessible_resources": [
     {
       "resources": [
+        "content-bootstrap.js",
         "content.js",
+        "rules.js",
         "utils.js"
       ],
       "matches": ["<all_urls>"]

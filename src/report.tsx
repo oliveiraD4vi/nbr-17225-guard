@@ -12,6 +12,7 @@ import {
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
 } from './utils/audit-comparison';
+import { buildExportableAuditResult } from './utils/audit-export';
 import './styles/popup.css';
 
 const { Header, Content, Footer } = Layout;
@@ -43,7 +44,7 @@ export const ReportApp: React.FC = () => {
   const handleExport = () => {
     if (!auditResult) return;
 
-    const dataStr = JSON.stringify(auditResult, null, 2);
+    const dataStr = JSON.stringify(buildExportableAuditResult(auditResult), null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
