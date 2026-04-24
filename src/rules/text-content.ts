@@ -1,11 +1,12 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getVisibleText, isElementVisible } from '@/utils';
 
 export const specialTextSemanticRule: Rule = {
   id: 'special-text-semantic',
   nbrReference: '5.12.8',
-  name: 'Semântica de texto especial',
-  description: 'Texto com ênfase ou significado especial deve usar elementos semânticos apropriados',
+  name: t('rules.textContent.specialTextSemantic.name'),
+  description: t('rules.textContent.specialTextSemantic.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -19,9 +20,11 @@ export const specialTextSemanticRule: Rule = {
 
       violations.push(createViolation(specialTextSemanticRule, {
         element,
-        message: `Elemento <${element.tagName.toLowerCase()}> usado para dar significado textual sem semântica apropriada.`,
-        suggestion: 'Prefira <strong> para importância e <em> para ênfase.',
-        remediationAdvice: `<strong>${text}</strong>`,
+        message: t('rules.textContent.specialTextSemantic.message', {
+          tagName: element.tagName.toLowerCase(),
+        }),
+        suggestion: t('rules.textContent.specialTextSemantic.suggestion'),
+        remediationAdvice: t('rules.textContent.specialTextSemantic.remediation', { text }),
         customIdPrefix: 'special-text',
       }));
     });
@@ -33,8 +36,8 @@ export const specialTextSemanticRule: Rule = {
 export const specialTextUsageRule: Rule = {
   id: 'special-text-usage',
   nbrReference: '5.12.9',
-  name: 'Uso de texto especial',
-  description: 'O uso de texto especial deve preservar o significado pretendido no contexto',
+  name: t('rules.textContent.specialTextUsage.name'),
+  description: t('rules.textContent.specialTextUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Não Automatizável',
@@ -46,9 +49,9 @@ export const specialTextUsageRule: Rule = {
 
     return [createViolation(specialTextUsageRule, {
       element: candidates[0],
-      message: 'Texto especial detectado; a adequação semântica do uso exige revisão humana.',
-      suggestion: 'Confirme se a marcação usada comunica corretamente importância, ênfase, abreviação, citação ou outro significado pretendido.',
-      remediationAdvice: `Revise o contexto do texto especial e substitua marcação puramente visual por elemento semântico quando aplicável.`,
+      message: t('rules.textContent.specialTextUsage.message'),
+      suggestion: t('rules.textContent.specialTextUsage.suggestion'),
+      remediationAdvice: t('rules.textContent.specialTextUsage.remediation'),
       customIdPrefix: 'special-text-usage',
     })];
   },

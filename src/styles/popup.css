@@ -44,6 +44,21 @@
   font-weight: 700;
 }
 
+.header-title {
+  display: inline-flex;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 10px;
+}
+
+.header-title-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 .popup-header .header-content p {
   margin: 0;
   font-size: 13px;

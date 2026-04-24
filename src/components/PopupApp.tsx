@@ -25,6 +25,7 @@ import {
 } from '@/utils/audit-comparison';
 import { buildExportableAuditResult } from '@/utils/audit-export';
 import {
+  ensureContentScriptReady,
   getActiveTab,
   getAuditHistoryForUrl,
   getAuditResult,
@@ -128,6 +129,7 @@ export const PopupApp: React.FC = () => {
   const [showAboutView, setShowAboutView] = useState(false);
   const [comparisonBaselineId, setComparisonBaselineId] = useState<string | undefined>(undefined);
   const [comparisonTargetId, setComparisonTargetId] = useState<string | undefined>(undefined);
+  const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon.png'), []);
 
   const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
     setAuditHistory((currentHistory) =>
@@ -188,6 +190,7 @@ export const PopupApp: React.FC = () => {
 
   const sendMessageToActiveTab = useCallback(async (payload: Record<string, unknown>) => {
     const tab = activeTab ?? await getActiveTab();
+    await ensureContentScriptReady(tab.id);
     await chrome.tabs.sendMessage(tab.id, payload);
   }, [activeTab]);
 
@@ -612,7 +615,10 @@ export const PopupApp: React.FC = () => {
       <Header className="popup-header">
         <div className="header-row">
           <div className="header-content">
-            <h1>{t('shared.brand.name')}</h1>
+            <h1 className="header-title">
+              <img src={appIconUrl} alt="" className="header-title-icon" aria-hidden="true" />
+              <span>{t('shared.brand.name')}</span>
+            </h1>
             <p>
               {activeTab?.title
                 ? t('popup.header.activeTab', { title: activeTab.title })
@@ -682,8 +688,9 @@ export const PopupApp: React.FC = () => {
         )}
       </Content>
 
-      <Footer className="popup-footer">
-        {footerActions.length > 0 && (
+      {!showAboutView && (
+        <Footer className="popup-footer">
+          {footerActions.length > 0 && (
           <div className="footer-actions-grid">
             {footerActions.map((action, index) => {
               const lastIndex = footerActions.length - 1;
@@ -711,8 +718,9 @@ export const PopupApp: React.FC = () => {
               );
             })}
           </div>
-        )}
-      </Footer>
+          )}
+        </Footer>
+      )}
     </Layout>
   );
 };

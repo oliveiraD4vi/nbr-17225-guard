@@ -1,11 +1,12 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getAccessibleName } from '@/utils';
 
 export const tableSemanticRule: Rule = {
   id: 'table-semantic',
   nbrReference: '5.6.1',
-  name: 'Semântica de tabela',
-  description: 'Tabelas de dados devem usar elementos semânticos adequados',
+  name: t('rules.tables.tableSemantic.name'),
+  description: t('rules.tables.tableSemantic.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -16,9 +17,9 @@ export const tableSemanticRule: Rule = {
       if (!cell.closest('table')) {
         violations.push(createViolation(tableSemanticRule, {
           element: cell,
-          message: `Elemento ${cell.tagName.toLowerCase()} encontrado fora de uma tabela.`,
-          suggestion: 'Use estrutura semântica completa de tabela ao utilizar células e linhas.',
-          remediationAdvice: `<table>\n  <tr><th>Cabeçalho</th></tr>\n</table>`,
+          message: t('rules.tables.tableSemantic.message', { tagName: cell.tagName.toLowerCase() }),
+          suggestion: t('rules.tables.tableSemantic.suggestion'),
+          remediationAdvice: t('rules.tables.tableSemantic.remediation'),
           customIdPrefix: 'table-structure',
         }));
       }
@@ -31,8 +32,8 @@ export const tableSemanticRule: Rule = {
 export const tableHeadersRule: Rule = {
   id: 'table-headers',
   nbrReference: '5.6.3',
-  name: 'Cabeçalhos de tabela',
-  description: 'Tabelas de dados devem possuir cabeçalhos identificáveis',
+  name: t('rules.tables.tableHeaders.name'),
+  description: t('rules.tables.tableHeaders.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -47,9 +48,9 @@ export const tableHeadersRule: Rule = {
       if (headers.length === 0) {
         violations.push(createViolation(tableHeadersRule, {
           element: table,
-          message: 'Tabela de dados sem células de cabeçalho <th>.',
-          suggestion: 'Adicione cabeçalhos de coluna ou linha usando <th>.',
-          remediationAdvice: `<table>\n  <tr><th scope="col">Nome</th></tr>\n</table>`,
+          message: t('rules.tables.tableHeaders.missingMessage'),
+          suggestion: t('rules.tables.tableHeaders.missingSuggestion'),
+          remediationAdvice: t('rules.tables.tableHeaders.missingRemediation'),
           customIdPrefix: 'table-th',
         }));
         return;
@@ -59,9 +60,9 @@ export const tableHeadersRule: Rule = {
         if (!header.getAttribute('scope') && !header.getAttribute('id')) {
           violations.push(createViolation(tableHeadersRule, {
             element: header as HTMLElement,
-            message: 'Cabeçalho de tabela sem scope ou id para associação explícita.',
-            suggestion: 'Defina scope="col"/"row" ou use id com headers nas células.',
-            remediationAdvice: `<th scope="col">Tempo</th>`,
+            message: t('rules.tables.tableHeaders.associationMessage'),
+            suggestion: t('rules.tables.tableHeaders.associationSuggestion'),
+            remediationAdvice: t('rules.tables.tableHeaders.associationRemediation'),
             customIdPrefix: 'table-scope',
           }));
         }
@@ -75,8 +76,8 @@ export const tableHeadersRule: Rule = {
 export const tableCaptionRule: Rule = {
   id: 'table-caption',
   nbrReference: '5.6.5',
-  name: 'Título de tabela associado',
-  description: 'Tabelas devem possuir caption ou nome acessível associado',
+  name: t('rules.tables.tableCaption.name'),
+  description: t('rules.tables.tableCaption.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -87,15 +88,15 @@ export const tableCaptionRule: Rule = {
       const hasData = table.querySelector('td, th');
       if (!hasData) return;
 
-      const hasCaption = !!table.querySelector('caption');
+      const hasCaption = Boolean(table.querySelector('caption'));
       const accessibleName = getAccessibleName(table as unknown as HTMLElement);
 
       if (!hasCaption && !accessibleName) {
         violations.push(createViolation(tableCaptionRule, {
           element: table,
-          message: 'Tabela sem caption ou nome acessível associado.',
-          suggestion: 'Adicione <caption> ou aria-label/aria-labelledby na tabela.',
-          remediationAdvice: `<table>\n  <caption>Resultados da prova</caption>\n</table>`,
+          message: t('rules.tables.tableCaption.message'),
+          suggestion: t('rules.tables.tableCaption.suggestion'),
+          remediationAdvice: t('rules.tables.tableCaption.remediation'),
           customIdPrefix: 'table-caption',
         }));
       }

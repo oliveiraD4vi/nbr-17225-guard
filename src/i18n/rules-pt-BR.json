@@ -77,6 +77,32 @@
       "remediation": "Ofereça autenticação sem depender exclusivamente de CAPTCHA visual."
     }
   },
+  "headings": {
+    "headingSemantic": {
+      "name": "Semântica de cabeçalho",
+      "description": "Cabeçalhos devem usar tags semânticas h1-h6",
+      "message": "Página sem cabeçalho h1.",
+      "suggestion": "Adicione um h1 como título principal.",
+      "remediation": "<h1>Título principal</h1>"
+    },
+    "headingUsage": {
+      "name": "Uso de cabeçalhos",
+      "description": "Cabeçalhos devem representar seções reais do conteúdo",
+      "message": "Cabeçalho sem conteúdo subsequente claramente associado.",
+      "suggestion": "Verifique se o cabeçalho realmente introduz uma seção de conteúdo.",
+      "remediation": "<h2>Informações do evento</h2>\n<p>Descrição da seção.</p>"
+    },
+    "headingStructure": {
+      "name": "Estrutura de cabeçalhos",
+      "description": "Cabeçalhos devem manter hierarquia lógica",
+      "firstMessage": "Primeiro cabeçalho é {{tagName}} em vez de h1.",
+      "firstSuggestion": "Inicie a hierarquia de cabeçalhos com h1.",
+      "firstRemediation": "<h1>Título principal</h1>",
+      "jumpMessage": "Salto na hierarquia de cabeçalhos: h{{from}} para h{{to}}.",
+      "jumpSuggestion": "Não pule níveis na estrutura de cabeçalhos.",
+      "jumpRemediation": "<h2>Seção</h2>\n<h3>Subseção</h3>"
+    }
+  },
   "images": {
     "imageAltText": {
       "name": "Texto alternativo para imagens de conteúdo",
@@ -179,6 +205,77 @@
       "remediation": "<button aria-keyshortcuts=\"Alt+S\">Salvar</button>"
     }
   },
+  "lists": {
+    "listSemantic": {
+      "name": "Semântica de lista",
+      "description": "Listas devem usar estrutura semântica correta com ul, ol e li",
+      "itemMessage": "Item de lista encontrado fora de ul, ol ou menu.",
+      "itemSuggestion": "Agrupe itens de lista dentro de um contêiner semântico.",
+      "itemRemediation": "<ul>\n  <li>Item</li>\n</ul>",
+      "emptyMessage": "Lista sem nenhum item <li> identificado.",
+      "emptySuggestion": "Use elementos <li> para cada item da lista.",
+      "emptyRemediation": "<ol>\n  <li>Primeiro item</li>\n</ol>"
+    }
+  },
+  "media": {
+    "audioControl": {
+      "name": "Controle de áudio",
+      "description": "Áudios reproduzidos automaticamente devem oferecer mecanismo de controle",
+      "message": "Mídia com reprodução automática sem controles visíveis.",
+      "suggestion": "Disponibilize controles ou evite reprodução automática.",
+      "remediation": "<audio controls autoplay src=\"audio.mp3\"></audio>"
+    }
+  },
+  "navigation": {
+    "linkSemantic": {
+      "name": "Semântica de link",
+      "description": "Links devem usar elemento âncora com destino ou nome acessível",
+      "hrefMessage": "Link sem atributo href.",
+      "hrefSuggestion": "Use href para navegação ou troque por <button> se for uma ação.",
+      "hrefRemediation": "<a href=\"/destino\">Acessar página</a>",
+      "nameMessage": "Link sem nome acessível.",
+      "nameSuggestion": "Forneça texto visível, aria-label ou conteúdo alternativo descritivo.",
+      "nameRemediation": "<a href=\"/contato\">Fale conosco</a>"
+    },
+    "skipLinks": {
+      "name": "Links para contornar blocos de conteúdo",
+      "description": "A página deve oferecer mecanismo para pular blocos repetidos",
+      "message": "Nenhum link para pular blocos repetidos foi encontrado.",
+      "suggestion": "Adicione um link de salto no início da página apontando para o conteúdo principal.",
+      "remediation": "<a href=\"#conteudo-principal\" class=\"skip-link\">Pular para o conteúdo principal</a>"
+    }
+  },
+  "presentation": {
+    "responsiveDesign": {
+      "name": "Design responsivo",
+      "description": "Páginas devem declarar viewport adequada para responsividade",
+      "missingMessage": "Meta viewport não encontrada.",
+      "missingSuggestion": "Adicione uma meta viewport adequada ao cabeçalho da página.",
+      "missingRemediation": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />",
+      "widthMessage": "Meta viewport não define width=device-width.",
+      "widthSuggestion": "Use width=device-width para adaptação correta em telas pequenas.",
+      "widthRemediation": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
+    }
+  },
+  "regions": {
+    "regionSemantic": {
+      "name": "Semântica de região",
+      "description": "A página deve expor regiões principais com semântica adequada",
+      "missingMessage": "A página não possui uma região principal identificável.",
+      "missingSuggestion": "Adicione um elemento <main> ou role=\"main\" para o conteúdo principal.",
+      "missingRemediation": "<main>Conteúdo principal</main>",
+      "roleMessage": "Região principal foi criada com role em vez de elemento semântico.",
+      "roleSuggestion": "Prefira usar <main> para a região principal.",
+      "roleRemediation": "<main>Conteúdo principal</main>"
+    },
+    "uniqueRegionIdentification": {
+      "name": "Regiões identificadas unicamente",
+      "description": "Regiões repetidas devem possuir nomes acessíveis distintos",
+      "message": "Região repetida sem nome acessível para diferenciá-la das demais.",
+      "suggestion": "Adicione aria-label ou aria-labelledby em regiões repetidas.",
+      "remediation": "<nav aria-label=\"Navegação principal\">...</nav>"
+    }
+  },
   "semantics": {
     "pageTitle": {
       "name": "Título da página",
@@ -221,6 +318,57 @@
       "message": "Componente com role=\"{{role}}\" sem estados ou propriedades obrigatórios: {{attrs}}.",
       "suggestion": "Exponha estados ARIA coerentes para o componente customizado.",
       "remediation": "<div role=\"{{role}}\" {{attrsTemplate}}></div>"
+    }
+  },
+  "tables": {
+    "tableSemantic": {
+      "name": "Semântica de tabela",
+      "description": "Tabelas de dados devem usar elementos semânticos adequados",
+      "message": "Elemento {{tagName}} encontrado fora de uma tabela.",
+      "suggestion": "Use estrutura semântica completa de tabela ao utilizar células e linhas.",
+      "remediation": "<table>\n  <tr><th>Cabeçalho</th></tr>\n</table>"
+    },
+    "tableHeaders": {
+      "name": "Cabeçalhos de tabela",
+      "description": "Tabelas de dados devem possuir cabeçalhos identificáveis",
+      "missingMessage": "Tabela de dados sem células de cabeçalho <th>.",
+      "missingSuggestion": "Adicione cabeçalhos de coluna ou linha usando <th>.",
+      "missingRemediation": "<table>\n  <tr><th scope=\"col\">Nome</th></tr>\n</table>",
+      "associationMessage": "Cabeçalho de tabela sem scope ou id para associação explícita.",
+      "associationSuggestion": "Defina scope=\"col\" ou \"row\" ou use id com headers nas células.",
+      "associationRemediation": "<th scope=\"col\">Tempo</th>"
+    },
+    "tableCaption": {
+      "name": "Título de tabela associado",
+      "description": "Tabelas devem possuir caption ou nome acessível associado",
+      "message": "Tabela sem caption ou nome acessível associado.",
+      "suggestion": "Adicione <caption> ou aria-label ou aria-labelledby na tabela.",
+      "remediation": "<table>\n  <caption>Resultados da prova</caption>\n</table>"
+    }
+  },
+  "textContent": {
+    "specialTextSemantic": {
+      "name": "Semântica de texto especial",
+      "description": "Texto com ênfase ou significado especial deve usar elementos semânticos apropriados",
+      "message": "Elemento <{{tagName}}> usado para dar significado textual sem semântica apropriada.",
+      "suggestion": "Prefira <strong> para importância e <em> para ênfase.",
+      "remediation": "<strong>{{text}}</strong>"
+    },
+    "specialTextUsage": {
+      "name": "Uso de texto especial",
+      "description": "O uso de texto especial deve preservar o significado pretendido no contexto",
+      "message": "Texto especial detectado; a adequação semântica do uso exige revisão humana.",
+      "suggestion": "Confirme se a marcação usada comunica corretamente importância, ênfase, abreviação, citação ou outro significado pretendido.",
+      "remediation": "Revise o contexto do texto especial e substitua marcação puramente visual por elemento semântico quando aplicável."
+    }
+  },
+  "time": {
+    "refreshControl": {
+      "name": "Controle de atualização",
+      "description": "Atualizações automáticas da página devem ser controláveis",
+      "message": "Atualização automática detectada via meta refresh.",
+      "suggestion": "Evite atualização automática ou ofereça mecanismo de controle ao usuário.",
+      "remediation": "<meta http-equiv=\"refresh\" content=\"30\"> requer alternativa controlável."
     }
   }
 }

@@ -1,24 +1,25 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getAccessibleName } from '@/utils';
 
 export const regionSemanticRule: Rule = {
   id: 'region-semantic',
   nbrReference: '5.4.1',
-  name: 'Semântica de região',
-  description: 'A página deve expor regiões principais com semântica adequada',
+  name: t('rules.regions.regionSemantic.name'),
+  description: t('rules.regions.regionSemantic.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
-    const hasMain = !!document.querySelector('main, [role="main"]');
+    const hasMain = Boolean(document.querySelector('main, [role="main"]'));
 
     if (!hasMain) {
       violations.push(createViolation(regionSemanticRule, {
         element: document.body,
-        message: 'A página não possui uma região principal identificável.',
-        suggestion: 'Adicione um elemento <main> ou role="main" para o conteúdo principal.',
-        remediationAdvice: `<main>Conteúdo principal</main>`,
+        message: t('rules.regions.regionSemantic.missingMessage'),
+        suggestion: t('rules.regions.regionSemantic.missingSuggestion'),
+        remediationAdvice: t('rules.regions.regionSemantic.missingRemediation'),
         customIdPrefix: 'region-main',
       }));
     }
@@ -27,9 +28,9 @@ export const regionSemanticRule: Rule = {
       if (element.tagName !== 'MAIN') {
         violations.push(createViolation(regionSemanticRule, {
           element: element as HTMLElement,
-          message: 'Região principal foi criada com role em vez de elemento semântico.',
-          suggestion: 'Prefira usar <main> para a região principal.',
-          remediationAdvice: `<main>Conteúdo principal</main>`,
+          message: t('rules.regions.regionSemantic.roleMessage'),
+          suggestion: t('rules.regions.regionSemantic.roleSuggestion'),
+          remediationAdvice: t('rules.regions.regionSemantic.roleRemediation'),
           customIdPrefix: 'region-role-main',
         }));
       }
@@ -42,8 +43,8 @@ export const regionSemanticRule: Rule = {
 export const uniqueRegionIdentificationRule: Rule = {
   id: 'unique-region-identification',
   nbrReference: '5.4.5',
-  name: 'Regiões identificadas unicamente',
-  description: 'Regiões repetidas devem possuir nomes acessíveis distintos',
+  name: t('rules.regions.uniqueRegionIdentification.name'),
+  description: t('rules.regions.uniqueRegionIdentification.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -63,9 +64,7 @@ export const uniqueRegionIdentificationRule: Rule = {
 
     document.querySelectorAll<HTMLElement>(selectors.join(', ')).forEach((element) => {
       const key = `${element.tagName.toLowerCase()}::${getAccessibleName(element).trim().toLowerCase()}`;
-      if (!seen.has(key)) {
-        seen.set(key, []);
-      }
+      if (!seen.has(key)) seen.set(key, []);
       seen.get(key)?.push(element);
     });
 
@@ -75,9 +74,9 @@ export const uniqueRegionIdentificationRule: Rule = {
         elements.forEach((element) => {
           violations.push(createViolation(uniqueRegionIdentificationRule, {
             element,
-            message: 'Região repetida sem nome acessível para diferenciá-la das demais.',
-            suggestion: 'Adicione aria-label ou aria-labelledby em regiões repetidas.',
-            remediationAdvice: `<nav aria-label="Navegação principal">...</nav>`,
+            message: t('rules.regions.uniqueRegionIdentification.message'),
+            suggestion: t('rules.regions.uniqueRegionIdentification.suggestion'),
+            remediationAdvice: t('rules.regions.uniqueRegionIdentification.remediation'),
             customIdPrefix: 'region-label',
           }));
         });

@@ -19,7 +19,7 @@
         "content-bootstrap.js",
         "content.js",
         "rules.js",
-        "utils.js"
+        "i18n.js"
       ],
       "matches": [
         "<all_urls>"

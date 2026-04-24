@@ -1,11 +1,12 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getAccessibleName, isElementVisible } from '@/utils';
 
 export const linkSemanticRule: Rule = {
   id: 'link-semantic',
   nbrReference: '5.7.1',
-  name: 'Semântica de link',
-  description: 'Links devem usar elemento âncora com destino ou nome acessível',
+  name: t('rules.navigation.linkSemantic.name'),
+  description: t('rules.navigation.linkSemantic.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -21,9 +22,9 @@ export const linkSemanticRule: Rule = {
       if (!href || href.trim() === '') {
         violations.push(createViolation(linkSemanticRule, {
           element: anchor,
-          message: 'Link sem atributo href.',
-          suggestion: 'Use href para navegação ou troque por <button> se for uma ação.',
-          remediationAdvice: `<a href="/destino">Acessar página</a>`,
+          message: t('rules.navigation.linkSemantic.hrefMessage'),
+          suggestion: t('rules.navigation.linkSemantic.hrefSuggestion'),
+          remediationAdvice: t('rules.navigation.linkSemantic.hrefRemediation'),
           customIdPrefix: 'link-href',
         }));
       }
@@ -31,9 +32,9 @@ export const linkSemanticRule: Rule = {
       if (!name.trim()) {
         violations.push(createViolation(linkSemanticRule, {
           element: anchor,
-          message: 'Link sem nome acessível.',
-          suggestion: 'Forneça texto visível, aria-label ou conteúdo alternativo descritivo.',
-          remediationAdvice: `<a href="/contato">Fale conosco</a>`,
+          message: t('rules.navigation.linkSemantic.nameMessage'),
+          suggestion: t('rules.navigation.linkSemantic.nameSuggestion'),
+          remediationAdvice: t('rules.navigation.linkSemantic.nameRemediation'),
           customIdPrefix: 'link-name',
         }));
       }
@@ -46,8 +47,8 @@ export const linkSemanticRule: Rule = {
 export const skipLinksRule: Rule = {
   id: 'skip-links',
   nbrReference: '5.7.12',
-  name: 'Links para contornar blocos de conteúdo',
-  description: 'A página deve oferecer mecanismo para pular blocos repetidos',
+  name: t('rules.navigation.skipLinks.name'),
+  description: t('rules.navigation.skipLinks.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -61,9 +62,9 @@ export const skipLinksRule: Rule = {
     if (!skipLink) {
       violations.push(createViolation(skipLinksRule, {
         element: document.body,
-        message: 'Nenhum link para pular blocos repetidos foi encontrado.',
-        suggestion: 'Adicione um link de salto no início da página apontando para o conteúdo principal.',
-        remediationAdvice: `<a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>`,
+        message: t('rules.navigation.skipLinks.message'),
+        suggestion: t('rules.navigation.skipLinks.suggestion'),
+        remediationAdvice: t('rules.navigation.skipLinks.remediation'),
         customIdPrefix: 'skip-link',
       }));
     }

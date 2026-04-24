@@ -1,11 +1,12 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation } from '@/utils';
 
 export const refreshControlRule: Rule = {
   id: 'refresh-control',
   nbrReference: '5.16.3',
-  name: 'Controle de atualização',
-  description: 'Atualizações automáticas da página devem ser controláveis',
+  name: t('rules.time.refreshControl.name'),
+  description: t('rules.time.refreshControl.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -16,9 +17,9 @@ export const refreshControlRule: Rule = {
     if (metaRefresh) {
       violations.push(createViolation(refreshControlRule, {
         element: metaRefresh as unknown as HTMLElement,
-        message: 'Atualização automática detectada via meta refresh.',
-        suggestion: 'Evite atualização automática ou ofereça mecanismo de controle ao usuário.',
-        remediationAdvice: `<meta http-equiv="refresh" content="30"> requer alternativa controlável.`,
+        message: t('rules.time.refreshControl.message'),
+        suggestion: t('rules.time.refreshControl.suggestion'),
+        remediationAdvice: t('rules.time.refreshControl.remediation'),
         customIdPrefix: 'meta-refresh',
       }));
     }

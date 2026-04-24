@@ -136,7 +136,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
   }
 }
 
-async function ensureContentScriptReady(tabId: number): Promise<void> {
+export async function ensureContentScriptReady(tabId: number): Promise<void> {
   if (await pingContentScript(tabId)) return;
 
   try {

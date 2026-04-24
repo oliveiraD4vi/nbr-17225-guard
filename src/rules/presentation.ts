@@ -1,11 +1,12 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation } from '@/utils';
 
 export const responsiveDesignRule: Rule = {
   id: 'responsive-design',
   nbrReference: '5.10.4',
-  name: 'Design responsivo',
-  description: 'Páginas devem declarar viewport adequada para responsividade',
+  name: t('rules.presentation.responsiveDesign.name'),
+  description: t('rules.presentation.responsiveDesign.description'),
   severity: 'error',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -16,9 +17,9 @@ export const responsiveDesignRule: Rule = {
     if (!viewport) {
       violations.push(createViolation(responsiveDesignRule, {
         element: document.body,
-        message: 'Meta viewport não encontrada.',
-        suggestion: 'Adicione uma meta viewport adequada ao cabeçalho da página.',
-        remediationAdvice: `<meta name="viewport" content="width=device-width, initial-scale=1" />`,
+        message: t('rules.presentation.responsiveDesign.missingMessage'),
+        suggestion: t('rules.presentation.responsiveDesign.missingSuggestion'),
+        remediationAdvice: t('rules.presentation.responsiveDesign.missingRemediation'),
         customIdPrefix: 'viewport',
       }));
       return violations;
@@ -28,9 +29,9 @@ export const responsiveDesignRule: Rule = {
     if (!content.includes('width=device-width')) {
       violations.push(createViolation(responsiveDesignRule, {
         element: viewport as unknown as HTMLElement,
-        message: 'Meta viewport não define width=device-width.',
-        suggestion: 'Use width=device-width para adaptação correta em telas pequenas.',
-        remediationAdvice: `<meta name="viewport" content="width=device-width, initial-scale=1" />`,
+        message: t('rules.presentation.responsiveDesign.widthMessage'),
+        suggestion: t('rules.presentation.responsiveDesign.widthSuggestion'),
+        remediationAdvice: t('rules.presentation.responsiveDesign.widthRemediation'),
         customIdPrefix: 'viewport-width',
       }));
     }
