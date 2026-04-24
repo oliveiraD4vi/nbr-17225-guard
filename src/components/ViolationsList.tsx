@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs, Checkbox, Input } from 'antd';
 import {
   CopyOutlined,
@@ -262,6 +262,9 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
           <div className="violation-human-review-card">
             <strong>Confirmação necessária</strong>
             <p>Eu acho que pode haver um problema aqui, mas preciso que você confirme manualmente no contexto real da página.</p>
+            {violation.inheritedFromHistory && (
+              <Tag color="blue">Herdado de auditoria anterior</Tag>
+            )}
             <Tag color={
               violation.humanReviewStatus === 'confirmed'
                 ? 'red'
@@ -477,3 +480,4 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
     </div>
   );
 };
+

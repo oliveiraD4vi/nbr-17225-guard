@@ -40,6 +40,7 @@ export interface Violation {
   elementVisibleText?: string;
   userNote?: string;
   noteUpdatedAt?: number;
+  inheritedFromHistory?: boolean;
   customId: string;
 }
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Motor de auditoria de acessibilidade
  */
 import type { AuditHistoryEntry, AuditResult, Violation } from '@/types';
@@ -72,6 +72,7 @@ function inheritPersistedViolationState(
           : violation.humanReviewStatus,
         userNote: persistedViolation.userNote ?? violation.userNote,
         noteUpdatedAt: persistedViolation.noteUpdatedAt ?? violation.noteUpdatedAt,
+        inheritedFromHistory: true,
       };
     }),
   };
@@ -296,3 +297,4 @@ export async function updateStoredAuditResult(updatedResult: AuditResult, tabId?
     console.error('[Guardião NBR 17225] Erro ao atualizar auditoria persistida:', error);
   }
 }
+

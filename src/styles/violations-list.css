@@ -191,6 +191,10 @@
   margin-top: 10px;
 }
 
+.violation-human-review-card .ant-tag + .ant-tag {
+  margin-left: 8px;
+}
+
 .violation-human-review-controls {
   display: flex;
   flex-direction: column;
