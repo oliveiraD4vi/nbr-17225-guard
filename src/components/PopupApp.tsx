@@ -1,23 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Layout, Button, Tabs, message, Spin, Tag, Empty, List, Alert, Space, Select, Statistic, Skeleton } from 'antd';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Button, Layout, message, Skeleton, Space, Spin, Tabs, Tag } from 'antd';
 import {
-  PlayCircleOutlined,
-  ReloadOutlined,
+  ArrowLeftOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
   DownloadOutlined,
   EyeOutlined,
-  DeleteOutlined,
-  StopOutlined,
-  FlagOutlined,
-  ClockCircleOutlined,
-  HistoryOutlined,
-  FileSearchOutlined,
-  ArrowLeftOutlined,
-  InfoCircleOutlined,
-  RiseOutlined,
   FallOutlined,
+  FlagOutlined,
+  InfoCircleOutlined,
   MinusOutlined,
+  ReloadOutlined,
+  RiseOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
+import { t } from '@/i18n';
 import type { AuditHistoryEntry, AuditResult, HumanReviewStatus, Violation, VisionSimulationFilter } from '@/types';
+import {
+  getConfirmedHumanReviewCount,
+  getDismissedHumanReviewCount,
+  getPendingHumanReviewCount,
+  compareAuditResults,
+} from '@/utils/audit-comparison';
+import { buildExportableAuditResult } from '@/utils/audit-export';
 import {
   getActiveTab,
   getAuditHistoryForUrl,
@@ -27,19 +32,34 @@ import {
   saveAuditResult,
   updateStoredAuditResult,
 } from '@/utils/audit-engine';
-import {
-  compareAuditResults,
-  getConfirmedHumanReviewCount,
-  getDismissedHumanReviewCount,
-  getPendingHumanReviewCount,
-} from '@/utils/audit-comparison';
-import { buildExportableAuditResult } from '@/utils/audit-export';
-import { ViolationsSummary } from './ViolationsSummary';
-import { ViolationsList } from './ViolationsList';
-import { VisionSimulator } from './VisionSimulator';
 import '../styles/popup.css';
 
 const { Header, Content, Footer } = Layout;
+
+const ViolationsSummary = React.lazy(async () => {
+  const module = await import('./ViolationsSummary');
+  return { default: module.ViolationsSummary };
+});
+
+const ViolationsList = React.lazy(async () => {
+  const module = await import('./ViolationsList');
+  return { default: module.ViolationsList };
+});
+
+const VisionSimulator = React.lazy(async () => {
+  const module = await import('./VisionSimulator');
+  return { default: module.VisionSimulator };
+});
+
+const AboutPanel = React.lazy(async () => {
+  const module = await import('./AboutPanel');
+  return { default: module.AboutPanel };
+});
+
+const HistoryTabPanel = React.lazy(async () => {
+  const module = await import('./HistoryTabPanel');
+  return { default: module.HistoryTabPanel };
+});
 
 const severityRank: Record<Violation['severity'], number> = {
   error: 0,
@@ -63,6 +83,42 @@ function getPriorityViolations(violations: Violation[]): Violation[] {
     .slice(0, 3);
 }
 
+function getComparisonTrend(summary: ReturnType<typeof compareAuditResults> | null) {
+  if (!summary) return null;
+
+  const delta = summary.targetOpenCount - summary.baselineOpenCount;
+  if (delta < 0) {
+    return {
+      icon: <RiseOutlined />,
+      label: t('shared.states.improvement'),
+      color: 'green' as const,
+    };
+  }
+  if (delta > 0) {
+    return {
+      icon: <FallOutlined />,
+      label: t('shared.states.regression'),
+      color: 'red' as const,
+    };
+  }
+
+  return {
+    icon: <MinusOutlined />,
+    label: t('shared.states.stable'),
+    color: 'default' as const,
+  };
+}
+
+function getComparisonQuickReadingLabel(label: string): string {
+  if (label === t('shared.states.improvement')) {
+    return 'A comparação indica redução de problemas visíveis na URL auditada.';
+  }
+  if (label === t('shared.states.regression')) {
+    return 'A comparação indica aumento de problemas visíveis na URL auditada.';
+  }
+  return 'A comparação não mostrou alteração no volume de problemas visíveis.';
+}
+
 export const PopupApp: React.FC = () => {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([]);
@@ -78,7 +134,7 @@ export const PopupApp: React.FC = () => {
 
   const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
     setAuditHistory((currentHistory) =>
-      currentHistory.map((entry) => (entry.id === updatedResult.id ? updatedResult as AuditHistoryEntry : entry))
+      currentHistory.map((entry) => (entry.id === updatedResult.id ? updatedResult as AuditHistoryEntry : entry)),
     );
     setAuditResult((currentResult) => (currentResult?.id === updatedResult.id ? updatedResult : currentResult));
   }, []);
@@ -111,16 +167,16 @@ export const PopupApp: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadAuditForCurrentTab();
+    void loadAuditForCurrentTab();
 
     const handleTabActivated = () => {
-      loadAuditForCurrentTab();
+      void loadAuditForCurrentTab();
     };
 
     const handleTabUpdated = (tabId: number, changeInfo: { status?: string; url?: string }) => {
       if (!activeTab?.id || tabId !== activeTab.id) return;
       if (changeInfo.status === 'complete' || 'url' in changeInfo) {
-        loadAuditForCurrentTab();
+        void loadAuditForCurrentTab();
       }
     };
 
@@ -138,21 +194,28 @@ export const PopupApp: React.FC = () => {
     await chrome.tabs.sendMessage(tab.id, payload);
   }, [activeTab]);
 
+  const viewedAuditResult = useMemo(() => {
+    if (!selectedHistoryId) return auditResult;
+    return auditHistory.find((entry) => entry.id === selectedHistoryId) || auditResult;
+  }, [auditHistory, auditResult, selectedHistoryId]);
+
+  const isHistoricalView = Boolean(selectedHistoryId);
+
   const clearHighlightsOnPage = useCallback(async (showFeedback = false) => {
     try {
       await sendMessageToActiveTab({ action: 'CLEAR_HIGHLIGHTS' });
       if (showFeedback) {
-        message.success('Destaques removidos da página');
+        message.success(t('popup.messages.highlightsCleared'));
       }
     } catch (error) {
       console.error('Erro ao limpar destaques:', error);
       if (showFeedback) {
-        message.error('Não foi possível limpar os destaques');
+        message.error(t('popup.messages.highlightsClearError'));
       }
     }
   }, [sendMessageToActiveTab]);
 
-  const handleRunAudit = async () => {
+  const handleRunAudit = useCallback(async () => {
     setLoading(true);
     try {
       await clearHighlightsOnPage(false);
@@ -160,24 +223,24 @@ export const PopupApp: React.FC = () => {
       const tab = await getActiveTab();
       setActiveTab(tab);
       const persistedResult = await saveAuditResult(result, tab.id);
-      setAuditResult(persistedResult);
       const history = await getAuditHistoryForUrl(tab.url);
+      setAuditResult(persistedResult);
       setAuditHistory(history);
       setSelectedHistoryId(null);
       setShowAboutView(false);
       setPriorityIndex(0);
       setComparisonTargetId(history[0]?.id);
       setComparisonBaselineId(history[1]?.id || history[0]?.id);
-      message.success(`Auditoria concluída: ${result.totalViolations} item(ns) encontrado(s).`);
+      message.success(t('popup.messages.auditCompleted', { count: result.totalViolations }));
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
       message.error(error instanceof Error ? error.message : 'Erro ao executar auditoria');
     } finally {
       setLoading(false);
     }
-  };
+  }, [clearHighlightsOnPage]);
 
-  const handleResetAudit = async () => {
+  const handleResetAudit = useCallback(async () => {
     setLoading(true);
     try {
       await clearHighlightsOnPage(false);
@@ -188,35 +251,35 @@ export const PopupApp: React.FC = () => {
       setPriorityIndex(0);
       setComparisonTargetId(auditHistory[0]?.id);
       setComparisonBaselineId(auditHistory[1]?.id || auditHistory[0]?.id);
-      message.success('Auditoria limpa para esta aba');
+      message.success(t('popup.messages.auditClearSuccess'));
     } catch (error) {
       console.error('Erro ao resetar:', error);
-      message.error('Erro ao limpar auditoria');
+      message.error(t('popup.messages.auditClearError'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [auditHistory, clearHighlightsOnPage]);
 
-  const handleExportJSON = () => {
+  const handleExportJSON = useCallback(() => {
     if (!viewedAuditResult) {
-      message.warning('Nenhuma auditoria para exportar');
+      message.warning(t('popup.messages.noAuditToExport'));
       return;
     }
 
     const dataStr = JSON.stringify(buildExportableAuditResult(viewedAuditResult), null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
+    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `nbr-17225-audit-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success('Relatório exportado como JSON');
-  };
+    message.success(t('popup.messages.exportJsonSuccess'));
+  }, [viewedAuditResult]);
 
-  const handleExportCSV = () => {
+  const handleExportCSV = useCallback(() => {
     if (!viewedAuditResult || viewedAuditResult.violations.length === 0) {
-      message.warning('Nenhuma violação para exportar');
+      message.warning(t('popup.messages.noViolationsToExport'));
       return;
     }
 
@@ -234,28 +297,28 @@ export const PopupApp: React.FC = () => {
       .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `nbr-17225-audit-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success('Relatório exportado como CSV');
-  };
+    message.success(t('popup.messages.exportCsvSuccess'));
+  }, [viewedAuditResult]);
 
-  const handleFilterChange = async (filter: VisionSimulationFilter) => {
+  const handleFilterChange = useCallback(async (filter: VisionSimulationFilter) => {
     await chrome.storage.local.set({ visionFilter: filter });
 
     if (!activeTab?.id) return;
 
-    chrome.tabs.sendMessage(activeTab.id, {
+    void chrome.tabs.sendMessage(activeTab.id, {
       action: 'APPLY_VISION_FILTER',
       filter,
     });
-  };
+  }, [activeTab?.id]);
 
-  const handleHighlightAll = async () => {
+  const handleHighlightAll = useCallback(async () => {
     if (!viewedAuditResult || isHistoricalView) return;
 
     try {
@@ -263,14 +326,14 @@ export const PopupApp: React.FC = () => {
         action: 'HIGHLIGHT_ALL_VIOLATIONS',
         violations: viewedAuditResult.violations,
       });
-      message.success('Destaques aplicados na página');
+      message.success(t('popup.messages.highlightsApplied'));
     } catch (error) {
       console.error('Erro ao destacar violações:', error);
-      message.error('Não foi possível destacar os elementos');
+      message.error(t('popup.messages.highlightError'));
     }
-  };
+  }, [isHistoricalView, sendMessageToActiveTab, viewedAuditResult]);
 
-  const handleHighlightViolation = async (violation: Violation) => {
+  const handleHighlightViolation = useCallback(async (violation: Violation) => {
     try {
       await sendMessageToActiveTab({
         action: 'HIGHLIGHT_VIOLATION',
@@ -279,14 +342,7 @@ export const PopupApp: React.FC = () => {
     } catch (error) {
       console.error('Erro ao destacar violação:', error);
     }
-  };
-
-  const viewedAuditResult = useMemo(() => {
-    if (!selectedHistoryId) return auditResult;
-    return auditHistory.find((entry) => entry.id === selectedHistoryId) || auditResult;
-  }, [auditHistory, auditResult, selectedHistoryId]);
-
-  const isHistoricalView = !!selectedHistoryId;
+  }, [sendMessageToActiveTab]);
 
   const comparisonEntries = useMemo(() => {
     const byId = new Map<string, AuditHistoryEntry>();
@@ -311,23 +367,11 @@ export const PopupApp: React.FC = () => {
     return compareAuditResults(baseline, target);
   }, [comparisonBaselineId, comparisonEntries, comparisonTargetId]);
 
-  const comparisonTrend = useMemo(() => {
-    if (!comparisonSummary) return null;
-
-    const delta = comparisonSummary.targetOpenCount - comparisonSummary.baselineOpenCount;
-    if (delta < 0) {
-      return { icon: <RiseOutlined />, label: 'Melhoria', color: 'green' as const };
-    }
-    if (delta > 0) {
-      return { icon: <FallOutlined />, label: 'Regressão', color: 'red' as const };
-    }
-
-    return { icon: <MinusOutlined />, label: 'Estável', color: 'default' as const };
-  }, [comparisonSummary]);
+  const comparisonTrend = useMemo(() => getComparisonTrend(comparisonSummary), [comparisonSummary]);
 
   const handleExportComparisonReport = useCallback(() => {
     if (!comparisonSummary || !comparisonTrend) {
-      message.warning('Selecione duas auditorias diferentes para exportar a comparação');
+      message.warning(t('popup.messages.comparisonSelectWarning'));
       return;
     }
 
@@ -358,12 +402,9 @@ export const PopupApp: React.FC = () => {
       '',
       '## Leitura rápida',
       '',
-      comparisonTrend.label === 'Melhoria'
-        ? 'A comparação indica redução de problemas visíveis na URL auditada.'
-        : comparisonTrend.label === 'Regressão'
-          ? 'A comparação indica aumento de problemas visíveis na URL auditada.'
-          : 'A comparação não mostrou alteração no volume de problemas visíveis.',
+      getComparisonQuickReadingLabel(comparisonTrend.label),
     ];
+
     const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -371,12 +412,12 @@ export const PopupApp: React.FC = () => {
     link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.md`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success('Comparação exportada');
+    message.success(t('popup.messages.comparisonExported'));
   }, [activeTab?.url, comparisonSummary, comparisonTrend, viewedAuditResult?.url]);
 
   const handleExportComparisonJson = useCallback(() => {
     if (!comparisonSummary) {
-      message.warning('Selecione duas auditorias diferentes para exportar a comparação');
+      message.warning(t('popup.messages.comparisonSelectWarning'));
       return;
     }
 
@@ -388,12 +429,12 @@ export const PopupApp: React.FC = () => {
     link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success('Comparação exportada como JSON');
+    message.success(t('popup.messages.comparisonExportedJson'));
   }, [comparisonSummary]);
 
   const handleExportComparisonCsv = useCallback(() => {
     if (!comparisonSummary) {
-      message.warning('Selecione duas auditorias diferentes para exportar a comparação');
+      message.warning(t('popup.messages.comparisonSelectWarning'));
       return;
     }
 
@@ -422,23 +463,24 @@ export const PopupApp: React.FC = () => {
     link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success('Comparação exportada como CSV');
+    message.success(t('popup.messages.comparisonExportedCsv'));
   }, [comparisonSummary]);
 
-  const priorityViolations = useMemo(() => (
-    viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []
-  ), [isHistoricalView, viewedAuditResult]);
+  const priorityViolations = useMemo(
+    () => (viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []),
+    [isHistoricalView, viewedAuditResult],
+  );
 
   const handleHumanReviewStatusChange = useCallback(async (violation: Violation, status: HumanReviewStatus) => {
     if (!viewedAuditResult) return;
 
     const updatedResult: AuditResult = {
       ...viewedAuditResult,
-      violations: viewedAuditResult.violations.map((currentViolation) =>
+      violations: viewedAuditResult.violations.map((currentViolation) => (
         currentViolation.id === violation.id
           ? { ...currentViolation, humanReviewStatus: status }
           : currentViolation
-      ),
+      )),
     };
 
     syncAuditResultUpdate(updatedResult);
@@ -450,7 +492,7 @@ export const PopupApp: React.FC = () => {
 
     const updatedResult: AuditResult = {
       ...viewedAuditResult,
-      violations: viewedAuditResult.violations.map((currentViolation) =>
+      violations: viewedAuditResult.violations.map((currentViolation) => (
         currentViolation.id === violation.id
           ? {
               ...currentViolation,
@@ -458,30 +500,30 @@ export const PopupApp: React.FC = () => {
               noteUpdatedAt: note ? Date.now() : undefined,
             }
           : currentViolation
-      ),
+      )),
     };
 
     syncAuditResultUpdate(updatedResult);
     await updateStoredAuditResult(updatedResult, activeTab?.id);
-    message.success(note ? 'Anotação salva' : 'Anotação removida');
+    message.success(note ? t('popup.messages.noteSaved') : t('popup.messages.noteRemoved'));
   }, [activeTab?.id, syncAuditResultUpdate, viewedAuditResult]);
 
-  const handleNextPriorityIssue = async () => {
+  const handleNextPriorityIssue = useCallback(async () => {
     if (isHistoricalView) {
-      message.info('Destaque indisponível em auditorias do histórico');
+      message.info(t('popup.messages.historyHighlightUnavailable'));
       return;
     }
 
     if (priorityViolations.length === 0) {
-      message.info('Nenhum item prioritário disponível nesta aba');
+      message.info(t('popup.messages.noPriorityAvailable'));
       return;
     }
 
     const nextViolation = priorityViolations[priorityIndex % priorityViolations.length];
     await handleHighlightViolation(nextViolation);
     setPriorityIndex((current) => (current + 1) % priorityViolations.length);
-    message.success(`Foco no item prioritário: ${nextViolation.ruleName}`);
-  };
+    message.success(t('popup.messages.priorityFocus', { name: nextViolation.ruleName }));
+  }, [handleHighlightViolation, isHistoricalView, priorityIndex, priorityViolations]);
 
   const footerActions = useMemo(() => {
     if (!viewedAuditResult) return [];
@@ -489,14 +531,14 @@ export const PopupApp: React.FC = () => {
     return [
       {
         key: 'rerun',
-        label: 'Reexecutar',
+        label: t('shared.actions.rerun'),
         icon: <ReloadOutlined />,
         onClick: handleRunAudit,
         loading,
       },
       {
         key: 'highlight',
-        label: 'Destacar tudo',
+        label: t('shared.actions.highlightAll'),
         icon: <EyeOutlined />,
         onClick: handleHighlightAll,
         type: 'primary' as const,
@@ -504,142 +546,146 @@ export const PopupApp: React.FC = () => {
       },
       {
         key: 'priority',
-        label: 'Próximo prioritário',
+        label: t('shared.actions.nextPriority'),
         icon: <FlagOutlined />,
         onClick: handleNextPriorityIssue,
         disabled: isHistoricalView,
       },
       {
         key: 'clear-highlight',
-        label: 'Limpar destaques',
+        label: t('shared.actions.clearHighlights'),
         icon: <StopOutlined />,
-        onClick: () => clearHighlightsOnPage(true),
+        onClick: () => { void clearHighlightsOnPage(true); },
         disabled: isHistoricalView,
       },
       {
         key: 'json',
-        label: 'Exportar JSON',
+        label: t('shared.actions.exportJson'),
         icon: <DownloadOutlined />,
         onClick: handleExportJSON,
       },
       {
         key: 'csv',
-        label: 'Exportar CSV',
+        label: t('shared.actions.exportCsv'),
         icon: <DownloadOutlined />,
         onClick: handleExportCSV,
       },
       {
         key: 'clear',
-        label: 'Limpar auditoria',
+        label: t('shared.actions.clearAudit'),
         icon: <DeleteOutlined />,
         onClick: handleResetAudit,
         danger: true,
       },
     ];
-  }, [viewedAuditResult, isHistoricalView, clearHighlightsOnPage, handleHighlightAll, handleNextPriorityIssue, loading]);
+  }, [
+    viewedAuditResult,
+    handleRunAudit,
+    loading,
+    handleHighlightAll,
+    isHistoricalView,
+    handleNextPriorityIssue,
+    clearHighlightsOnPage,
+    handleExportJSON,
+    handleExportCSV,
+    handleResetAudit,
+  ]);
 
-  const pendingHistoryEntries = useMemo(
-    () => auditHistory.filter((entry) => getPendingHumanReviewCount(entry) > 0),
-    [auditHistory]
-  );
+  const tabItems = useMemo(() => {
+    if (!viewedAuditResult) return [];
 
-  const completedHistoryEntries = useMemo(
-    () => auditHistory.filter((entry) => getPendingHumanReviewCount(entry) === 0),
-    [auditHistory]
-  );
-
-  const renderHistoryList = (entries: AuditHistoryEntry[], sectionTitle: string, emptyDescription: string) => (
-    <div className="history-section">
-      <div className="history-section-header">
-        <strong>{sectionTitle}</strong>
-        <span>{entries.length} auditoria(s)</span>
-      </div>
-      {entries.length === 0 ? (
-        <Empty description={emptyDescription} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-      ) : (
-        <List
-          dataSource={entries}
-          renderItem={(entry, index) => {
-            const isCurrent = !selectedHistoryId ? entry.id === auditHistory[0]?.id : entry.id === selectedHistoryId;
-            const pendingReviews = getPendingHumanReviewCount(entry);
-            const confirmedReviews = getConfirmedHumanReviewCount(entry);
-            const dismissedReviews = getDismissedHumanReviewCount(entry);
-
-            return (
-              <List.Item
-                className={`history-item${entry.id === selectedHistoryId ? ' is-selected' : ''}${pendingReviews > 0 ? ' is-pending' : ' is-complete'}`}
-                actions={[
-                  <Button
-                    key="view"
-                    type={entry.id === selectedHistoryId ? 'primary' : 'default'}
-                    size="small"
-                    icon={<HistoryOutlined />}
-                    disabled={entry.id === selectedHistoryId && !auditResult}
-                    onClick={() => {
-                      setSelectedHistoryId(entry.id === selectedHistoryId ? null : entry.id);
-                      setPriorityIndex(0);
-                    }}
-                  >
-                    {entry.id === selectedHistoryId
-                      ? (auditResult ? 'Voltar para atual' : 'Usando histórico')
-                      : 'Visualizar'}
-                  </Button>,
-                ]}
-              >
-                <List.Item.Meta
-                  avatar={<FileSearchOutlined />}
-                  title={(
-                    <div className="history-item-title">
-                      <span>{entry.pageTitle || activeTab?.title || entry.url}</span>
-                      {!selectedHistoryId && entry.id === auditHistory[0]?.id && <Tag color="blue">Mais recente</Tag>}
-                      {entry.id === selectedHistoryId && <Tag color="gold">Em visualização</Tag>}
-                      {isCurrent && selectedHistoryId && <Tag color="blue">Atual em foco</Tag>}
-                      <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
-                        {pendingReviews > 0 ? 'Revisão pendente' : 'Revisão concluída'}
-                      </Tag>
-                    </div>
-                  )}
-                  description={(
-                    <div className="history-item-meta">
-                      <div className="history-item-meta-row">
-                        <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
-                        <span>{entry.totalViolations} item(ns)</span>
-                      </div>
-                      <div className="history-item-tag-row">
-                        <Tag color="red">{confirmedReviews} confirmados</Tag>
-                        <Tag>{dismissedReviews} descartados</Tag>
-                        <Tag color="gold">{pendingReviews} pendentes</Tag>
-                        <Tag color="blue">{entry.violations.filter((violation) => Boolean(violation.userNote?.trim())).length} anotações</Tag>
-                      </div>
-                    </div>
-                  )}
-                />
-              </List.Item>
-            );
-          }}
-        />
-      )}
-    </div>
-  );
+    return [
+      {
+        key: 'summary',
+        label: t('popup.tabs.summary'),
+        children: <ViolationsSummary result={viewedAuditResult} />,
+      },
+      {
+        key: 'violations',
+        label: t('popup.tabs.violations', { count: viewedAuditResult.totalViolations }),
+        children: (
+          <ViolationsList
+            violations={viewedAuditResult.violations}
+            onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
+            onHumanReviewStatusChange={handleHumanReviewStatusChange}
+            onViolationNoteChange={handleViolationNoteChange}
+          />
+        ),
+      },
+      {
+        key: 'history',
+        label: t('popup.tabs.history', { count: auditHistory.length }),
+        children: (
+          <HistoryTabPanel
+            activeTabTitle={activeTab?.title}
+            auditHistory={auditHistory}
+            auditResultId={auditResult?.id}
+            selectedHistoryId={selectedHistoryId}
+            comparisonEntries={comparisonEntries}
+            comparisonBaselineId={comparisonBaselineId}
+            comparisonTargetId={comparisonTargetId}
+            comparisonSummary={comparisonSummary}
+            comparisonTrend={comparisonTrend}
+            onSelectHistory={(historyId) => {
+              setSelectedHistoryId(historyId);
+              setPriorityIndex(0);
+            }}
+            onComparisonBaselineChange={setComparisonBaselineId}
+            onComparisonTargetChange={setComparisonTargetId}
+            onExportMarkdown={handleExportComparisonReport}
+            onExportJson={handleExportComparisonJson}
+            onExportCsv={handleExportComparisonCsv}
+          />
+        ),
+      },
+      {
+        key: 'simulator',
+        label: t('popup.tabs.simulator'),
+        children: <VisionSimulator onFilterChange={handleFilterChange} />,
+      },
+    ];
+  }, [
+    viewedAuditResult,
+    isHistoricalView,
+    handleHighlightViolation,
+    handleHumanReviewStatusChange,
+    handleViolationNoteChange,
+    auditHistory.length,
+    activeTab?.title,
+    auditHistory,
+    auditResult?.id,
+    selectedHistoryId,
+    comparisonEntries,
+    comparisonBaselineId,
+    comparisonTargetId,
+    comparisonSummary,
+    comparisonTrend,
+    handleExportComparisonReport,
+    handleExportComparisonJson,
+    handleExportComparisonCsv,
+    handleFilterChange,
+  ]);
 
   return (
     <Layout className="popup-app">
       <Header className="popup-header">
         <div className="header-row">
           <div className="header-content">
-            <h1>Guardião NBR 17225</h1>
+            <h1>{t('shared.brand.name')}</h1>
             <p>
-              {activeTab?.title ? `Aba ativa: ${activeTab.title}` : 'Verificação por aba com foco em requisitos e recomendações.'}
+              {activeTab?.title
+                ? t('popup.header.activeTab', { title: activeTab.title })
+                : t('popup.header.fallback')}
             </p>
           </div>
           <Space>
             {showAboutView ? (
               <Button icon={<ArrowLeftOutlined />} onClick={() => setShowAboutView(false)}>
-                Voltar
+                {t('shared.actions.back')}
               </Button>
             ) : (
               <Button icon={<InfoCircleOutlined />} onClick={() => setShowAboutView(true)}>
-                Sobre
+                {t('shared.actions.about')}
               </Button>
             )}
           </Space>
@@ -647,7 +693,7 @@ export const PopupApp: React.FC = () => {
       </Header>
 
       <Content className="popup-content">
-        <Spin spinning={loading} tip="Analisando página...">
+        <Spin spinning={loading} tip={t('popup.loading.analyzingPage')}>
           {initialLoading ? (
             <div className="popup-loading-state" aria-live="polite" aria-busy="true">
               <Skeleton.Button active block className="popup-loading-title" />
@@ -659,48 +705,32 @@ export const PopupApp: React.FC = () => {
               </div>
             </div>
           ) : showAboutView || !viewedAuditResult ? (
-            <div className="empty-state empty-state-with-about">
-              <div className="about-card">
-                <span className="about-eyebrow">Sobre</span>
-                <h2>Auditoria assistida da ABNT NBR 17225</h2>
-                <p>
-                  O Guardião avalia o escopo da versão 1 do catálogo normativo do projeto e separa
-                  automaticamente requisitos, recomendações e itens que ainda precisam de confirmação humana.
-                </p>
-                <p>
-                  Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página
-                  e manter um histórico local das auditorias já executadas.
-                </p>
-              </div>
-              <Space>
-                {viewedAuditResult && (
-                  <Button icon={<ArrowLeftOutlined />} onClick={() => setShowAboutView(false)}>
-                    Voltar à auditoria
-                  </Button>
-                )}
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<PlayCircleOutlined />}
-                  onClick={handleRunAudit}
-                  loading={loading}
-                >
-                  Iniciar verificação
-                </Button>
-              </Space>
-            </div>
+            <Suspense fallback={<Spin spinning tip={t('popup.loading.analyzingPage')} />}>
+              <AboutPanel
+                hasAudit={Boolean(viewedAuditResult)}
+                loading={loading}
+                onBack={() => setShowAboutView(false)}
+                onStart={() => { void handleRunAudit(); }}
+              />
+            </Suspense>
           ) : (
             <>
               <div className="tab-status-strip">
                 <div className="tab-status-item">
-                  <span className="tab-status-label">Aba atual</span>
-                  <strong>{activeTab?.title || activeTab?.url || 'Sem título'}</strong>
+                  <span className="tab-status-label">{t('shared.labels.currentTab')}</span>
+                  <strong>{activeTab?.title || activeTab?.url || t('shared.labels.untitled')}</strong>
                 </div>
                 <div className="tab-status-item">
-                  <span className="tab-status-label">{isHistoricalView ? 'Histórico de' : 'Auditado em'}</span>
-                  <strong><ClockCircleOutlined /> {new Date(viewedAuditResult.timestamp).toLocaleString('pt-BR')}</strong>
+                  <span className="tab-status-label">
+                    {isHistoricalView ? t('shared.labels.historyOf') : t('shared.labels.auditedAt')}
+                  </span>
+                  <strong>
+                    <ClockCircleOutlined /> {new Date(viewedAuditResult.timestamp).toLocaleString('pt-BR')}
+                  </strong>
                 </div>
-                <Tag color={isHistoricalView ? 'gold' : 'blue'}>{isHistoricalView ? 'Histórico por URL' : 'Auditoria atual'}</Tag>
+                <Tag color={isHistoricalView ? 'gold' : 'blue'}>
+                  {isHistoricalView ? t('shared.labels.historyByUrl') : t('shared.labels.currentAudit')}
+                </Tag>
               </div>
 
               {isHistoricalView && (
@@ -708,140 +738,14 @@ export const PopupApp: React.FC = () => {
                   className="history-alert"
                   type="warning"
                   showIcon
-                  message="Você está visualizando uma auditoria do histórico"
-                  description="Os dados abaixo pertencem a uma execução anterior da mesma URL. Destaques visuais na página atual podem não corresponder a esse estado."
+                  message={t('popup.history.warningTitle')}
+                  description={t('popup.history.warningDescription')}
                 />
               )}
 
-              <Tabs
-                activeKey={activeTabKey}
-                onChange={setActiveTabKey}
-                items={[
-                  {
-                    key: 'summary',
-                    label: 'Resumo',
-                    children: <ViolationsSummary result={viewedAuditResult} />,
-                  },
-                  {
-                    key: 'violations',
-                    label: `Violações (${viewedAuditResult.totalViolations})`,
-                    children: (
-                      <ViolationsList
-                        violations={viewedAuditResult.violations}
-                        onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
-                        onHumanReviewStatusChange={handleHumanReviewStatusChange}
-                        onViolationNoteChange={handleViolationNoteChange}
-                      />
-                    ),
-                  },
-                  {
-                    key: 'history',
-                    label: `Histórico (${auditHistory.length})`,
-                    children: (
-                      <div className="history-tab">
-                        {comparisonEntries.length >= 2 && (
-                          <div className="history-comparison-card">
-                            <div className="history-comparison-header">
-                              <div>
-                                <strong>Comparar auditorias</strong>
-                                <p>Compare a evolução desta URL entre duas execuções salvas.</p>
-                              </div>
-                              <Space>
-                                {comparisonTrend && (
-                                  <Tag color={comparisonTrend.color}>
-                                    {comparisonTrend.icon} {comparisonTrend.label}
-                                  </Tag>
-                                )}
-                                <Button size="small" icon={<DownloadOutlined />} onClick={handleExportComparisonReport} disabled={!comparisonSummary}>
-                                  Exportar MD
-                                </Button>
-                                <Button size="small" icon={<DownloadOutlined />} onClick={handleExportComparisonJson} disabled={!comparisonSummary}>
-                                  JSON
-                                </Button>
-                                <Button size="small" icon={<DownloadOutlined />} onClick={handleExportComparisonCsv} disabled={!comparisonSummary}>
-                                  CSV
-                                </Button>
-                              </Space>
-                            </div>
-
-                            <div className="history-comparison-selectors">
-                              <div className="history-comparison-field">
-                                <span>Base</span>
-                                <Select
-                                  value={comparisonBaselineId}
-                                  onChange={setComparisonBaselineId}
-                                  options={comparisonEntries.map((entry) => ({
-                                    value: entry.id,
-                                    label: `${new Date(entry.timestamp).toLocaleString('pt-BR')} • ${entry.totalViolations} item(ns)`,
-                                  }))}
-                                />
-                              </div>
-                              <div className="history-comparison-field">
-                                <span>Comparar com</span>
-                                <Select
-                                  value={comparisonTargetId}
-                                  onChange={setComparisonTargetId}
-                                  options={comparisonEntries.map((entry) => ({
-                                    value: entry.id,
-                                    label: `${new Date(entry.timestamp).toLocaleString('pt-BR')} • ${entry.totalViolations} item(ns)`,
-                                  }))}
-                                />
-                              </div>
-                            </div>
-
-                            {comparisonSummary ? (
-                              <div className="history-comparison-body">
-                                <div className="history-comparison-stats">
-                                  <Statistic title="Novos problemas" value={comparisonSummary.newViolations.length} />
-                                  <Statistic title="Problemas resolvidos" value={comparisonSummary.resolvedViolations.length} />
-                                  <Statistic title="Problemas persistentes" value={comparisonSummary.persistentViolations.length} />
-                                </div>
-
-                                <div className="history-comparison-meta">
-                                  <span>Notas: {comparisonSummary.baselineNoteCount} {'->'} {comparisonSummary.targetNoteCount}</span>
-                                  <span>Confirmações humanas: {comparisonSummary.baselineConfirmedReviews} {'->'} {comparisonSummary.targetConfirmedReviews}</span>
-                                  <span>Descartes humanos: {comparisonSummary.baselineDismissedReviews} {'->'} {comparisonSummary.targetDismissedReviews}</span>
-                                  <span>Pendentes humanos: {comparisonSummary.baselinePendingReviews} {'->'} {comparisonSummary.targetPendingReviews}</span>
-                                  <span>Itens visíveis: {comparisonSummary.baselineOpenCount} {'->'} {comparisonSummary.targetOpenCount}</span>
-                                  <span>Variação: {comparisonSummary.openIssuesDeltaPercentage}%</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <Alert
-                                type="info"
-                                showIcon
-                                message="Selecione duas auditorias diferentes para comparar"
-                              />
-                            )}
-                          </div>
-                        )}
-
-                        {auditHistory.length === 0 ? (
-                          <Empty description="Nenhuma auditoria anterior encontrada para esta URL" />
-                        ) : (
-                          <>
-                            {renderHistoryList(
-                              pendingHistoryEntries,
-                              'Revisão pendente',
-                              'Nenhuma auditoria com revisão humana pendente'
-                            )}
-                            {renderHistoryList(
-                              completedHistoryEntries,
-                              'Revisão concluída',
-                              'Nenhuma auditoria com revisão humana concluída'
-                            )}
-                          </>
-                        )}
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 'simulator',
-                    label: 'Simulador de Visão',
-                    children: <VisionSimulator onFilterChange={handleFilterChange} />,
-                  },
-                ]}
-              />
+              <Suspense fallback={<Spin spinning tip={t('popup.loading.analyzingPage')} />}>
+                <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} items={tabItems} />
+              </Suspense>
             </>
           )}
         </Spin>

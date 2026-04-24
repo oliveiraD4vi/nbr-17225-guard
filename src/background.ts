@@ -1,26 +1,24 @@
 /**
  * Background Service Worker
  */
+import { t } from '@/i18n';
 
-// Listener para instalação da extensão
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    console.log('[Guardião NBR 17225] Extensão instalada com sucesso');
+    console.log(`[${t('shared.brand.name')}] ${t('background.installed')}`);
   } else if (details.reason === 'update') {
-    console.log('[Guardião NBR 17225] Extensão atualizada');
+    console.log(`[${t('shared.brand.name')}] ${t('background.updated')}`);
   }
 });
 
-// Listener para mensagens
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('[Guardião NBR 17225] Mensagem no background:', request.action);
+  console.log(`[${t('shared.brand.name')}] ${t('background.message')}`, request.action);
 
   switch (request.action) {
     case 'OPEN_REPORT':
       openDetailedReport();
       sendResponse({ status: 'OK' });
       break;
-
     default:
       sendResponse({ status: 'UNKNOWN_ACTION' });
   }
@@ -28,9 +26,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   return true;
 });
 
-/**
- * Abre a janela de relatório detalhado
- */
 function openDetailedReport() {
   chrome.windows.create({
     url: chrome.runtime.getURL('src/report.html'),
@@ -40,4 +35,4 @@ function openDetailedReport() {
   });
 }
 
-console.log('[Guardião NBR 17225] Background service worker carregado');
+console.log(`[${t('shared.brand.name')}] ${t('background.loaded')}`);

@@ -1,4 +1,5 @@
 .popup-app {
+  width: 600px;
   max-width: 600px !important;
   min-height: 400px;
   display: flex;

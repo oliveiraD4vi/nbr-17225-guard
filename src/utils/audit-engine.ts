@@ -1,6 +1,7 @@
 ﻿/**
  * Motor de auditoria de acessibilidade
  */
+import { t } from '@/i18n';
 import type { AuditHistoryEntry, AuditResult, Violation } from '@/types';
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
@@ -8,7 +9,7 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> 
   const activeTab = tabs[0];
 
   if (!activeTab?.id) {
-    throw new Error('Nenhuma aba ativa encontrada.');
+    throw new Error(t('engine.noActiveTab'));
   }
 
   return activeTab as chrome.tabs.Tab & { id: number };
@@ -107,7 +108,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
     const activeTab = await getActiveTab();
 
     if (!activeTab.url || !isSupportedTabUrl(activeTab.url)) {
-      throw new Error('A auditoria só pode ser executada em páginas http(s) ou arquivos locais com permissão.');
+      throw new Error(t('engine.unsupportedUrl'));
     }
 
     await ensureContentScriptReady(activeTab.id);
@@ -121,7 +122,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
     }
 
     if (!response?.result) {
-      throw new Error('Erro ao executar a auditoria no content script.');
+      throw new Error(t('engine.contentExecutionError'));
     }
 
     const result: AuditResult = normalizeAuditResult(response.result)!;
@@ -152,7 +153,7 @@ async function ensureContentScriptReady(tabId: number): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
 
-  throw new Error('Não foi possível acessar o DOM da página. Recarregue a aba e tente novamente.');
+  throw new Error(t('engine.domUnavailable'));
 }
 
 async function pingContentScript(tabId: number): Promise<boolean> {

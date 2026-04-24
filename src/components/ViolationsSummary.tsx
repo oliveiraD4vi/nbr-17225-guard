@@ -1,13 +1,20 @@
 import React from 'react';
 import { Card, Empty, Spin, Tag } from 'antd';
-import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined, LinkOutlined, CalendarOutlined } from '@ant-design/icons';
+import {
+  CalendarOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  LinkOutlined,
+  WarningOutlined,
+} from '@ant-design/icons';
+import { t } from '@/i18n';
 import type { AuditResult } from '@/types';
-import { getRequirementScoreData } from '@/utils/audit-score';
 import {
   getConfirmedHumanReviewCount,
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
 } from '@/utils/audit-comparison';
+import { getRequirementScoreData } from '@/utils/audit-score';
 import '../styles/violations-summary.css';
 
 interface ViolationsSummaryProps {
@@ -15,11 +22,14 @@ interface ViolationsSummaryProps {
   loading?: boolean;
 }
 
-export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, loading = false }) => {
+export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(({
+  result,
+  loading = false,
+}) => {
   if (loading) {
     return (
       <div className="violations-summary-loading">
-        <Spin size="large" tip="Analisando página..." />
+        <Spin size="large" tip={t('summary.loading')} />
       </div>
     );
   }
@@ -27,7 +37,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
   if (!result) {
     return (
       <Empty
-        description="Nenhuma auditoria executada"
+        description={t('summary.empty')}
         style={{ marginTop: '50px' }}
       />
     );
@@ -44,17 +54,19 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
       <Card className="summary-card">
         <div className="summary-hero">
           <div className="summary-hero-copy">
-            <span className="summary-eyebrow">Resumo da auditoria</span>
-            <h2>{hasViolations ? 'Ajustes pendentes identificados' : 'Nenhuma violação detectada'}</h2>
+            <span className="summary-eyebrow">{t('summary.eyebrow')}</span>
+            <h2>{hasViolations ? t('summary.titleWithIssues') : t('summary.titleWithoutIssues')}</h2>
             <p>
               {hasViolations
-                ? 'Os pontos abaixo priorizam os requisitos obrigatórios e separam recomendações para revisão incremental.'
-                : 'A página auditada não apresentou violações nas regras atualmente verificadas pelo motor.'}
+                ? t('summary.descriptionWithIssues')
+                : t('summary.descriptionWithoutIssues')}
             </p>
           </div>
           <div className={`summary-status-pill ${hasViolations ? 'is-warning' : 'is-success'}`}>
             {hasViolations ? <WarningOutlined /> : <CheckCircleOutlined />}
-            <span>{hasViolations ? 'Ação necessária' : 'Conforme verificado'}</span>
+            <span>
+              {hasViolations ? t('shared.states.actionRequired') : t('shared.states.verifiedCompliant')}
+            </span>
           </div>
         </div>
 
@@ -71,19 +83,19 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
 
         <div className="summary-score-card">
           <div className="summary-score-copy">
-            <span className="summary-stat-label">Nota de requisitos</span>
-            <strong>{requirementScore.score}</strong>
-            <p>
-              Considera apenas os requisitos obrigatórios do escopo v1. Itens ainda pendentes de confirmação humana não entram nesta nota.
-            </p>
+            <span className="summary-stat-label">{t('summary.scoreLabel')}</span>
+            <strong>{t('summary.scoreOutOf', { score: requirementScore.score })}</strong>
+            <p>{t('summary.scoreDescription')}</p>
           </div>
           <div className="summary-score-meta">
             <Tag color={requirementScore.score >= 90 ? 'green' : requirementScore.score >= 70 ? 'gold' : 'red'}>
-              {requirementScore.violatedRequirementRules} regra(s) obrigatória(s) com falha
+              {t('summary.failingRequirements', { count: requirementScore.violatedRequirementRules })}
             </Tag>
             {requirementScore.pendingHumanRequirementRules > 0 && (
               <Tag color="gold">
-                {requirementScore.pendingHumanRequirementRules} regra(s) aguardando confirmação humana
+                {t('summary.pendingRequirementReview', {
+                  count: requirementScore.pendingHumanRequirementRules,
+                })}
               </Tag>
             )}
           </div>
@@ -91,61 +103,61 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
 
         <div className="summary-total-wrapper">
           <div className="summary-stat-card is-total">
-            <span className="summary-stat-label">Total</span>
+            <span className="summary-stat-label">{t('shared.labels.total')}</span>
             <strong>{result.totalViolations}</strong>
-            <small>itens encontrados</small>
+            <small>{t('summary.totalItemsFound')}</small>
           </div>
 
           <div className="summary-stat-grid">
             <div className="summary-stat-card is-error">
-              <span className="summary-stat-label">Requisitos</span>
+              <span className="summary-stat-label">{t('shared.labels.requirements')}</span>
               <strong>{result.errors}</strong>
-              <small>não atendidos</small>
+              <small>{t('summary.requirementsMissed')}</small>
             </div>
             <div className="summary-stat-card is-warning">
-              <span className="summary-stat-label">Recomendações</span>
+              <span className="summary-stat-label">{t('shared.labels.recommendations')}</span>
               <strong>{result.warnings}</strong>
-              <small>para revisão</small>
+              <small>{t('summary.recommendationsReview')}</small>
             </div>
             <div className="summary-stat-card is-review">
-              <span className="summary-stat-label">Verificação humana</span>
+              <span className="summary-stat-label">{t('shared.labels.humanReview')}</span>
               <strong>{result.humanReviewItems}</strong>
-              <small>itens a confirmar</small>
+              <small>{t('summary.itemsToConfirm')}</small>
             </div>
           </div>
         </div>
 
         <div className="summary-review-progress">
           <div className="summary-review-progress-header">
-            <h3>Progresso da revisão humana</h3>
+            <h3>{t('summary.humanReviewProgress')}</h3>
             <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
-              {pendingReviews > 0 ? 'Há confirmações pendentes' : 'Revisão humana concluída'}
+              {pendingReviews > 0 ? t('summary.pendingReviewBadge') : t('summary.completedReviewBadge')}
             </Tag>
           </div>
           <div className="summary-review-progress-grid">
             <div className="summary-review-card is-confirmed">
-              <span className="summary-stat-label">Confirmados</span>
+              <span className="summary-stat-label">{t('summary.confirmed')}</span>
               <strong>{confirmedReviews}</strong>
-              <small>continuam como problema</small>
+              <small>{t('summary.confirmedDescription')}</small>
             </div>
             <div className="summary-review-card is-dismissed">
-              <span className="summary-stat-label">Descartados</span>
+              <span className="summary-stat-label">{t('summary.dismissed')}</span>
               <strong>{dismissedReviews}</strong>
-              <small>não se confirmaram no contexto</small>
+              <small>{t('summary.dismissedDescription')}</small>
             </div>
             <div className="summary-review-card is-pending">
-              <span className="summary-stat-label">Pendentes</span>
+              <span className="summary-stat-label">{t('summary.pending')}</span>
               <strong>{pendingReviews}</strong>
-              <small>ainda precisam de revisão humana</small>
+              <small>{t('summary.pendingDescription')}</small>
             </div>
           </div>
         </div>
 
         <div className="summary-breakdown">
           <div className="summary-breakdown-header">
-            <h3>Prioridade de revisão</h3>
+            <h3>{t('summary.reviewPriority')}</h3>
             <Tag color={hasViolations ? 'orange' : 'green'}>
-              {hasViolations ? 'Comece pelos requisitos' : 'Nenhuma prioridade aberta'}
+              {hasViolations ? t('summary.priorityOpen') : t('summary.priorityClear')}
             </Tag>
           </div>
 
@@ -155,8 +167,8 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
                 <CloseCircleOutlined />
               </span>
               <div>
-                <strong>Requisitos obrigatórios</strong>
-                <p>Itens marcados como requisito devem ser tratados primeiro, porque representam não conformidades diretas.</p>
+                <strong>{t('summary.priorityRequirements')}</strong>
+                <p>{t('summary.priorityRequirementsDescription')}</p>
               </div>
               <span className="summary-priority-value">{result.errors}</span>
             </div>
@@ -166,8 +178,8 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
                 <WarningOutlined />
               </span>
               <div>
-                <strong>Recomendações e heurísticas</strong>
-                <p>Esses itens dependem de validação contextual e ajudam a fechar lacunas de usabilidade e conformidade.</p>
+                <strong>{t('summary.priorityRecommendations')}</strong>
+                <p>{t('summary.priorityRecommendationsDescription')}</p>
               </div>
               <span className="summary-priority-value">{result.warnings}</span>
             </div>
@@ -177,8 +189,8 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
                 <WarningOutlined />
               </span>
               <div>
-                <strong>Confirmação humana</strong>
-                <p>Esses itens são indícios fortes, mas a conclusão depende de verificar o comportamento real, o contexto visual ou o fluxo da interface.</p>
+                <strong>{t('summary.priorityHumanReview')}</strong>
+                <p>{t('summary.priorityHumanReviewDescription')}</p>
               </div>
               <span className="summary-priority-value">{result.humanReviewItems}</span>
             </div>
@@ -188,10 +200,10 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = ({ result, lo
         {!hasViolations && (
           <div className="success-message">
             <CheckCircleOutlined style={{ fontSize: '40px', color: '#166534' }} />
-            <p>Auditoria concluída sem violações no conjunto atual de regras verificadas.</p>
+            <p>{t('summary.success')}</p>
           </div>
         )}
       </Card>
     </div>
   );
-};
+});

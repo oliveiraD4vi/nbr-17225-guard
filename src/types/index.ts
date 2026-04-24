@@ -9,7 +9,7 @@ export type HumanReviewStatus = 'not_applicable' | 'pending' | 'confirmed' | 'di
 
 export interface Rule {
   id: string;
-  nbrReference: string; // ex: "5.2.1"
+  nbrReference: string;
   name: string;
   description: string;
   severity: SeverityLevel;
@@ -70,7 +70,7 @@ export interface HighlightState {
 
 export interface VisionSimulationFilter {
   type: 'none' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'blur';
-  intensity: number; // 0-100
+  intensity: number;
 }
 
 export interface ExtensionMessage {

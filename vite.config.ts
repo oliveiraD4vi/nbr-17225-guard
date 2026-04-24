@@ -16,6 +16,7 @@ export default defineConfig({
     },
   ],
   build: {
+    chunkSizeWarningLimit: 450,
     rollupOptions: {
       input: {
         popup: path.resolve(__dirname, 'src/popup.html'),
@@ -27,8 +28,18 @@ export default defineConfig({
         entryFileNames: '[name].js',
         chunkFileNames: '[name].js',
         assetFileNames: '[name].[ext]',
-        inlineDynamicImports: false,
-        manualChunks: undefined,
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (id.includes('@ant-design/icons')) return 'vendor-icons'
+          if (
+            id.includes('/node_modules/react/') ||
+            id.includes('/node_modules/react-dom/') ||
+            id.includes('/node_modules/scheduler/')
+          ) {
+            return 'vendor-react'
+          }
+          return undefined
+        },
       },
     },
     outDir: 'dist',

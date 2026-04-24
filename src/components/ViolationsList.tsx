@@ -1,18 +1,19 @@
-﻿import React from 'react';
-import { Card, Tag, Button, Collapse, Space, Empty, Tooltip, Tabs, Checkbox, Input } from 'antd';
+import React from 'react';
+import { Button, Card, Checkbox, Collapse, Empty, Input, Space, Tabs, Tag, Tooltip } from 'antd';
 import {
-  CopyOutlined,
-  LinkOutlined,
-  InfoCircleOutlined,
-  PushpinFilled,
-  SearchOutlined,
-  FileTextOutlined,
   BoldOutlined,
-  ItalicOutlined,
-  UnorderedListOutlined,
-  SaveOutlined,
   ClearOutlined,
+  CopyOutlined,
+  FileTextOutlined,
+  InfoCircleOutlined,
+  ItalicOutlined,
+  LinkOutlined,
+  PushpinFilled,
+  SaveOutlined,
+  SearchOutlined,
+  UnorderedListOutlined,
 } from '@ant-design/icons';
+import { t } from '@/i18n';
 import type { HumanReviewStatus, Violation } from '@/types';
 import '../styles/violations-list.css';
 
@@ -29,24 +30,26 @@ interface ViolationGroup {
   topIssueCount: number;
 }
 
+const { TextArea } = Input;
+
 const severityRank: Record<Violation['severity'], number> = {
   error: 0,
   warning: 1,
 };
 
-function getSeverityColor(severity: string): string {
+function getSeverityColor(severity: Violation['severity']): string {
   return severity === 'error' ? 'red' : 'orange';
 }
 
-function getSeverityLabel(severity: string): string {
-  return severity === 'error' ? 'Requisito' : 'Recomendação';
+function getSeverityLabel(severity: Violation['severity']): string {
+  return severity === 'error' ? t('shared.severity.requirement') : t('shared.severity.recommendation');
 }
 
 function getReviewLabel(violation: Violation): string {
-  if (!violation.requiresHumanReview) return 'Detecção automática';
-  if (violation.humanReviewStatus === 'confirmed') return 'Confirmado e precisa de correção';
-  if (violation.humanReviewStatus === 'dismissed') return 'Descartado na revisão humana';
-  return 'Precisa de confirmação humana';
+  if (!violation.requiresHumanReview) return t('shared.states.automaticDetection');
+  if (violation.humanReviewStatus === 'confirmed') return t('shared.review.confirmedNeedsFix');
+  if (violation.humanReviewStatus === 'dismissed') return t('shared.review.dismissed');
+  return t('shared.review.needsConfirmation');
 }
 
 function isVisibleInMainLists(violation: Violation): boolean {
@@ -104,10 +107,10 @@ function renderViolationGroups(
   violations: Violation[],
   onSelectViolation?: (violation: Violation) => void,
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
-  onViolationNoteChange?: (violation: Violation, note: string) => void
+  onViolationNoteChange?: (violation: Violation, note: string) => void,
 ): React.ReactNode {
   if (violations.length === 0) {
-    return <Empty description="Nenhum item nesta categoria" />;
+    return <Empty description={t('violations.emptyCategory')} />;
   }
 
   const groups = buildGroups(violations);
@@ -127,7 +130,7 @@ function renderViolationGroups(
               <span className="violation-rule-name">{firstViolation.ruleName}</span>
               {topRuleIds.has(group.ruleId) && (
                 <Tag className="violation-top-tag" color="volcano">
-                  <PushpinFilled /> Prioridade
+                  <PushpinFilled /> {t('shared.states.priority')}
                 </Tag>
               )}
             </div>
@@ -137,8 +140,8 @@ function renderViolationGroups(
             <Tag color={getSeverityColor(firstViolation.severity)}>
               {getSeverityLabel(firstViolation.severity)}
             </Tag>
-            {firstViolation.requiresHumanReview && <Tag color="gold">Confirmação humana</Tag>}
-            <Tag>{group.violations.length} ocorrência(s)</Tag>
+            {firstViolation.requiresHumanReview && <Tag color="gold">{t('shared.states.humanConfirmation')}</Tag>}
+            <Tag>{t('shared.counts.occurrences', { count: group.violations.length })}</Tag>
             <span className="violation-nbr-ref">NBR {firstViolation.nbrReference}</span>
           </div>
         </div>
@@ -147,33 +150,41 @@ function renderViolationGroups(
         <div className="violation-details">
           <div className="violation-top-issues">
             <div className="violation-section-header">
-              <strong>Itens prioritários</strong>
-              <span>{group.topIssueCount} ponto(s) prioritário(s)</span>
+              <strong>{t('violations.topIssues')}</strong>
+              <span>{t('shared.counts.priorityPoints', { count: group.topIssueCount })}</span>
             </div>
             <div className="violation-items">
-              {topIssues.map((violation, index) =>
-                renderViolationCard(violation, index, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange, true)
-              )}
+              {topIssues.map((violation, index) => (
+                <ViolationCard
+                  key={violation.id}
+                  violation={violation}
+                  index={index}
+                  onSelectViolation={onSelectViolation}
+                  onHumanReviewStatusChange={onHumanReviewStatusChange}
+                  onViolationNoteChange={onViolationNoteChange}
+                  pinned
+                />
+              ))}
             </div>
           </div>
 
           {remainingIssues.length > 0 && (
             <div className="violation-more-issues">
               <div className="violation-section-header">
-                <strong>Demais ocorrências</strong>
-                <span>{remainingIssues.length} item(ns)</span>
+                <strong>{t('violations.otherOccurrences')}</strong>
+                <span>{t('shared.counts.items', { count: remainingIssues.length })}</span>
               </div>
               <div className="violation-items">
-                {remainingIssues.map((violation, index) =>
-                  renderViolationCard(
-                    violation,
-                    topIssues.length + index,
-                    onSelectViolation,
-                    onHumanReviewStatusChange,
-                    onViolationNoteChange,
-                    false
-                  )
-                )}
+                {remainingIssues.map((violation, index) => (
+                  <ViolationCard
+                    key={violation.id}
+                    violation={violation}
+                    index={topIssues.length + index}
+                    onSelectViolation={onSelectViolation}
+                    onHumanReviewStatusChange={onHumanReviewStatusChange}
+                    onViolationNoteChange={onViolationNoteChange}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -185,26 +196,6 @@ function renderViolationGroups(
   return <Collapse items={items} />;
 }
 
-function renderViolationCard(
-  violation: Violation,
-  index: number,
-  onSelectViolation?: (violation: Violation) => void,
-  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
-  onViolationNoteChange?: (violation: Violation, note: string) => void,
-  pinned = false
-): React.ReactNode {
-  return (
-    <ViolationCard
-      violation={violation}
-      index={index}
-      onSelectViolation={onSelectViolation}
-      onHumanReviewStatusChange={onHumanReviewStatusChange}
-      onViolationNoteChange={onViolationNoteChange}
-      pinned={pinned}
-    />
-  );
-}
-
 interface ViolationCardProps {
   violation: Violation;
   index: number;
@@ -214,9 +205,7 @@ interface ViolationCardProps {
   pinned?: boolean;
 }
 
-const { TextArea } = Input;
-
-const ViolationCard: React.FC<ViolationCardProps> = ({
+const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
   violation,
   index,
   onSelectViolation,
@@ -231,21 +220,24 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
     setNoteDraft(violation.userNote || '');
   }, [violation.id, violation.userNote]);
 
-  const insertAtEnd = (value: string) => {
+  const insertAtEnd = React.useCallback((value: string) => {
     setNoteDraft((current) => `${current}${current ? '\n' : ''}${value}`);
-  };
+  }, []);
 
-  const handleSaveNote = (event: React.MouseEvent<HTMLElement>) => {
+  const handleSaveNote = React.useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
     onViolationNoteChange?.(violation, noteDraft.trim());
-  };
+  }, [noteDraft, onViolationNoteChange, violation]);
+
+  const handleCardClick = React.useCallback(() => {
+    onSelectViolation?.(violation);
+  }, [onSelectViolation, violation]);
 
   return (
     <Card
-      key={violation.id}
       size="small"
       className={`violation-item-card${pinned ? ' is-pinned' : ''}`}
-      onClick={() => onSelectViolation?.(violation)}
+      onClick={handleCardClick}
     >
       <div className="violation-item-header">
         <span className="violation-item-number">#{index + 1}</span>
@@ -260,61 +252,69 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
       <div className="violation-item-content">
         {violation.requiresHumanReview && (
           <div className="violation-human-review-card">
-            <strong>Confirmação necessária</strong>
-            <p>Eu acho que pode haver um problema aqui, mas preciso que você confirme manualmente no contexto real da página.</p>
+            <strong>{t('violations.requiresHumanReviewTitle')}</strong>
+            <p>{t('violations.requiresHumanReviewDescription')}</p>
             {violation.inheritedFromHistory && (
-              <Tag color="blue">Herdado de auditoria anterior</Tag>
+              <Tag color="blue">{t('shared.states.inherited')}</Tag>
             )}
-            <Tag color={
-              violation.humanReviewStatus === 'confirmed'
-                ? 'red'
-                : violation.humanReviewStatus === 'dismissed'
-                  ? 'default'
-                  : 'gold'
-            }>
+            <Tag
+              color={
+                violation.humanReviewStatus === 'confirmed'
+                  ? 'red'
+                  : violation.humanReviewStatus === 'dismissed'
+                    ? 'default'
+                    : 'gold'
+              }
+            >
               {getReviewLabel(violation)}
             </Tag>
             <div className="violation-human-review-controls">
               <Checkbox
                 checked={violation.humanReviewStatus === 'confirmed'}
                 onClick={(event) => event.stopPropagation()}
-                onChange={(event) => onHumanReviewStatusChange?.(violation, event.target.checked ? 'confirmed' : 'pending')}
+                onChange={(event) => onHumanReviewStatusChange?.(
+                  violation,
+                  event.target.checked ? 'confirmed' : 'pending',
+                )}
               >
-                É um problema e precisa de correção
+                {t('violations.checkboxProblem')}
               </Checkbox>
               <Checkbox
                 checked={violation.humanReviewStatus === 'dismissed'}
                 onClick={(event) => event.stopPropagation()}
-                onChange={(event) => onHumanReviewStatusChange?.(violation, event.target.checked ? 'dismissed' : 'pending')}
+                onChange={(event) => onHumanReviewStatusChange?.(
+                  violation,
+                  event.target.checked ? 'dismissed' : 'pending',
+                )}
               >
-                Não é um problema neste contexto
+                {t('violations.checkboxNotProblem')}
               </Checkbox>
             </div>
           </div>
         )}
 
         <div className="violation-element-card">
-          <strong>Elemento afetado</strong>
+          <strong>{t('shared.labels.affectedElement')}</strong>
           <div className="violation-element-title">{getElementTitle(violation)}</div>
 
           <div className="violation-element-fields">
             {violation.elementAccessibleName && (
               <div className="violation-element-field">
-                <span className="violation-element-field-label">Nome acessível</span>
+                <span className="violation-element-field-label">{t('shared.labels.accessibleName')}</span>
                 <span className="violation-element-field-value">{violation.elementAccessibleName}</span>
               </div>
             )}
 
             {violation.elementVisibleText && (
               <div className="violation-element-field">
-                <span className="violation-element-field-label">Texto visível</span>
+                <span className="violation-element-field-label">{t('shared.labels.visibleText')}</span>
                 <span className="violation-element-field-value">{violation.elementVisibleText}</span>
               </div>
             )}
 
             {violation.elementSelector && (
               <div className="violation-element-field">
-                <span className="violation-element-field-label">Seletor</span>
+                <span className="violation-element-field-label">{t('shared.labels.selector')}</span>
                 <span className="violation-element-field-value is-monospace">{violation.elementSelector}</span>
               </div>
             )}
@@ -322,19 +322,19 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
         </div>
 
         <div className="violation-suggestion">
-          <strong>Sugestão</strong>
+          <strong>{t('shared.labels.suggestion')}</strong>
           <p>{violation.suggestion}</p>
         </div>
 
         <div className="violation-remediation">
-          <strong>Como corrigir</strong>
+          <strong>{t('shared.labels.howToFix')}</strong>
           <pre>
             <code>{violation.remediationAdvice}</code>
           </pre>
         </div>
 
         <Space className="violation-actions">
-          <Tooltip title="Anotações">
+          <Tooltip title={t('violations.notesTooltip')}>
             <Button
               type={violation.userNote ? 'default' : 'text'}
               size="small"
@@ -345,7 +345,7 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
               }}
             />
           </Tooltip>
-          <Tooltip title="Copiar seletor do elemento">
+          <Tooltip title={t('violations.copySelector')}>
             <Button
               type="text"
               size="small"
@@ -356,7 +356,7 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
               }}
             />
           </Tooltip>
-          <Tooltip title="Ir para elemento">
+          <Tooltip title={t('violations.goToElement')}>
             <Button
               type="text"
               size="small"
@@ -379,36 +379,56 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
         {isNotesOpen && (
           <div className="violation-notes-card" onClick={(event) => event.stopPropagation()}>
             <div className="violation-notes-header">
-              <strong>Anotações</strong>
-              <span>{noteDraft.length}/600</span>
+              <strong>{t('shared.labels.annotations')}</strong>
+              <span>{t('violations.notesLength', { count: noteDraft.length })}</span>
             </div>
 
             <Space className="violation-notes-toolbar" wrap>
-              <Tooltip title="Inserir destaque em negrito">
-                <Button type="text" size="small" icon={<BoldOutlined />} onClick={(event) => {
-                  event.stopPropagation();
-                  insertAtEnd('**texto**');
-                }} />
+              <Tooltip title={t('violations.insertBold')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<BoldOutlined />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    insertAtEnd('**texto**');
+                  }}
+                />
               </Tooltip>
-              <Tooltip title="Inserir destaque em itálico">
-                <Button type="text" size="small" icon={<ItalicOutlined />} onClick={(event) => {
-                  event.stopPropagation();
-                  insertAtEnd('*texto*');
-                }} />
+              <Tooltip title={t('violations.insertItalic')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ItalicOutlined />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    insertAtEnd('*texto*');
+                  }}
+                />
               </Tooltip>
-              <Tooltip title="Inserir lista">
-                <Button type="text" size="small" icon={<UnorderedListOutlined />} onClick={(event) => {
-                  event.stopPropagation();
-                  insertAtEnd('- item');
-                }} />
+              <Tooltip title={t('violations.insertList')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<UnorderedListOutlined />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    insertAtEnd('- item');
+                  }}
+                />
               </Tooltip>
-              <Tooltip title="Limpar rascunho">
-                <Button type="text" size="small" icon={<ClearOutlined />} onClick={(event) => {
-                  event.stopPropagation();
-                  setNoteDraft('');
-                }} />
+              <Tooltip title={t('violations.clearDraft')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ClearOutlined />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setNoteDraft('');
+                  }}
+                />
               </Tooltip>
-              <Tooltip title="Salvar anotação">
+              <Tooltip title={t('violations.saveNote')}>
                 <Button type="text" size="small" icon={<SaveOutlined />} onClick={handleSaveNote} />
               </Tooltip>
             </Space>
@@ -416,7 +436,7 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
             <TextArea
               rows={4}
               maxLength={600}
-              placeholder="Registre contexto, decisão tomada ou próximos passos."
+              placeholder={t('violations.notePlaceholder')}
               value={noteDraft}
               onClick={(event) => event.stopPropagation()}
               onChange={(event) => setNoteDraft(event.target.value)}
@@ -424,7 +444,9 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
 
             {violation.noteUpdatedAt && (
               <span className="violation-notes-meta">
-                Atualizada em {new Date(violation.noteUpdatedAt).toLocaleString('pt-BR')}
+                {t('violations.noteUpdatedAt', {
+                  date: new Date(violation.noteUpdatedAt).toLocaleString('pt-BR'),
+                })}
               </span>
             )}
           </div>
@@ -432,23 +454,35 @@ const ViolationCard: React.FC<ViolationCardProps> = ({
       </div>
     </Card>
   );
-};
+});
 
-export const ViolationsList: React.FC<ViolationsListProps> = ({
+export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
   violations,
   onSelectViolation,
   onHumanReviewStatusChange,
   onViolationNoteChange,
 }) => {
-  if (!violations || violations.length === 0) {
-    return <Empty description="Nenhuma violação encontrada" />;
-  }
+  const sortedViolations = React.useMemo(() => sortViolations(violations), [violations]);
+  const visibleViolations = React.useMemo(
+    () => sortedViolations.filter(isVisibleInMainLists),
+    [sortedViolations],
+  );
+  const requirementViolations = React.useMemo(
+    () => visibleViolations.filter((violation) => violation.severity === 'error'),
+    [visibleViolations],
+  );
+  const recommendationViolations = React.useMemo(
+    () => visibleViolations.filter((violation) => violation.severity !== 'error'),
+    [visibleViolations],
+  );
+  const reviewViolations = React.useMemo(
+    () => sortedViolations.filter((violation) => violation.requiresHumanReview),
+    [sortedViolations],
+  );
 
-  const sortedViolations = sortViolations(violations);
-  const visibleViolations = sortedViolations.filter(isVisibleInMainLists);
-  const requirementViolations = visibleViolations.filter((violation) => violation.severity === 'error');
-  const recommendationViolations = visibleViolations.filter((violation) => violation.severity !== 'error');
-  const reviewViolations = sortedViolations.filter((violation) => violation.requiresHumanReview);
+  if (!violations || violations.length === 0) {
+    return <Empty description={t('violations.emptyAll')} />;
+  }
 
   return (
     <div className="violations-list">
@@ -457,27 +491,46 @@ export const ViolationsList: React.FC<ViolationsListProps> = ({
         items={[
           {
             key: 'all',
-            label: `Todos (${visibleViolations.length})`,
-            children: renderViolationGroups(visibleViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
+            label: t('violations.tabAll', { count: visibleViolations.length }),
+            children: renderViolationGroups(
+              visibleViolations,
+              onSelectViolation,
+              onHumanReviewStatusChange,
+              onViolationNoteChange,
+            ),
           },
           {
             key: 'requirements',
-            label: `Requisitos (${requirementViolations.length})`,
-            children: renderViolationGroups(requirementViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
+            label: t('violations.tabRequirements', { count: requirementViolations.length }),
+            children: renderViolationGroups(
+              requirementViolations,
+              onSelectViolation,
+              onHumanReviewStatusChange,
+              onViolationNoteChange,
+            ),
           },
           {
             key: 'recommendations',
-            label: `Recomendações (${recommendationViolations.length})`,
-            children: renderViolationGroups(recommendationViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
+            label: t('violations.tabRecommendations', { count: recommendationViolations.length }),
+            children: renderViolationGroups(
+              recommendationViolations,
+              onSelectViolation,
+              onHumanReviewStatusChange,
+              onViolationNoteChange,
+            ),
           },
           {
             key: 'review',
-            label: `Verificação humana (${reviewViolations.length})`,
-            children: renderViolationGroups(reviewViolations, onSelectViolation, onHumanReviewStatusChange, onViolationNoteChange),
+            label: t('violations.tabReview', { count: reviewViolations.length }),
+            children: renderViolationGroups(
+              reviewViolations,
+              onSelectViolation,
+              onHumanReviewStatusChange,
+              onViolationNoteChange,
+            ),
           },
         ]}
       />
     </div>
   );
-};
-
+});

@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ConfigProvider, Layout, Spin, Empty, Button, Space, Alert, Tag } from 'antd';
+import { Alert, Button, ConfigProvider, Empty, Layout, Space, Spin, Tag } from 'antd';
 import { DownloadOutlined, PrinterOutlined, RobotOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import ptBR from 'antd/locale/pt_BR';
+import { t } from './i18n';
 import type { AuditResult } from './types';
-import { ViolationsList } from './components/ViolationsList';
-import { ViolationsSummary } from './components/ViolationsSummary';
-import { getActiveTab, getAuditResult } from './utils/audit-engine';
+import { buildExportableAuditResult } from './utils/audit-export';
 import {
   getConfirmedHumanReviewCount,
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
 } from './utils/audit-comparison';
-import { buildExportableAuditResult } from './utils/audit-export';
+import { getActiveTab, getAuditResult } from './utils/audit-engine';
 import './styles/popup.css';
+
+const ViolationsList = React.lazy(async () => {
+  const module = await import('./components/ViolationsList');
+  return { default: module.ViolationsList };
+});
+
+const ViolationsSummary = React.lazy(async () => {
+  const module = await import('./components/ViolationsSummary');
+  return { default: module.ViolationsSummary };
+});
 
 const { Header, Content, Footer } = Layout;
 
@@ -22,7 +31,7 @@ export const ReportApp: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    loadAuditResult();
+    void loadAuditResult();
   }, []);
 
   const loadAuditResult = async () => {
@@ -37,22 +46,22 @@ export const ReportApp: React.FC = () => {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = React.useCallback(() => {
     window.print();
-  };
+  }, []);
 
-  const handleExport = () => {
+  const handleExport = React.useCallback(() => {
     if (!auditResult) return;
 
     const dataStr = JSON.stringify(buildExportableAuditResult(auditResult), null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
+    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `nbr-17225-report-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
+  }, [auditResult]);
 
   const confirmedReviews = auditResult ? getConfirmedHumanReviewCount(auditResult) : 0;
   const dismissedReviews = auditResult ? getDismissedHumanReviewCount(auditResult) : 0;
@@ -61,36 +70,38 @@ export const ReportApp: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ background: '#ffffff', color: '#0f172a', borderBottom: '1px solid #e2e8f0' }}>
-        <h1 style={{ margin: 0, fontSize: '24px' }}>Guardião NBR 17225 - Relatório detalhado</h1>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>{t('report.title')}</h1>
       </Header>
 
       <Content style={{ padding: '24px' }}>
-        <Spin spinning={loading} tip="Carregando relatório...">
+        <Spin spinning={loading} tip={t('report.loading')}>
           {!auditResult ? (
-            <Empty description="Nenhum relatório disponível para a aba ativa" />
+            <Empty description={t('report.empty')} />
           ) : (
             <>
               <Alert
                 style={{ marginBottom: '16px' }}
                 type="info"
                 showIcon
-                message="Leitura do relatório"
+                message={t('report.introTitle')}
                 description={(
                   <Space wrap size={[8, 8]}>
-                    <Tag icon={<RobotOutlined />} color="blue">Detecção automática</Tag>
-                    <Tag icon={<UserSwitchOutlined />} color="gold">Confirmação humana</Tag>
-                    <span>Itens com confirmação humana indicam suspeita relevante, mas exigem validação manual no contexto real.</span>
-                    <Tag color="red">{confirmedReviews} confirmados</Tag>
-                    <Tag>{dismissedReviews} descartados</Tag>
-                    <Tag color="gold">{pendingReviews} pendentes</Tag>
+                    <Tag icon={<RobotOutlined />} color="blue">{t('shared.states.automaticDetection')}</Tag>
+                    <Tag icon={<UserSwitchOutlined />} color="gold">{t('shared.states.humanConfirmation')}</Tag>
+                    <span>{t('report.introDescription')}</span>
+                    <Tag color="red">{t('shared.counts.confirmed', { count: confirmedReviews })}</Tag>
+                    <Tag>{t('shared.counts.dismissed', { count: dismissedReviews })}</Tag>
+                    <Tag color="gold">{t('shared.counts.pending', { count: pendingReviews })}</Tag>
                   </Space>
                 )}
               />
-              <ViolationsSummary result={auditResult} />
-              <div style={{ marginTop: '24px' }}>
-                <h2>Detalhes das violações</h2>
-                <ViolationsList violations={auditResult.violations} />
-              </div>
+              <Suspense fallback={<Spin spinning tip={t('report.loading')} />}>
+                <ViolationsSummary result={auditResult} />
+                <div style={{ marginTop: '24px' }}>
+                  <h2>{t('report.violationsTitle')}</h2>
+                  <ViolationsList violations={auditResult.violations} />
+                </div>
+              </Suspense>
             </>
           )}
         </Spin>
@@ -99,10 +110,10 @@ export const ReportApp: React.FC = () => {
       <Footer style={{ textAlign: 'center', background: '#f8fafc', padding: '16px' }}>
         <Space>
           <Button icon={<PrinterOutlined />} onClick={handlePrint}>
-            Imprimir
+            {t('shared.actions.print')}
           </Button>
           <Button icon={<DownloadOutlined />} onClick={handleExport}>
-            Exportar JSON
+            {t('shared.actions.exportJson')}
           </Button>
         </Space>
       </Footer>
@@ -117,5 +128,5 @@ root.render(
     <ConfigProvider locale={ptBR}>
       <ReportApp />
     </ConfigProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

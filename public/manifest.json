@@ -21,7 +21,9 @@
         "rules.js",
         "utils.js"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "action": {
@@ -38,8 +40,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content-bootstrap.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content-bootstrap.js"
+      ],
       "run_at": "document_start"
     }
   ],

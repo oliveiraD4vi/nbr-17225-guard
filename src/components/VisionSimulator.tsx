@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Card, Select, Slider, Button, Space, Tooltip, Divider } from 'antd';
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { Button, Card, Divider, Select, Slider, Space, Tooltip } from 'antd';
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { t } from '@/i18n';
 import type { VisionSimulationFilter } from '@/types';
 import '../styles/vision-simulator.css';
 
@@ -8,35 +9,33 @@ interface VisionSimulatorProps {
   onFilterChange?: (filter: VisionSimulationFilter) => void;
 }
 
-export const VisionSimulator: React.FC<VisionSimulatorProps> = ({ onFilterChange }) => {
+const filterOptions = [
+  { label: t('vision.none'), value: 'none' },
+  { label: t('vision.protanopia'), value: 'protanopia' },
+  { label: t('vision.deuteranopia'), value: 'deuteranopia' },
+  { label: t('vision.tritanopia'), value: 'tritanopia' },
+  { label: t('vision.blur'), value: 'blur' },
+];
+
+export const VisionSimulator: React.FC<VisionSimulatorProps> = React.memo(({ onFilterChange }) => {
   const [filterType, setFilterType] = useState<VisionSimulationFilter['type']>('none');
   const [intensity, setIntensity] = useState(50);
   const [isActive, setIsActive] = useState(false);
 
-  const filterOptions = [
-    { label: 'Nenhum', value: 'none' },
-    { label: 'Protanopia (Daltonismo Vermelho-Verde)', value: 'protanopia' },
-    { label: 'Deuteranopia (Daltonismo Verde-Vermelho)', value: 'deuteranopia' },
-    { label: 'Tritanopia (Daltonismo Azul-Amarelo)', value: 'tritanopia' },
-    { label: 'Desfoque (Baixa Visão)', value: 'blur' },
-  ];
-
   const handleFilterChange = (newType: VisionSimulationFilter['type']) => {
     setFilterType(newType);
-    const filter: VisionSimulationFilter = {
+    onFilterChange?.({
       type: newType,
       intensity,
-    };
-    onFilterChange?.(filter);
+    });
   };
 
   const handleIntensityChange = (value: number) => {
     setIntensity(value);
-    const filter: VisionSimulationFilter = {
+    onFilterChange?.({
       type: filterType,
       intensity: value,
-    };
-    onFilterChange?.(filter);
+    });
   };
 
   const toggleSimulation = () => {
@@ -50,23 +49,23 @@ export const VisionSimulator: React.FC<VisionSimulatorProps> = ({ onFilterChange
   };
 
   return (
-    <Card className="vision-simulator" title="Simulador de Visão">
+    <Card className="vision-simulator" title={t('vision.title')}>
       <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <Tooltip title="Ativa/desativa o simulador de visão">
+        <Tooltip title={t('vision.toggleTooltip')}>
           <Button
             type={isActive ? 'primary' : 'default'}
             icon={isActive ? <EyeOutlined /> : <EyeInvisibleOutlined />}
             onClick={toggleSimulation}
             block
           >
-            {isActive ? 'Simulador Ativo' : 'Ativar Simulador'}
+            {isActive ? t('vision.active') : t('vision.inactive')}
           </Button>
         </Tooltip>
 
         <Divider style={{ margin: '8px 0' }} />
 
         <div>
-          <label>Tipo de Deficiência Visual:</label>
+          <label>{t('vision.filterType')}:</label>
           <Select
             value={filterType}
             onChange={handleFilterChange}
@@ -77,7 +76,7 @@ export const VisionSimulator: React.FC<VisionSimulatorProps> = ({ onFilterChange
         </div>
 
         <div>
-          <label>Intensidade: {intensity}%</label>
+          <label>{t('vision.intensity', { value: intensity })}</label>
           <Slider
             value={intensity}
             onChange={handleIntensityChange}
@@ -89,19 +88,19 @@ export const VisionSimulator: React.FC<VisionSimulatorProps> = ({ onFilterChange
 
         <div className="simulator-info">
           <p>
-            <strong>Protanopia:</strong> Dificuldade em distinguir vermelho e verde.
+            <strong>Protanopia:</strong> {t('vision.infoProtanopia')}
           </p>
           <p>
-            <strong>Deuteranopia:</strong> Forma mais comum de daltonismo, afeta percepção de verde.
+            <strong>Deuteranopia:</strong> {t('vision.infoDeuteranopia')}
           </p>
           <p>
-            <strong>Tritanopia:</strong> Rara, afeta percepção de azul e amarelo.
+            <strong>Tritanopia:</strong> {t('vision.infoTritanopia')}
           </p>
           <p>
-            <strong>Desfoque:</strong> Simula baixa visão ou miopia.
+            <strong>Desfoque:</strong> {t('vision.infoBlur')}
           </p>
         </div>
       </Space>
     </Card>
   );
-};
+});
