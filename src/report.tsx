@@ -1,8 +1,9 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { Alert, Button, ConfigProvider, Empty, Layout, Space, Spin, Tag } from 'antd';
+import { Alert, Button, ConfigProvider, Empty, Layout, Space, Tag } from 'antd';
 import { DownloadOutlined, PrinterOutlined, RobotOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import ptBR from 'antd/locale/pt_BR';
+import { ReportSkeleton } from './components/LoadingSkeletons';
 import { t } from './i18n';
 import type { AuditResult } from './types';
 import { buildExportableAuditResult } from './utils/audit-export';
@@ -74,37 +75,37 @@ export const ReportApp: React.FC = () => {
       </Header>
 
       <Content style={{ padding: '24px' }}>
-        <Spin spinning={loading} tip={t('report.loading')}>
-          {!auditResult ? (
-            <Empty description={t('report.empty')} />
-          ) : (
-            <>
-              <Alert
-                style={{ marginBottom: '16px' }}
-                type="info"
-                showIcon
-                message={t('report.introTitle')}
-                description={(
-                  <Space wrap size={[8, 8]}>
-                    <Tag icon={<RobotOutlined />} color="blue">{t('shared.states.automaticDetection')}</Tag>
-                    <Tag icon={<UserSwitchOutlined />} color="gold">{t('shared.states.humanConfirmation')}</Tag>
-                    <span>{t('report.introDescription')}</span>
-                    <Tag color="red">{t('shared.counts.confirmed', { count: confirmedReviews })}</Tag>
-                    <Tag>{t('shared.counts.dismissed', { count: dismissedReviews })}</Tag>
-                    <Tag color="gold">{t('shared.counts.pending', { count: pendingReviews })}</Tag>
-                  </Space>
-                )}
-              />
-              <Suspense fallback={<Spin spinning tip={t('report.loading')} />}>
-                <ViolationsSummary result={auditResult} />
-                <div style={{ marginTop: '24px' }}>
-                  <h2>{t('report.violationsTitle')}</h2>
-                  <ViolationsList violations={auditResult.violations} />
-                </div>
-              </Suspense>
-            </>
-          )}
-        </Spin>
+        {loading ? (
+          <ReportSkeleton />
+        ) : !auditResult ? (
+          <Empty description={t('report.empty')} />
+        ) : (
+          <>
+            <Alert
+              style={{ marginBottom: '16px' }}
+              type="info"
+              showIcon
+              message={t('report.introTitle')}
+              description={(
+                <Space wrap size={[8, 8]}>
+                  <Tag icon={<RobotOutlined />} color="blue">{t('shared.states.automaticDetection')}</Tag>
+                  <Tag icon={<UserSwitchOutlined />} color="gold">{t('shared.states.humanConfirmation')}</Tag>
+                  <span>{t('report.introDescription')}</span>
+                  <Tag color="red">{t('shared.counts.confirmed', { count: confirmedReviews })}</Tag>
+                  <Tag>{t('shared.counts.dismissed', { count: dismissedReviews })}</Tag>
+                  <Tag color="gold">{t('shared.counts.pending', { count: pendingReviews })}</Tag>
+                </Space>
+              )}
+            />
+            <Suspense fallback={<ReportSkeleton />}>
+              <ViolationsSummary result={auditResult} />
+              <div style={{ marginTop: '24px' }}>
+                <h2>{t('report.violationsTitle')}</h2>
+                <ViolationsList violations={auditResult.violations} />
+              </div>
+            </Suspense>
+          </>
+        )}
       </Content>
 
       <Footer style={{ textAlign: 'center', background: '#f8fafc', padding: '16px' }}>

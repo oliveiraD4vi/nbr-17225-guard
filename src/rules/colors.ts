@@ -1,73 +1,58 @@
 /**
- * Regras da Seção 5.11 - Uso de Cores e Contraste
+ * Regras da Seção 5.11 - Uso de cores e contraste
  * ABNT NBR 17225:2025
  */
 
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
-import { 
+import {
   createViolation,
-  getContrastRatio, 
-  rgbToHex,
+  getContrastRatio,
   getEffectiveBackgroundColor,
-  isElementVisible
+  isElementVisible,
+  rgbToHex,
 } from '@/utils';
 
-/**
- * 5.11.3 - Contraste para texto (mínimo)
- * Totalmente Automatizável
- * Nível AA
- */
 export const textContrastRule: Rule = {
   id: 'text-contrast',
   nbrReference: '5.11.3',
-  name: 'Contraste para texto (mínimo)',
-  description: 'Texto deve ter razão de contraste mínima de 4.5:1 para texto normal',
+  name: t('rules.colors.textContrast.name'),
+  description: t('rules.colors.textContrast.description'),
   severity: 'error',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
     const seenParents = new Set<HTMLElement>();
-    const walker = document.createTreeWalker(
-      document.body,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
 
     let node;
     while ((node = walker.nextNode())) {
       const textNode = node as Text;
       const text = textNode.textContent?.trim();
-      
-      if (!text || text.length === 0) continue;
+      if (!text) continue;
 
       const parent = textNode.parentElement;
-      if (!parent || !isElementVisible(parent)) continue;
-      if (seenParents.has(parent)) continue;
-
+      if (!parent || !isElementVisible(parent) || seenParents.has(parent)) continue;
       seenParents.add(parent);
 
       const textColor = window.getComputedStyle(parent).color;
       const bgColor = getEffectiveBackgroundColor(parent);
-
       const textHex = rgbToHex(textColor);
       const bgHex = rgbToHex(bgColor);
-
       const ratio = getContrastRatio(textHex, bgHex);
       const fontSize = parseFloat(window.getComputedStyle(parent).fontSize);
       const fontWeight = window.getComputedStyle(parent).fontWeight;
-
-      // Verifica se é texto grande (18pt ou 14pt bold)
-      const isLargeText = fontSize >= 18 || (fontSize >= 14 && (fontWeight === 'bold' || parseInt(fontWeight) >= 700));
+      const isLargeText = fontSize >= 18 || (fontSize >= 14 && (fontWeight === 'bold' || parseInt(fontWeight, 10) >= 700));
       const minRatio = isLargeText ? 3 : 4.5;
 
       if (ratio < minRatio) {
         violations.push(createViolation(textContrastRule, {
           element: parent,
-          description: `Contraste insuficiente: ${ratio.toFixed(2)}:1 (mínimo: ${minRatio}:1)`,
-          message: `Razão de contraste ${ratio.toFixed(2)}:1 é menor que ${minRatio}:1`,
-          suggestion: 'Aumentar o contraste entre texto e fundo',
-          remediationAdvice: `Escureça o texto, clareie o fundo ou aumente o tamanho/peso visual quando aplicável. Razão atual: ${ratio.toFixed(2)}:1. Razão mínima: ${minRatio}:1.`,
+          description: t('rules.colors.textContrast.detail', { ratio: ratio.toFixed(2), minRatio }),
+          message: t('rules.colors.textContrast.message', { ratio: ratio.toFixed(2), minRatio }),
+          suggestion: t('rules.colors.textContrast.suggestion'),
+          remediationAdvice: t('rules.colors.textContrast.remediation', { ratio: ratio.toFixed(2), minRatio }),
           customIdPrefix: 'contrast',
         }));
       }
@@ -77,16 +62,11 @@ export const textContrastRule: Rule = {
   },
 };
 
-/**
- * 5.11.4 - Contraste para componentes
- * Totalmente Automatizável
- * Nível AA
- */
 export const componentContrastRule: Rule = {
   id: 'component-contrast',
   nbrReference: '5.11.4',
-  name: 'Contraste para componentes',
-  description: 'Componentes interativos devem ter contraste mínimo de 3:1',
+  name: t('rules.colors.componentContrast.name'),
+  description: t('rules.colors.componentContrast.description'),
   severity: 'error',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -104,13 +84,11 @@ export const componentContrastRule: Rule = {
       const bgColor = styles.backgroundColor;
       const surroundingColor = getEffectiveBackgroundColor(el.parentElement as HTMLElement || el);
 
-      if (borderWidth <= 0) return;
-      if (borderColor === 'transparent' || bgColor === 'transparent') return;
+      if (borderWidth <= 0 || borderColor === 'transparent' || bgColor === 'transparent') return;
 
       const borderHex = rgbToHex(borderColor);
       const bgHex = rgbToHex(bgColor);
       const surroundingHex = rgbToHex(surroundingColor);
-
       const internalRatio = getContrastRatio(borderHex, bgHex);
       const externalRatio = getContrastRatio(borderHex, surroundingHex);
       const ratio = Math.max(internalRatio, externalRatio);
@@ -118,10 +96,10 @@ export const componentContrastRule: Rule = {
       if (ratio < 3) {
         violations.push(createViolation(componentContrastRule, {
           element: el,
-          description: `Contraste de componente insuficiente: ${ratio.toFixed(2)}:1`,
-          message: `Componente ${el.tagName} com contraste ${ratio.toFixed(2)}:1 (mínimo: 3:1)`,
-          suggestion: 'Aumentar o contraste entre a borda/fundo do componente',
-          remediationAdvice: `Garanta contraste mínimo de 3:1 entre o indicador visual do componente e as áreas adjacentes. Razão atual: ${ratio.toFixed(2)}:1.`,
+          description: t('rules.colors.componentContrast.detail', { ratio: ratio.toFixed(2) }),
+          message: t('rules.colors.componentContrast.message', { tagName: el.tagName, ratio: ratio.toFixed(2) }),
+          suggestion: t('rules.colors.componentContrast.suggestion'),
+          remediationAdvice: t('rules.colors.componentContrast.remediation', { ratio: ratio.toFixed(2) }),
           customIdPrefix: 'component-contrast',
         }));
       }

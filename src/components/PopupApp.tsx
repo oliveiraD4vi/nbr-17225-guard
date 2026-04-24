@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Layout, message, Skeleton, Space, Spin, Tabs, Tag } from 'antd';
+import { Alert, Button, Layout, message, Space, Tabs, Tag } from 'antd';
 import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
@@ -14,13 +14,14 @@ import {
   RiseOutlined,
   StopOutlined,
 } from '@ant-design/icons';
+import { PopupPanelSkeleton } from './LoadingSkeletons';
 import { t } from '@/i18n';
 import type { AuditHistoryEntry, AuditResult, HumanReviewStatus, Violation, VisionSimulationFilter } from '@/types';
 import {
+  compareAuditResults,
   getConfirmedHumanReviewCount,
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
-  compareAuditResults,
 } from '@/utils/audit-comparison';
 import { buildExportableAuditResult } from '@/utils/audit-export';
 import {
@@ -110,13 +111,9 @@ function getComparisonTrend(summary: ReturnType<typeof compareAuditResults> | nu
 }
 
 function getComparisonQuickReadingLabel(label: string): string {
-  if (label === t('shared.states.improvement')) {
-    return 'A comparação indica redução de problemas visíveis na URL auditada.';
-  }
-  if (label === t('shared.states.regression')) {
-    return 'A comparação indica aumento de problemas visíveis na URL auditada.';
-  }
-  return 'A comparação não mostrou alteração no volume de problemas visíveis.';
+  if (label === t('shared.states.improvement')) return t('popup.history.quickReadingImprovement');
+  if (label === t('shared.states.regression')) return t('popup.history.quickReadingRegression');
+  return t('popup.history.quickReadingStable');
 }
 
 export const PopupApp: React.FC = () => {
@@ -204,14 +201,10 @@ export const PopupApp: React.FC = () => {
   const clearHighlightsOnPage = useCallback(async (showFeedback = false) => {
     try {
       await sendMessageToActiveTab({ action: 'CLEAR_HIGHLIGHTS' });
-      if (showFeedback) {
-        message.success(t('popup.messages.highlightsCleared'));
-      }
+      if (showFeedback) message.success(t('popup.messages.highlightsCleared'));
     } catch (error) {
       console.error('Erro ao limpar destaques:', error);
-      if (showFeedback) {
-        message.error(t('popup.messages.highlightsClearError'));
-      }
+      if (showFeedback) message.error(t('popup.messages.highlightsClearError'));
     }
   }, [sendMessageToActiveTab]);
 
@@ -234,7 +227,7 @@ export const PopupApp: React.FC = () => {
       message.success(t('popup.messages.auditCompleted', { count: result.totalViolations }));
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
-      message.error(error instanceof Error ? error.message : 'Erro ao executar auditoria');
+      message.error(error instanceof Error ? error.message : t('popup.messages.auditRunError'));
     } finally {
       setLoading(false);
     }
@@ -309,13 +302,8 @@ export const PopupApp: React.FC = () => {
 
   const handleFilterChange = useCallback(async (filter: VisionSimulationFilter) => {
     await chrome.storage.local.set({ visionFilter: filter });
-
     if (!activeTab?.id) return;
-
-    void chrome.tabs.sendMessage(activeTab.id, {
-      action: 'APPLY_VISION_FILTER',
-      filter,
-    });
+    void chrome.tabs.sendMessage(activeTab.id, { action: 'APPLY_VISION_FILTER', filter });
   }, [activeTab?.id]);
 
   const handleHighlightAll = useCallback(async () => {
@@ -346,12 +334,8 @@ export const PopupApp: React.FC = () => {
 
   const comparisonEntries = useMemo(() => {
     const byId = new Map<string, AuditHistoryEntry>();
-    auditHistory.forEach((entry) => {
-      byId.set(entry.id, entry);
-    });
-    if (auditResult?.id) {
-      byId.set(auditResult.id, auditResult as AuditHistoryEntry);
-    }
+    auditHistory.forEach((entry) => byId.set(entry.id, entry));
+    if (auditResult?.id) byId.set(auditResult.id, auditResult as AuditHistoryEntry);
     return Array.from(byId.values()).sort((left, right) => right.timestamp - left.timestamp);
   }, [auditHistory, auditResult]);
 
@@ -363,7 +347,6 @@ export const PopupApp: React.FC = () => {
     const baseline = comparisonEntries.find((entry) => entry.id === comparisonBaselineId);
     const target = comparisonEntries.find((entry) => entry.id === comparisonTargetId);
     if (!baseline || !target) return null;
-
     return compareAuditResults(baseline, target);
   }, [comparisonBaselineId, comparisonEntries, comparisonTargetId]);
 
@@ -513,7 +496,6 @@ export const PopupApp: React.FC = () => {
       message.info(t('popup.messages.historyHighlightUnavailable'));
       return;
     }
-
     if (priorityViolations.length === 0) {
       message.info(t('popup.messages.noPriorityAvailable'));
       return;
@@ -529,54 +511,13 @@ export const PopupApp: React.FC = () => {
     if (!viewedAuditResult) return [];
 
     return [
-      {
-        key: 'rerun',
-        label: t('shared.actions.rerun'),
-        icon: <ReloadOutlined />,
-        onClick: handleRunAudit,
-        loading,
-      },
-      {
-        key: 'highlight',
-        label: t('shared.actions.highlightAll'),
-        icon: <EyeOutlined />,
-        onClick: handleHighlightAll,
-        type: 'primary' as const,
-        disabled: isHistoricalView,
-      },
-      {
-        key: 'priority',
-        label: t('shared.actions.nextPriority'),
-        icon: <FlagOutlined />,
-        onClick: handleNextPriorityIssue,
-        disabled: isHistoricalView,
-      },
-      {
-        key: 'clear-highlight',
-        label: t('shared.actions.clearHighlights'),
-        icon: <StopOutlined />,
-        onClick: () => { void clearHighlightsOnPage(true); },
-        disabled: isHistoricalView,
-      },
-      {
-        key: 'json',
-        label: t('shared.actions.exportJson'),
-        icon: <DownloadOutlined />,
-        onClick: handleExportJSON,
-      },
-      {
-        key: 'csv',
-        label: t('shared.actions.exportCsv'),
-        icon: <DownloadOutlined />,
-        onClick: handleExportCSV,
-      },
-      {
-        key: 'clear',
-        label: t('shared.actions.clearAudit'),
-        icon: <DeleteOutlined />,
-        onClick: handleResetAudit,
-        danger: true,
-      },
+      { key: 'rerun', label: t('shared.actions.rerun'), icon: <ReloadOutlined />, onClick: handleRunAudit, loading },
+      { key: 'highlight', label: t('shared.actions.highlightAll'), icon: <EyeOutlined />, onClick: handleHighlightAll, type: 'primary' as const, disabled: isHistoricalView },
+      { key: 'priority', label: t('shared.actions.nextPriority'), icon: <FlagOutlined />, onClick: handleNextPriorityIssue, disabled: isHistoricalView },
+      { key: 'clear-highlight', label: t('shared.actions.clearHighlights'), icon: <StopOutlined />, onClick: () => { void clearHighlightsOnPage(true); }, disabled: isHistoricalView },
+      { key: 'json', label: t('shared.actions.exportJson'), icon: <DownloadOutlined />, onClick: handleExportJSON },
+      { key: 'csv', label: t('shared.actions.exportCsv'), icon: <DownloadOutlined />, onClick: handleExportCSV },
+      { key: 'clear', label: t('shared.actions.clearAudit'), icon: <DeleteOutlined />, onClick: handleResetAudit, danger: true },
     ];
   }, [
     viewedAuditResult,
@@ -693,62 +634,52 @@ export const PopupApp: React.FC = () => {
       </Header>
 
       <Content className="popup-content">
-        <Spin spinning={loading} tip={t('popup.loading.analyzingPage')}>
-          {initialLoading ? (
-            <div className="popup-loading-state" aria-live="polite" aria-busy="true">
-              <Skeleton.Button active block className="popup-loading-title" />
-              <Skeleton active paragraph={{ rows: 3 }} title={false} />
-              <div className="popup-loading-grid">
-                <Skeleton.Button active block />
-                <Skeleton.Button active block />
-                <Skeleton.Button active block />
+        {initialLoading || loading ? (
+          <PopupPanelSkeleton />
+        ) : showAboutView || !viewedAuditResult ? (
+          <Suspense fallback={<PopupPanelSkeleton />}>
+            <AboutPanel
+              hasAudit={Boolean(viewedAuditResult)}
+              loading={loading}
+              onBack={() => setShowAboutView(false)}
+              onStart={() => { void handleRunAudit(); }}
+            />
+          </Suspense>
+        ) : (
+          <>
+            <div className="tab-status-strip">
+              <div className="tab-status-item">
+                <span className="tab-status-label">{t('shared.labels.currentTab')}</span>
+                <strong>{activeTab?.title || activeTab?.url || t('shared.labels.untitled')}</strong>
               </div>
+              <div className="tab-status-item">
+                <span className="tab-status-label">
+                  {isHistoricalView ? t('shared.labels.historyOf') : t('shared.labels.auditedAt')}
+                </span>
+                <strong>
+                  <ClockCircleOutlined /> {new Date(viewedAuditResult.timestamp).toLocaleString('pt-BR')}
+                </strong>
+              </div>
+              <Tag color={isHistoricalView ? 'gold' : 'blue'}>
+                {isHistoricalView ? t('shared.labels.historyByUrl') : t('shared.labels.currentAudit')}
+              </Tag>
             </div>
-          ) : showAboutView || !viewedAuditResult ? (
-            <Suspense fallback={<Spin spinning tip={t('popup.loading.analyzingPage')} />}>
-              <AboutPanel
-                hasAudit={Boolean(viewedAuditResult)}
-                loading={loading}
-                onBack={() => setShowAboutView(false)}
-                onStart={() => { void handleRunAudit(); }}
+
+            {isHistoricalView && (
+              <Alert
+                className="history-alert"
+                type="warning"
+                showIcon
+                message={t('popup.history.warningTitle')}
+                description={t('popup.history.warningDescription')}
               />
+            )}
+
+            <Suspense fallback={<PopupPanelSkeleton />}>
+              <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} items={tabItems} />
             </Suspense>
-          ) : (
-            <>
-              <div className="tab-status-strip">
-                <div className="tab-status-item">
-                  <span className="tab-status-label">{t('shared.labels.currentTab')}</span>
-                  <strong>{activeTab?.title || activeTab?.url || t('shared.labels.untitled')}</strong>
-                </div>
-                <div className="tab-status-item">
-                  <span className="tab-status-label">
-                    {isHistoricalView ? t('shared.labels.historyOf') : t('shared.labels.auditedAt')}
-                  </span>
-                  <strong>
-                    <ClockCircleOutlined /> {new Date(viewedAuditResult.timestamp).toLocaleString('pt-BR')}
-                  </strong>
-                </div>
-                <Tag color={isHistoricalView ? 'gold' : 'blue'}>
-                  {isHistoricalView ? t('shared.labels.historyByUrl') : t('shared.labels.currentAudit')}
-                </Tag>
-              </div>
-
-              {isHistoricalView && (
-                <Alert
-                  className="history-alert"
-                  type="warning"
-                  showIcon
-                  message={t('popup.history.warningTitle')}
-                  description={t('popup.history.warningDescription')}
-                />
-              )}
-
-              <Suspense fallback={<Spin spinning tip={t('popup.loading.analyzingPage')} />}>
-                <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} items={tabItems} />
-              </Suspense>
-            </>
-          )}
-        </Spin>
+          </>
+        )}
       </Content>
 
       <Footer className="popup-footer">

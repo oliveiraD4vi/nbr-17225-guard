@@ -1,0 +1,226 @@
+{
+  "colors": {
+    "textContrast": {
+      "name": "Contraste para texto (mínimo)",
+      "description": "Texto deve ter razão de contraste mínima de 4.5:1 para texto normal",
+      "detail": "Contraste insuficiente: {{ratio}}:1 (mínimo: {{minRatio}}:1)",
+      "message": "Razão de contraste {{ratio}}:1 é menor que {{minRatio}}:1",
+      "suggestion": "Aumente o contraste entre texto e fundo.",
+      "remediation": "Escureça o texto, clareie o fundo ou aumente o tamanho e o peso visual quando aplicável. Razão atual: {{ratio}}:1. Razão mínima: {{minRatio}}:1."
+    },
+    "componentContrast": {
+      "name": "Contraste para componentes",
+      "description": "Componentes interativos devem ter contraste mínimo de 3:1",
+      "detail": "Contraste de componente insuficiente: {{ratio}}:1",
+      "message": "Componente {{tagName}} com contraste {{ratio}}:1 (mínimo: 3:1)",
+      "suggestion": "Aumente o contraste entre a borda e o fundo do componente.",
+      "remediation": "Garanta contraste mínimo de 3:1 entre o indicador visual do componente e as áreas adjacentes. Razão atual: {{ratio}}:1."
+    }
+  },
+  "controls": {
+    "buttonSemantic": {
+      "name": "Semântica de botão",
+      "description": "Botões e controles de ação devem possuir semântica e nome acessível",
+      "message": "Controle com comportamento de botão sem nome acessível.",
+      "suggestion": "Forneça texto visível, value ou aria-label descritivo.",
+      "remediation": "<button aria-label=\"Salvar alterações\">Salvar</button>"
+    },
+    "targetSize": {
+      "name": "Área de acionamento mínima",
+      "description": "Elementos acionáveis devem possuir área mínima para interação",
+      "message": "Área acionável muito pequena ({{width}}x{{height}}px).",
+      "suggestion": "Aumente a área clicável para pelo menos 24x24 px.",
+      "remediation": "button { min-width: 24px; min-height: 24px; }"
+    }
+  },
+  "forms": {
+    "fieldLabel": {
+      "name": "Rótulo de campo",
+      "description": "Campos de formulário devem possuir rótulo identificável",
+      "message": "Campo de formulário sem rótulo associado.",
+      "suggestion": "Associe um <label>, aria-label ou aria-labelledby ao campo.",
+      "remediation": "<label for=\"email\">E-mail</label>\n<input id=\"email\" type=\"email\" />"
+    },
+    "associatedFieldLabel": {
+      "name": "Rótulo de campo associado",
+      "description": "Rótulos de campos devem estar associados programaticamente ao respectivo controle",
+      "message": "Campo de formulário sem associação programática de rótulo.",
+      "suggestion": "Associe o rótulo ao campo com for/id, aria-label ou aria-labelledby.",
+      "remediation": "<label for=\"nome\">Nome</label>\n<input id=\"nome\" name=\"nome\" />"
+    },
+    "relatedFields": {
+      "name": "Campos relacionados",
+      "description": "Campos relacionados devem ser agrupados semanticamente",
+      "message": "Grupo de campos \"{{name}}\" sem agrupamento semântico.",
+      "suggestion": "Agrupe opções relacionadas com fieldset, legend ou role apropriado.",
+      "remediation": "<fieldset>\n  <legend>Forma de pagamento</legend>\n</fieldset>"
+    },
+    "requiredFields": {
+      "name": "Campos obrigatórios",
+      "description": "Campos obrigatórios devem ser programaticamente identificáveis",
+      "message": "Campo aparenta ser obrigatório, mas não está marcado programaticamente.",
+      "suggestion": "Use required ou aria-required=\"true\" em campos obrigatórios.",
+      "remediation": "<input required aria-required=\"true\" />"
+    },
+    "dataType": {
+      "name": "Tipo de dado determinado",
+      "description": "Campos devem usar tipos adequados ao dado solicitado",
+      "message": "Campo parece solicitar {{type}}, mas está usando type=\"text\".",
+      "suggestion": "Use type=\"{{type}}\" para melhorar entrada e validação.",
+      "remediation": "<input type=\"{{type}}\" />"
+    },
+    "accessibleAuthentication": {
+      "name": "Autenticação acessível mínima",
+      "description": "Autenticação não deve depender apenas de quebra-cabeças cognitivos sem alternativa",
+      "message": "Possível mecanismo de CAPTCHA detectado; exige validação manual de acessibilidade.",
+      "suggestion": "Verifique se existe alternativa acessível ao desafio cognitivo.",
+      "remediation": "Ofereça autenticação sem depender exclusivamente de CAPTCHA visual."
+    }
+  },
+  "images": {
+    "imageAltText": {
+      "name": "Texto alternativo para imagens de conteúdo",
+      "description": "Imagens de conteúdo devem ter texto alternativo descritivo",
+      "message": "Imagem de conteúdo sem texto alternativo.",
+      "suggestion": "Adicione atributo alt descritivo ou aria-label apropriado.",
+      "remediation": "<img src=\"imagem.jpg\" alt=\"Descrição clara da imagem\" />"
+    },
+    "imageFunctionalAlt": {
+      "name": "Texto alternativo para imagens funcionais",
+      "description": "Imagens funcionais devem descrever sua ação ou destino",
+      "message": "Imagem funcional sem texto alternativo descritivo.",
+      "suggestion": "Descreva o destino do link ou a ação do botão.",
+      "remediation": "<img src=\"acao.png\" alt=\"Abrir detalhes do evento\" />"
+    },
+    "imageDecorative": {
+      "name": "Texto alternativo para imagens decorativas",
+      "description": "Imagens decorativas devem ser ocultadas de tecnologias assistivas",
+      "message": "Imagem com forte indício de uso decorativo sem ocultação acessível.",
+      "suggestion": "Use alt=\"\" ou role=\"presentation\" em imagens puramente decorativas.",
+      "remediation": "<img src=\"decoracao.png\" alt=\"\" role=\"presentation\" />"
+    },
+    "complexImageDescription": {
+      "name": "Descrição para imagens complexas",
+      "description": "Imagens complexas devem possuir descrição adicional quando necessário",
+      "message": "Possível imagem complexa sem descrição longa associada.",
+      "suggestion": "Associe longdesc, aria-describedby ou texto adjacente equivalente.",
+      "remediation": "<img aria-describedby=\"descricao-grafico\" alt=\"Variação de desempenho\" />"
+    },
+    "imageOfText": {
+      "name": "Imagens de texto",
+      "description": "Imagens de texto devem ser evitadas quando não forem essenciais",
+      "message": "Imagem com texto alternativo extenso pode representar imagem de texto.",
+      "suggestion": "Prefira texto HTML estilizado sempre que o conteúdo textual não for essencialmente gráfico.",
+      "remediation": "<h2>Resultados oficiais</h2>"
+    }
+  },
+  "keyboard": {
+    "keyboardAccessibility": {
+      "name": "Acessibilidade por teclado parcial",
+      "description": "Todos os elementos interativos devem ser acessíveis via teclado",
+      "message": "Elemento {{tagName}} com comportamento interativo não é focável via teclado.",
+      "suggestion": "Adicione tabindex=\"0\" ou use elemento semântico apropriado.",
+      "remediation": "<button type=\"button\">Ação</button>"
+    },
+    "focusIndicator": {
+      "name": "Indicador de foco visível",
+      "description": "Elementos focáveis devem ter indicador de foco perceptível",
+      "message": "Elemento {{tagName}} em foco pode não possuir indicador de foco visível.",
+      "suggestion": "Defina outline, box-shadow ou estilo perceptível em :focus ou :focus-visible.",
+      "remediation": "button:focus-visible { outline: 2px solid #005fcc; outline-offset: 2px; }"
+    },
+    "focusFullyVisible": {
+      "name": "Elemento em foco totalmente visível",
+      "description": "Elementos focáveis devem conseguir ficar totalmente visíveis na viewport",
+      "message": "Elemento focável está fora da viewport ou potencialmente cortado.",
+      "suggestion": "Garanta rolagem adequada e evite conteúdo fixo que cubra o foco.",
+      "remediation": "scroll-margin-top: 16px;"
+    },
+    "focusPartiallyVisible": {
+      "name": "Elemento em foco parcialmente visível",
+      "description": "Elementos focáveis não devem ficar praticamente ocultos ao receber foco",
+      "message": "Elemento focável pode ficar invisível ao navegar por teclado.",
+      "suggestion": "Reposicione o elemento ou permita rolagem até ele.",
+      "remediation": "element.scrollIntoView({ block: 'nearest' })"
+    },
+    "focusOrder": {
+      "name": "Ordem de foco previsível",
+      "description": "A ordem de tabulação deve seguir fluxo lógico",
+      "message": "Elemento usa tabindex positivo ({{value}}), o que costuma quebrar a ordem lógica de foco.",
+      "suggestion": "Evite tabindex positivo; prefira a ordem natural do DOM.",
+      "remediation": "<button>Continuar</button>"
+    },
+    "focusTrap": {
+      "name": "Armadilha de foco",
+      "description": "Componentes modais devem permitir saída previsível do foco",
+      "message": "Possível diálogo sem mecanismo claro para sair da interação.",
+      "suggestion": "Forneça botão de fechar e tratamento de ESC quando aplicável.",
+      "remediation": "<button aria-label=\"Fechar modal\">×</button>"
+    },
+    "additionalContentPersistent": {
+      "name": "Conteúdo adicional persistente",
+      "description": "Conteúdo adicional exibido em foco ou hover deve permanecer disponível",
+      "message": "Tooltip sem identificação programática consistente.",
+      "suggestion": "Use id no tooltip e associe-o ao elemento disparador.",
+      "remediation": "<div id=\"ajuda\" role=\"tooltip\">Descrição</div>"
+    },
+    "additionalContentDismissible": {
+      "name": "Conteúdo adicional dispensável",
+      "description": "Conteúdo adicional deve poder ser dispensado sem mover foco",
+      "message": "Conteúdo adicional sem controle explícito de dispensa.",
+      "suggestion": "Disponibilize mecanismo claro para fechar ou dispensar o conteúdo.",
+      "remediation": "<button aria-label=\"Fechar\">Fechar</button>"
+    },
+    "keyboardShortcut": {
+      "name": "Atalhos de teclado sem tecla modificadora",
+      "description": "Atalhos de teclado de caractere único exigem verificação e cuidado especial",
+      "message": "Atalho de teclado detectado via accesskey=\"{{accessKey}}\".",
+      "suggestion": "Evite atalhos de caractere único ou ofereça mecanismo para desativá-los.",
+      "remediation": "<button aria-keyshortcuts=\"Alt+S\">Salvar</button>"
+    }
+  },
+  "semantics": {
+    "pageTitle": {
+      "name": "Título da página",
+      "description": "A página deve possuir título significativo",
+      "message": "Documento sem título significativo.",
+      "suggestion": "Defina um título descritivo no elemento <title>.",
+      "remediation": "<title>Título descritivo da página</title>"
+    },
+    "pageLanguage": {
+      "name": "Idioma da página",
+      "description": "O elemento html deve declarar o idioma principal da página",
+      "message": "Elemento html sem atributo lang.",
+      "suggestion": "Declare o idioma principal da página no elemento html.",
+      "remediation": "<html lang=\"pt-BR\">"
+    },
+    "frameTitle": {
+      "name": "Título de frame",
+      "description": "Frames devem possuir título acessível",
+      "message": "Frame sem title ou nome acessível.",
+      "suggestion": "Adicione um título que descreva o conteúdo incorporado.",
+      "remediation": "<iframe title=\"Mapa do evento\"></iframe>"
+    },
+    "zoomAllowed": {
+      "name": "Zoom não bloqueado",
+      "description": "A página não deve bloquear zoom do navegador",
+      "message": "Viewport bloqueia ou limita excessivamente o zoom.",
+      "suggestion": "Remova user-scalable=no e não limite o zoom a 100%.",
+      "remediation": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
+    },
+    "accessibleName": {
+      "name": "Componentes com nome acessível",
+      "description": "Componentes interativos devem possuir nome acessível",
+      "message": "Componente interativo sem nome acessível.",
+      "suggestion": "Forneça texto visível, aria-label, aria-labelledby ou equivalente.",
+      "remediation": "<button aria-label=\"Abrir menu\"></button>"
+    },
+    "customState": {
+      "name": "Estados, propriedades e valores de componentes customizados",
+      "description": "Componentes customizados devem expor estados ARIA quando aplicável",
+      "message": "Componente com role=\"{{role}}\" sem estados ou propriedades obrigatórios: {{attrs}}.",
+      "suggestion": "Exponha estados ARIA coerentes para o componente customizado.",
+      "remediation": "<div role=\"{{role}}\" {{attrsTemplate}}></div>"
+    }
+  }
+}

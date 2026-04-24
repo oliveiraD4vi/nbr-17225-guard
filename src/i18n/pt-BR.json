@@ -99,6 +99,7 @@
       "highlightsCleared": "Destaques removidos da página",
       "highlightsClearError": "Não foi possível limpar os destaques",
       "auditCompleted": "Auditoria concluída: {{count}} item(ns) encontrado(s).",
+      "auditRunError": "Erro ao executar auditoria",
       "auditClearSuccess": "Auditoria limpa para esta aba",
       "auditClearError": "Erro ao limpar auditoria",
       "noAuditToExport": "Nenhuma auditoria para exportar",
@@ -143,7 +144,10 @@
       "metadataPending": "Pendentes humanos: {{from}} -> {{to}}",
       "metadataVisible": "Itens visíveis: {{from}} -> {{to}}",
       "metadataDelta": "Variação: {{value}}%",
-      "optionLabel": "{{date}} • {{count}} item(ns)"
+      "optionLabel": "{{date}} • {{count}} item(ns)",
+      "quickReadingImprovement": "A comparação indica redução de problemas visíveis na URL auditada.",
+      "quickReadingRegression": "A comparação indica aumento de problemas visíveis na URL auditada.",
+      "quickReadingStable": "A comparação não mostrou alteração no volume de problemas visíveis."
     }
   },
   "summary": {

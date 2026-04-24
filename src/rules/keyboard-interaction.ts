@@ -1,8 +1,9 @@
 /**
- * Regras da Secao 5.1 - Interacao por Teclado
+ * Regras da Seção 5.1 - Interação por teclado
  * ABNT NBR 17225:2025
  */
 
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import {
   createViolation,
@@ -12,28 +13,25 @@ import {
   isElementVisible,
 } from '@/utils';
 
-/**
- * 5.1.13 - Acessibilidade por teclado parcial
- */
 export const keyboardAccessibilityRule: Rule = {
   id: 'keyboard-accessibility',
   nbrReference: '5.1.13',
-  name: 'Acessibilidade por teclado parcial',
-  description: 'Todos os elementos interativos devem ser acessíveis via teclado',
+  name: t('rules.keyboard.keyboardAccessibility.name'),
+  description: t('rules.keyboard.keyboardAccessibility.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
     const interactiveElements = document.querySelectorAll<HTMLElement>(
-      'a, button, input, select, textarea, [role="button"], [role="link"], [role="menuitem"], [onclick]'
+      'a, button, input, select, textarea, [role="button"], [role="link"], [role="menuitem"], [onclick]',
     );
 
     interactiveElements.forEach((el) => {
       if (!isElementVisible(el)) return;
 
       const tabIndex = el.getAttribute('tabindex');
-      const hasHref = el.tagName !== 'A' || !!el.getAttribute('href');
+      const hasHref = el.tagName !== 'A' || Boolean(el.getAttribute('href'));
       const isNaturallyFocusable = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) || (el.tagName === 'A' && hasHref);
       const isGenericOnClickOnly =
         el.hasAttribute('onclick') &&
@@ -47,9 +45,9 @@ export const keyboardAccessibilityRule: Rule = {
       if (!isNaturallyFocusable && (!tabIndex || parseInt(tabIndex, 10) < 0)) {
         violations.push(createViolation(keyboardAccessibilityRule, {
           element: el,
-          message: `Elemento ${el.tagName} com comportamento interativo não é focável via teclado.`,
-          suggestion: 'Adicione tabindex="0" ou use elemento semântico apropriado.',
-          remediationAdvice: `<button type="button">Ação</button>`,
+          message: t('rules.keyboard.keyboardAccessibility.message', { tagName: el.tagName }),
+          suggestion: t('rules.keyboard.keyboardAccessibility.suggestion'),
+          remediationAdvice: t('rules.keyboard.keyboardAccessibility.remediation'),
           customIdPrefix: 'keyboard',
         }));
       }
@@ -59,14 +57,11 @@ export const keyboardAccessibilityRule: Rule = {
   },
 };
 
-/**
- * 5.1.1 - Indicador de foco visível
- */
 export const focusIndicatorRule: Rule = {
   id: 'focus-indicator',
   nbrReference: '5.1.1',
-  name: 'Indicador de foco visível',
-  description: 'Elementos focáveis devem ter indicador de foco perceptível',
+  name: t('rules.keyboard.focusIndicator.name'),
+  description: t('rules.keyboard.focusIndicator.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -84,16 +79,12 @@ export const focusIndicatorRule: Rule = {
     const borderStyle = styles.borderStyle;
     const borderWidth = parseFloat(styles.borderWidth || '0');
 
-    if (
-      (outlineStyle === 'none' || outlineWidth === 0) &&
-      (!boxShadow || boxShadow === 'none') &&
-      (borderStyle === 'none' || borderWidth === 0)
-    ) {
+    if ((outlineStyle === 'none' || outlineWidth === 0) && (!boxShadow || boxShadow === 'none') && (borderStyle === 'none' || borderWidth === 0)) {
       violations.push(createViolation(focusIndicatorRule, {
         element: activeElement,
-        message: `Elemento ${activeElement.tagName} em foco pode não possuir indicador de foco visível.`,
-        suggestion: 'Defina outline, box-shadow ou estilo perceptível em :focus/:focus-visible.',
-        remediationAdvice: `button:focus-visible { outline: 2px solid #005fcc; outline-offset: 2px; }`,
+        message: t('rules.keyboard.focusIndicator.message', { tagName: activeElement.tagName }),
+        suggestion: t('rules.keyboard.focusIndicator.suggestion'),
+        remediationAdvice: t('rules.keyboard.focusIndicator.remediation'),
         customIdPrefix: 'focus',
       }));
     }
@@ -102,14 +93,11 @@ export const focusIndicatorRule: Rule = {
   },
 };
 
-/**
- * 5.1.2 - Elemento em foco totalmente visível
- */
 export const focusFullyVisibleRule: Rule = {
   id: 'focus-fully-visible',
   nbrReference: '5.1.2',
-  name: 'Elemento em foco totalmente visível',
-  description: 'Elementos focáveis devem conseguir ficar totalmente visíveis na viewport',
+  name: t('rules.keyboard.focusFullyVisible.name'),
+  description: t('rules.keyboard.focusFullyVisible.description'),
   severity: 'warning',
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
@@ -121,24 +109,21 @@ export const focusFullyVisibleRule: Rule = {
 
     return !isElementFullyInViewport(activeElement)
       ? [createViolation(focusFullyVisibleRule, {
-        element: activeElement,
-        message: 'Elemento focável está fora da viewport ou potencialmente cortado.',
-        suggestion: 'Garanta scroll adequado e evite conteúdo fixo que cubra o foco.',
-        remediationAdvice: `scroll-margin-top: 16px;`,
-        customIdPrefix: 'focus-full',
-      })]
+          element: activeElement,
+          message: t('rules.keyboard.focusFullyVisible.message'),
+          suggestion: t('rules.keyboard.focusFullyVisible.suggestion'),
+          remediationAdvice: t('rules.keyboard.focusFullyVisible.remediation'),
+          customIdPrefix: 'focus-full',
+        })]
       : [];
   },
 };
 
-/**
- * 5.1.3 - Elemento em foco parcialmente visível
- */
 export const focusPartiallyVisibleRule: Rule = {
   id: 'focus-partially-visible',
   nbrReference: '5.1.3',
-  name: 'Elemento em foco parcialmente visível',
-  description: 'Elementos focáveis não devem ficar praticamente ocultos ao receber foco',
+  name: t('rules.keyboard.focusPartiallyVisible.name'),
+  description: t('rules.keyboard.focusPartiallyVisible.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -150,24 +135,21 @@ export const focusPartiallyVisibleRule: Rule = {
 
     return !isElementPartiallyInViewport(activeElement)
       ? [createViolation(focusPartiallyVisibleRule, {
-        element: activeElement,
-        message: 'Elemento focável pode ficar invisível ao navegar por teclado.',
-        suggestion: 'Reposicione o elemento ou permita rolagem até ele.',
-        remediationAdvice: `element.scrollIntoView({ block: 'nearest' })`,
-        customIdPrefix: 'focus-partial',
-      })]
+          element: activeElement,
+          message: t('rules.keyboard.focusPartiallyVisible.message'),
+          suggestion: t('rules.keyboard.focusPartiallyVisible.suggestion'),
+          remediationAdvice: t('rules.keyboard.focusPartiallyVisible.remediation'),
+          customIdPrefix: 'focus-partial',
+        })]
       : [];
   },
 };
 
-/**
- * 5.1.4 - Ordem de foco previsível
- */
 export const focusOrderRule: Rule = {
   id: 'focus-order',
   nbrReference: '5.1.4',
-  name: 'Ordem de foco previsível',
-  description: 'A ordem de tabulação deve seguir fluxo lógico',
+  name: t('rules.keyboard.focusOrder.name'),
+  description: t('rules.keyboard.focusOrder.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -179,9 +161,9 @@ export const focusOrderRule: Rule = {
       if (value > 0) {
         violations.push(createViolation(focusOrderRule, {
           element: el,
-          message: `Elemento usa tabindex positivo (${value}), o que costuma quebrar a ordem lógica de foco.`,
-          suggestion: 'Evite tabindex positivo; prefira a ordem natural do DOM.',
-          remediationAdvice: `<button>Continuar</button>`,
+          message: t('rules.keyboard.focusOrder.message', { value }),
+          suggestion: t('rules.keyboard.focusOrder.suggestion'),
+          remediationAdvice: t('rules.keyboard.focusOrder.remediation'),
           customIdPrefix: 'focus-order',
         }));
       }
@@ -191,14 +173,11 @@ export const focusOrderRule: Rule = {
   },
 };
 
-/**
- * 5.1.6 - Armadilha de foco
- */
 export const focusTrapRule: Rule = {
   id: 'focus-trap',
   nbrReference: '5.1.6',
-  name: 'Armadilha de foco',
-  description: 'Componentes modais devem permitir saída previsível do foco',
+  name: t('rules.keyboard.focusTrap.name'),
+  description: t('rules.keyboard.focusTrap.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -215,9 +194,9 @@ export const focusTrapRule: Rule = {
       if (!hasCloseControl) {
         violations.push(createViolation(focusTrapRule, {
           element: dialog,
-          message: 'Possível diálogo sem mecanismo claro para sair da interação.',
-          suggestion: 'Forneça botão de fechar e tratamento de ESC quando aplicável.',
-          remediationAdvice: `<button aria-label="Fechar modal">×</button>`,
+          message: t('rules.keyboard.focusTrap.message'),
+          suggestion: t('rules.keyboard.focusTrap.suggestion'),
+          remediationAdvice: t('rules.keyboard.focusTrap.remediation'),
           customIdPrefix: 'focus-trap',
         }));
       }
@@ -227,14 +206,11 @@ export const focusTrapRule: Rule = {
   },
 };
 
-/**
- * 5.1.8 - Conteúdo adicional persistente
- */
 export const additionalContentPersistentRule: Rule = {
   id: 'additional-content-persistent',
   nbrReference: '5.1.8',
-  name: 'Conteúdo adicional persistente',
-  description: 'Conteúdo adicional exibido em foco ou hover deve permanecer disponível',
+  name: t('rules.keyboard.additionalContentPersistent.name'),
+  description: t('rules.keyboard.additionalContentPersistent.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -245,9 +221,9 @@ export const additionalContentPersistentRule: Rule = {
       if (element.getAttribute('role') === 'tooltip' && !element.id) {
         violations.push(createViolation(additionalContentPersistentRule, {
           element,
-          message: 'Tooltip sem identificação programática consistente.',
-          suggestion: 'Use id no tooltip e associe-o ao elemento disparador.',
-          remediationAdvice: `<div id="ajuda" role="tooltip">Descrição</div>`,
+          message: t('rules.keyboard.additionalContentPersistent.message'),
+          suggestion: t('rules.keyboard.additionalContentPersistent.suggestion'),
+          remediationAdvice: t('rules.keyboard.additionalContentPersistent.remediation'),
           customIdPrefix: 'tooltip-persistent',
         }));
       }
@@ -257,14 +233,11 @@ export const additionalContentPersistentRule: Rule = {
   },
 };
 
-/**
- * 5.1.9 - Conteúdo adicional dispensável
- */
 export const additionalContentDismissibleRule: Rule = {
   id: 'additional-content-dismissible',
   nbrReference: '5.1.9',
-  name: 'Conteúdo adicional dispensável',
-  description: 'Conteúdo adicional deve poder ser dispensado sem mover foco',
+  name: t('rules.keyboard.additionalContentDismissible.name'),
+  description: t('rules.keyboard.additionalContentDismissible.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -272,13 +245,13 @@ export const additionalContentDismissibleRule: Rule = {
     const violations: Violation[] = [];
 
     document.querySelectorAll<HTMLElement>('[role="tooltip"], [role="dialog"], [popover]').forEach((element) => {
-      const hasDismissControl = !!element.querySelector('button, [role="button"], [aria-label*="fechar" i], [aria-label*="close" i]');
+      const hasDismissControl = Boolean(element.querySelector('button, [role="button"], [aria-label*="fechar" i], [aria-label*="close" i]'));
       if (!hasDismissControl && element.getAttribute('role') !== 'tooltip') {
         violations.push(createViolation(additionalContentDismissibleRule, {
           element,
-          message: 'Conteúdo adicional sem controle explícito de dispensa.',
-          suggestion: 'Disponibilize mecanismo claro para fechar ou dispensar o conteúdo.',
-          remediationAdvice: `<button aria-label="Fechar">Fechar</button>`,
+          message: t('rules.keyboard.additionalContentDismissible.message'),
+          suggestion: t('rules.keyboard.additionalContentDismissible.suggestion'),
+          remediationAdvice: t('rules.keyboard.additionalContentDismissible.remediation'),
           customIdPrefix: 'dismissible',
         }));
       }
@@ -288,28 +261,25 @@ export const additionalContentDismissibleRule: Rule = {
   },
 };
 
-/**
- * 5.1.11 - Atalhos de teclado sem tecla modificadora
- */
 export const keyboardShortcutRule: Rule = {
   id: 'keyboard-shortcut',
   nbrReference: '5.1.11',
-  name: 'Atalhos de teclado sem tecla modificadora',
-  description: 'Atalhos de teclado de caractere único exigem verificação e cuidado especial',
+  name: t('rules.keyboard.keyboardShortcut.name'),
+  description: t('rules.keyboard.keyboardShortcut.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
-  check: async (): Promise<Violation[]> => {
-    return Array.from(document.querySelectorAll<HTMLElement>('[accesskey]')).map((el) =>
+  check: async (): Promise<Violation[]> => (
+    Array.from(document.querySelectorAll<HTMLElement>('[accesskey]')).map((el) =>
       createViolation(keyboardShortcutRule, {
         element: el,
-        message: `Atalho de teclado detectado via accesskey="${el.getAttribute('accesskey')}".`,
-        suggestion: 'Evite atalhos de caractere único ou ofereça mecanismo para desativá-los.',
-        remediationAdvice: `<button aria-keyshortcuts="Alt+S">Salvar</button>`,
+        message: t('rules.keyboard.keyboardShortcut.message', { accessKey: el.getAttribute('accesskey') }),
+        suggestion: t('rules.keyboard.keyboardShortcut.suggestion'),
+        remediationAdvice: t('rules.keyboard.keyboardShortcut.remediation'),
         customIdPrefix: 'accesskey',
-      })
-    );
-  },
+      }),
+    )
+  ),
 };
 
 export const keyboardRules: Rule[] = [

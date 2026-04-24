@@ -1,16 +1,17 @@
 /**
- * Regras da Secao 5.2 - Imagens
+ * Regras da Seção 5.2 - Imagens
  * ABNT NBR 17225:2025
  */
 
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, isElementVisible } from '@/utils';
 
 export const imageAltTextRule: Rule = {
   id: 'image-alt-text',
   nbrReference: '5.2.1',
-  name: 'Texto alternativo para imagens de conteúdo',
-  description: 'Imagens de conteúdo devem ter texto alternativo descritivo',
+  name: t('rules.images.imageAltText.name'),
+  description: t('rules.images.imageAltText.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -22,15 +23,14 @@ export const imageAltTextRule: Rule = {
       const alt = img.getAttribute('alt');
       const ariaLabel = img.getAttribute('aria-label');
       const role = img.getAttribute('role');
-
       if (role === 'presentation' || role === 'none') return;
 
       if ((!alt || !alt.trim()) && (!ariaLabel || !ariaLabel.trim())) {
         violations.push(createViolation(imageAltTextRule, {
           element: img,
-          message: 'Imagem de conteúdo sem texto alternativo.',
-          suggestion: 'Adicione atributo alt descritivo ou aria-label apropriado.',
-          remediationAdvice: `<img src="imagem.jpg" alt="Descrição clara da imagem" />`,
+          message: t('rules.images.imageAltText.message'),
+          suggestion: t('rules.images.imageAltText.suggestion'),
+          remediationAdvice: t('rules.images.imageAltText.remediation'),
           customIdPrefix: 'image-alt',
         }));
       }
@@ -43,8 +43,8 @@ export const imageAltTextRule: Rule = {
 export const imageFunctionalAltRule: Rule = {
   id: 'image-functional-alt',
   nbrReference: '5.2.2',
-  name: 'Texto alternativo para imagens funcionais',
-  description: 'Imagens funcionais devem descrever sua ação ou destino',
+  name: t('rules.images.imageFunctionalAlt.name'),
+  description: t('rules.images.imageFunctionalAlt.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -57,9 +57,9 @@ export const imageFunctionalAltRule: Rule = {
       if (!alt || !alt.trim()) {
         violations.push(createViolation(imageFunctionalAltRule, {
           element: img,
-          message: 'Imagem funcional sem texto alternativo descritivo.',
-          suggestion: 'Descreva o destino do link ou a ação do botão.',
-          remediationAdvice: `<img src="acao.png" alt="Abrir detalhes do evento" />`,
+          message: t('rules.images.imageFunctionalAlt.message'),
+          suggestion: t('rules.images.imageFunctionalAlt.suggestion'),
+          remediationAdvice: t('rules.images.imageFunctionalAlt.remediation'),
           customIdPrefix: 'image-functional',
         }));
       }
@@ -72,8 +72,8 @@ export const imageFunctionalAltRule: Rule = {
 export const imageDecorativeRule: Rule = {
   id: 'image-decorative',
   nbrReference: '5.2.3',
-  name: 'Texto alternativo para imagens decorativas',
-  description: 'Imagens decorativas devem ser ocultadas de tecnologias assistivas',
+  name: t('rules.images.imageDecorative.name'),
+  description: t('rules.images.imageDecorative.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -92,9 +92,9 @@ export const imageDecorativeRule: Rule = {
       if (looksDecorative && !(alt === '' || role === 'presentation' || role === 'none' || ariaHidden === 'true')) {
         violations.push(createViolation(imageDecorativeRule, {
           element: img,
-          message: 'Imagem com forte indício de uso decorativo sem ocultação acessível.',
-          suggestion: 'Use alt="" ou role="presentation" em imagens puramente decorativas.',
-          remediationAdvice: `<img src="decoracao.png" alt="" role="presentation" />`,
+          message: t('rules.images.imageDecorative.message'),
+          suggestion: t('rules.images.imageDecorative.suggestion'),
+          remediationAdvice: t('rules.images.imageDecorative.remediation'),
           customIdPrefix: 'image-decorative',
         }));
       }
@@ -107,8 +107,8 @@ export const imageDecorativeRule: Rule = {
 export const complexImageDescriptionRule: Rule = {
   id: 'complex-image-description',
   nbrReference: '5.2.4',
-  name: 'Descrição para imagens complexas',
-  description: 'Imagens complexas devem possuir descrição adicional quando necessário',
+  name: t('rules.images.complexImageDescription.name'),
+  description: t('rules.images.complexImageDescription.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -122,16 +122,16 @@ export const complexImageDescriptionRule: Rule = {
       const src = img.src.toLowerCase();
       const sufficientlyLarge = img.width >= 120 || img.height >= 120;
       const looksComplex = ['chart', 'graph', 'map', 'diagram', 'infographic'].some((token) =>
-        className.includes(token) || src.includes(token) || alt.toLowerCase().includes(token)
+        className.includes(token) || src.includes(token) || alt.toLowerCase().includes(token),
       );
-      const hasLongDescription = !!(img.getAttribute('longdesc') || img.getAttribute('aria-describedby'));
+      const hasLongDescription = Boolean(img.getAttribute('longdesc') || img.getAttribute('aria-describedby'));
 
       if (looksComplex && sufficientlyLarge && !hasLongDescription) {
         violations.push(createViolation(complexImageDescriptionRule, {
           element: img,
-          message: 'Possível imagem complexa sem descrição longa associada.',
-          suggestion: 'Associe longdesc, aria-describedby ou texto adjacente equivalente.',
-          remediationAdvice: `<img aria-describedby="descricao-grafico" alt="Variação de desempenho" />`,
+          message: t('rules.images.complexImageDescription.message'),
+          suggestion: t('rules.images.complexImageDescription.suggestion'),
+          remediationAdvice: t('rules.images.complexImageDescription.remediation'),
           customIdPrefix: 'image-complex',
         }));
       }
@@ -144,8 +144,8 @@ export const complexImageDescriptionRule: Rule = {
 export const imageOfTextRule: Rule = {
   id: 'image-of-text',
   nbrReference: '5.2.5',
-  name: 'Imagens de texto',
-  description: 'Imagens de texto devem ser evitadas quando não forem essenciais',
+  name: t('rules.images.imageOfText.name'),
+  description: t('rules.images.imageOfText.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -161,9 +161,9 @@ export const imageOfTextRule: Rule = {
       if (looksLikeTextAsset && alt.length >= 12 && !img.closest('a, button')) {
         violations.push(createViolation(imageOfTextRule, {
           element: img,
-          message: 'Imagem com texto alternativo extenso pode representar imagem de texto.',
-          suggestion: 'Prefira texto HTML estilizado sempre que o conteúdo textual não for essencialmente gráfico.',
-          remediationAdvice: `<h2>Resultados oficiais</h2>`,
+          message: t('rules.images.imageOfText.message'),
+          suggestion: t('rules.images.imageOfText.suggestion'),
+          remediationAdvice: t('rules.images.imageOfText.remediation'),
           customIdPrefix: 'image-text',
         }));
       }

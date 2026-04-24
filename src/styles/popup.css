@@ -399,11 +399,6 @@
 }
 
 @media (max-width: 640px) {
-  .popup-app {
-    width: 100vw;
-    max-width: 100%;
-  }
-
   .tab-status-strip {
     flex-direction: column;
     align-items: flex-start;

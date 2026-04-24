@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getAssociatedLabelText, isElementVisible } from '@/utils';
 
@@ -6,8 +7,8 @@ const formFieldsSelector = 'input:not([type="hidden"]):not([type="submit"]):not(
 export const fieldLabelRule: Rule = {
   id: 'field-label',
   nbrReference: '5.9.1',
-  name: 'Rótulo de campo',
-  description: 'Campos de formulário devem possuir rótulo identificável',
+  name: t('rules.forms.fieldLabel.name'),
+  description: t('rules.forms.fieldLabel.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -21,9 +22,9 @@ export const fieldLabelRule: Rule = {
       if (!label.trim()) {
         violations.push(createViolation(fieldLabelRule, {
           element: field as unknown as HTMLElement,
-          message: 'Campo de formulário sem rótulo associado.',
-          suggestion: 'Associe um <label>, aria-label ou aria-labelledby ao campo.',
-          remediationAdvice: `<label for="email">E-mail</label>\n<input id="email" type="email" />`,
+          message: t('rules.forms.fieldLabel.message'),
+          suggestion: t('rules.forms.fieldLabel.suggestion'),
+          remediationAdvice: t('rules.forms.fieldLabel.remediation'),
           customIdPrefix: 'field-label',
         }));
       }
@@ -36,8 +37,8 @@ export const fieldLabelRule: Rule = {
 export const associatedFieldLabelRule: Rule = {
   id: 'field-label-associated',
   nbrReference: '5.9.3',
-  name: 'Rótulo de campo associado',
-  description: 'Rótulos de campos devem estar associados programaticamente ao respectivo controle',
+  name: t('rules.forms.associatedFieldLabel.name'),
+  description: t('rules.forms.associatedFieldLabel.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -48,16 +49,16 @@ export const associatedFieldLabelRule: Rule = {
       if (!isElementVisible(field as unknown as HTMLElement)) return;
 
       const hasProgrammaticLabel =
-        !!getAssociatedLabelText(field).trim() ||
-        !!field.getAttribute('aria-label')?.trim() ||
-        !!field.getAttribute('aria-labelledby')?.trim();
+        Boolean(getAssociatedLabelText(field).trim()) ||
+        Boolean(field.getAttribute('aria-label')?.trim()) ||
+        Boolean(field.getAttribute('aria-labelledby')?.trim());
 
       if (!hasProgrammaticLabel) {
         violations.push(createViolation(associatedFieldLabelRule, {
           element: field as unknown as HTMLElement,
-          message: 'Campo de formulário sem associação programática de rótulo.',
-          suggestion: 'Associe o rótulo ao campo com for/id, aria-label ou aria-labelledby.',
-          remediationAdvice: `<label for="nome">Nome</label>\n<input id="nome" name="nome" />`,
+          message: t('rules.forms.associatedFieldLabel.message'),
+          suggestion: t('rules.forms.associatedFieldLabel.suggestion'),
+          remediationAdvice: t('rules.forms.associatedFieldLabel.remediation'),
           customIdPrefix: 'field-label-associated',
         }));
       }
@@ -70,8 +71,8 @@ export const associatedFieldLabelRule: Rule = {
 export const relatedFieldsRule: Rule = {
   id: 'related-fields',
   nbrReference: '5.9.6',
-  name: 'Campos relacionados',
-  description: 'Campos relacionados devem ser agrupados semanticamente',
+  name: t('rules.forms.relatedFields.name'),
+  description: t('rules.forms.relatedFields.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -91,9 +92,9 @@ export const relatedFieldsRule: Rule = {
       if (!first.closest('fieldset, [role="group"], [role="radiogroup"]')) {
         violations.push(createViolation(relatedFieldsRule, {
           element: first,
-          message: `Grupo de campos "${first.name}" sem agrupamento semântico.`,
-          suggestion: 'Agrupe opções relacionadas com fieldset/legend ou role apropriado.',
-          remediationAdvice: `<fieldset>\n  <legend>Forma de pagamento</legend>\n</fieldset>`,
+          message: t('rules.forms.relatedFields.message', { name: first.name }),
+          suggestion: t('rules.forms.relatedFields.suggestion'),
+          remediationAdvice: t('rules.forms.relatedFields.remediation'),
           customIdPrefix: 'field-group',
         }));
       }
@@ -106,8 +107,8 @@ export const relatedFieldsRule: Rule = {
 export const requiredFieldsRule: Rule = {
   id: 'required-fields',
   nbrReference: '5.9.7',
-  name: 'Campos obrigatórios',
-  description: 'Campos obrigatórios devem ser programaticamente identificáveis',
+  name: t('rules.forms.requiredFields.name'),
+  description: t('rules.forms.requiredFields.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -124,9 +125,9 @@ export const requiredFieldsRule: Rule = {
       if (visuallyRequired && !programmaticallyRequired) {
         violations.push(createViolation(requiredFieldsRule, {
           element: field as unknown as HTMLElement,
-          message: 'Campo aparenta ser obrigatório, mas não está marcado programaticamente.',
-          suggestion: 'Use required ou aria-required="true" em campos obrigatórios.',
-          remediationAdvice: `<input required aria-required="true" />`,
+          message: t('rules.forms.requiredFields.message'),
+          suggestion: t('rules.forms.requiredFields.suggestion'),
+          remediationAdvice: t('rules.forms.requiredFields.remediation'),
           customIdPrefix: 'required-field',
         }));
       }
@@ -139,8 +140,8 @@ export const requiredFieldsRule: Rule = {
 export const dataTypeRule: Rule = {
   id: 'field-data-type',
   nbrReference: '5.9.8',
-  name: 'Tipo de dado determinado',
-  description: 'Campos devem usar tipos adequados ao dado solicitado',
+  name: t('rules.forms.dataType.name'),
+  description: t('rules.forms.dataType.description'),
   severity: 'error',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -163,9 +164,9 @@ export const dataTypeRule: Rule = {
       if (expectedType && field.type === 'text') {
         violations.push(createViolation(dataTypeRule, {
           element: field,
-          message: `Campo parece solicitar ${expectedType}, mas está usando type="text".`,
-          suggestion: `Use type="${expectedType}" para melhorar entrada e validação.`,
-          remediationAdvice: `<input type="${expectedType}" />`,
+          message: t('rules.forms.dataType.message', { type: expectedType }),
+          suggestion: t('rules.forms.dataType.suggestion', { type: expectedType }),
+          remediationAdvice: t('rules.forms.dataType.remediation', { type: expectedType }),
           customIdPrefix: 'field-type',
         }));
       }
@@ -178,8 +179,8 @@ export const dataTypeRule: Rule = {
 export const accessibleAuthenticationRule: Rule = {
   id: 'accessible-authentication',
   nbrReference: '5.9.18',
-  name: 'Autenticação acessível mínima',
-  description: 'Autenticação não deve depender apenas de quebra-cabeças cognitivos sem alternativa',
+  name: t('rules.forms.accessibleAuthentication.name'),
+  description: t('rules.forms.accessibleAuthentication.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -188,9 +189,9 @@ export const accessibleAuthenticationRule: Rule = {
     document.querySelectorAll<HTMLElement>('[class*="captcha" i], [id*="captcha" i], [title*="captcha" i], [aria-label*="captcha" i], [src*="captcha" i], [data-sitekey]').forEach((element) => {
       violations.push(createViolation(accessibleAuthenticationRule, {
         element,
-        message: 'Possível mecanismo de CAPTCHA detectado; exige validação manual de acessibilidade.',
-        suggestion: 'Verifique se existe alternativa acessível ao desafio cognitivo.',
-        remediationAdvice: `Ofereça autenticação sem depender exclusivamente de CAPTCHA visual.`,
+        message: t('rules.forms.accessibleAuthentication.message'),
+        suggestion: t('rules.forms.accessibleAuthentication.suggestion'),
+        remediationAdvice: t('rules.forms.accessibleAuthentication.remediation'),
         customIdPrefix: 'captcha',
       }));
     });

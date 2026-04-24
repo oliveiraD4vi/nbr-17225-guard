@@ -1,8 +1,13 @@
 import messages from './pt-BR.json';
+import ruleMessages from './rules-pt-BR.json';
 
 type Primitive = string | number | boolean | null | undefined;
 type NestedRecord = { [key: string]: Primitive | NestedRecord };
 export type TextKey = string;
+const catalog = {
+  ...messages,
+  rules: ruleMessages,
+};
 
 function readMessage(key: TextKey): string {
   return key
@@ -12,7 +17,7 @@ function readMessage(key: TextKey): string {
         return current[segment as keyof typeof current];
       }
       throw new Error(`Chave de texto não encontrada: ${key}`);
-    }, messages as NestedRecord) as string;
+    }, catalog as NestedRecord) as string;
 }
 
 export function t(key: TextKey, params?: Record<string, Primitive>): string {

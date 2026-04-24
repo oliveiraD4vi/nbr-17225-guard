@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Empty, Spin, Tag } from 'antd';
+import { Card, Empty, Tag } from 'antd';
 import {
   CalendarOutlined,
   CheckCircleOutlined,
@@ -15,6 +15,7 @@ import {
   getPendingHumanReviewCount,
 } from '@/utils/audit-comparison';
 import { getRequirementScoreData } from '@/utils/audit-score';
+import { SummarySkeleton } from './LoadingSkeletons';
 import '../styles/violations-summary.css';
 
 interface ViolationsSummaryProps {
@@ -27,11 +28,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(({
   loading = false,
 }) => {
   if (loading) {
-    return (
-      <div className="violations-summary-loading">
-        <Spin size="large" tip={t('summary.loading')} />
-      </div>
-    );
+    return <SummarySkeleton />;
   }
 
   if (!result) {

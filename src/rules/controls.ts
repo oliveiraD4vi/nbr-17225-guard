@@ -1,11 +1,12 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getAccessibleName, isElementVisible } from '@/utils';
 
 export const buttonSemanticRule: Rule = {
   id: 'button-semantic',
   nbrReference: '5.8.1',
-  name: 'Semântica de botão',
-  description: 'Botões e controles de ação devem possuir semântica e nome acessível',
+  name: t('rules.controls.buttonSemantic.name'),
+  description: t('rules.controls.buttonSemantic.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -15,14 +16,13 @@ export const buttonSemanticRule: Rule = {
 
     controls.forEach((control) => {
       if (!isElementVisible(control)) return;
-
       const name = getAccessibleName(control);
       if (!name.trim()) {
         violations.push(createViolation(buttonSemanticRule, {
           element: control,
-          message: 'Controle com comportamento de botão sem nome acessível.',
-          suggestion: 'Forneça texto visível, value ou aria-label descritivo.',
-          remediationAdvice: `<button aria-label="Salvar alterações">Salvar</button>`,
+          message: t('rules.controls.buttonSemantic.message'),
+          suggestion: t('rules.controls.buttonSemantic.suggestion'),
+          remediationAdvice: t('rules.controls.buttonSemantic.remediation'),
           customIdPrefix: 'button-name',
         }));
       }
@@ -35,8 +35,8 @@ export const buttonSemanticRule: Rule = {
 export const targetSizeRule: Rule = {
   id: 'target-size',
   nbrReference: '5.8.7',
-  name: 'Área de acionamento mínima',
-  description: 'Elementos acionáveis devem possuir área mínima para interação',
+  name: t('rules.controls.targetSize.name'),
+  description: t('rules.controls.targetSize.description'),
   severity: 'error',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -52,9 +52,12 @@ export const targetSizeRule: Rule = {
       if (rect.width < 24 || rect.height < 24) {
         violations.push(createViolation(targetSizeRule, {
           element: control,
-          message: `Área acionável muito pequena (${Math.round(rect.width)}x${Math.round(rect.height)}px).`,
-          suggestion: 'Aumente a área clicável para pelo menos 24x24 px.',
-          remediationAdvice: `button { min-width: 24px; min-height: 24px; }`,
+          message: t('rules.controls.targetSize.message', {
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+          }),
+          suggestion: t('rules.controls.targetSize.suggestion'),
+          remediationAdvice: t('rules.controls.targetSize.remediation'),
           customIdPrefix: 'target-size',
         }));
       }

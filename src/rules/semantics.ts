@@ -1,27 +1,26 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import { createViolation, getAccessibleName, isElementVisible } from '@/utils';
 
 export const pageTitleRule: Rule = {
   id: 'page-title',
   nbrReference: '5.13.1',
-  name: 'Título da página',
-  description: 'A página deve possuir título significativo',
+  name: t('rules.semantics.pageTitle.name'),
+  description: t('rules.semantics.pageTitle.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = [];
-
     if (!document.title.trim()) {
       violations.push(createViolation(pageTitleRule, {
         element: document.body,
-        message: 'Documento sem título significativo.',
-        suggestion: 'Defina um título descritivo no elemento <title>.',
-        remediationAdvice: `<title>Título descritivo da página</title>`,
+        message: t('rules.semantics.pageTitle.message'),
+        suggestion: t('rules.semantics.pageTitle.suggestion'),
+        remediationAdvice: t('rules.semantics.pageTitle.remediation'),
         customIdPrefix: 'page-title',
       }));
     }
-
     return violations;
   },
 };
@@ -29,8 +28,8 @@ export const pageTitleRule: Rule = {
 export const pageLanguageRule: Rule = {
   id: 'page-language',
   nbrReference: '5.13.2',
-  name: 'Idioma da página',
-  description: 'O elemento html deve declarar o idioma principal da página',
+  name: t('rules.semantics.pageLanguage.name'),
+  description: t('rules.semantics.pageLanguage.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -38,17 +37,15 @@ export const pageLanguageRule: Rule = {
     const violations: Violation[] = [];
     const html = document.documentElement;
     const lang = html.getAttribute('lang');
-
     if (!lang?.trim()) {
       violations.push(createViolation(pageLanguageRule, {
         element: html,
-        message: 'Elemento html sem atributo lang.',
-        suggestion: 'Declare o idioma principal da página no elemento html.',
-        remediationAdvice: `<html lang="pt-BR">`,
+        message: t('rules.semantics.pageLanguage.message'),
+        suggestion: t('rules.semantics.pageLanguage.suggestion'),
+        remediationAdvice: t('rules.semantics.pageLanguage.remediation'),
         customIdPrefix: 'html-lang',
       }));
     }
-
     return violations;
   },
 };
@@ -56,8 +53,8 @@ export const pageLanguageRule: Rule = {
 export const frameTitleRule: Rule = {
   id: 'frame-title',
   nbrReference: '5.13.4',
-  name: 'Título de frame',
-  description: 'Frames devem possuir título acessível',
+  name: t('rules.semantics.frameTitle.name'),
+  description: t('rules.semantics.frameTitle.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -67,9 +64,9 @@ export const frameTitleRule: Rule = {
       if (!getAccessibleName(frame).trim()) {
         violations.push(createViolation(frameTitleRule, {
           element: frame,
-          message: 'Frame sem title ou nome acessível.',
-          suggestion: 'Adicione um título que descreva o conteúdo incorporado.',
-          remediationAdvice: `<iframe title="Mapa do evento"></iframe>`,
+          message: t('rules.semantics.frameTitle.message'),
+          suggestion: t('rules.semantics.frameTitle.suggestion'),
+          remediationAdvice: t('rules.semantics.frameTitle.remediation'),
           customIdPrefix: 'frame-title',
         }));
       }
@@ -81,8 +78,8 @@ export const frameTitleRule: Rule = {
 export const zoomAllowedRule: Rule = {
   id: 'zoom-allowed',
   nbrReference: '5.13.5',
-  name: 'Zoom não bloqueado',
-  description: 'A página não deve bloquear zoom do navegador',
+  name: t('rules.semantics.zoomAllowed.name'),
+  description: t('rules.semantics.zoomAllowed.description'),
   severity: 'error',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -94,9 +91,9 @@ export const zoomAllowedRule: Rule = {
     if (content.includes('user-scalable=no') || /maximum-scale\s*=\s*1(\.0)?/.test(content)) {
       violations.push(createViolation(zoomAllowedRule, {
         element: viewport as unknown as HTMLElement,
-        message: 'Viewport bloqueia ou limita excessivamente o zoom.',
-        suggestion: 'Remova user-scalable=no e não limite o zoom a 100%.',
-        remediationAdvice: `<meta name="viewport" content="width=device-width, initial-scale=1" />`,
+        message: t('rules.semantics.zoomAllowed.message'),
+        suggestion: t('rules.semantics.zoomAllowed.suggestion'),
+        remediationAdvice: t('rules.semantics.zoomAllowed.remediation'),
         customIdPrefix: 'zoom',
       }));
     }
@@ -108,8 +105,8 @@ export const zoomAllowedRule: Rule = {
 export const accessibleNameRule: Rule = {
   id: 'accessible-name',
   nbrReference: '5.13.10',
-  name: 'Componentes com nome acessível',
-  description: 'Componentes interativos devem possuir nome acessível',
+  name: t('rules.semantics.accessibleName.name'),
+  description: t('rules.semantics.accessibleName.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -134,9 +131,9 @@ export const accessibleNameRule: Rule = {
       if (!getAccessibleName(element).trim()) {
         violations.push(createViolation(accessibleNameRule, {
           element,
-          message: 'Componente interativo sem nome acessível.',
-          suggestion: 'Forneça texto visível, aria-label, aria-labelledby ou equivalente.',
-          remediationAdvice: `<button aria-label="Abrir menu"></button>`,
+          message: t('rules.semantics.accessibleName.message'),
+          suggestion: t('rules.semantics.accessibleName.suggestion'),
+          remediationAdvice: t('rules.semantics.accessibleName.remediation'),
           customIdPrefix: 'accessible-name',
         }));
       }
@@ -149,8 +146,8 @@ export const accessibleNameRule: Rule = {
 export const customStateRule: Rule = {
   id: 'custom-component-state',
   nbrReference: '5.13.13',
-  name: 'Estados, propriedades e valores de componentes customizados',
-  description: 'Componentes customizados devem expor estados ARIA quando aplicável',
+  name: t('rules.semantics.customState.name'),
+  description: t('rules.semantics.customState.description'),
   severity: 'error',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -166,13 +163,19 @@ export const customStateRule: Rule = {
 
     Object.entries(requiredStates).forEach(([role, attrs]) => {
       document.querySelectorAll<HTMLElement>(`[role="${role}"]`).forEach((element) => {
-        const missing = attrs.filter(attr => !element.hasAttribute(attr));
+        const missing = attrs.filter((attr) => !element.hasAttribute(attr));
         if (missing.length) {
           violations.push(createViolation(customStateRule, {
             element,
-            message: `Componente com role="${role}" sem estados/propriedades obrigatórios: ${missing.join(', ')}.`,
-            suggestion: 'Exponha estados ARIA coerentes para o componente customizado.',
-            remediationAdvice: `<div role="${role}" ${attrs.map(attr => `${attr}="..."`).join(' ')}></div>`,
+            message: t('rules.semantics.customState.message', {
+              role,
+              attrs: missing.join(', '),
+            }),
+            suggestion: t('rules.semantics.customState.suggestion'),
+            remediationAdvice: t('rules.semantics.customState.remediation', {
+              role,
+              attrsTemplate: attrs.map((attr) => `${attr}="..."`).join(' '),
+            }),
             customIdPrefix: 'custom-state',
           }));
         }
