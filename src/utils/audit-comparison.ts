@@ -1,4 +1,5 @@
 import type { AuditResult, Violation } from '@/types';
+import { getViolationIdentityKey, getVisibleAuditViolations } from '@/utils/audit-history';
 
 export interface AuditComparisonSummary {
   baselineId: string;
@@ -31,19 +32,6 @@ export function getPercentageDelta(baselineValue: number, targetValue: number): 
   return Number((((targetValue - baselineValue) / baselineValue) * 100).toFixed(1));
 }
 
-export function isViolationVisibleInMainLists(violation: Violation): boolean {
-  return !(violation.requiresHumanReview && violation.humanReviewStatus === 'dismissed');
-}
-
-function getViolationComparisonKey(violation: Violation): string {
-  return violation.id || [
-    violation.ruleId,
-    violation.elementSelector || '',
-    violation.message,
-    violation.suggestion,
-  ].join('|');
-}
-
 export function getAuditNoteCount(result: AuditResult): number {
   return result.violations.filter((violation) => Boolean(violation.userNote?.trim())).length;
 }
@@ -67,20 +55,20 @@ export function compareAuditResults(
   baseline: AuditResult,
   target: AuditResult
 ): AuditComparisonSummary {
-  const baselineOpenViolations = baseline.violations.filter(isViolationVisibleInMainLists);
-  const targetOpenViolations = target.violations.filter(isViolationVisibleInMainLists);
+  const baselineOpenViolations = getVisibleAuditViolations(baseline);
+  const targetOpenViolations = getVisibleAuditViolations(target);
 
-  const baselineKeys = new Set(baselineOpenViolations.map(getViolationComparisonKey));
-  const targetKeys = new Set(targetOpenViolations.map(getViolationComparisonKey));
+  const baselineKeys = new Set(baselineOpenViolations.map(getViolationIdentityKey));
+  const targetKeys = new Set(targetOpenViolations.map(getViolationIdentityKey));
 
   return {
     baselineId: baseline.id || '',
     targetId: target.id || '',
     baselineTimestamp: baseline.timestamp,
     targetTimestamp: target.timestamp,
-    newViolations: targetOpenViolations.filter((violation) => !baselineKeys.has(getViolationComparisonKey(violation))),
-    resolvedViolations: baselineOpenViolations.filter((violation) => !targetKeys.has(getViolationComparisonKey(violation))),
-    persistentViolations: targetOpenViolations.filter((violation) => baselineKeys.has(getViolationComparisonKey(violation))),
+    newViolations: targetOpenViolations.filter((violation) => !baselineKeys.has(getViolationIdentityKey(violation))),
+    resolvedViolations: baselineOpenViolations.filter((violation) => !targetKeys.has(getViolationIdentityKey(violation))),
+    persistentViolations: targetOpenViolations.filter((violation) => baselineKeys.has(getViolationIdentityKey(violation))),
     baselineOpenCount: baselineOpenViolations.length,
     targetOpenCount: targetOpenViolations.length,
     baselineNoteCount: getAuditNoteCount(baseline),
