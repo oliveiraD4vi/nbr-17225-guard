@@ -4,16 +4,26 @@ Verificador de acessibilidade web para navegadores Chromium, alinhado aos requis
 
 ## Visão Geral
 
-O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e retorna violações com referência normativa, severidade, sugestão de correção e trecho do elemento afetado.
+O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e retorna violações com referência normativa, severidade, sugestão de correção, contexto do elemento afetado e histórico por URL.
 
 Funcionalidades principais:
 
 - análise de regras da NBR 17225 por módulos em `src/rules`;
-- destaque visual de problemas na página;
-- painel de detalhes com sugestões contextualizadas;
+- cobertura do catálogo v1 com 94 regras derivadas de `docs/Analise_Documental_NBR17225.xlsx`;
+- destaque visual de problemas na página, com limpeza de destaques e navegação por itens prioritários;
+- painel de detalhes com agrupamento por regra, severidade, sugestões contextualizadas e orientação de correção;
+- separação entre detecção automática e itens que exigem confirmação humana;
+- revisão humana persistida por item, com estados de confirmado, descartado e pendente;
+- anotações por item com persistência entre auditorias equivalentes;
+- herança de anotações e triagem humana entre auditorias equivalentes da mesma URL;
+- histórico de auditorias por URL;
+- comparação entre auditorias salvas, com indicadores de evolução, regressão e porcentagens;
+- exportação de auditorias em JSON e CSV;
+- exportação de comparações em Markdown, JSON e CSV;
+- nota de requisitos baseada apenas nos requisitos do escopo v1;
 - simulação de visão para protanopia, deuteranopia, tritanopia e desfoque;
-- exportação de resultados em JSON e CSV;
-- página de relatório detalhado.
+- página de relatório detalhado;
+- verificação automática de cobertura entre catálogo documentado e regras implementadas.
 
 ## Cobertura de Regras
 
@@ -47,7 +57,7 @@ Consulte:
 Para validar cada regra individualmente contra os requisitos documentados:
 
 ```bash
-npm run verify:rules
+pnpm verify:rules
 ```
 
 O script verifica:
@@ -107,7 +117,7 @@ pnpm dev
 pnpm build
 pnpm lint
 pnpm type-check
-npm run verify:rules
+pnpm verify:rules
 ```
 
 ## Estrutura
@@ -166,7 +176,7 @@ export const myRule: Rule = {
 Após adicionar uma regra, exporte-a em `src/rules/index.ts` e execute:
 
 ```bash
-npm run verify:rules
+pnpm verify:rules
 pnpm type-check
 pnpm build
 ```
