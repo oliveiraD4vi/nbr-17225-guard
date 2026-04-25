@@ -19,9 +19,6 @@ import { t } from '@/i18n';
 import type { AuditHistoryEntry, AuditResult, HumanReviewStatus, Violation, VisionSimulationFilter } from '@/types';
 import {
   compareAuditResults,
-  getConfirmedHumanReviewCount,
-  getDismissedHumanReviewCount,
-  getPendingHumanReviewCount,
 } from '@/utils/audit-comparison';
 import { buildExportableAuditResult } from '@/utils/audit-export';
 import {
