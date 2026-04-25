@@ -264,7 +264,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nbr-17225-audit-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `${t('shared.exports.auditFilePrefix')}-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.exportJsonSuccess'));
@@ -276,7 +276,14 @@ export const PopupApp: React.FC = () => {
       return;
     }
 
-    const headers = ['ID', 'Regra', 'Referência NBR', 'Severidade', 'Mensagem', 'Sugestão'];
+    const headers = [
+      t('shared.exports.csvHeaders.id'),
+      t('shared.exports.csvHeaders.rule'),
+      t('shared.exports.csvHeaders.nbrReference'),
+      t('shared.exports.csvHeaders.severity'),
+      t('shared.exports.csvHeaders.message'),
+      t('shared.exports.csvHeaders.suggestion'),
+    ];
     const rows = viewedAuditResult.violations.map((violation) => [
       violation.id,
       violation.ruleName,
@@ -294,7 +301,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nbr-17225-audit-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `${t('shared.exports.auditFilePrefix')}-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.exportCsvSuccess'));
@@ -392,7 +399,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.md`;
+    link.download = `${t('shared.exports.comparisonFilePrefix')}-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.md`;
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.comparisonExported'));
@@ -409,7 +416,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.json`;
+    link.download = `${t('shared.exports.comparisonFilePrefix')}-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.comparisonExportedJson'));
@@ -422,17 +429,22 @@ export const PopupApp: React.FC = () => {
     }
 
     const rows = [
-      ['indicador', 'base', 'comparada', 'variacao_percentual'],
-      ['itens_visiveis', comparisonSummary.baselineOpenCount, comparisonSummary.targetOpenCount, comparisonSummary.openIssuesDeltaPercentage],
-      ['revisao_humana_concluida', comparisonSummary.baselineConfirmedReviews + comparisonSummary.baselineDismissedReviews, comparisonSummary.targetConfirmedReviews + comparisonSummary.targetDismissedReviews, ''],
-      ['revisao_humana_pendente', comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
-      ['confirmados_humanamente', comparisonSummary.baselineConfirmedReviews, comparisonSummary.targetConfirmedReviews, comparisonSummary.confirmedReviewsDeltaPercentage],
-      ['descartados_humanamente', comparisonSummary.baselineDismissedReviews, comparisonSummary.targetDismissedReviews, ''],
-      ['pendentes_humanos', comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
-      ['anotacoes', comparisonSummary.baselineNoteCount, comparisonSummary.targetNoteCount, comparisonSummary.notesDeltaPercentage],
-      ['novos_problemas', '', comparisonSummary.newViolations.length, ''],
-      ['problemas_resolvidos', comparisonSummary.resolvedViolations.length, '', ''],
-      ['problemas_persistentes', '', comparisonSummary.persistentViolations.length, ''],
+      [
+        t('popup.history.comparisonCsv.indicator'),
+        t('popup.history.comparisonCsv.baseline'),
+        t('popup.history.comparisonCsv.target'),
+        t('popup.history.comparisonCsv.deltaPercentage'),
+      ],
+      [t('popup.history.comparisonCsv.visibleItems'), comparisonSummary.baselineOpenCount, comparisonSummary.targetOpenCount, comparisonSummary.openIssuesDeltaPercentage],
+      [t('popup.history.comparisonCsv.completedHumanReview'), comparisonSummary.baselineConfirmedReviews + comparisonSummary.baselineDismissedReviews, comparisonSummary.targetConfirmedReviews + comparisonSummary.targetDismissedReviews, ''],
+      [t('popup.history.comparisonCsv.pendingHumanReview'), comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
+      [t('popup.history.comparisonCsv.confirmedHumanReview'), comparisonSummary.baselineConfirmedReviews, comparisonSummary.targetConfirmedReviews, comparisonSummary.confirmedReviewsDeltaPercentage],
+      [t('popup.history.comparisonCsv.dismissedHumanReview'), comparisonSummary.baselineDismissedReviews, comparisonSummary.targetDismissedReviews, ''],
+      [t('popup.history.comparisonCsv.pendingHumanItems'), comparisonSummary.baselinePendingReviews, comparisonSummary.targetPendingReviews, ''],
+      [t('popup.history.comparisonCsv.notes'), comparisonSummary.baselineNoteCount, comparisonSummary.targetNoteCount, comparisonSummary.notesDeltaPercentage],
+      [t('popup.history.comparisonCsv.newProblems'), '', comparisonSummary.newViolations.length, ''],
+      [t('popup.history.comparisonCsv.resolvedProblems'), comparisonSummary.resolvedViolations.length, '', ''],
+      [t('popup.history.comparisonCsv.persistentProblems'), '', comparisonSummary.persistentViolations.length, ''],
     ];
 
     const csv = rows
@@ -443,7 +455,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nbr-17225-comparacao-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.csv`;
+    link.download = `${t('shared.exports.comparisonFilePrefix')}-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.comparisonExportedCsv'));

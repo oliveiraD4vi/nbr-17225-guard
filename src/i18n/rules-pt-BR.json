@@ -151,6 +151,7 @@
     "predictableFieldLabel": {
       "name": "Rótulo de campo previsível",
       "description": "Campos equivalentes devem manter identificação previsível",
+      "message": "Campos equivalentes apresentam rótulos diferentes para \"{{field}}\".",
       "suggestion": "Padronize o rótulo de campos que coletam a mesma informação.",
       "remediation": "Use sempre o mesmo rótulo para campos como e-mail, telefone e CPF em fluxos equivalentes."
     },
@@ -188,6 +189,7 @@
     "dataReentry": {
       "name": "Reentrada de dados",
       "description": "Fluxos não devem exigir redigitação desnecessária de dados já fornecidos",
+      "message": "Há múltiplos campos equivalentes para \"{{field}}\" na mesma página.",
       "suggestion": "Avalie se a confirmação ou redigitação é realmente necessária.",
       "remediation": "Reutilize dados já informados ou ofereça preenchimento automático quando possível."
     },
@@ -229,12 +231,14 @@
     "graphicContrast": {
       "name": "Contraste para objetos gráficos",
       "description": "Objetos gráficos informativos devem ter contraste suficiente",
+      "message": "Objeto gráfico com contraste estimado de {{ratio}}:1.",
       "suggestion": "Aumente o contraste do gráfico em relação ao fundo.",
       "remediation": "Use cores com razão mínima próxima de 3:1 para elementos gráficos informativos."
     },
     "focusIndicatorContrast": {
       "name": "Contraste para indicador de foco visual",
       "description": "Indicadores de foco devem ter contraste perceptível com áreas adjacentes",
+      "message": "Indicador de foco com contraste estimado de {{ratio}}:1.",
       "suggestion": "Aumente o contraste do outline, box-shadow ou anel de foco.",
       "remediation": "button:focus-visible { outline: 3px solid #005fcc; }"
     },

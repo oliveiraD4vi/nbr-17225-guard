@@ -124,7 +124,7 @@ export const predictableFieldLabelRule: Rule = {
     const inconsistent = Array.from(labelsByAutocomplete.entries()).find(([, labels]) => labels.size > 1);
     return inconsistent ? [createViolation(predictableFieldLabelRule, {
       element: document.body,
-      message: `Campos equivalentes apresentam rótulos diferentes para "${inconsistent[0]}".`,
+      message: t('rules.documentalCompletenessB.predictableFieldLabel.message', { field: inconsistent[0] }),
       suggestion: t('rules.documentalCompletenessB.predictableFieldLabel.suggestion'),
       remediationAdvice: t('rules.documentalCompletenessB.predictableFieldLabel.remediation'),
       customIdPrefix: 'predictable-label',
@@ -284,7 +284,7 @@ export const dataReentryRule: Rule = {
     const duplicate = Array.from(repeatedFields.entries()).find(([, fields]) => fields.length > 1);
     return duplicate ? [createViolation(dataReentryRule, {
       element: duplicate[1][0],
-      message: `Há múltiplos campos equivalentes para "${duplicate[0]}" na mesma página.`,
+      message: t('rules.documentalCompletenessB.dataReentry.message', { field: duplicate[0] }),
       suggestion: t('rules.documentalCompletenessB.dataReentry.suggestion'),
       remediationAdvice: t('rules.documentalCompletenessB.dataReentry.remediation'),
       customIdPrefix: 'data-reentry',
@@ -436,7 +436,7 @@ export const graphicContrastRule: Rule = {
       if (ratio < 3) {
         violations.push(createViolation(graphicContrastRule, {
           element,
-          message: `Objeto gráfico com contraste estimado de ${ratio.toFixed(2)}:1.`,
+          message: t('rules.documentalCompletenessB.graphicContrast.message', { ratio: ratio.toFixed(2) }),
           suggestion: t('rules.documentalCompletenessB.graphicContrast.suggestion'),
           remediationAdvice: t('rules.documentalCompletenessB.graphicContrast.remediation'),
           customIdPrefix: 'graphic-contrast',
@@ -475,7 +475,7 @@ export const focusIndicatorContrastRule: Rule = {
     if (ratio < 3) {
       violations.push(createViolation(focusIndicatorContrastRule, {
         element: activeElement,
-        message: `Indicador de foco com contraste estimado de ${ratio.toFixed(2)}:1.`,
+        message: t('rules.documentalCompletenessB.focusIndicatorContrast.message', { ratio: ratio.toFixed(2) }),
         suggestion: t('rules.documentalCompletenessB.focusIndicatorContrast.suggestion'),
         remediationAdvice: t('rules.documentalCompletenessB.focusIndicatorContrast.remediation'),
         customIdPrefix: 'focus-contrast',

@@ -78,6 +78,19 @@
       "dismissed": "{{count}} descartados",
       "pending": "{{count}} pendentes",
       "humanConfirmations": "{{count}} confirmações humanas"
+    },
+    "exports": {
+      "auditFilePrefix": "nbr-17225-audit",
+      "comparisonFilePrefix": "nbr-17225-comparacao",
+      "reportFilePrefix": "nbr-17225-report",
+      "csvHeaders": {
+        "id": "ID",
+        "rule": "Regra",
+        "nbrReference": "Referência NBR",
+        "severity": "Severidade",
+        "message": "Mensagem",
+        "suggestion": "Sugestão"
+      }
     }
   },
   "popup": {
@@ -165,7 +178,23 @@
       "optionLabel": "{{date}} • {{count}} item(ns)",
       "quickReadingImprovement": "A comparação indica redução de problemas visíveis na URL auditada.",
       "quickReadingRegression": "A comparação indica aumento de problemas visíveis na URL auditada.",
-      "quickReadingStable": "A comparação não mostrou alteração no volume de problemas visíveis."
+      "quickReadingStable": "A comparação não mostrou alteração no volume de problemas visíveis.",
+      "comparisonCsv": {
+        "indicator": "indicador",
+        "baseline": "base",
+        "target": "comparada",
+        "deltaPercentage": "variacao_percentual",
+        "visibleItems": "itens_visiveis",
+        "completedHumanReview": "revisao_humana_concluida",
+        "pendingHumanReview": "revisao_humana_pendente",
+        "confirmedHumanReview": "confirmados_humanamente",
+        "dismissedHumanReview": "descartados_humanamente",
+        "pendingHumanItems": "pendentes_humanos",
+        "notes": "anotacoes",
+        "newProblems": "novos_problemas",
+        "resolvedProblems": "problemas_resolvidos",
+        "persistentProblems": "problemas_persistentes"
+      }
     }
   },
   "summary": {

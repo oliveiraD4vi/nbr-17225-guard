@@ -59,7 +59,7 @@ export const ReportApp: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `nbr-17225-report-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `${t('shared.exports.reportFilePrefix')}-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
   }, [auditResult]);
