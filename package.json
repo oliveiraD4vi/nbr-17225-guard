@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "verify:rules": "node scripts/verify-rules.mjs",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:audit-history": "pnpm build && node scripts/test-audit-history.mjs"
   },
   "dependencies": {
     "antd": "^6.3.4",

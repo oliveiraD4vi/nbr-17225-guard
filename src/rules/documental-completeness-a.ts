@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import {
   createViolation,
@@ -26,8 +27,8 @@ function createWarnings(
 export const regionUsageRule: Rule = {
   id: 'region-usage',
   nbrReference: '5.4.2',
-  name: 'Uso de regiões',
-  description: 'Regiões devem organizar logicamente a página',
+  name: t('rules.documentalCompletenessA.regionUsage.name'),
+  description: t('rules.documentalCompletenessA.regionUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -36,9 +37,9 @@ export const regionUsageRule: Rule = {
     if (regions.length < 2) {
       return [createViolation(regionUsageRule, {
         element: document.body,
-        message: 'A página apresenta pouca estrutura regional explícita.',
-        suggestion: 'Organize o conteúdo com header, main, footer, nav e regiões complementares.',
-        remediationAdvice: `<header>...</header><main>...</main><footer>...</footer>`,
+        message: t('rules.documentalCompletenessA.regionUsage.message'),
+        suggestion: t('rules.documentalCompletenessA.regionUsage.suggestion'),
+        remediationAdvice: t('rules.documentalCompletenessA.regionUsage.remediation'),
         customIdPrefix: 'region-usage',
       })];
     }
@@ -49,8 +50,8 @@ export const regionUsageRule: Rule = {
 export const listUsageRule: Rule = {
   id: 'list-usage',
   nbrReference: '5.5.2',
-  name: 'Uso de listas',
-  description: 'Itens correlatos devem ser agrupados em listas quando apropriado',
+  name: t('rules.documentalCompletenessA.listUsage.name'),
+  description: t('rules.documentalCompletenessA.listUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -63,9 +64,9 @@ export const listUsageRule: Rule = {
         if (bulletLike.length >= 3) {
           violations.push(createViolation(listUsageRule, {
             element: container,
-            message: 'Há indício de itens correlatos apresentados fora de lista semântica.',
-            suggestion: 'Use ul, ol ou dl para agrupar itens relacionados.',
-            remediationAdvice: `<ul><li>Item</li></ul>`,
+            message: t('rules.documentalCompletenessA.listUsage.message'),
+            suggestion: t('rules.documentalCompletenessA.listUsage.suggestion'),
+            remediationAdvice: t('rules.documentalCompletenessA.listUsage.remediation'),
             customIdPrefix: 'list-usage',
           }));
         }
@@ -78,8 +79,8 @@ export const listUsageRule: Rule = {
 export const tableUsageRule: Rule = {
   id: 'table-usage',
   nbrReference: '5.6.2',
-  name: 'Uso de tabelas',
-  description: 'Tabelas devem ser usadas para dados tabulares, não layout',
+  name: t('rules.documentalCompletenessA.tableUsage.name'),
+  description: t('rules.documentalCompletenessA.tableUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -91,9 +92,9 @@ export const tableUsageRule: Rule = {
       if (!hasHeaders && hasManyControls) {
         violations.push(createViolation(tableUsageRule, {
           element: table,
-          message: 'Tabela com indícios de uso para layout em vez de dados.',
-          suggestion: 'Use layout CSS e reserve tabelas para dados tabulares.',
-          remediationAdvice: `<div class="grid-layout">...</div>`,
+          message: t('rules.documentalCompletenessA.tableUsage.message'),
+          suggestion: t('rules.documentalCompletenessA.tableUsage.suggestion'),
+          remediationAdvice: t('rules.documentalCompletenessA.tableUsage.remediation'),
           customIdPrefix: 'table-usage',
         }));
       }
@@ -105,8 +106,8 @@ export const tableUsageRule: Rule = {
 export const linkUsageRule: Rule = {
   id: 'link-usage',
   nbrReference: '5.7.2',
-  name: 'Uso de links',
-  description: 'Links devem ser usados para navegação e não para ações genéricas',
+  name: t('rules.documentalCompletenessA.linkUsage.name'),
+  description: t('rules.documentalCompletenessA.linkUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -116,9 +117,9 @@ export const linkUsageRule: Rule = {
       const href = anchor.getAttribute('href') || '';
       return href === '#' || href.toLowerCase().startsWith('javascript:');
     }),
-    () => 'Link com href não navegável, possivelmente usado como botão.',
-    'Use button para ações que não navegam.',
-    `<button type="button">Abrir modal</button>`,
+    () => t('rules.documentalCompletenessA.linkUsage.message'),
+    t('rules.documentalCompletenessA.linkUsage.suggestion'),
+    t('rules.documentalCompletenessA.linkUsage.remediation'),
     'link-usage'
   ),
 };
@@ -126,8 +127,8 @@ export const linkUsageRule: Rule = {
 export const linkPurposeRule: Rule = {
   id: 'link-purpose',
   nbrReference: '5.7.4',
-  name: 'Propósito do link no contexto',
-  description: 'O texto do link deve comunicar o destino ou propósito',
+  name: t('rules.documentalCompletenessA.linkPurpose.name'),
+  description: t('rules.documentalCompletenessA.linkPurpose.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -138,9 +139,9 @@ export const linkPurposeRule: Rule = {
       Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]')).filter((anchor) =>
         vagueTexts.includes(getAccessibleName(anchor).trim().toLowerCase())
       ),
-      (anchor) => `Texto do link "${getAccessibleName(anchor)}" é vago fora de contexto.`,
-      'Use texto que descreva o destino do link.',
-      `<a href="/regulamento">Ler regulamento da prova</a>`,
+      (anchor) => t('rules.documentalCompletenessA.linkPurpose.message', { name: getAccessibleName(anchor) }),
+      t('rules.documentalCompletenessA.linkPurpose.suggestion'),
+      t('rules.documentalCompletenessA.linkPurpose.remediation'),
       'link-purpose'
     );
   },
@@ -149,8 +150,8 @@ export const linkPurposeRule: Rule = {
 export const navigationConsistencyRule: Rule = {
   id: 'navigation-consistency',
   nbrReference: '5.7.15',
-  name: 'Navegação consistente',
-  description: 'Blocos de navegação repetidos devem manter ordem consistente',
+  name: t('rules.documentalCompletenessA.navigationConsistency.name'),
+  description: t('rules.documentalCompletenessA.navigationConsistency.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -165,9 +166,9 @@ export const navigationConsistencyRule: Rule = {
     );
     return new Set(signatures).size > 1 ? [createViolation(navigationConsistencyRule, {
       element: navs[0],
-      message: 'Blocos de navegação repetidos com ordem ou rótulos inconsistentes.',
-      suggestion: 'Mantenha a mesma estrutura e ordem relativa para navegação recorrente.',
-      remediationAdvice: `<nav><a href="/inicio">Início</a><a href="/eventos">Eventos</a></nav>`,
+      message: t('rules.documentalCompletenessA.navigationConsistency.message'),
+      suggestion: t('rules.documentalCompletenessA.navigationConsistency.suggestion'),
+      remediationAdvice: t('rules.documentalCompletenessA.navigationConsistency.remediation'),
       customIdPrefix: 'nav-consistency',
     })] : [];
   },
@@ -176,8 +177,8 @@ export const navigationConsistencyRule: Rule = {
 export const helpConsistencyRule: Rule = {
   id: 'help-consistency',
   nbrReference: '5.7.16',
-  name: 'Ajuda consistente',
-  description: 'Mecanismos recorrentes de ajuda devem permanecer consistentes',
+  name: t('rules.documentalCompletenessA.helpConsistency.name'),
+  description: t('rules.documentalCompletenessA.helpConsistency.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -191,9 +192,9 @@ export const helpConsistencyRule: Rule = {
       if (labels.size > 1) {
         return [createViolation(helpConsistencyRule, {
           element: helpLinks[0] as unknown as HTMLElement,
-          message: 'Mecanismos de ajuda com identificação inconsistente.',
-          suggestion: 'Padronize rótulos e posição relativa de ajuda recorrente.',
-          remediationAdvice: `<a href="/ajuda">Ajuda</a>`,
+          message: t('rules.documentalCompletenessA.helpConsistency.message'),
+          suggestion: t('rules.documentalCompletenessA.helpConsistency.suggestion'),
+          remediationAdvice: t('rules.documentalCompletenessA.helpConsistency.remediation'),
           customIdPrefix: 'help-consistency',
         })];
       }
@@ -205,17 +206,17 @@ export const helpConsistencyRule: Rule = {
 export const buttonUsageRule: Rule = {
   id: 'button-usage',
   nbrReference: '5.8.2',
-  name: 'Uso de botões',
-  description: 'Botões devem ser usados para ações na interface',
+  name: t('rules.documentalCompletenessA.buttonUsage.name'),
+  description: t('rules.documentalCompletenessA.buttonUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     buttonUsageRule,
     Array.from(document.querySelectorAll<HTMLElement>('[role="button"], a[onclick]')),
-    () => 'Elemento não semântico realizando ação típica de botão.',
-    'Use button nativo sempre que possível.',
-    `<button type="button">Salvar</button>`,
+    () => t('rules.documentalCompletenessA.buttonUsage.message'),
+    t('rules.documentalCompletenessA.buttonUsage.suggestion'),
+    t('rules.documentalCompletenessA.buttonUsage.remediation'),
     'button-usage'
   ),
 };
@@ -223,8 +224,8 @@ export const buttonUsageRule: Rule = {
 export const buttonPurposeRule: Rule = {
   id: 'button-purpose',
   nbrReference: '5.8.3',
-  name: 'Propósito do botão',
-  description: 'Botões devem comunicar claramente o que fazem',
+  name: t('rules.documentalCompletenessA.buttonPurpose.name'),
+  description: t('rules.documentalCompletenessA.buttonPurpose.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -234,9 +235,9 @@ export const buttonPurposeRule: Rule = {
       buttonPurposeRule,
       Array.from(document.querySelectorAll<HTMLElement>('button, [role="button"], input[type="button"], input[type="submit"]'))
         .filter((element) => vagueTexts.includes(getAccessibleName(element).trim().toLowerCase())),
-      (element) => `Botão "${getAccessibleName(element)}" pode não indicar propósito suficiente.`,
-      'Use rótulos que descrevam a ação final.',
-      `<button>Baixar relatório em CSV</button>`,
+      (element) => t('rules.documentalCompletenessA.buttonPurpose.message', { name: getAccessibleName(element) }),
+      t('rules.documentalCompletenessA.buttonPurpose.suggestion'),
+      t('rules.documentalCompletenessA.buttonPurpose.remediation'),
       'button-purpose'
     );
   },
@@ -245,8 +246,8 @@ export const buttonPurposeRule: Rule = {
 export const buttonConsistencyRule: Rule = {
   id: 'button-consistency',
   nbrReference: '5.8.5',
-  name: 'Identificação consistente em conjunto de páginas',
-  description: 'Controles com a mesma função devem manter identificação consistente',
+  name: t('rules.documentalCompletenessA.buttonConsistency.name'),
+  description: t('rules.documentalCompletenessA.buttonConsistency.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -263,9 +264,9 @@ export const buttonConsistencyRule: Rule = {
     const inconsistent = Array.from(byTarget.entries()).find(([, names]) => names.size > 1);
     return inconsistent ? [createViolation(buttonConsistencyRule, {
       element: document.body,
-      message: `Ações equivalentes possuem rótulos diferentes para o mesmo alvo "${inconsistent[0]}".`,
-      suggestion: 'Padronize o nome dos controles que realizam a mesma ação.',
-      remediationAdvice: `Use sempre "Entrar" para o fluxo de login.`,
+      message: t('rules.documentalCompletenessA.buttonConsistency.message', { target: inconsistent[0] }),
+      suggestion: t('rules.documentalCompletenessA.buttonConsistency.suggestion'),
+      remediationAdvice: t('rules.documentalCompletenessA.buttonConsistency.remediation'),
       customIdPrefix: 'button-consistency',
     })] : [];
   },
@@ -274,17 +275,17 @@ export const buttonConsistencyRule: Rule = {
 export const contextChangeOnFocusRule: Rule = {
   id: 'context-change-focus',
   nbrReference: '5.8.9',
-  name: 'Mudança de contexto previsível no foco',
-  description: 'Focar um elemento não deve mudar o contexto inesperadamente',
+  name: t('rules.documentalCompletenessA.contextChangeOnFocus.name'),
+  description: t('rules.documentalCompletenessA.contextChangeOnFocus.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     contextChangeOnFocusRule,
     Array.from(document.querySelectorAll<HTMLElement>('[onfocus], [autofocus]')),
-    () => 'Elemento com comportamento em foco que requer validação manual de mudança de contexto.',
-    'Evite redirecionar ou abrir conteúdo automaticamente ao focar.',
-    `<input onfocus="..." /> requer validação manual.`,
+    () => t('rules.documentalCompletenessA.contextChangeOnFocus.message'),
+    t('rules.documentalCompletenessA.contextChangeOnFocus.suggestion'),
+    t('rules.documentalCompletenessA.contextChangeOnFocus.remediation'),
     'context-focus'
   ),
 };
@@ -292,17 +293,17 @@ export const contextChangeOnFocusRule: Rule = {
 export const contextChangeOnInputRule: Rule = {
   id: 'context-change-input',
   nbrReference: '5.8.10',
-  name: 'Mudança de contexto previsível na entrada',
-  description: 'Entrada de dados não deve causar mudança de contexto inesperada',
+  name: t('rules.documentalCompletenessA.contextChangeOnInput.name'),
+  description: t('rules.documentalCompletenessA.contextChangeOnInput.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     contextChangeOnInputRule,
     Array.from(document.querySelectorAll<HTMLElement>('select[onchange], input[onchange], textarea[onchange]')),
-    () => 'Campo com mudança de contexto potencial ao alterar valor.',
-    'Evite submissão ou redirecionamento automáticos sem aviso.',
-    `<select onchange="..."> requer validação manual.`,
+    () => t('rules.documentalCompletenessA.contextChangeOnInput.message'),
+    t('rules.documentalCompletenessA.contextChangeOnInput.suggestion'),
+    t('rules.documentalCompletenessA.contextChangeOnInput.remediation'),
     'context-input'
   ),
 };
@@ -310,17 +311,17 @@ export const contextChangeOnInputRule: Rule = {
 export const singlePointerRule: Rule = {
   id: 'single-pointer',
   nbrReference: '5.8.11',
-  name: 'Acionamento por ponteiro único',
-  description: 'Acionamentos devem ocorrer de forma previsível com ponteiro único',
+  name: t('rules.documentalCompletenessA.singlePointer.name'),
+  description: t('rules.documentalCompletenessA.singlePointer.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     singlePointerRule,
     Array.from(document.querySelectorAll<HTMLElement>('[onmousedown], [onpointerdown], [ontouchstart]')),
-    () => 'Elemento depende de evento de pressionar em vez de soltar/confirmar.',
-    'Prefira acionar ações no click/up-event e permitir cancelamento.',
-    `<button onclick="acao()">Enviar</button>`,
+    () => t('rules.documentalCompletenessA.singlePointer.message'),
+    t('rules.documentalCompletenessA.singlePointer.suggestion'),
+    t('rules.documentalCompletenessA.singlePointer.remediation'),
     'single-pointer'
   ),
 };
@@ -328,17 +329,17 @@ export const singlePointerRule: Rule = {
 export const pointerGestureRule: Rule = {
   id: 'pointer-gesture',
   nbrReference: '5.8.12',
-  name: 'Operação por gestos de ponteiro',
-  description: 'Gestos complexos devem ter alternativa simples',
+  name: t('rules.documentalCompletenessA.pointerGesture.name'),
+  description: t('rules.documentalCompletenessA.pointerGesture.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     pointerGestureRule,
     Array.from(document.querySelectorAll<HTMLElement>('[ontouchstart], [ontouchmove], [ongesturestart], [ongesturechange]')),
-    () => 'Gestos de ponteiro complexos detectados; validar alternativa simples.',
-    'Forneça ação equivalente por toque simples ou controle visível.',
-    `Adicione alternativa por botão para gestos complexos.`,
+    () => t('rules.documentalCompletenessA.pointerGesture.message'),
+    t('rules.documentalCompletenessA.pointerGesture.suggestion'),
+    t('rules.documentalCompletenessA.pointerGesture.remediation'),
     'pointer-gesture'
   ),
 };
@@ -346,17 +347,17 @@ export const pointerGestureRule: Rule = {
 export const dragMovementRule: Rule = {
   id: 'drag-movement',
   nbrReference: '5.8.13',
-  name: 'Operação por movimento de arrastar',
-  description: 'Arrastar deve ter alternativa sem arraste',
+  name: t('rules.documentalCompletenessA.dragMovement.name'),
+  description: t('rules.documentalCompletenessA.dragMovement.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     dragMovementRule,
     Array.from(document.querySelectorAll<HTMLElement>('[draggable="true"], [ondragstart], [ondrop]')),
-    () => 'Interação por arrastar detectada; verificar alternativa equivalente.',
-    'Forneça botões ou seleção simples como alternativa ao arraste.',
-    `Inclua controles mover para cima/baixo como alternativa.`,
+    () => t('rules.documentalCompletenessA.dragMovement.message'),
+    t('rules.documentalCompletenessA.dragMovement.suggestion'),
+    t('rules.documentalCompletenessA.dragMovement.remediation'),
     'drag-movement'
   ),
 };
@@ -364,17 +365,17 @@ export const dragMovementRule: Rule = {
 export const motionOperationRule: Rule = {
   id: 'motion-operation',
   nbrReference: '5.8.14',
-  name: 'Operação por movimento',
-  description: 'Operações por movimento do dispositivo devem ter alternativa',
+  name: t('rules.documentalCompletenessA.motionOperation.name'),
+  description: t('rules.documentalCompletenessA.motionOperation.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async () => createWarnings(
     motionOperationRule,
     Array.from(document.querySelectorAll<HTMLElement>('[data-motion], [data-shake], [data-tilt]')),
-    () => 'Indício de operação por movimento detectado; validar alternativa sem movimento.',
-    'Disponibilize controle equivalente por interface tradicional.',
-    `Adicione botão ou alternador para a mesma operação.`,
+    () => t('rules.documentalCompletenessA.motionOperation.message'),
+    t('rules.documentalCompletenessA.motionOperation.suggestion'),
+    t('rules.documentalCompletenessA.motionOperation.remediation'),
     'motion-operation'
   ),
 };

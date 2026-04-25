@@ -33,6 +33,120 @@
       "remediation": "button { min-width: 24px; min-height: 24px; }"
     }
   },
+  "documentalCompletenessA": {
+    "regionUsage": {
+      "name": "Uso de regiões",
+      "description": "Regiões devem organizar logicamente a página",
+      "message": "A página apresenta pouca estrutura regional explícita.",
+      "suggestion": "Organize o conteúdo com header, main, footer, nav e regiões complementares.",
+      "remediation": "<header>...</header><main>...</main><footer>...</footer>"
+    },
+    "listUsage": {
+      "name": "Uso de listas",
+      "description": "Itens correlatos devem ser agrupados em listas quando apropriado",
+      "message": "Há indício de itens correlatos apresentados fora de lista semântica.",
+      "suggestion": "Use ul, ol ou dl para agrupar itens relacionados.",
+      "remediation": "<ul><li>Item</li></ul>"
+    },
+    "tableUsage": {
+      "name": "Uso de tabelas",
+      "description": "Tabelas devem ser usadas para dados tabulares, não layout",
+      "message": "Tabela com indícios de uso para layout em vez de dados.",
+      "suggestion": "Use layout CSS e reserve tabelas para dados tabulares.",
+      "remediation": "<div class=\"grid-layout\">...</div>"
+    },
+    "linkUsage": {
+      "name": "Uso de links",
+      "description": "Links devem ser usados para navegação e não para ações genéricas",
+      "message": "Link com href não navegável, possivelmente usado como botão.",
+      "suggestion": "Use button para ações que não navegam.",
+      "remediation": "<button type=\"button\">Abrir modal</button>"
+    },
+    "linkPurpose": {
+      "name": "Propósito do link no contexto",
+      "description": "O texto do link deve comunicar o destino ou propósito",
+      "message": "Texto do link \"{{name}}\" é vago fora de contexto.",
+      "suggestion": "Use texto que descreva o destino do link.",
+      "remediation": "<a href=\"/regulamento\">Ler regulamento da prova</a>"
+    },
+    "navigationConsistency": {
+      "name": "Navegação consistente",
+      "description": "Blocos de navegação repetidos devem manter ordem consistente",
+      "message": "Blocos de navegação repetidos com ordem ou rótulos inconsistentes.",
+      "suggestion": "Mantenha a mesma estrutura e ordem relativa para navegação recorrente.",
+      "remediation": "<nav><a href=\"/inicio\">Início</a><a href=\"/eventos\">Eventos</a></nav>"
+    },
+    "helpConsistency": {
+      "name": "Ajuda consistente",
+      "description": "Mecanismos recorrentes de ajuda devem permanecer consistentes",
+      "message": "Mecanismos de ajuda com identificação inconsistente.",
+      "suggestion": "Padronize rótulos e posição relativa de ajuda recorrente.",
+      "remediation": "<a href=\"/ajuda\">Ajuda</a>"
+    },
+    "buttonUsage": {
+      "name": "Uso de botões",
+      "description": "Botões devem ser usados para ações na interface",
+      "message": "Elemento não semântico realizando ação típica de botão.",
+      "suggestion": "Use button nativo sempre que possível.",
+      "remediation": "<button type=\"button\">Salvar</button>"
+    },
+    "buttonPurpose": {
+      "name": "Propósito do botão",
+      "description": "Botões devem comunicar claramente o que fazem",
+      "message": "Botão \"{{name}}\" pode não indicar propósito suficiente.",
+      "suggestion": "Use rótulos que descrevam a ação final.",
+      "remediation": "<button>Baixar relatório em CSV</button>"
+    },
+    "buttonConsistency": {
+      "name": "Identificação consistente em conjunto de páginas",
+      "description": "Controles com a mesma função devem manter identificação consistente",
+      "message": "Ações equivalentes possuem rótulos diferentes para o mesmo alvo \"{{target}}\".",
+      "suggestion": "Padronize o nome dos controles que realizam a mesma ação.",
+      "remediation": "Use sempre \"Entrar\" para o fluxo de login."
+    },
+    "contextChangeOnFocus": {
+      "name": "Mudança de contexto previsível no foco",
+      "description": "Focar um elemento não deve mudar o contexto inesperadamente",
+      "message": "Elemento com comportamento em foco que requer validação manual de mudança de contexto.",
+      "suggestion": "Evite redirecionar ou abrir conteúdo automaticamente ao focar.",
+      "remediation": "<input onfocus=\"...\" /> requer validação manual."
+    },
+    "contextChangeOnInput": {
+      "name": "Mudança de contexto previsível na entrada",
+      "description": "Entrada de dados não deve causar mudança de contexto inesperada",
+      "message": "Campo com mudança de contexto potencial ao alterar valor.",
+      "suggestion": "Evite submissão ou redirecionamento automáticos sem aviso.",
+      "remediation": "<select onchange=\"...\"> requer validação manual.</select>"
+    },
+    "singlePointer": {
+      "name": "Acionamento por ponteiro único",
+      "description": "Acionamentos devem ocorrer de forma previsível com ponteiro único",
+      "message": "Elemento depende de evento de pressionar em vez de soltar ou confirmar.",
+      "suggestion": "Prefira acionar ações no click ou up-event e permitir cancelamento.",
+      "remediation": "<button onclick=\"acao()\">Enviar</button>"
+    },
+    "pointerGesture": {
+      "name": "Operação por gestos de ponteiro",
+      "description": "Gestos complexos devem ter alternativa simples",
+      "message": "Gestos de ponteiro complexos detectados; validar alternativa simples.",
+      "suggestion": "Forneça ação equivalente por toque simples ou controle visível.",
+      "remediation": "Adicione alternativa por botão para gestos complexos."
+    },
+    "dragMovement": {
+      "name": "Operação por movimento de arrastar",
+      "description": "Arrastar deve ter alternativa sem arraste",
+      "message": "Interação por arrastar detectada; verificar alternativa equivalente.",
+      "suggestion": "Forneça botões ou seleção simples como alternativa ao arraste.",
+      "remediation": "Inclua controles mover para cima ou para baixo como alternativa."
+    },
+    "motionOperation": {
+      "name": "Operação por movimento",
+      "description": "Operações por movimento do dispositivo devem ter alternativa",
+      "message": "Indício de operação por movimento detectado; validar alternativa sem movimento.",
+      "suggestion": "Disponibilize controle equivalente por interface tradicional.",
+      "remediation": "Adicione botão ou alternador para a mesma operação."
+    }
+  },
   "forms": {
     "fieldLabel": {
       "name": "Rótulo de campo",
