@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { allRules } from './rules';
 import type { AuditResult, Violation, VisionSimulationFilter } from './types';
 
@@ -27,9 +28,9 @@ if (contentScope.__nbrGuardContentLoaded) {
 
       case 'RUN_AUDIT':
         runAuditInPage()
-          .then(result => sendResponse({ result }))
+          .then((result) => sendResponse({ result }))
           .catch((error: unknown) => {
-            const message = error instanceof Error ? error.message : 'Erro desconhecido ao auditar a página';
+            const message = error instanceof Error ? error.message : t('content.unknownAuditError');
             sendResponse({ error: message });
           });
         return true;
@@ -297,13 +298,18 @@ if (contentScope.__nbrGuardContentLoaded) {
       icon.className = 'highlight-icon';
       icon.type = 'button';
       icon.textContent = violation.severity === 'error' ? '!' : '?';
-      icon.setAttribute('aria-label', `Detalhes da regra ${violation.ruleName}`);
+      icon.setAttribute('aria-label', t('content.highlightAriaLabel', { ruleName: violation.ruleName }));
 
       const tooltip = document.createElement('div');
       tooltip.className = `tooltip position-${verticalPosition} position-${horizontalPosition}`;
       tooltip.innerHTML = `
         <span class="tooltip-title">${violation.ruleName}</span>
-        <span class="tooltip-meta">NBR ${violation.nbrReference} · ${violation.severity === 'error' ? 'Requisito' : 'Recomendação'}</span>
+        <span class="tooltip-meta">${t('content.highlightMeta', {
+          reference: violation.nbrReference,
+          severity: violation.severity === 'error'
+            ? t('shared.severity.requirement')
+            : t('shared.severity.recommendation'),
+        })}</span>
       `;
 
       let pinnedOpen = startOpen;
@@ -447,3 +453,5 @@ if (contentScope.__nbrGuardContentLoaded) {
 
   console.log('[Guardião NBR 17225] Content script carregado');
 }
+
+

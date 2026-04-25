@@ -4,22 +4,7 @@ Este arquivo organiza melhorias recomendadas para aumentar robustez, previsibili
 
 ## Prioridade alta
 
-### 1. Fechar a centralização completa de textos
-
-Objetivo:
-- remover strings restantes ainda espalhadas em módulos documentais, exportações e mensagens auxiliares.
-
-Sugestões:
-- migrar `documental-completeness-a.ts` e `documental-completeness-b.ts` para o catálogo de i18n;
-- centralizar cabeçalhos e colunas das exportações CSV/Markdown/JSON onde ainda houver texto fixo;
-- manter todo texto novo em PT-BR UTF-8 com chave semântica estável.
-
-Benefício:
-- reduz inconsistência de linguagem;
-- simplifica revisão de texto;
-- evita regressões de encoding.
-
-### 2. Adicionar testes automatizados para histórico e revisão humana
+### 1. Ampliar testes automatizados para histórico e revisão humana
 
 Objetivo:
 - garantir que persistência e comparação de auditorias não se deteriorem com refactors futuros.
@@ -34,7 +19,7 @@ Benefício:
 - reduz risco de inconsistência silenciosa;
 - protege o fluxo mais sensível do produto hoje.
 
-### 3. Tornar mais explícita a diferença entre fonte da verdade por aba e por URL
+### 2. Tornar mais explícita a diferença entre fonte da verdade por aba e por URL
 
 Objetivo:
 - manter a estrutura de storage simples e previsível.
@@ -51,7 +36,7 @@ Benefício:
 
 ## Prioridade média
 
-### 4. Reduzir heurísticas frágeis nas regras mais sensíveis
+### 3. Reduzir heurísticas frágeis nas regras mais sensíveis
 
 Objetivo:
 - diminuir ruído, especialmente falsos positivos em verificações sem contexto suficiente.
@@ -69,7 +54,7 @@ Benefício:
 - aproxima o motor do comportamento esperado em ferramentas maduras;
 - melhora confiança no resultado.
 
-### 5. Melhorar a exportação comparativa
+### 4. Melhorar a exportação comparativa
 
 Objetivo:
 - tornar os relatórios de evolução mais úteis para acompanhamento real de melhoria ou regressão.
@@ -83,7 +68,7 @@ Sugestões:
 Benefício:
 - melhora a utilidade prática do histórico para equipes de produto e acessibilidade.
 
-### 6. Refinar performance de renderização do popup
+### 5. Refinar performance de renderização do popup
 
 Objetivo:
 - reduzir recomputação e rerender em listas, histórico e exportações.
@@ -99,7 +84,7 @@ Benefício:
 
 ## Prioridade baixa
 
-### 7. Ampliar documentação pública do projeto
+### 6. Ampliar documentação pública do projeto
 
 Objetivo:
 - facilitar contribuição externa sem exigir leitura completa do código.
@@ -110,11 +95,11 @@ Sugestões:
   - execução;
   - persistência;
   - histórico;
-  - comparação;
-  - exportação;
+- comparação;
+- exportação;
 - incluir exemplos de contribuição para novas regras dentro do escopo v1.
 
-### 8. Revisar logs e telemetria de depuração local
+### 7. Revisar logs e telemetria de depuração local
 
 Objetivo:
 - facilitar diagnóstico quando algum fluxo falhar em ambiente real.
@@ -123,9 +108,24 @@ Sugestões:
 - padronizar logs do bootstrap, content script e auditoria;
 - diferenciar claramente:
   - falha de injeção;
-  - falha de carregamento de chunk;
-  - falha de mensagem;
-  - falha de regra.
+- falha de carregamento de chunk;
+- falha de mensagem;
+- falha de regra.
+
+### 8. Formalizar a política de catálogo de textos
+
+Objetivo:
+- evitar regressões em que texto de usuário volte a aparecer fora do catálogo.
+
+Sugestões:
+- definir em `CONTRIBUTING.md` que texto de interface, exportação e mensagens visíveis deve usar o catálogo;
+- deixar explícito que apenas logs técnicos e heurísticas internas podem permanecer fora do i18n;
+- adicionar uma checagem simples em revisão ou script para localizar texto novo fora do catálogo.
+
+Benefício:
+- preserva consistência de linguagem;
+- reduz retrabalho de revisão textual;
+- dificulta reintrodução de mojibake e strings dispersas.
 
 ## Backlog futuro fora do escopo v1
 

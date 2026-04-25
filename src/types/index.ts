@@ -4,8 +4,18 @@
 
 export type SeverityLevel = 'error' | 'warning';
 export type WCAGLevel = 'A' | 'AA' | 'AAA';
-export type AutomationCategory = 'Totalmente Automatizável' | 'Semi-Automatizável' | 'Não Automatizável';
+export const AUTOMATION_CATEGORIES = {
+  fully: 'Totalmente Automatizável',
+  semi: 'Semi-Automatizável',
+  none: 'Não Automatizável',
+} as const;
+
+export type AutomationCategory = (typeof AUTOMATION_CATEGORIES)[keyof typeof AUTOMATION_CATEGORIES];
 export type HumanReviewStatus = 'not_applicable' | 'pending' | 'confirmed' | 'dismissed';
+
+export function isFullyAutomatedCategory(category: AutomationCategory): boolean {
+  return category === AUTOMATION_CATEGORIES.fully;
+}
 
 export interface Rule {
   id: string;

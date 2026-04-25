@@ -1,4 +1,5 @@
 import type { Rule, SeverityLevel, Violation, WCAGLevel } from '@/types';
+import { isFullyAutomatedCategory } from '@/types';
 
 /**
  * Utilitários gerais para a extensão
@@ -338,8 +339,8 @@ export function createViolation(
     severity: options.severity || rule.severity,
     wcagLevel: options.wcagLevel || rule.wcagLevel,
     automationCategory: rule.category,
-    requiresHumanReview: rule.category !== 'Totalmente Automatizável',
-    humanReviewStatus: rule.category !== 'Totalmente Automatizável' ? 'pending' : 'not_applicable',
+    requiresHumanReview: !isFullyAutomatedCategory(rule.category),
+    humanReviewStatus: !isFullyAutomatedCategory(rule.category) ? 'pending' : 'not_applicable',
     message: options.message,
     snippet: options.snippet || (element?.outerHTML.substring(0, 200) || '<document>'),
     suggestion: options.suggestion,

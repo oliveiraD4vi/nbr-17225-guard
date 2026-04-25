@@ -19,6 +19,8 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - matriz normativa em `RULES_NORMATIVE_MATRIX.md`.
 
 ### Changed
+- extração restante de textos visíveis para o catálogo centralizado, incluindo mensagens dinâmicas das regras documentais, nomes de exportação e metadados de highlight;
+- categorias de automação consolidadas em constantes de domínio, reduzindo dependência de comparações por string literal;
 - motor de histórico unificado com identidade consistente para URL e violações;
 - fluxo de bootstrap do content script endurecido para evitar falhas de carregamento por chunk;
 - popup dividido em chunks menores, com melhor comportamento de carregamento;
@@ -27,4 +29,4 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 ### Fixed
 - variações de auditoria causadas por pontos de persistência e deduplicação inconsistentes;
 - falha de acesso ao DOM causada por recursos não expostos no bundle da extensão;
-- múltiplos pontos de texto degradado e inconsistências de PT-BR UTF-8.
+- múltiplos pontos de texto degradado e inconsistências de PT-BR UTF-8, inclusive no `content.ts`.

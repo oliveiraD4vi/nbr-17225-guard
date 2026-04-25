@@ -63,6 +63,11 @@
       "requirement": "Requisito",
       "recommendation": "Recomendação"
     },
+    "automationCategory": {
+      "fully": "Totalmente automatizável",
+      "semi": "Semi-automatizável",
+      "none": "Não automatizável"
+    },
     "review": {
       "needsConfirmation": "Precisa de confirmação humana",
       "confirmedNeedsFix": "Confirmado e precisa de correção",
@@ -283,6 +288,11 @@
     "introTitle": "Leitura do relatório",
     "introDescription": "Itens com confirmação humana indicam suspeita relevante, mas exigem validação manual no contexto real.",
     "violationsTitle": "Detalhes das violações"
+  },
+  "content": {
+    "unknownAuditError": "Erro desconhecido ao auditar a página",
+    "highlightAriaLabel": "Detalhes da regra {{ruleName}}",
+    "highlightMeta": "NBR {{reference}} · {{severity}}"
   },
   "engine": {
     "noActiveTab": "Nenhuma aba ativa encontrada.",

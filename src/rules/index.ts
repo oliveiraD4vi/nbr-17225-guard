@@ -3,7 +3,7 @@
  * ABNT NBR 17225:2025
  */
 
-import type { Rule } from '@/types';
+import { AUTOMATION_CATEGORIES, type Rule } from '@/types';
 import { colorRules } from './colors';
 import { controlRules } from './controls';
 import { documentalCompletenessRulesA } from './documental-completeness-a';
@@ -49,17 +49,18 @@ export const allRules: Rule[] = [
  * Regras por nivel WCAG
  */
 export const rulesByWCAGLevel = {
-  A: allRules.filter(r => r.wcagLevel === 'A'),
-  AA: allRules.filter(r => r.wcagLevel === 'AA'),
-  AAA: allRules.filter(r => r.wcagLevel === 'AAA'),
+  A: allRules.filter((rule) => rule.wcagLevel === 'A'),
+  AA: allRules.filter((rule) => rule.wcagLevel === 'AA'),
+  AAA: allRules.filter((rule) => rule.wcagLevel === 'AAA'),
 };
 
 /**
  * Regras por categoria de automacao
  */
 export const rulesByAutomation = {
-  'Totalmente Automatizável': allRules.filter(r => r.category === 'Totalmente Automatizável'),
-  'Semi-Automatizável': allRules.filter(r => r.category === 'Semi-Automatizável'),
+  [AUTOMATION_CATEGORIES.fully]: allRules.filter((rule) => rule.category === AUTOMATION_CATEGORIES.fully),
+  [AUTOMATION_CATEGORIES.semi]: allRules.filter((rule) => rule.category === AUTOMATION_CATEGORIES.semi),
+  [AUTOMATION_CATEGORIES.none]: allRules.filter((rule) => rule.category === AUTOMATION_CATEGORIES.none),
 };
 
 export {
