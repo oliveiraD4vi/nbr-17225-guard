@@ -6,7 +6,7 @@ import type { AuditHistoryEntry, AuditResult, Violation } from '@/types';
 import {
   dedupeAndSortAuditHistory,
   getAuditUrlStorageKey,
-  getViolationIdentityKey,
+  inheritViolationStateFromHistory,
 } from '@/utils/audit-history';
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
@@ -22,47 +22,6 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> 
 
 function getTabStorageKey(tabId: number): string {
   return String(tabId);
-}
-
-function inheritPersistedViolationState(
-  result: AuditResult,
-  historyEntries: AuditHistoryEntry[]
-): AuditResult {
-  const persistedViolations = new Map<string, Violation>();
-
-  historyEntries.forEach((entry) => {
-    entry.violations.forEach((violation) => {
-      const hasPersistedState = (
-        violation.humanReviewStatus !== 'not_applicable' &&
-        violation.humanReviewStatus !== 'pending'
-      ) || Boolean(violation.userNote?.trim());
-
-      if (!hasPersistedState) return;
-
-      const key = getViolationIdentityKey(violation);
-      if (!persistedViolations.has(key)) {
-        persistedViolations.set(key, violation);
-      }
-    });
-  });
-
-  return {
-    ...result,
-    violations: result.violations.map((violation) => {
-      const persistedViolation = persistedViolations.get(getViolationIdentityKey(violation));
-      if (!persistedViolation) return violation;
-
-      return {
-        ...violation,
-        humanReviewStatus: violation.requiresHumanReview
-          ? persistedViolation.humanReviewStatus ?? violation.humanReviewStatus
-          : violation.humanReviewStatus,
-        userNote: persistedViolation.userNote ?? violation.userNote,
-        noteUpdatedAt: persistedViolation.noteUpdatedAt ?? violation.noteUpdatedAt,
-        inheritedFromHistory: true,
-      };
-    }),
-  };
 }
 
 function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null {
@@ -187,7 +146,7 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     const urlKey = getAuditUrlStorageKey(result.url);
     const history = (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {};
     const currentHistory = history[urlKey] ?? [];
-    const normalizedResult = inheritPersistedViolationState(normalizeAuditResult(result)!, currentHistory);
+    const normalizedResult = inheritViolationStateFromHistory(normalizeAuditResult(result)!, currentHistory);
     const historyEntry: AuditHistoryEntry = normalizedResult as AuditHistoryEntry;
     const auditResultsByTab = {
       ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),

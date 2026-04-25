@@ -147,6 +147,231 @@
       "remediation": "Adicione botão ou alternador para a mesma operação."
     }
   },
+  "documentalCompletenessB": {
+    "predictableFieldLabel": {
+      "name": "Rótulo de campo previsível",
+      "description": "Campos equivalentes devem manter identificação previsível",
+      "suggestion": "Padronize o rótulo de campos que coletam a mesma informação.",
+      "remediation": "Use sempre o mesmo rótulo para campos como e-mail, telefone e CPF em fluxos equivalentes."
+    },
+    "descriptiveFieldLabel": {
+      "name": "Rótulo de campo descritivo",
+      "description": "Rótulos devem descrever claramente o dado solicitado",
+      "suggestion": "Substitua rótulos vagos por identificação específica do dado esperado.",
+      "remediation": "<label for=\"email\">E-mail para contato</label>"
+    },
+    "predictableHelpText": {
+      "name": "Textos de ajuda previsíveis",
+      "description": "Campos complexos devem expor ajuda e instruções de forma consistente",
+      "suggestion": "Associe instruções com aria-describedby ou ajuda textual próxima ao campo.",
+      "remediation": "<small id=\"senha-ajuda\">Use ao menos 8 caracteres.</small><input aria-describedby=\"senha-ajuda\" />"
+    },
+    "descriptiveError": {
+      "name": "Mensagem de erro descritiva",
+      "description": "Mensagens de erro devem explicar claramente o problema encontrado",
+      "suggestion": "Explique qual campo falhou e por qual motivo.",
+      "remediation": "Informe o erro de forma específica, como \"O CPF deve conter 11 dígitos\"."
+    },
+    "correctionSuggestion": {
+      "name": "Sugestão de correção",
+      "description": "Erros de entrada devem oferecer sugestão de correção quando possível",
+      "message": "Mensagem de erro sem indicação explícita de como corrigir a entrada.",
+      "suggestion": "Inclua instruções ou exemplo do formato esperado.",
+      "remediation": "Exemplo: \"Informe o e-mail no formato nome@dominio.com\"."
+    },
+    "criticalFormPrevention": {
+      "name": "Prevenção de erro para formulários críticos",
+      "description": "Ações críticas devem prever revisão, confirmação ou cancelamento",
+      "suggestion": "Inclua revisão, confirmação reversível ou etapa de validação antes da ação final.",
+      "remediation": "Ofereça tela de revisão ou confirmação antes de concluir a operação crítica."
+    },
+    "dataReentry": {
+      "name": "Reentrada de dados",
+      "description": "Fluxos não devem exigir redigitação desnecessária de dados já fornecidos",
+      "suggestion": "Avalie se a confirmação ou redigitação é realmente necessária.",
+      "remediation": "Reutilize dados já informados ou ofereça preenchimento automático quando possível."
+    },
+    "sensoryValidation": {
+      "name": "Validação sensorial ou por movimento",
+      "description": "Validações não devem depender apenas de percepção sensorial ou movimento",
+      "suggestion": "Complemente instruções com texto objetivo, não dependente de cor, posição ou movimento.",
+      "remediation": "Exemplo: \"Campos obrigatórios estão marcados com * e descritos como obrigatórios\"."
+    },
+    "sensoryCharacteristics": {
+      "name": "Características sensoriais",
+      "description": "Instruções não devem depender apenas de forma, cor, tamanho ou posição",
+      "suggestion": "Use referências textuais inequívocas, como nome do campo, botão ou etapa.",
+      "remediation": "Prefira \"Selecione o botão Confirmar\" em vez de \"clique no botão verde\"."
+    },
+    "presentationOrder": {
+      "name": "Ordem de apresentação",
+      "description": "A ordem de leitura e navegação deve seguir uma sequência lógica",
+      "positiveTabindexMessage": "Elemento com tabindex positivo ({{value}}) pode quebrar a ordem lógica de apresentação.",
+      "positiveTabindexSuggestion": "Evite tabindex positivo e preserve a sequência natural do DOM.",
+      "positiveTabindexRemediation": "<button>Continuar</button>",
+      "cssOrderMessage": "Elemento com reordenação visual via CSS; valide a coerência com a ordem de leitura.",
+      "cssOrderSuggestion": "Evite usar order para inverter a ordem lógica de leitura.",
+      "cssOrderRemediation": "Prefira ordenar o DOM na sequência correta e use CSS apenas para apresentação."
+    },
+    "orientation": {
+      "name": "Orientação de exibição",
+      "description": "O conteúdo deve funcionar em retrato e paisagem, salvo exceções justificadas",
+      "message": "Foram encontradas regras de estilo com media query de orientação que podem ocultar o layout principal.",
+      "suggestion": "Valide se a interface continua operável em retrato e paisagem ou documente a exceção essencial.",
+      "remediation": "Evite ocultar ou bloquear o conteúdo principal apenas por orientação de tela."
+    },
+    "colorUsage": {
+      "name": "Uso de cores",
+      "description": "Cor não deve ser o único meio de transmitir informação",
+      "suggestion": "Adicione texto, ícone, estado programático ou outro indicador além da cor.",
+      "remediation": "Combine cor com rótulo, ícone ou mensagem textual explícita."
+    },
+    "graphicContrast": {
+      "name": "Contraste para objetos gráficos",
+      "description": "Objetos gráficos informativos devem ter contraste suficiente",
+      "suggestion": "Aumente o contraste do gráfico em relação ao fundo.",
+      "remediation": "Use cores com razão mínima próxima de 3:1 para elementos gráficos informativos."
+    },
+    "focusIndicatorContrast": {
+      "name": "Contraste para indicador de foco visual",
+      "description": "Indicadores de foco devem ter contraste perceptível com áreas adjacentes",
+      "suggestion": "Aumente o contraste do outline, box-shadow ou anel de foco.",
+      "remediation": "button:focus-visible { outline: 3px solid #005fcc; }"
+    },
+    "lineSpacing": {
+      "name": "Espaçamento entre linhas",
+      "description": "Conteúdo textual deve suportar aumento de espaçamento entre linhas",
+      "message": "Bloco de texto com line-height baixo e overflow oculto, o que pode quebrar ao aumentar espaçamento.",
+      "suggestion": "Evite truncar texto e permita line-height mais amplo.",
+      "remediation": "p { line-height: 1.5; overflow: visible; }"
+    },
+    "paragraphSpacing": {
+      "name": "Espaçamento entre parágrafos",
+      "description": "Parágrafos devem suportar aumento de espaçamento sem perda de conteúdo",
+      "message": "Agrupamento com múltiplos parágrafos e overflow oculto pode falhar com espaçamento ampliado.",
+      "suggestion": "Permita expansão vertical do conteúdo textual.",
+      "remediation": "Evite altura fixa e overflow oculto em contêineres de texto."
+    },
+    "letterSpacing": {
+      "name": "Espaçamento entre letras",
+      "description": "Texto deve suportar aumento de espaçamento entre letras",
+      "message": "Bloco textual com nowrap ou ellipsis pode falhar ao aumentar o espaçamento entre letras.",
+      "suggestion": "Permita quebra de linha e evite truncar texto essencial.",
+      "remediation": "white-space: normal; text-overflow: clip;"
+    },
+    "wordSpacing": {
+      "name": "Espaçamento entre palavras",
+      "description": "Texto deve suportar aumento de espaçamento entre palavras",
+      "message": "Bloco textual pode não acomodar aumento de espaçamento entre palavras.",
+      "suggestion": "Evite restringir horizontalmente blocos de texto longos.",
+      "remediation": "Remova white-space: nowrap e overflow-x: hidden de conteúdos textuais extensos."
+    },
+    "textWidth": {
+      "name": "Largura de blocos de texto",
+      "description": "Linhas longas demais dificultam leitura confortável",
+      "message": "Bloco textual muito largo para leitura confortável em linhas curtas.",
+      "suggestion": "Limite a largura de leitura de blocos textuais extensos.",
+      "remediation": "main { max-width: 80ch; }"
+    },
+    "resizedText": {
+      "name": "Texto redimensionado",
+      "description": "Conteúdo deve suportar aumento de zoom e texto sem perda funcional",
+      "message": "Conteúdo textual com altura fixa e overflow oculto pode falhar ao ampliar o texto.",
+      "suggestion": "Permita crescimento vertical do conteúdo ao ampliar o texto.",
+      "remediation": "Evite altura fixa em contêineres com texto."
+    },
+    "pagePartLanguage": {
+      "name": "Idioma das partes da página",
+      "description": "Trechos em idioma diferente devem ser marcados com lang apropriado",
+      "suggestion": "Marque trechos em outro idioma com o atributo lang correspondente.",
+      "remediation": "<span lang=\"en\">Download</span>"
+    },
+    "readingOrder": {
+      "name": "Ordem de leitura",
+      "description": "A ordem de leitura assistiva deve acompanhar a sequência lógica do conteúdo",
+      "ariaFlowtoMessage": "Uso de aria-flowto exige validação manual da ordem de leitura resultante.",
+      "ariaFlowtoSuggestion": "Prefira ordem natural do DOM e use aria-flowto apenas quando estritamente necessário.",
+      "ariaFlowtoRemediation": "Reordene o DOM na sequência correta de leitura.",
+      "cssOrderMessage": "Reordenação visual via CSS pode divergir da ordem de leitura assistiva.",
+      "cssOrderSuggestion": "Mantenha a ordem lógica no DOM.",
+      "cssOrderRemediation": "Evite depender de CSS order para a sequência principal do conteúdo."
+    },
+    "visibleTextInName": {
+      "name": "Texto visível no nome acessível",
+      "description": "O nome acessível deve conter o texto visível do controle",
+      "suggestion": "Alinhe o texto visível com o nome acessível exposto ao leitor de tela.",
+      "remediation": "<button aria-label=\"Baixar regulamento\">Baixar regulamento</button>"
+    },
+    "statusMessage": {
+      "name": "Mensagens de status",
+      "description": "Mensagens dinâmicas de status devem ser anunciáveis programaticamente",
+      "message": "Possível mensagem de status sem role ou aria-live.",
+      "suggestion": "Adicione role=\"status\", role=\"alert\" ou aria-live adequado ao conteúdo dinâmico.",
+      "remediation": "<div role=\"status\" aria-live=\"polite\">Salvo com sucesso</div>"
+    },
+    "customComponentSemantic": {
+      "name": "Semântica de componentes customizados",
+      "description": "Componentes customizados interativos devem expor função semântica apropriada",
+      "suggestion": "Aplique role coerente e comportamento compatível, ou substitua por elemento nativo.",
+      "remediation": "<div role=\"button\" tabindex=\"0\">Abrir</div>"
+    },
+    "audioTranscript": {
+      "name": "Alternativa em texto para áudio",
+      "description": "Áudios gravados devem disponibilizar alternativa textual equivalente",
+      "message": "Áudio sem indício de transcrição ou alternativa textual associada.",
+      "suggestion": "Disponibilize transcrição próxima ao áudio ou vinculada a ele.",
+      "remediation": "Inclua link ou bloco com a transcrição completa do conteúdo em áudio."
+    },
+    "videoCaptions": {
+      "name": "Legendas descritivas para vídeo",
+      "description": "Vídeos gravados devem oferecer legendas sincronizadas",
+      "message": "Vídeo sem faixa de legenda detectável.",
+      "suggestion": "Adicione track de legendas ou equivalente sincronizado.",
+      "remediation": "<video controls><track kind=\"captions\" srclang=\"pt-BR\" src=\"legendas.vtt\" /></video>"
+    },
+    "audioDescription": {
+      "name": "Audiodescrição para vídeo",
+      "description": "Vídeos com informação visual relevante devem oferecer audiodescrição ou alternativa equivalente",
+      "message": "Vídeo sem faixa de audiodescrição detectável; valide a necessidade de alternativa equivalente.",
+      "suggestion": "Inclua audiodescrição ou transcrição expandida quando houver informação visual relevante.",
+      "remediation": "<track kind=\"descriptions\" srclang=\"pt-BR\" src=\"descricao.vtt\" />"
+    },
+    "liveCaptions": {
+      "name": "Legendas para áudio e vídeo ao vivo",
+      "description": "Transmissões ao vivo devem prever legenda sincronizada quando aplicável",
+      "message": "Indício de mídia ao vivo sem referência a legendas.",
+      "suggestion": "Valide e documente a oferta de legendas ao vivo quando houver transmissão síncrona.",
+      "remediation": "Inclua mecanismo de legendagem ao vivo ou indicação clara da alternativa disponível."
+    },
+    "animationControl": {
+      "name": "Controle de animação",
+      "description": "Movimento automático prolongado deve poder ser pausado, interrompido ou ocultado",
+      "carouselMessage": "Elemento com animação ou rotação automática sem controle visível de pausa.",
+      "carouselSuggestion": "Adicione mecanismo para pausar, parar ou ocultar a animação.",
+      "carouselRemediation": "<button aria-label=\"Pausar animação\">Pausar</button>",
+      "mediaMessage": "Mídia em reprodução automática sem controle de pausa visível.",
+      "mediaSuggestion": "Disponibilize controles ou desative a reprodução automática.",
+      "mediaRemediation": "<video controls autoplay></video>"
+    },
+    "flashingContent": {
+      "name": "Flash intermitente limitado",
+      "description": "Conteúdo não deve piscar de forma potencialmente perigosa",
+      "message": "Animação rápida e infinita detectada; valide risco de flashes intermitentes.",
+      "suggestion": "Evite cintilação rápida ou reduza frequência ou intensidade do efeito.",
+      "remediation": "Prefira animações suaves, sem repetição rápida contínua."
+    },
+    "adjustableTimeLimit": {
+      "name": "Limite de tempo ajustável",
+      "description": "Limites de tempo devem poder ser estendidos, ajustados ou desativados quando aplicável",
+      "metaMessageWithSeconds": "Atualização temporizada detectada em aproximadamente {{seconds}} segundo(s), sem mecanismo visível de ajuste ou extensão.",
+      "metaMessage": "Atualização temporizada detectada sem mecanismo visível de ajuste ou extensão.",
+      "metaSuggestion": "Ofereça extensão, pausa ou desativação do limite de tempo.",
+      "metaRemediation": "Evite meta refresh ou forneça controle equivalente ao usuário.",
+      "countdownMessage": "Contagem de tempo detectada sem mecanismo visível de extensão ou ajuste.",
+      "countdownSuggestion": "Inclua opção para estender, pausar ou remover o limite quando aplicável.",
+      "countdownRemediation": "<button>Estender sessão</button>"
+    }
+  },
   "forms": {
     "fieldLabel": {
       "name": "Rótulo de campo",

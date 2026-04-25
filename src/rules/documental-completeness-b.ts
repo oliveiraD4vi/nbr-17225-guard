@@ -1,3 +1,4 @@
+import { t } from '@/i18n';
 import type { Rule, Violation } from '@/types';
 import {
   createViolation,
@@ -104,8 +105,8 @@ function looksLikeForeignLanguageBlock(text: string): boolean {
 export const predictableFieldLabelRule: Rule = {
   id: 'predictable-field-label',
   nbrReference: '5.9.2',
-  name: 'Rótulo de campo previsível',
-  description: 'Campos equivalentes devem manter identificação previsível',
+  name: t('rules.documentalCompletenessB.predictableFieldLabel.name'),
+  description: t('rules.documentalCompletenessB.predictableFieldLabel.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -124,8 +125,8 @@ export const predictableFieldLabelRule: Rule = {
     return inconsistent ? [createViolation(predictableFieldLabelRule, {
       element: document.body,
       message: `Campos equivalentes apresentam rótulos diferentes para "${inconsistent[0]}".`,
-      suggestion: 'Padronize o rótulo de campos que coletam a mesma informação.',
-      remediationAdvice: `Use sempre o mesmo rótulo para campos como e-mail, telefone e CPF em fluxos equivalentes.`,
+      suggestion: t('rules.documentalCompletenessB.predictableFieldLabel.suggestion'),
+      remediationAdvice: t('rules.documentalCompletenessB.predictableFieldLabel.remediation'),
       customIdPrefix: 'predictable-label',
     })] : [];
   },
@@ -134,8 +135,8 @@ export const predictableFieldLabelRule: Rule = {
 export const descriptiveFieldLabelRule: Rule = {
   id: 'descriptive-field-label',
   nbrReference: '5.9.4',
-  name: 'Rótulo de campo descritivo',
-  description: 'Rótulos devem descrever claramente o dado solicitado',
+  name: t('rules.documentalCompletenessB.descriptiveFieldLabel.name'),
+  description: t('rules.documentalCompletenessB.descriptiveFieldLabel.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -149,8 +150,8 @@ export const descriptiveFieldLabelRule: Rule = {
       })
       .map((field) => field as unknown as HTMLElement),
     (field) => `Campo com rótulo potencialmente genérico: "${getAssociatedLabelText(field as HTMLInputElement).trim()}".`,
-    'Substitua rótulos vagos por identificação específica do dado esperado.',
-    `<label for="email">E-mail para contato</label>`,
+    t('rules.documentalCompletenessB.descriptiveFieldLabel.suggestion'),
+    t('rules.documentalCompletenessB.descriptiveFieldLabel.remediation'),
     'descriptive-label'
   ),
 };
@@ -158,8 +159,8 @@ export const descriptiveFieldLabelRule: Rule = {
 export const predictableHelpTextRule: Rule = {
   id: 'predictable-help-text',
   nbrReference: '5.9.5',
-  name: 'Textos de ajuda previsíveis',
-  description: 'Campos complexos devem expor ajuda e instruções de forma consistente',
+  name: t('rules.documentalCompletenessB.predictableHelpText.name'),
+  description: t('rules.documentalCompletenessB.predictableHelpText.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -176,8 +177,8 @@ export const predictableHelpTextRule: Rule = {
         })
         .map((field) => field as unknown as HTMLElement),
       (field) => `Campo "${getAssociatedLabelText(field as HTMLInputElement) || field.getAttribute('name') || field.id}" sem texto de ajuda associado.`,
-      'Associe instruções com aria-describedby ou ajuda textual próxima ao campo.',
-      `<small id="senha-ajuda">Use ao menos 8 caracteres.</small><input aria-describedby="senha-ajuda" />`,
+      t('rules.documentalCompletenessB.predictableHelpText.suggestion'),
+      t('rules.documentalCompletenessB.predictableHelpText.remediation'),
       'predictable-help'
     );
   },
@@ -186,8 +187,8 @@ export const predictableHelpTextRule: Rule = {
 export const descriptiveErrorRule: Rule = {
   id: 'descriptive-error',
   nbrReference: '5.9.9',
-  name: 'Mensagem de erro descritiva',
-  description: 'Mensagens de erro devem explicar claramente o problema encontrado',
+  name: t('rules.documentalCompletenessB.descriptiveError.name'),
+  description: t('rules.documentalCompletenessB.descriptiveError.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -201,8 +202,8 @@ export const descriptiveErrorRule: Rule = {
           return !!text && vagueErrors.some((message) => text === message || text.endsWith(message));
         }),
       (element) => `Mensagem de erro pouco descritiva: "${getVisibleText(element)}".`,
-      'Explique qual campo falhou e por qual motivo.',
-      `Informe o erro de forma específica, como "O CPF deve conter 11 dígitos".`,
+      t('rules.documentalCompletenessB.descriptiveError.suggestion'),
+      t('rules.documentalCompletenessB.descriptiveError.remediation'),
       'descriptive-error'
     );
   },
@@ -211,8 +212,8 @@ export const descriptiveErrorRule: Rule = {
 export const correctionSuggestionRule: Rule = {
   id: 'correction-suggestion',
   nbrReference: '5.9.10',
-  name: 'Sugestão de correção',
-  description: 'Erros de entrada devem oferecer sugestão de correção quando possível',
+  name: t('rules.documentalCompletenessB.correctionSuggestion.name'),
+  description: t('rules.documentalCompletenessB.correctionSuggestion.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -225,9 +226,9 @@ export const correctionSuggestionRule: Rule = {
           const text = getVisibleText(element).trim().toLowerCase();
           return !!text && !guidanceTerms.some((term) => text.includes(term));
         }),
-      () => 'Mensagem de erro sem indicação explícita de como corrigir a entrada.',
-      'Inclua instruções ou exemplo do formato esperado.',
-      `Exemplo: "Informe o e-mail no formato nome@dominio.com".`,
+      () => t('rules.documentalCompletenessB.correctionSuggestion.message'),
+      t('rules.documentalCompletenessB.correctionSuggestion.suggestion'),
+      t('rules.documentalCompletenessB.correctionSuggestion.remediation'),
       'correction-suggestion'
     );
   },
@@ -236,8 +237,8 @@ export const correctionSuggestionRule: Rule = {
 export const criticalFormPreventionRule: Rule = {
   id: 'critical-form-prevention',
   nbrReference: '5.9.12',
-  name: 'Prevenção de erro para formulários críticos',
-  description: 'Ações críticas devem prever revisão, confirmação ou cancelamento',
+  name: t('rules.documentalCompletenessB.criticalFormPrevention.name'),
+  description: t('rules.documentalCompletenessB.criticalFormPrevention.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -255,8 +256,8 @@ export const criticalFormPreventionRule: Rule = {
         return !/revisar|confirmar|voltar|cancelar/.test(surroundingText);
       }),
       (element) => `Ação crítica "${getAccessibleName(element)}" sem indício de revisão ou confirmação.`,
-      'Inclua revisão, confirmação reversível ou etapa de validação antes da ação final.',
-      `Ofereça tela de revisão ou confirmação antes de concluir a operação crítica.`,
+      t('rules.documentalCompletenessB.criticalFormPrevention.suggestion'),
+      t('rules.documentalCompletenessB.criticalFormPrevention.remediation'),
       'critical-form'
     );
   },
@@ -265,8 +266,8 @@ export const criticalFormPreventionRule: Rule = {
 export const dataReentryRule: Rule = {
   id: 'data-reentry',
   nbrReference: '5.9.15',
-  name: 'Reentrada de dados',
-  description: 'Fluxos não devem exigir redigitação desnecessária de dados já fornecidos',
+  name: t('rules.documentalCompletenessB.dataReentry.name'),
+  description: t('rules.documentalCompletenessB.dataReentry.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -284,8 +285,8 @@ export const dataReentryRule: Rule = {
     return duplicate ? [createViolation(dataReentryRule, {
       element: duplicate[1][0],
       message: `Há múltiplos campos equivalentes para "${duplicate[0]}" na mesma página.`,
-      suggestion: 'Avalie se a confirmação ou redigitação é realmente necessária.',
-      remediationAdvice: `Reutilize dados já informados ou ofereça preenchimento automático quando possível.`,
+      suggestion: t('rules.documentalCompletenessB.dataReentry.suggestion'),
+      remediationAdvice: t('rules.documentalCompletenessB.dataReentry.remediation'),
       customIdPrefix: 'data-reentry',
     })] : [];
   },
@@ -294,8 +295,8 @@ export const dataReentryRule: Rule = {
 export const sensoryValidationRule: Rule = {
   id: 'sensory-validation',
   nbrReference: '5.9.16',
-  name: 'Validação sensorial ou por movimento',
-  description: 'Validações não devem depender apenas de percepção sensorial ou movimento',
+  name: t('rules.documentalCompletenessB.sensoryValidation.name'),
+  description: t('rules.documentalCompletenessB.sensoryValidation.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -304,8 +305,8 @@ export const sensoryValidationRule: Rule = {
     Array.from(document.querySelectorAll<HTMLElement>('label, legend, p, span, small, .help, .hint'))
       .filter((element) => /vermelh|azul|direita|esquerda|acima|abaixo|agite|balance|mova o dispositivo/.test(getVisibleText(element).toLowerCase())),
     (element) => `Instrução com dependência sensorial detectada: "${getVisibleText(element)}".`,
-    'Complemente instruções com texto objetivo, não dependente de cor, posição ou movimento.',
-    `Exemplo: "Campos obrigatórios estão marcados com * e descritos como obrigatórios".`,
+    t('rules.documentalCompletenessB.sensoryValidation.suggestion'),
+    t('rules.documentalCompletenessB.sensoryValidation.remediation'),
     'sensory-validation'
   ),
 };
@@ -313,8 +314,8 @@ export const sensoryValidationRule: Rule = {
 export const sensoryCharacteristicsRule: Rule = {
   id: 'sensory-characteristics',
   nbrReference: '5.10.1',
-  name: 'Características sensoriais',
-  description: 'Instruções não devem depender apenas de forma, cor, tamanho ou posição',
+  name: t('rules.documentalCompletenessB.sensoryCharacteristics.name'),
+  description: t('rules.documentalCompletenessB.sensoryCharacteristics.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -323,8 +324,8 @@ export const sensoryCharacteristicsRule: Rule = {
     Array.from(document.querySelectorAll<HTMLElement>('p, span, li, label, legend, small, strong, em'))
       .filter((element) => /clique no bot[aã]o vermelho|campo à direita|item acima|item abaixo|lado esquerdo|lado direito|círculo verde|retângulo azul/.test(getVisibleText(element).toLowerCase())),
     (element) => `Instrução dependente de característica sensorial: "${getVisibleText(element)}".`,
-    'Use referências textuais inequívocas, como nome do campo, botão ou etapa.',
-    `Prefira "Selecione o botão Confirmar" em vez de "clique no botão verde".`,
+    t('rules.documentalCompletenessB.sensoryCharacteristics.suggestion'),
+    t('rules.documentalCompletenessB.sensoryCharacteristics.remediation'),
     'sensory-characteristics'
   ),
 };
@@ -332,8 +333,8 @@ export const sensoryCharacteristicsRule: Rule = {
 export const presentationOrderRule: Rule = {
   id: 'presentation-order',
   nbrReference: '5.10.2',
-  name: 'Ordem de apresentação',
-  description: 'A ordem de leitura e navegação deve seguir uma sequência lógica',
+  name: t('rules.documentalCompletenessB.presentationOrder.name'),
+  description: t('rules.documentalCompletenessB.presentationOrder.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -345,9 +346,9 @@ export const presentationOrderRule: Rule = {
       if (tabIndex > 0) {
         violations.push(createViolation(presentationOrderRule, {
           element,
-          message: `Elemento com tabindex positivo (${tabIndex}) pode quebrar a ordem lógica de apresentação.`,
-          suggestion: 'Evite tabindex positivo e preserve a sequência natural do DOM.',
-          remediationAdvice: `<button>Continuar</button>`,
+          message: t('rules.documentalCompletenessB.presentationOrder.positiveTabindexMessage', { value: tabIndex }),
+          suggestion: t('rules.documentalCompletenessB.presentationOrder.positiveTabindexSuggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.presentationOrder.positiveTabindexRemediation'),
           customIdPrefix: 'presentation-order',
         }));
       }
@@ -359,9 +360,9 @@ export const presentationOrderRule: Rule = {
       if ((style.display.includes('flex') || style.display.includes('grid')) && style.order !== '0') {
         violations.push(createViolation(presentationOrderRule, {
           element,
-          message: 'Elemento com reordenação visual via CSS; valide a coerência com a ordem de leitura.',
-          suggestion: 'Evite usar order para inverter a ordem lógica de leitura.',
-          remediationAdvice: `Prefira ordenar o DOM na sequência correta e use CSS apenas para apresentação.`,
+          message: t('rules.documentalCompletenessB.presentationOrder.cssOrderMessage'),
+          suggestion: t('rules.documentalCompletenessB.presentationOrder.cssOrderSuggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.presentationOrder.cssOrderRemediation'),
           customIdPrefix: 'presentation-order',
         }));
       }
@@ -374,8 +375,8 @@ export const presentationOrderRule: Rule = {
 export const orientationRule: Rule = {
   id: 'orientation',
   nbrReference: '5.10.3',
-  name: 'Orientação de exibição',
-  description: 'O conteúdo deve funcionar em retrato e paisagem, salvo exceções justificadas',
+  name: t('rules.documentalCompletenessB.orientation.name'),
+  description: t('rules.documentalCompletenessB.orientation.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -386,9 +387,9 @@ export const orientationRule: Rule = {
 
     return [createViolation(orientationRule, {
       element: document.body,
-      message: 'Foram encontradas regras de estilo com media query de orientação que podem ocultar o layout principal.',
-      suggestion: 'Valide se a interface continua operável em retrato e paisagem ou documente a exceção essencial.',
-      remediationAdvice: `Evite ocultar ou bloquear o conteúdo principal apenas por orientação de tela.`,
+      message: t('rules.documentalCompletenessB.orientation.message'),
+      suggestion: t('rules.documentalCompletenessB.orientation.suggestion'),
+      remediationAdvice: t('rules.documentalCompletenessB.orientation.remediation'),
       customIdPrefix: 'orientation',
     })];
   },
@@ -397,8 +398,8 @@ export const orientationRule: Rule = {
 export const colorUsageRule: Rule = {
   id: 'color-usage',
   nbrReference: '5.11.1',
-  name: 'Uso de cores',
-  description: 'Cor não deve ser o único meio de transmitir informação',
+  name: t('rules.documentalCompletenessB.colorUsage.name'),
+  description: t('rules.documentalCompletenessB.colorUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -407,8 +408,8 @@ export const colorUsageRule: Rule = {
     Array.from(document.querySelectorAll<HTMLElement>('p, span, li, label, legend, small, strong, em'))
       .filter((element) => /em vermelho|em verde|em azul|destacado em amarelo|campos em vermelho|botão verde/.test(getVisibleText(element).toLowerCase())),
     (element) => `Indício de informação transmitida apenas por cor: "${getVisibleText(element)}".`,
-    'Adicione texto, ícone, estado programático ou outro indicador além da cor.',
-    `Combine cor com rótulo, ícone ou mensagem textual explícita.`,
+    t('rules.documentalCompletenessB.colorUsage.suggestion'),
+    t('rules.documentalCompletenessB.colorUsage.remediation'),
     'color-usage'
   ),
 };
@@ -416,8 +417,8 @@ export const colorUsageRule: Rule = {
 export const graphicContrastRule: Rule = {
   id: 'graphic-contrast',
   nbrReference: '5.11.5',
-  name: 'Contraste para objetos gráficos',
-  description: 'Objetos gráficos informativos devem ter contraste suficiente',
+  name: t('rules.documentalCompletenessB.graphicContrast.name'),
+  description: t('rules.documentalCompletenessB.graphicContrast.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -436,8 +437,8 @@ export const graphicContrastRule: Rule = {
         violations.push(createViolation(graphicContrastRule, {
           element,
           message: `Objeto gráfico com contraste estimado de ${ratio.toFixed(2)}:1.`,
-          suggestion: 'Aumente o contraste do gráfico em relação ao fundo.',
-          remediationAdvice: `Use cores com razão mínima próxima de 3:1 para elementos gráficos informativos.`,
+          suggestion: t('rules.documentalCompletenessB.graphicContrast.suggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.graphicContrast.remediation'),
           customIdPrefix: 'graphic-contrast',
         }));
       }
@@ -450,8 +451,8 @@ export const graphicContrastRule: Rule = {
 export const focusIndicatorContrastRule: Rule = {
   id: 'focus-indicator-contrast',
   nbrReference: '5.11.6',
-  name: 'Contraste para indicador de foco visual',
-  description: 'Indicadores de foco devem ter contraste perceptível com áreas adjacentes',
+  name: t('rules.documentalCompletenessB.focusIndicatorContrast.name'),
+  description: t('rules.documentalCompletenessB.focusIndicatorContrast.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -475,8 +476,8 @@ export const focusIndicatorContrastRule: Rule = {
       violations.push(createViolation(focusIndicatorContrastRule, {
         element: activeElement,
         message: `Indicador de foco com contraste estimado de ${ratio.toFixed(2)}:1.`,
-        suggestion: 'Aumente o contraste do outline, box-shadow ou anel de foco.',
-        remediationAdvice: `button:focus-visible { outline: 3px solid #005fcc; }`,
+        suggestion: t('rules.documentalCompletenessB.focusIndicatorContrast.suggestion'),
+        remediationAdvice: t('rules.documentalCompletenessB.focusIndicatorContrast.remediation'),
         customIdPrefix: 'focus-contrast',
       }));
     }
@@ -493,8 +494,8 @@ function getTextBlocks(): HTMLElement[] {
 export const lineSpacingRule: Rule = {
   id: 'line-spacing',
   nbrReference: '5.12.1',
-  name: 'Espaçamento entre linhas',
-  description: 'Conteúdo textual deve suportar aumento de espaçamento entre linhas',
+  name: t('rules.documentalCompletenessB.lineSpacing.name'),
+  description: t('rules.documentalCompletenessB.lineSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -504,9 +505,9 @@ export const lineSpacingRule: Rule = {
       const style = window.getComputedStyle(element);
       return style.overflow === 'hidden' && parseFloat(style.lineHeight || '0') > 0 && parseFloat(style.lineHeight || '0') < parseFloat(style.fontSize) * 1.5;
     }),
-    () => 'Bloco de texto com line-height baixo e overflow oculto, o que pode quebrar ao aumentar espaçamento.',
-    'Evite truncar texto e permita line-height mais amplo.',
-    `p { line-height: 1.5; overflow: visible; }`,
+    () => t('rules.documentalCompletenessB.lineSpacing.message'),
+    t('rules.documentalCompletenessB.lineSpacing.suggestion'),
+    t('rules.documentalCompletenessB.lineSpacing.remediation'),
     'line-spacing'
   ),
 };
@@ -514,8 +515,8 @@ export const lineSpacingRule: Rule = {
 export const paragraphSpacingRule: Rule = {
   id: 'paragraph-spacing',
   nbrReference: '5.12.2',
-  name: 'Espaçamento entre parágrafos',
-  description: 'Parágrafos devem suportar aumento de espaçamento sem perda de conteúdo',
+  name: t('rules.documentalCompletenessB.paragraphSpacing.name'),
+  description: t('rules.documentalCompletenessB.paragraphSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -527,9 +528,9 @@ export const paragraphSpacingRule: Rule = {
         const style = window.getComputedStyle(element);
         return paragraphs.length >= 2 && style.overflow === 'hidden' && element.getBoundingClientRect().height > 0;
       }),
-    () => 'Agrupamento com múltiplos parágrafos e overflow oculto pode falhar com espaçamento ampliado.',
-    'Permita expansão vertical do conteúdo textual.',
-    `Evite altura fixa e overflow oculto em contêineres de texto.`,
+    () => t('rules.documentalCompletenessB.paragraphSpacing.message'),
+    t('rules.documentalCompletenessB.paragraphSpacing.suggestion'),
+    t('rules.documentalCompletenessB.paragraphSpacing.remediation'),
     'paragraph-spacing'
   ),
 };
@@ -537,8 +538,8 @@ export const paragraphSpacingRule: Rule = {
 export const letterSpacingRule: Rule = {
   id: 'letter-spacing',
   nbrReference: '5.12.3',
-  name: 'Espaçamento entre letras',
-  description: 'Texto deve suportar aumento de espaçamento entre letras',
+  name: t('rules.documentalCompletenessB.letterSpacing.name'),
+  description: t('rules.documentalCompletenessB.letterSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -548,9 +549,9 @@ export const letterSpacingRule: Rule = {
       const style = window.getComputedStyle(element);
       return style.whiteSpace === 'nowrap' || style.textOverflow === 'ellipsis';
     }),
-    () => 'Bloco textual com nowrap ou ellipsis pode falhar ao aumentar o espaçamento entre letras.',
-    'Permita quebra de linha e evite truncar texto essencial.',
-    `white-space: normal; text-overflow: clip;`,
+    () => t('rules.documentalCompletenessB.letterSpacing.message'),
+    t('rules.documentalCompletenessB.letterSpacing.suggestion'),
+    t('rules.documentalCompletenessB.letterSpacing.remediation'),
     'letter-spacing'
   ),
 };
@@ -558,8 +559,8 @@ export const letterSpacingRule: Rule = {
 export const wordSpacingRule: Rule = {
   id: 'word-spacing',
   nbrReference: '5.12.4',
-  name: 'Espaçamento entre palavras',
-  description: 'Texto deve suportar aumento de espaçamento entre palavras',
+  name: t('rules.documentalCompletenessB.wordSpacing.name'),
+  description: t('rules.documentalCompletenessB.wordSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -569,9 +570,9 @@ export const wordSpacingRule: Rule = {
       const style = window.getComputedStyle(element);
       return style.overflowX === 'hidden' || style.whiteSpace === 'nowrap';
     }),
-    () => 'Bloco textual pode não acomodar aumento de espaçamento entre palavras.',
-    'Evite restringir horizontalmente blocos de texto longos.',
-    `Remova white-space: nowrap e overflow-x: hidden de conteúdos textuais extensos.`,
+    () => t('rules.documentalCompletenessB.wordSpacing.message'),
+    t('rules.documentalCompletenessB.wordSpacing.suggestion'),
+    t('rules.documentalCompletenessB.wordSpacing.remediation'),
     'word-spacing'
   ),
 };
@@ -579,17 +580,17 @@ export const wordSpacingRule: Rule = {
 export const textWidthRule: Rule = {
   id: 'text-width',
   nbrReference: '5.12.6',
-  name: 'Largura de blocos de texto',
-  description: 'Linhas longas demais dificultam leitura confortável',
+  name: t('rules.documentalCompletenessB.textWidth.name'),
+  description: t('rules.documentalCompletenessB.textWidth.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async () => createWarnings(
     textWidthRule,
     getTextBlocks().filter((element) => parseFloat(window.getComputedStyle(element).width || '0') > 1000),
-    () => 'Bloco textual muito largo para leitura confortável em linhas curtas.',
-    'Limite a largura de leitura de blocos textuais extensos.',
-    `main { max-width: 80ch; }`,
+    () => t('rules.documentalCompletenessB.textWidth.message'),
+    t('rules.documentalCompletenessB.textWidth.suggestion'),
+    t('rules.documentalCompletenessB.textWidth.remediation'),
     'text-width'
   ),
 };
@@ -597,8 +598,8 @@ export const textWidthRule: Rule = {
 export const resizedTextRule: Rule = {
   id: 'resized-text',
   nbrReference: '5.12.7',
-  name: 'Texto redimensionado',
-  description: 'Conteúdo deve suportar aumento de zoom e texto sem perda funcional',
+  name: t('rules.documentalCompletenessB.resizedText.name'),
+  description: t('rules.documentalCompletenessB.resizedText.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -611,9 +612,9 @@ export const resizedTextRule: Rule = {
         const fixedHeight = parseFloat(style.height || '0') > 0 && style.height !== 'auto';
         return fixedHeight && style.overflow === 'hidden' && style.whiteSpace !== 'normal';
       }),
-    () => 'Conteúdo textual com altura fixa e overflow oculto pode falhar ao ampliar o texto.',
-    'Permita crescimento vertical do conteúdo ao ampliar o texto.',
-    `Evite altura fixa em contêineres com texto.`,
+    () => t('rules.documentalCompletenessB.resizedText.message'),
+    t('rules.documentalCompletenessB.resizedText.suggestion'),
+    t('rules.documentalCompletenessB.resizedText.remediation'),
     'resized-text'
   ),
 };
@@ -621,8 +622,8 @@ export const resizedTextRule: Rule = {
 export const pagePartLanguageRule: Rule = {
   id: 'page-part-language',
   nbrReference: '5.13.3',
-  name: 'Idioma das partes da página',
-  description: 'Trechos em idioma diferente devem ser marcados com lang apropriado',
+  name: t('rules.documentalCompletenessB.pagePartLanguage.name'),
+  description: t('rules.documentalCompletenessB.pagePartLanguage.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -638,8 +639,8 @@ export const pagePartLanguageRule: Rule = {
           return getElementLanguage(element) === pageLang && text.split(/\s+/).length >= 5;
         }),
       (element) => `Trecho com possível conteúdo em idioma diferente sem marcação de lang: "${getVisibleText(element).slice(0, 80)}".`,
-      'Marque trechos em outro idioma com o atributo lang correspondente.',
-      `<span lang="en">Download</span>`,
+      t('rules.documentalCompletenessB.pagePartLanguage.suggestion'),
+      t('rules.documentalCompletenessB.pagePartLanguage.remediation'),
       'page-part-language'
     );
   },
@@ -648,8 +649,8 @@ export const pagePartLanguageRule: Rule = {
 export const readingOrderRule: Rule = {
   id: 'reading-order',
   nbrReference: '5.13.6',
-  name: 'Ordem de leitura',
-  description: 'A ordem de leitura assistiva deve acompanhar a sequência lógica do conteúdo',
+  name: t('rules.documentalCompletenessB.readingOrder.name'),
+  description: t('rules.documentalCompletenessB.readingOrder.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -659,9 +660,9 @@ export const readingOrderRule: Rule = {
     document.querySelectorAll<HTMLElement>('[aria-flowto]').forEach((element) => {
       violations.push(createViolation(readingOrderRule, {
         element,
-        message: 'Uso de aria-flowto exige validação manual da ordem de leitura resultante.',
-        suggestion: 'Prefira ordem natural do DOM e use aria-flowto apenas quando estritamente necessário.',
-        remediationAdvice: `Reordene o DOM na sequência correta de leitura.`,
+        message: t('rules.documentalCompletenessB.readingOrder.ariaFlowtoMessage'),
+        suggestion: t('rules.documentalCompletenessB.readingOrder.ariaFlowtoSuggestion'),
+        remediationAdvice: t('rules.documentalCompletenessB.readingOrder.ariaFlowtoRemediation'),
         customIdPrefix: 'reading-order',
       }));
     });
@@ -672,9 +673,9 @@ export const readingOrderRule: Rule = {
       if ((style.display.includes('flex') || style.display.includes('grid')) && style.order !== '0') {
         violations.push(createViolation(readingOrderRule, {
           element,
-          message: 'Reordenação visual via CSS pode divergir da ordem de leitura assistiva.',
-          suggestion: 'Mantenha a ordem lógica no DOM.',
-          remediationAdvice: `Evite depender de CSS order para a sequência principal do conteúdo.`,
+          message: t('rules.documentalCompletenessB.readingOrder.cssOrderMessage'),
+          suggestion: t('rules.documentalCompletenessB.readingOrder.cssOrderSuggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.readingOrder.cssOrderRemediation'),
           customIdPrefix: 'reading-order',
         }));
       }
@@ -687,8 +688,8 @@ export const readingOrderRule: Rule = {
 export const visibleTextInNameRule: Rule = {
   id: 'visible-text-in-name',
   nbrReference: '5.13.7',
-  name: 'Texto visível no nome acessível',
-  description: 'O nome acessível deve conter o texto visível do controle',
+  name: t('rules.documentalCompletenessB.visibleTextInName.name'),
+  description: t('rules.documentalCompletenessB.visibleTextInName.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -702,8 +703,8 @@ export const visibleTextInNameRule: Rule = {
         return !!visible && !!accessible && !accessible.includes(visible);
       }),
     (element) => `Nome acessível não contém o texto visível do controle "${getVisibleText(element)}".`,
-    'Alinhe o texto visível com o nome acessível exposto ao leitor de tela.',
-    `<button aria-label="Baixar regulamento">Baixar regulamento</button>`,
+    t('rules.documentalCompletenessB.visibleTextInName.suggestion'),
+    t('rules.documentalCompletenessB.visibleTextInName.remediation'),
     'visible-text-name'
   ),
 };
@@ -711,8 +712,8 @@ export const visibleTextInNameRule: Rule = {
 export const statusMessageRule: Rule = {
   id: 'status-message',
   nbrReference: '5.13.8',
-  name: 'Mensagens de status',
-  description: 'Mensagens dinâmicas de status devem ser anunciáveis programaticamente',
+  name: t('rules.documentalCompletenessB.statusMessage.name'),
+  description: t('rules.documentalCompletenessB.statusMessage.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -726,9 +727,9 @@ export const statusMessageRule: Rule = {
         if (text.length < 4 || text.length > 160) return false;
         return /(salvo|enviado|atualizado|erro|falha|sucesso|carregado|copiado|removido|adicionado)/.test(text);
       }),
-    () => 'Possível mensagem de status sem role ou aria-live.',
-    'Adicione role="status", role="alert" ou aria-live adequado ao conteúdo dinâmico.',
-    `<div role="status" aria-live="polite">Salvo com sucesso</div>`,
+    () => t('rules.documentalCompletenessB.statusMessage.message'),
+    t('rules.documentalCompletenessB.statusMessage.suggestion'),
+    t('rules.documentalCompletenessB.statusMessage.remediation'),
     'status-message'
   ),
 };
@@ -736,8 +737,8 @@ export const statusMessageRule: Rule = {
 export const customComponentSemanticRule: Rule = {
   id: 'custom-component-semantics',
   nbrReference: '5.13.12',
-  name: 'Semântica de componentes customizados',
-  description: 'Componentes customizados interativos devem expor função semântica apropriada',
+  name: t('rules.documentalCompletenessB.customComponentSemantic.name'),
+  description: t('rules.documentalCompletenessB.customComponentSemantic.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -750,8 +751,8 @@ export const customComponentSemanticRule: Rule = {
         return !element.getAttribute('role');
       }),
     (element) => `Componente customizado interativo sem role semântica: <${element.tagName.toLowerCase()}>.`,
-    'Aplique role coerente e comportamento compatível, ou substitua por elemento nativo.',
-    `<div role="button" tabindex="0">Abrir</div>`,
+    t('rules.documentalCompletenessB.customComponentSemantic.suggestion'),
+    t('rules.documentalCompletenessB.customComponentSemantic.remediation'),
     'custom-component-semantics'
   ),
 };
@@ -759,8 +760,8 @@ export const customComponentSemanticRule: Rule = {
 export const audioTranscriptRule: Rule = {
   id: 'audio-transcript',
   nbrReference: '5.14.1',
-  name: 'Alternativa em texto para áudio',
-  description: 'Áudios gravados devem disponibilizar alternativa textual equivalente',
+  name: t('rules.documentalCompletenessB.audioTranscript.name'),
+  description: t('rules.documentalCompletenessB.audioTranscript.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -771,9 +772,9 @@ export const audioTranscriptRule: Rule = {
         const container = (element.closest('figure, section, article, div') as HTMLElement | null) || document.body;
         return !/transcri|transcript|roteiro|texto alternativo/.test(getVisibleText(container).toLowerCase());
       }),
-    () => 'Áudio sem indício de transcrição ou alternativa textual associada.',
-    'Disponibilize transcrição próxima ao áudio ou vinculada a ele.',
-    `Inclua link ou bloco com a transcrição completa do conteúdo em áudio.`,
+    () => t('rules.documentalCompletenessB.audioTranscript.message'),
+    t('rules.documentalCompletenessB.audioTranscript.suggestion'),
+    t('rules.documentalCompletenessB.audioTranscript.remediation'),
     'audio-transcript'
   ),
 };
@@ -781,8 +782,8 @@ export const audioTranscriptRule: Rule = {
 export const videoCaptionsRule: Rule = {
   id: 'video-captions',
   nbrReference: '5.14.2',
-  name: 'Legendas descritivas para vídeo',
-  description: 'Vídeos gravados devem oferecer legendas sincronizadas',
+  name: t('rules.documentalCompletenessB.videoCaptions.name'),
+  description: t('rules.documentalCompletenessB.videoCaptions.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -791,9 +792,9 @@ export const videoCaptionsRule: Rule = {
     Array.from(document.querySelectorAll<HTMLVideoElement>('video'))
       .filter((video) => !video.querySelector('track[kind="captions"], track[kind="subtitles"]'))
       .map((video) => video as unknown as HTMLElement),
-    () => 'Vídeo sem faixa de legenda detectável.',
-    'Adicione track de legendas ou equivalente sincronizado.',
-    `<video controls><track kind="captions" srclang="pt-BR" src="legendas.vtt" /></video>`,
+    () => t('rules.documentalCompletenessB.videoCaptions.message'),
+    t('rules.documentalCompletenessB.videoCaptions.suggestion'),
+    t('rules.documentalCompletenessB.videoCaptions.remediation'),
     'video-captions'
   ),
 };
@@ -801,8 +802,8 @@ export const videoCaptionsRule: Rule = {
 export const audioDescriptionRule: Rule = {
   id: 'audio-description',
   nbrReference: '5.14.4',
-  name: 'Audiodescrição para vídeo',
-  description: 'Vídeos com informação visual relevante devem oferecer audiodescrição ou alternativa equivalente',
+  name: t('rules.documentalCompletenessB.audioDescription.name'),
+  description: t('rules.documentalCompletenessB.audioDescription.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -811,9 +812,9 @@ export const audioDescriptionRule: Rule = {
     Array.from(document.querySelectorAll<HTMLVideoElement>('video'))
       .filter((video) => !video.querySelector('track[kind="descriptions"]'))
       .map((video) => video as unknown as HTMLElement),
-    () => 'Vídeo sem faixa de audiodescrição detectável; valide a necessidade de alternativa equivalente.',
-    'Inclua audiodescrição ou transcrição expandida quando houver informação visual relevante.',
-    `<track kind="descriptions" srclang="pt-BR" src="descricao.vtt" />`,
+    () => t('rules.documentalCompletenessB.audioDescription.message'),
+    t('rules.documentalCompletenessB.audioDescription.suggestion'),
+    t('rules.documentalCompletenessB.audioDescription.remediation'),
     'audio-description'
   ),
 };
@@ -821,8 +822,8 @@ export const audioDescriptionRule: Rule = {
 export const liveCaptionsRule: Rule = {
   id: 'live-captions',
   nbrReference: '5.14.9',
-  name: 'Legendas para áudio e vídeo ao vivo',
-  description: 'Transmissões ao vivo devem prever legenda sincronizada quando aplicável',
+  name: t('rules.documentalCompletenessB.liveCaptions.name'),
+  description: t('rules.documentalCompletenessB.liveCaptions.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -830,9 +831,9 @@ export const liveCaptionsRule: Rule = {
     liveCaptionsRule,
     Array.from(document.querySelectorAll<HTMLElement>('video, iframe, section, article, div'))
       .filter((element) => /ao vivo|live|transmiss[aã]o/.test(getVisibleText(element).toLowerCase()) && !/legenda|caption/.test(getVisibleText(element).toLowerCase())),
-    () => 'Indício de mídia ao vivo sem referência a legendas.',
-    'Valide e documente a oferta de legendas ao vivo quando houver transmissão síncrona.',
-    `Inclua mecanismo de legendagem ao vivo ou indicação clara da alternativa disponível.`,
+    () => t('rules.documentalCompletenessB.liveCaptions.message'),
+    t('rules.documentalCompletenessB.liveCaptions.suggestion'),
+    t('rules.documentalCompletenessB.liveCaptions.remediation'),
     'live-captions'
   ),
 };
@@ -840,8 +841,8 @@ export const liveCaptionsRule: Rule = {
 export const animationControlRule: Rule = {
   id: 'animation-control',
   nbrReference: '5.15.1',
-  name: 'Controle de animação',
-  description: 'Movimento automático prolongado deve poder ser pausado, interrompido ou ocultado',
+  name: t('rules.documentalCompletenessB.animationControl.name'),
+  description: t('rules.documentalCompletenessB.animationControl.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -853,9 +854,9 @@ export const animationControlRule: Rule = {
       if (!/pausar|pause|parar|stop/.test(containerText)) {
         violations.push(createViolation(animationControlRule, {
           element,
-          message: 'Elemento com animação/rotação automática sem controle visível de pausa.',
-          suggestion: 'Adicione mecanismo para pausar, parar ou ocultar a animação.',
-          remediationAdvice: `<button aria-label="Pausar animação">Pausar</button>`,
+          message: t('rules.documentalCompletenessB.animationControl.carouselMessage'),
+          suggestion: t('rules.documentalCompletenessB.animationControl.carouselSuggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.animationControl.carouselRemediation'),
           customIdPrefix: 'animation-control',
         }));
       }
@@ -865,9 +866,9 @@ export const animationControlRule: Rule = {
       if (!media.hasAttribute('controls')) {
         violations.push(createViolation(animationControlRule, {
           element: media as unknown as HTMLElement,
-          message: 'Mídia em reprodução automática sem controle de pausa visível.',
-          suggestion: 'Disponibilize controles ou desative a reprodução automática.',
-          remediationAdvice: `<video controls autoplay></video>`,
+          message: t('rules.documentalCompletenessB.animationControl.mediaMessage'),
+          suggestion: t('rules.documentalCompletenessB.animationControl.mediaSuggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.animationControl.mediaRemediation'),
           customIdPrefix: 'animation-control',
         }));
       }
@@ -880,8 +881,8 @@ export const animationControlRule: Rule = {
 export const flashingContentRule: Rule = {
   id: 'flashing-content',
   nbrReference: '5.15.4',
-  name: 'Flash intermitente limitado',
-  description: 'Conteúdo não deve piscar de forma potencialmente perigosa',
+  name: t('rules.documentalCompletenessB.flashingContent.name'),
+  description: t('rules.documentalCompletenessB.flashingContent.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -898,9 +899,9 @@ export const flashingContentRule: Rule = {
         const nearbyControls = getVisibleText((element.parentElement as HTMLElement | null) || element).toLowerCase();
         return duration > 0.08 && duration < 0.24 && infinite && area >= 4900 && !/pausar|parar animação|reduzir movimento/.test(nearbyControls);
       }),
-    () => 'Animação rápida e infinita detectada; valide risco de flashes intermitentes.',
-    'Evite cintilação rápida ou reduza frequência/intensidade do efeito.',
-    `Prefira animações suaves, sem repetição rápida contínua.`,
+    () => t('rules.documentalCompletenessB.flashingContent.message'),
+    t('rules.documentalCompletenessB.flashingContent.suggestion'),
+    t('rules.documentalCompletenessB.flashingContent.remediation'),
     'flashing-content'
   ),
 };
@@ -908,8 +909,8 @@ export const flashingContentRule: Rule = {
 export const adjustableTimeLimitRule: Rule = {
   id: 'adjustable-time-limit',
   nbrReference: '5.16.2',
-  name: 'Limite de tempo ajustável',
-  description: 'Limites de tempo devem poder ser estendidos, ajustados ou desativados quando aplicável',
+  name: t('rules.documentalCompletenessB.adjustableTimeLimit.name'),
+  description: t('rules.documentalCompletenessB.adjustableTimeLimit.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -923,10 +924,10 @@ export const adjustableTimeLimitRule: Rule = {
       violations.push(createViolation(adjustableTimeLimitRule, {
         element: refreshMeta as unknown as HTMLElement,
         message: Number.isFinite(refreshSeconds) && refreshSeconds > 0
-          ? `Atualização temporizada detectada em aproximadamente ${refreshSeconds} segundo(s), sem mecanismo visível de ajuste ou extensão.`
-          : 'Atualização temporizada detectada sem mecanismo visível de ajuste ou extensão.',
-        suggestion: 'Ofereça extensão, pausa ou desativação do limite de tempo.',
-        remediationAdvice: `Evite meta refresh ou forneça controle equivalente ao usuário.`,
+          ? t('rules.documentalCompletenessB.adjustableTimeLimit.metaMessageWithSeconds', { seconds: refreshSeconds })
+          : t('rules.documentalCompletenessB.adjustableTimeLimit.metaMessage'),
+        suggestion: t('rules.documentalCompletenessB.adjustableTimeLimit.metaSuggestion'),
+        remediationAdvice: t('rules.documentalCompletenessB.adjustableTimeLimit.metaRemediation'),
         customIdPrefix: 'adjustable-time',
       }));
     }
@@ -938,9 +939,9 @@ export const adjustableTimeLimitRule: Rule = {
       if (/segundos restantes|tempo restante|sess[aã]o expira|expira em/.test(text) && !hasControlNearby) {
         violations.push(createViolation(adjustableTimeLimitRule, {
           element,
-          message: 'Contagem de tempo detectada sem mecanismo visível de extensão ou ajuste.',
-          suggestion: 'Inclua opção para estender, pausar ou remover o limite quando aplicável.',
-          remediationAdvice: `<button>Estender sessão</button>`,
+          message: t('rules.documentalCompletenessB.adjustableTimeLimit.countdownMessage'),
+          suggestion: t('rules.documentalCompletenessB.adjustableTimeLimit.countdownSuggestion'),
+          remediationAdvice: t('rules.documentalCompletenessB.adjustableTimeLimit.countdownRemediation'),
           customIdPrefix: 'adjustable-time',
         }));
       }
