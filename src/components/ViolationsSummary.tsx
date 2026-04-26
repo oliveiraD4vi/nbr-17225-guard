@@ -45,6 +45,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(({
   const confirmedReviews = getConfirmedHumanReviewCount(result);
   const dismissedReviews = getDismissedHumanReviewCount(result);
   const pendingReviews = getPendingHumanReviewCount(result);
+  const scoreTone = requirementScore.score >= 90 ? 'good' : requirementScore.score >= 70 ? 'medium' : 'critical';
 
   return (
     <div className="violations-summary">
@@ -78,11 +79,14 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(({
           </div>
         </div>
 
-        <div className="summary-score-card">
+        <div className={`summary-score-card is-${scoreTone}`}>
           <div className="summary-score-copy">
             <span className="summary-stat-label">{t('summary.scoreLabel')}</span>
             <strong>{t('summary.scoreOutOf', { score: requirementScore.score })}</strong>
             <p>{t('summary.scoreDescription')}</p>
+            <div className="summary-score-meter" aria-hidden="true">
+              <span className="summary-score-meter-fill" style={{ width: `${requirementScore.score}%` }} />
+            </div>
           </div>
           <div className="summary-score-meta">
             <Tag color={requirementScore.score >= 90 ? 'green' : requirementScore.score >= 70 ? 'gold' : 'red'}>

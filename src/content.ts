@@ -27,7 +27,7 @@ if (contentScope.__nbrGuardContentLoaded) {
         break;
 
       case 'RUN_AUDIT':
-        runAuditInPage()
+        runAuditInPage(Boolean(request.includeRecommendations))
           .then((result) => sendResponse({ result }))
           .catch((error: unknown) => {
             const message = error instanceof Error ? error.message : t('content.unknownAuditError');
@@ -67,13 +67,17 @@ if (contentScope.__nbrGuardContentLoaded) {
     violations.forEach((violation) => renderViolationHighlight(violation));
   }
 
-  async function runAuditInPage(): Promise<AuditResult> {
+  async function runAuditInPage(includeRecommendations: boolean): Promise<AuditResult> {
     await ensureDocumentReady();
     clearHighlights();
     await waitForAuditStability();
 
     const violations: Violation[] = [];
-    for (const rule of allRules) {
+    const rulesToRun = includeRecommendations
+      ? allRules
+      : allRules.filter((rule) => rule.severity === 'error');
+
+    for (const rule of rulesToRun) {
       try {
         const ruleViolations = await rule.check();
         violations.push(...ruleViolations);
@@ -110,6 +114,7 @@ if (contentScope.__nbrGuardContentLoaded) {
       timestamp: Date.now(),
       url: window.location.href,
       pageTitle: document.title,
+      includeRecommendations,
       violationsByRule,
       violationsBySeverity,
     };

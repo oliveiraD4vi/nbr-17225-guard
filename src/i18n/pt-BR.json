@@ -19,6 +19,7 @@
       "nextPriority": "Próximo prioritário",
       "clearHighlights": "Limpar destaques",
       "clearAudit": "Limpar auditoria",
+      "delete": "Excluir",
       "json": "JSON",
       "csv": "CSV"
     },
@@ -132,10 +133,19 @@
       "comparisonExportedCsv": "Comparação exportada como CSV",
       "noteSaved": "Anotação salva",
       "noteRemoved": "Anotação removida",
+      "historyDeleted": "Histórico removido da lista",
       "historyHighlightUnavailable": "Destaque indisponível em auditorias do histórico",
       "noPriorityAvailable": "Nenhum item prioritário disponível nesta aba",
       "priorityFocus": "Foco no item prioritário: {{name}}",
-      "comparisonSelectInfo": "Selecione duas auditorias diferentes para comparar"
+      "comparisonSelectInfo": "Selecione duas auditorias diferentes para comparar",
+      "recommendationsIncluded": "Recomendações incluídas na auditoria atual",
+      "recommendationsLoadError": "Não foi possível concluir a auditoria com recomendações"
+    },
+    "scope": {
+      "toggleLabel": "Escopo da auditoria",
+      "requirementsOnly": "Somente requisitos",
+      "withRecommendations": "Requisitos e recomendações",
+      "description": "Ative para incluir recomendações sem gerar um novo histórico."
     },
     "tabs": {
       "summary": "Resumo",
@@ -174,6 +184,10 @@
       "emptyCompleted": "Nenhuma auditoria com revisão humana concluída",
       "sectionPending": "Revisão pendente",
       "sectionCompleted": "Revisão concluída",
+      "deleteModalTitle": "Excluir auditoria do histórico",
+      "deleteModalDescription": "Esta exclusão remove apenas este registro da lista de histórico da URL. A ação não pode ser desfeita.",
+      "deleteConfirm": "Excluir do histórico",
+      "deleteCancel": "Cancelar",
       "metadataNotes": "Notas: {{from}} -> {{to}}",
       "metadataConfirmed": "Confirmações humanas: {{from}} -> {{to}}",
       "metadataDismissed": "Descartes humanos: {{from}} -> {{to}}",
@@ -242,6 +256,9 @@
   "violations": {
     "emptyCategory": "Nenhum item nesta categoria",
     "emptyAll": "Nenhuma violação encontrada",
+    "categoryFilterLabel": "Filtrar por categoria",
+    "categoryFilterDescription": "Refine a listagem usando a categoria natural das regras auditadas.",
+    "categoryAll": "Todas as categorias",
     "topIssues": "Itens prioritários",
     "otherOccurrences": "Demais ocorrências",
     "requiresHumanReviewTitle": "Confirmação necessária",
@@ -259,10 +276,28 @@
     "saveNote": "Salvar anotação",
     "notePlaceholder": "Registre contexto, decisão tomada ou próximos passos.",
     "noteUpdatedAt": "Atualizada em {{date}}",
-    "tabAll": "Todos ({{count}})",
     "tabRequirements": "Requisitos ({{count}})",
     "tabRecommendations": "Recomendações ({{count}})",
     "tabReview": "Verificação humana ({{count}})"
+  },
+  "ruleTopics": {
+    "keyboard": "Teclado",
+    "images": "Imagens",
+    "headings": "Cabeçalhos",
+    "regions": "Regiões",
+    "lists": "Listas",
+    "tables": "Tabelas",
+    "navigation": "Navegação",
+    "controls": "Controles",
+    "forms": "Formulários",
+    "documentalA": "Completude documental A",
+    "documentalB": "Completude documental B",
+    "presentation": "Apresentação",
+    "colors": "Cores",
+    "textContent": "Conteúdo textual",
+    "semantics": "Semântica",
+    "media": "Mídia",
+    "time": "Tempo"
   },
   "vision": {
     "title": "Simulador de visão",

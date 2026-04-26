@@ -104,9 +104,9 @@
 }
 
 .tab-status-strip {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
   gap: 12px;
   margin-bottom: 12px;
   padding: 10px 12px;
@@ -122,11 +122,39 @@
   min-width: 0;
 }
 
+.tab-status-item-toggle {
+  gap: 8px;
+}
+
 .tab-status-label {
   color: #64748b;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
+}
+
+.recommendations-toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.recommendations-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.recommendations-toggle-copy strong {
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.recommendations-toggle-copy span {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .tab-status-item strong {
@@ -395,6 +423,17 @@
 
 .history-item-tag-row .ant-tag {
   margin-inline-end: 0;
+}
+
+.history-delete-target {
+  margin: 0;
+  color: #0f172a;
+}
+
+@media (max-width: 640px) {
+  .tab-status-strip {
+    grid-template-columns: 1fr;
+  }
 }
 
 .popup-content::-webkit-scrollbar {

@@ -59,6 +59,7 @@ export interface AuditResult {
   timestamp: number;
   url: string;
   pageTitle?: string;
+  includeRecommendations?: boolean;
   totalViolations: number;
   errors: number;
   warnings: number;
@@ -94,4 +95,5 @@ export interface StorageData {
   auditHistoryByUrl?: Record<string, AuditHistoryEntry[]>;
   highlightState?: HighlightState;
   visionFilter?: VisionSimulationFilter;
+  includeRecommendationsPreference?: boolean;
 }

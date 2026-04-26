@@ -22,28 +22,56 @@ import { tableRules } from './tables';
 import { textContentRules } from './text-content';
 import { timeRules } from './time';
 
+export const RULE_TOPIC_GROUPS = {
+  keyboard: keyboardRules,
+  images: imageRules,
+  headings: headingRules,
+  regions: regionRules,
+  lists: listRules,
+  tables: tableRules,
+  navigation: navigationRules,
+  controls: controlRules,
+  forms: formRules,
+  documentalA: documentalCompletenessRulesA,
+  documentalB: documentalCompletenessRulesB,
+  presentation: presentationRules,
+  colors: colorRules,
+  textContent: textContentRules,
+  semantics: semanticRules,
+  media: mediaRules,
+  time: timeRules,
+} as const;
+
+export type RuleTopicCategory = keyof typeof RULE_TOPIC_GROUPS;
+
 /**
  * Todas as regras de acessibilidade disponiveis
  */
 export const allRules: Rule[] = [
-  ...keyboardRules,
-  ...imageRules,
-  ...headingRules,
-  ...regionRules,
-  ...listRules,
-  ...tableRules,
-  ...navigationRules,
-  ...controlRules,
-  ...formRules,
-  ...documentalCompletenessRulesA,
-  ...documentalCompletenessRulesB,
-  ...presentationRules,
-  ...colorRules,
-  ...textContentRules,
-  ...semanticRules,
-  ...mediaRules,
-  ...timeRules,
+  ...RULE_TOPIC_GROUPS.keyboard,
+  ...RULE_TOPIC_GROUPS.images,
+  ...RULE_TOPIC_GROUPS.headings,
+  ...RULE_TOPIC_GROUPS.regions,
+  ...RULE_TOPIC_GROUPS.lists,
+  ...RULE_TOPIC_GROUPS.tables,
+  ...RULE_TOPIC_GROUPS.navigation,
+  ...RULE_TOPIC_GROUPS.controls,
+  ...RULE_TOPIC_GROUPS.forms,
+  ...RULE_TOPIC_GROUPS.documentalA,
+  ...RULE_TOPIC_GROUPS.documentalB,
+  ...RULE_TOPIC_GROUPS.presentation,
+  ...RULE_TOPIC_GROUPS.colors,
+  ...RULE_TOPIC_GROUPS.textContent,
+  ...RULE_TOPIC_GROUPS.semantics,
+  ...RULE_TOPIC_GROUPS.media,
+  ...RULE_TOPIC_GROUPS.time,
 ];
+
+const ruleTopicEntries = Object.entries(RULE_TOPIC_GROUPS).flatMap(([topic, rules]) =>
+  rules.map((rule) => [rule.id, topic as RuleTopicCategory] as const)
+);
+
+const ruleTopicById = new Map<string, RuleTopicCategory>(ruleTopicEntries);
 
 /**
  * Regras por nivel WCAG
@@ -62,6 +90,10 @@ export const rulesByAutomation = {
   [AUTOMATION_CATEGORIES.semi]: allRules.filter((rule) => rule.category === AUTOMATION_CATEGORIES.semi),
   [AUTOMATION_CATEGORIES.none]: allRules.filter((rule) => rule.category === AUTOMATION_CATEGORIES.none),
 };
+
+export function getRuleTopicCategory(ruleId: string): RuleTopicCategory {
+  return ruleTopicById.get(ruleId) ?? 'semantics';
+}
 
 export {
   keyboardRules,

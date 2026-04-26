@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card, Checkbox, Collapse, Empty, Input, Space, Tabs, Tag, Tooltip } from 'antd';
+import { Button, Card, Checkbox, Collapse, Empty, Input, Select, Space, Tabs, Tag, Tooltip } from 'antd';
 import {
   BoldOutlined,
   ClearOutlined,
@@ -14,6 +14,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons';
 import { t } from '@/i18n';
+import { getRuleTopicCategory, type RuleTopicCategory } from '@/rules';
 import type { HumanReviewStatus, Violation } from '@/types';
 import '../styles/violations-list.css';
 
@@ -28,6 +29,7 @@ interface ViolationGroup {
   ruleId: string;
   violations: Violation[];
   topIssueCount: number;
+  topicCategory: RuleTopicCategory;
 }
 
 const { TextArea } = Input;
@@ -85,6 +87,7 @@ function buildGroups(violations: Violation[]): ViolationGroup[] {
       ruleId,
       violations: sortViolations(ruleViolations),
       topIssueCount: new Set(ruleViolations.slice(0, 3).map(getViolationSignature)).size,
+      topicCategory: getRuleTopicCategory(ruleId),
     }))
     .sort((left, right) => {
       const leftFirst = left.violations[0];
@@ -94,6 +97,10 @@ function buildGroups(violations: Violation[]): ViolationGroup[] {
       if (right.violations.length !== left.violations.length) return right.violations.length - left.violations.length;
       return leftFirst.nbrReference.localeCompare(rightFirst.nbrReference, 'pt-BR');
     });
+}
+
+function getRuleTopicLabel(topicCategory: RuleTopicCategory): string {
+  return t(`ruleTopics.${topicCategory}`);
 }
 
 function getElementTitle(violation: Violation): string {
@@ -128,6 +135,7 @@ function renderViolationGroups(
           <div className="violation-group-main">
             <div className="violation-group-title-row">
               <span className="violation-rule-name">{firstViolation.ruleName}</span>
+              <Tag color="blue">{getRuleTopicLabel(group.topicCategory)}</Tag>
               {topRuleIds.has(group.ruleId) && (
                 <Tag className="violation-top-tag" color="volcano">
                   <PushpinFilled /> {t('shared.states.priority')}
@@ -462,6 +470,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
   onHumanReviewStatusChange,
   onViolationNoteChange,
 }) => {
+  const [selectedCategory, setSelectedCategory] = React.useState<'all' | RuleTopicCategory>('all');
   const sortedViolations = React.useMemo(() => sortViolations(violations), [violations]);
   const visibleViolations = React.useMemo(
     () => sortedViolations.filter(isVisibleInMainLists),
@@ -479,6 +488,32 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
     () => sortedViolations.filter((violation) => violation.requiresHumanReview),
     [sortedViolations],
   );
+  const availableCategories = React.useMemo(() => {
+    const categories = new Set<RuleTopicCategory>();
+    sortedViolations.forEach((violation) => {
+      categories.add(getRuleTopicCategory(violation.ruleId));
+    });
+    return Array.from(categories).sort((left, right) => getRuleTopicLabel(left).localeCompare(getRuleTopicLabel(right), 'pt-BR'));
+  }, [sortedViolations]);
+
+  const filterByCategory = React.useCallback((inputViolations: Violation[]) => (
+    selectedCategory === 'all'
+      ? inputViolations
+      : inputViolations.filter((violation) => getRuleTopicCategory(violation.ruleId) === selectedCategory)
+  ), [selectedCategory]);
+
+  const filteredRequirementViolations = React.useMemo(
+    () => filterByCategory(requirementViolations),
+    [filterByCategory, requirementViolations],
+  );
+  const filteredRecommendationViolations = React.useMemo(
+    () => filterByCategory(recommendationViolations),
+    [filterByCategory, recommendationViolations],
+  );
+  const filteredReviewViolations = React.useMemo(
+    () => filterByCategory(reviewViolations),
+    [filterByCategory, reviewViolations],
+  );
 
   if (!violations || violations.length === 0) {
     return <Empty description={t('violations.emptyAll')} />;
@@ -486,24 +521,32 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
 
   return (
     <div className="violations-list">
+      <div className="violations-toolbar">
+        <div className="violations-toolbar-copy">
+          <strong>{t('violations.categoryFilterLabel')}</strong>
+          <span>{t('violations.categoryFilterDescription')}</span>
+        </div>
+        <Select
+          className="violations-category-select"
+          value={selectedCategory}
+          onChange={(value) => setSelectedCategory(value)}
+          options={[
+            { value: 'all', label: t('violations.categoryAll') },
+            ...availableCategories.map((category) => ({
+              value: category,
+              label: getRuleTopicLabel(category),
+            })),
+          ]}
+        />
+      </div>
       <Tabs
         className="violations-filter-tabs"
         items={[
           {
-            key: 'all',
-            label: t('violations.tabAll', { count: visibleViolations.length }),
-            children: renderViolationGroups(
-              visibleViolations,
-              onSelectViolation,
-              onHumanReviewStatusChange,
-              onViolationNoteChange,
-            ),
-          },
-          {
             key: 'requirements',
-            label: t('violations.tabRequirements', { count: requirementViolations.length }),
+            label: t('violations.tabRequirements', { count: filteredRequirementViolations.length }),
             children: renderViolationGroups(
-              requirementViolations,
+              filteredRequirementViolations,
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
@@ -511,9 +554,9 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
           },
           {
             key: 'recommendations',
-            label: t('violations.tabRecommendations', { count: recommendationViolations.length }),
+            label: t('violations.tabRecommendations', { count: filteredRecommendationViolations.length }),
             children: renderViolationGroups(
-              recommendationViolations,
+              filteredRecommendationViolations,
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
@@ -521,9 +564,9 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
           },
           {
             key: 'review',
-            label: t('violations.tabReview', { count: reviewViolations.length }),
+            label: t('violations.tabReview', { count: filteredReviewViolations.length }),
             children: renderViolationGroups(
-              reviewViolations,
+              filteredReviewViolations,
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,

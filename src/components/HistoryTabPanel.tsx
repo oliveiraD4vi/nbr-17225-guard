@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Button, Empty, List, Select, Space, Statistic, Tag } from 'antd';
-import { DownloadOutlined, FileSearchOutlined, HistoryOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, FileSearchOutlined, HistoryOutlined } from '@ant-design/icons';
 import { t } from '@/i18n';
 import type { AuditHistoryEntry } from '@/types';
 import {
@@ -27,6 +27,7 @@ interface HistoryTabPanelProps {
   comparisonSummary: AuditComparisonSummary | null;
   comparisonTrend: ComparisonTrend | null;
   onSelectHistory: (historyId: string | null) => void;
+  onDeleteHistoryEntry: (entry: AuditHistoryEntry) => void;
   onComparisonBaselineChange: (historyId: string) => void;
   onComparisonTargetChange: (historyId: string) => void;
   onExportMarkdown: () => void;
@@ -50,6 +51,7 @@ function HistoryListSection({
   auditResultId,
   selectedHistoryId,
   onSelectHistory,
+  onDeleteHistoryEntry,
 }: {
   entries: AuditHistoryEntry[];
   sectionTitle: string;
@@ -59,6 +61,7 @@ function HistoryListSection({
   auditResultId?: string;
   selectedHistoryId: string | null;
   onSelectHistory: (historyId: string | null) => void;
+  onDeleteHistoryEntry: (entry: AuditHistoryEntry) => void;
 }) {
   return (
     <div className="history-section">
@@ -93,6 +96,15 @@ function HistoryListSection({
                       ? (auditResultId ? t('shared.actions.viewCurrent') : t('shared.actions.usingHistory'))
                       : t('shared.actions.view')}
                   </Button>,
+                  <Button
+                    key="delete"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={() => onDeleteHistoryEntry(entry)}
+                  >
+                    {t('shared.actions.delete')}
+                  </Button>,
                 ]}
               >
                 <List.Item.Meta
@@ -111,6 +123,11 @@ function HistoryListSection({
                       )}
                       <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
                         {pendingReviews > 0 ? t('shared.states.reviewPending') : t('shared.states.reviewComplete')}
+                      </Tag>
+                      <Tag color={entry.includeRecommendations ? 'blue' : 'default'}>
+                        {entry.includeRecommendations
+                          ? t('popup.scope.withRecommendations')
+                          : t('popup.scope.requirementsOnly')}
                       </Tag>
                     </div>
                   )}
@@ -153,6 +170,7 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(({
   comparisonSummary,
   comparisonTrend,
   onSelectHistory,
+  onDeleteHistoryEntry,
   onComparisonBaselineChange,
   onComparisonTargetChange,
   onExportMarkdown,
@@ -260,6 +278,7 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(({
             auditResultId={auditResultId}
             selectedHistoryId={selectedHistoryId}
             onSelectHistory={onSelectHistory}
+            onDeleteHistoryEntry={onDeleteHistoryEntry}
           />
           <HistoryListSection
             entries={completedHistoryEntries}
@@ -270,6 +289,7 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(({
             auditResultId={auditResultId}
             selectedHistoryId={selectedHistoryId}
             onSelectHistory={onSelectHistory}
+            onDeleteHistoryEntry={onDeleteHistoryEntry}
           />
         </>
       )}

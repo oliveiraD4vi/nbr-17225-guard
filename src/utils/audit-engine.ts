@@ -5,9 +5,14 @@ import { t } from '@/i18n';
 import type { AuditHistoryEntry, AuditResult, Violation } from '@/types';
 import {
   dedupeAndSortAuditHistory,
+  getDisplayAuditResult,
   getAuditUrlStorageKey,
   inheritViolationStateFromHistory,
 } from '@/utils/audit-history';
+
+interface RunAuditOptions {
+  includeRecommendations?: boolean;
+}
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -38,6 +43,7 @@ function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null
   return {
     ...result,
     id: auditId,
+    includeRecommendations: result.includeRecommendations ?? true,
     violations,
     humanReviewItems: result.humanReviewItems ?? humanReviewItems,
     automatedFindings: result.automatedFindings ?? automatedFindings,
@@ -48,7 +54,7 @@ function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null
 /**
  * Executa a auditoria de acessibilidade na aba ativa
  */
-export async function runAccessibilityAudit(): Promise<AuditResult> {
+export async function runAccessibilityAudit(options: RunAuditOptions = {}): Promise<AuditResult> {
   try {
     const activeTab = await getActiveTab();
 
@@ -60,6 +66,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
 
     const response = await chrome.tabs.sendMessage(activeTab.id, {
       action: 'RUN_AUDIT',
+      includeRecommendations: options.includeRecommendations ?? false,
     });
 
     if (response?.error) {
@@ -73,6 +80,7 @@ export async function runAccessibilityAudit(): Promise<AuditResult> {
     const result: AuditResult = normalizeAuditResult(response.result)!;
     result.url = activeTab.url;
     result.timestamp = Date.now();
+    result.includeRecommendations = options.includeRecommendations ?? false;
 
     return result;
   } catch (error) {
@@ -184,6 +192,30 @@ export async function getAuditResult(tabId?: number): Promise<AuditResult | null
     console.error('[Guardião NBR 17225] Erro ao recuperar resultado:', error);
     return null;
   }
+}
+
+export async function deleteAuditHistoryEntry(url: string, historyId: string): Promise<AuditHistoryEntry[]> {
+  try {
+    const data = await chrome.storage.local.get('auditHistoryByUrl');
+    const auditHistoryByUrl = {
+      ...((data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}),
+    };
+    const urlKey = getAuditUrlStorageKey(url);
+    const currentHistory = auditHistoryByUrl[urlKey] ?? [];
+    auditHistoryByUrl[urlKey] = currentHistory.filter((entry) => entry.id !== historyId);
+
+    await chrome.storage.local.set({ auditHistoryByUrl });
+    return dedupeAndSortAuditHistory(
+      auditHistoryByUrl[urlKey].map((entry) => normalizeAuditResult(entry) as AuditHistoryEntry)
+    );
+  } catch (error) {
+    console.error('[Guardião NBR 17225] Erro ao remover histórico:', error);
+    return [];
+  }
+}
+
+export function getDisplayResultForScope(result: AuditResult | null, includeRecommendations: boolean): AuditResult | null {
+  return result ? getDisplayAuditResult(result, includeRecommendations) : null;
 }
 
 export async function getAuditHistoryForUrl(url?: string): Promise<AuditHistoryEntry[]> {

@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Layout, message, Space, Tabs, Tag } from 'antd';
+import { Alert, Button, Layout, message, Modal, Space, Switch, Tabs, Tag } from 'antd';
 import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
@@ -22,7 +22,9 @@ import {
 } from '@/utils/audit-comparison';
 import { buildExportableAuditResult } from '@/utils/audit-export';
 import {
+  deleteAuditHistoryEntry,
   ensureContentScriptReady,
+  getDisplayResultForScope,
   getActiveTab,
   getAuditHistoryForUrl,
   getAuditResult,
@@ -118,12 +120,14 @@ export const PopupApp: React.FC = () => {
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([]);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
+  const [includeRecommendations, setIncludeRecommendations] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null);
   const [activeTabKey, setActiveTabKey] = useState('summary');
   const [priorityIndex, setPriorityIndex] = useState(0);
   const [showAboutView, setShowAboutView] = useState(false);
+  const [historyEntryPendingDeletion, setHistoryEntryPendingDeletion] = useState<AuditHistoryEntry | null>(null);
   const [comparisonBaselineId, setComparisonBaselineId] = useState<string | undefined>(undefined);
   const [comparisonTargetId, setComparisonTargetId] = useState<string | undefined>(undefined);
   const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon.png'), []);
@@ -139,10 +143,15 @@ export const PopupApp: React.FC = () => {
     try {
       const tab = await getActiveTab();
       setActiveTab(tab);
-      const result = await getAuditResult(tab.id);
+      const [result, preferences] = await Promise.all([
+        getAuditResult(tab.id),
+        chrome.storage.local.get('includeRecommendationsPreference'),
+      ]);
       const history = await getAuditHistoryForUrl(tab.url);
+      const resolvedPreference = result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference);
       setAuditResult(result);
       setAuditHistory(history);
+      setIncludeRecommendations(resolvedPreference);
       setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null);
       setShowAboutView(false);
       setPriorityIndex(0);
@@ -197,6 +206,14 @@ export const PopupApp: React.FC = () => {
   }, [auditHistory, auditResult, selectedHistoryId]);
 
   const isHistoricalView = Boolean(selectedHistoryId);
+  const displayedAuditResult = useMemo(
+    () => getDisplayResultForScope(viewedAuditResult, includeRecommendations),
+    [includeRecommendations, viewedAuditResult],
+  );
+  const scopedRawViolations = useMemo(
+    () => viewedAuditResult?.violations.filter((violation) => includeRecommendations || violation.severity === 'error') ?? [],
+    [includeRecommendations, viewedAuditResult],
+  );
 
   const clearHighlightsOnPage = useCallback(async (showFeedback = false) => {
     try {
@@ -212,7 +229,7 @@ export const PopupApp: React.FC = () => {
     setLoading(true);
     try {
       await clearHighlightsOnPage(false);
-      const result = await runAccessibilityAudit();
+      const result = await runAccessibilityAudit({ includeRecommendations });
       const tab = await getActiveTab();
       setActiveTab(tab);
       const persistedResult = await saveAuditResult(result, tab.id);
@@ -224,14 +241,16 @@ export const PopupApp: React.FC = () => {
       setPriorityIndex(0);
       setComparisonTargetId(history[0]?.id);
       setComparisonBaselineId(history[1]?.id || history[0]?.id);
-      message.success(t('popup.messages.auditCompleted', { count: result.totalViolations }));
+      message.success(t('popup.messages.auditCompleted', {
+        count: getDisplayResultForScope(persistedResult, includeRecommendations)?.totalViolations ?? result.totalViolations,
+      }));
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
       message.error(error instanceof Error ? error.message : t('popup.messages.auditRunError'));
     } finally {
       setLoading(false);
     }
-  }, [clearHighlightsOnPage]);
+  }, [clearHighlightsOnPage, includeRecommendations]);
 
   const handleResetAudit = useCallback(async () => {
     setLoading(true);
@@ -253,13 +272,48 @@ export const PopupApp: React.FC = () => {
     }
   }, [auditHistory, clearHighlightsOnPage]);
 
+  const handleRecommendationsToggle = useCallback(async (checked: boolean) => {
+    setIncludeRecommendations(checked);
+    await chrome.storage.local.set({ includeRecommendationsPreference: checked });
+
+    if (!checked || isHistoricalView || !auditResult || auditResult.includeRecommendations) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await clearHighlightsOnPage(false);
+      const upgradedResult = await runAccessibilityAudit({ includeRecommendations: true });
+      const preservedResult: AuditResult = {
+        ...upgradedResult,
+        id: auditResult.id,
+        timestamp: auditResult.timestamp,
+        includeRecommendations: true,
+      };
+
+      syncAuditResultUpdate(preservedResult);
+      await updateStoredAuditResult(preservedResult, activeTab?.id);
+
+      const refreshedHistory = await getAuditHistoryForUrl(activeTab?.url || preservedResult.url);
+      setAuditHistory(refreshedHistory);
+      message.success(t('popup.messages.recommendationsIncluded'));
+    } catch (error) {
+      console.error('Erro ao incluir recomendações:', error);
+      setIncludeRecommendations(false);
+      await chrome.storage.local.set({ includeRecommendationsPreference: false });
+      message.error(t('popup.messages.recommendationsLoadError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab?.id, activeTab?.url, auditResult, clearHighlightsOnPage, isHistoricalView, syncAuditResultUpdate]);
+
   const handleExportJSON = useCallback(() => {
-    if (!viewedAuditResult) {
+    if (!displayedAuditResult) {
       message.warning(t('popup.messages.noAuditToExport'));
       return;
     }
 
-    const dataStr = JSON.stringify(buildExportableAuditResult(viewedAuditResult), null, 2);
+    const dataStr = JSON.stringify(buildExportableAuditResult(displayedAuditResult), null, 2);
     const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -268,10 +322,10 @@ export const PopupApp: React.FC = () => {
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.exportJsonSuccess'));
-  }, [viewedAuditResult]);
+  }, [displayedAuditResult]);
 
   const handleExportCSV = useCallback(() => {
-    if (!viewedAuditResult || viewedAuditResult.violations.length === 0) {
+    if (!displayedAuditResult || displayedAuditResult.violations.length === 0) {
       message.warning(t('popup.messages.noViolationsToExport'));
       return;
     }
@@ -284,7 +338,7 @@ export const PopupApp: React.FC = () => {
       t('shared.exports.csvHeaders.message'),
       t('shared.exports.csvHeaders.suggestion'),
     ];
-    const rows = viewedAuditResult.violations.map((violation) => [
+    const rows = displayedAuditResult.violations.map((violation) => [
       violation.id,
       violation.ruleName,
       violation.nbrReference,
@@ -305,7 +359,7 @@ export const PopupApp: React.FC = () => {
     link.click();
     URL.revokeObjectURL(url);
     message.success(t('popup.messages.exportCsvSuccess'));
-  }, [viewedAuditResult]);
+  }, [displayedAuditResult]);
 
   const handleFilterChange = useCallback(async (filter: VisionSimulationFilter) => {
     await chrome.storage.local.set({ visionFilter: filter });
@@ -314,19 +368,19 @@ export const PopupApp: React.FC = () => {
   }, [activeTab?.id]);
 
   const handleHighlightAll = useCallback(async () => {
-    if (!viewedAuditResult || isHistoricalView) return;
+    if (!displayedAuditResult || isHistoricalView) return;
 
     try {
       await sendMessageToActiveTab({
         action: 'HIGHLIGHT_ALL_VIOLATIONS',
-        violations: viewedAuditResult.violations,
+        violations: displayedAuditResult.violations,
       });
       message.success(t('popup.messages.highlightsApplied'));
     } catch (error) {
       console.error('Erro ao destacar violações:', error);
       message.error(t('popup.messages.highlightError'));
     }
-  }, [isHistoricalView, sendMessageToActiveTab, viewedAuditResult]);
+  }, [displayedAuditResult, isHistoricalView, sendMessageToActiveTab]);
 
   const handleHighlightViolation = useCallback(async (violation: Violation) => {
     try {
@@ -462,8 +516,8 @@ export const PopupApp: React.FC = () => {
   }, [comparisonSummary]);
 
   const priorityViolations = useMemo(
-    () => (viewedAuditResult && !isHistoricalView ? getPriorityViolations(viewedAuditResult.violations) : []),
-    [isHistoricalView, viewedAuditResult],
+    () => (displayedAuditResult && !isHistoricalView ? getPriorityViolations(displayedAuditResult.violations) : []),
+    [displayedAuditResult, isHistoricalView],
   );
 
   const handleHumanReviewStatusChange = useCallback(async (violation: Violation, status: HumanReviewStatus) => {
@@ -520,7 +574,7 @@ export const PopupApp: React.FC = () => {
   }, [handleHighlightViolation, isHistoricalView, priorityIndex, priorityViolations]);
 
   const footerActions = useMemo(() => {
-    if (!viewedAuditResult) return [];
+    if (!displayedAuditResult) return [];
 
     return [
       { key: 'rerun', label: t('shared.actions.rerun'), icon: <ReloadOutlined />, onClick: handleRunAudit, loading },
@@ -532,7 +586,7 @@ export const PopupApp: React.FC = () => {
       { key: 'clear', label: t('shared.actions.clearAudit'), icon: <DeleteOutlined />, onClick: handleResetAudit, danger: true },
     ];
   }, [
-    viewedAuditResult,
+    displayedAuditResult,
     handleRunAudit,
     loading,
     handleHighlightAll,
@@ -545,20 +599,20 @@ export const PopupApp: React.FC = () => {
   ]);
 
   const tabItems = useMemo(() => {
-    if (!viewedAuditResult) return [];
+    if (!displayedAuditResult) return [];
 
     return [
       {
         key: 'summary',
         label: t('popup.tabs.summary'),
-        children: <ViolationsSummary result={viewedAuditResult} />,
+        children: <ViolationsSummary result={displayedAuditResult} />,
       },
       {
         key: 'violations',
-        label: t('popup.tabs.violations', { count: viewedAuditResult.totalViolations }),
+        label: t('popup.tabs.violations', { count: displayedAuditResult.totalViolations }),
         children: (
           <ViolationsList
-            violations={viewedAuditResult.violations}
+            violations={scopedRawViolations}
             onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
             onHumanReviewStatusChange={handleHumanReviewStatusChange}
             onViolationNoteChange={handleViolationNoteChange}
@@ -583,6 +637,7 @@ export const PopupApp: React.FC = () => {
               setSelectedHistoryId(historyId);
               setPriorityIndex(0);
             }}
+            onDeleteHistoryEntry={setHistoryEntryPendingDeletion}
             onComparisonBaselineChange={setComparisonBaselineId}
             onComparisonTargetChange={setComparisonTargetId}
             onExportMarkdown={handleExportComparisonReport}
@@ -598,7 +653,8 @@ export const PopupApp: React.FC = () => {
       },
     ];
   }, [
-    viewedAuditResult,
+    displayedAuditResult,
+    scopedRawViolations,
     isHistoricalView,
     handleHighlightViolation,
     handleHumanReviewStatusChange,
@@ -613,6 +669,7 @@ export const PopupApp: React.FC = () => {
     comparisonTargetId,
     comparisonSummary,
     comparisonTrend,
+    includeRecommendations,
     handleExportComparisonReport,
     handleExportComparisonJson,
     handleExportComparisonCsv,
@@ -651,7 +708,7 @@ export const PopupApp: React.FC = () => {
       <Content className="popup-content">
         {initialLoading || loading ? (
           <PopupPanelSkeleton />
-        ) : showAboutView || !viewedAuditResult ? (
+        ) : showAboutView || !displayedAuditResult ? (
           <Suspense fallback={<PopupPanelSkeleton />}>
             <AboutPanel
               hasAudit={Boolean(viewedAuditResult)}
@@ -672,8 +729,24 @@ export const PopupApp: React.FC = () => {
                   {isHistoricalView ? t('shared.labels.historyOf') : t('shared.labels.auditedAt')}
                 </span>
                 <strong>
-                  <ClockCircleOutlined /> {new Date(viewedAuditResult.timestamp).toLocaleString('pt-BR')}
+                  <ClockCircleOutlined /> {new Date(displayedAuditResult.timestamp).toLocaleString('pt-BR')}
                 </strong>
+              </div>
+              <div className="tab-status-item tab-status-item-toggle">
+                <span className="tab-status-label">{t('popup.scope.toggleLabel')}</span>
+                <div className="recommendations-toggle-row">
+                  <Switch
+                    checked={includeRecommendations}
+                    loading={loading}
+                    onChange={(checked) => { void handleRecommendationsToggle(checked); }}
+                  />
+                  <div className="recommendations-toggle-copy">
+                    <strong>
+                      {includeRecommendations ? t('popup.scope.withRecommendations') : t('popup.scope.requirementsOnly')}
+                    </strong>
+                    <span>{t('popup.scope.description')}</span>
+                  </div>
+                </div>
               </div>
               <Tag color={isHistoricalView ? 'gold' : 'blue'}>
                 {isHistoricalView ? t('shared.labels.historyByUrl') : t('shared.labels.currentAudit')}
@@ -696,6 +769,35 @@ export const PopupApp: React.FC = () => {
           </>
         )}
       </Content>
+
+      <Modal
+        open={Boolean(historyEntryPendingDeletion)}
+        title={t('popup.history.deleteModalTitle')}
+        okText={t('popup.history.deleteConfirm')}
+        cancelText={t('popup.history.deleteCancel')}
+        okButtonProps={{ danger: true }}
+        onCancel={() => setHistoryEntryPendingDeletion(null)}
+        onOk={async () => {
+          if (!historyEntryPendingDeletion) return;
+          const updatedHistory = await deleteAuditHistoryEntry(historyEntryPendingDeletion.url, historyEntryPendingDeletion.id);
+          setAuditHistory(updatedHistory);
+          if (selectedHistoryId === historyEntryPendingDeletion.id) {
+            setSelectedHistoryId(null);
+          }
+          setComparisonTargetId(updatedHistory[0]?.id);
+          setComparisonBaselineId(updatedHistory[1]?.id || updatedHistory[0]?.id);
+          setHistoryEntryPendingDeletion(null);
+          message.success(t('popup.messages.historyDeleted'));
+        }}
+        getContainer={false}
+      >
+        <p>{t('popup.history.deleteModalDescription')}</p>
+        {historyEntryPendingDeletion && (
+          <p className="history-delete-target">
+            <strong>{historyEntryPendingDeletion.pageTitle || historyEntryPendingDeletion.url}</strong>
+          </p>
+        )}
+      </Modal>
 
       {!showAboutView && (
         <Footer className="popup-footer">

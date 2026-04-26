@@ -34,6 +34,45 @@ export function getVisibleAuditViolations(result: AuditResult): Violation[] {
   ));
 }
 
+export function getDisplayAuditResult(
+  result: AuditResult,
+  includeRecommendations: boolean
+): AuditResult {
+  const visibleViolations = getVisibleAuditViolations(result).filter((violation) => (
+    includeRecommendations || violation.severity === 'error'
+  ));
+
+  const violationsByRule = visibleViolations.reduce<Record<string, Violation[]>>((acc, violation) => {
+    acc[violation.ruleId] ??= [];
+    acc[violation.ruleId].push(violation);
+    return acc;
+  }, {});
+
+  const violationsBySeverity = visibleViolations.reduce<Record<'error' | 'warning', Violation[]>>(
+    (acc, violation) => {
+      acc[violation.severity].push(violation);
+      return acc;
+    },
+    { error: [], warning: [] }
+  );
+
+  const pendingHumanReviewItems = visibleViolations.filter((violation) => (
+    violation.requiresHumanReview && violation.humanReviewStatus === 'pending'
+  )).length;
+
+  return {
+    ...result,
+    totalViolations: visibleViolations.length,
+    errors: violationsBySeverity.error.length,
+    warnings: violationsBySeverity.warning.length,
+    humanReviewItems: pendingHumanReviewItems,
+    automatedFindings: visibleViolations.length - pendingHumanReviewItems,
+    violations: visibleViolations,
+    violationsByRule,
+    violationsBySeverity,
+  };
+}
+
 export function inheritViolationStateFromHistory(
   result: AuditResult,
   historyEntries: AuditHistoryEntry[]
