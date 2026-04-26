@@ -278,7 +278,15 @@
     "noteUpdatedAt": "Atualizada em {{date}}",
     "tabRequirements": "Requisitos ({{count}})",
     "tabRecommendations": "Recomendações ({{count}})",
-    "tabReview": "Verificação humana ({{count}})"
+    "tabReview": "Verificação humana ({{count}})",
+    "reviewSections": {
+      "pending": "Pendentes de decisão",
+      "pendingDescription": "Itens que ainda precisam de confirmação manual no contexto real da página.",
+      "confirmed": "Confirmados como problema",
+      "confirmedDescription": "Itens que já foram revisados e continuam exigindo correção.",
+      "dismissed": "Descartados na revisão humana",
+      "dismissedDescription": "Itens que não se confirmaram como problema, mas continuam disponíveis para reavaliação."
+    }
   },
   "ruleTopics": {
     "keyboard": "Teclado",

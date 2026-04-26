@@ -214,6 +214,17 @@ export const PopupApp: React.FC = () => {
     () => viewedAuditResult?.violations.filter((violation) => includeRecommendations || violation.severity === 'error') ?? [],
     [includeRecommendations, viewedAuditResult],
   );
+  const reviewSourceResult = useMemo(
+    () => (
+      viewedAuditResult
+        ? {
+            ...viewedAuditResult,
+            violations: scopedRawViolations,
+          }
+        : null
+    ),
+    [scopedRawViolations, viewedAuditResult],
+  );
 
   const clearHighlightsOnPage = useCallback(async (showFeedback = false) => {
     try {
@@ -605,7 +616,7 @@ export const PopupApp: React.FC = () => {
       {
         key: 'summary',
         label: t('popup.tabs.summary'),
-        children: <ViolationsSummary result={displayedAuditResult} />,
+        children: <ViolationsSummary result={displayedAuditResult} reviewSourceResult={reviewSourceResult} />,
       },
       {
         key: 'violations',
@@ -654,6 +665,7 @@ export const PopupApp: React.FC = () => {
     ];
   }, [
     displayedAuditResult,
+    reviewSourceResult,
     scopedRawViolations,
     isHistoricalView,
     handleHighlightViolation,

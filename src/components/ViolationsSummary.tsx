@@ -20,11 +20,13 @@ import '../styles/violations-summary.css';
 
 interface ViolationsSummaryProps {
   result: AuditResult | null;
+  reviewSourceResult?: AuditResult | null;
   loading?: boolean;
 }
 
 export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(({
   result,
+  reviewSourceResult,
   loading = false,
 }) => {
   if (loading) {
@@ -42,9 +44,10 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(({
 
   const hasViolations = result.totalViolations > 0;
   const requirementScore = getRequirementScoreData(result);
-  const confirmedReviews = getConfirmedHumanReviewCount(result);
-  const dismissedReviews = getDismissedHumanReviewCount(result);
-  const pendingReviews = getPendingHumanReviewCount(result);
+  const reviewBase = reviewSourceResult ?? result;
+  const confirmedReviews = getConfirmedHumanReviewCount(reviewBase);
+  const dismissedReviews = getDismissedHumanReviewCount(reviewBase);
+  const pendingReviews = getPendingHumanReviewCount(reviewBase);
   const scoreTone = requirementScore.score >= 90 ? 'good' : requirementScore.score >= 70 ? 'medium' : 'critical';
 
   return (

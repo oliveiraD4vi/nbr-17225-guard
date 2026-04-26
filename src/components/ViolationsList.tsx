@@ -204,6 +204,74 @@ function renderViolationGroups(
   return <Collapse items={items} />;
 }
 
+function renderReviewSections(
+  violations: Violation[],
+  onSelectViolation?: (violation: Violation) => void,
+  onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
+  onViolationNoteChange?: (violation: Violation, note: string) => void,
+): React.ReactNode {
+  if (violations.length === 0) {
+    return <Empty description={t('violations.emptyCategory')} />;
+  }
+
+  const pendingViolations = violations.filter((violation) => violation.humanReviewStatus === 'pending');
+  const confirmedViolations = violations.filter((violation) => violation.humanReviewStatus === 'confirmed');
+  const dismissedViolations = violations.filter((violation) => violation.humanReviewStatus === 'dismissed');
+
+  const sections = [
+    {
+      key: 'pending',
+      title: t('violations.reviewSections.pending'),
+      description: t('violations.reviewSections.pendingDescription'),
+      count: pendingViolations.length,
+      colorClassName: 'is-pending',
+      violations: pendingViolations,
+    },
+    {
+      key: 'confirmed',
+      title: t('violations.reviewSections.confirmed'),
+      description: t('violations.reviewSections.confirmedDescription'),
+      count: confirmedViolations.length,
+      colorClassName: 'is-confirmed',
+      violations: confirmedViolations,
+    },
+    {
+      key: 'dismissed',
+      title: t('violations.reviewSections.dismissed'),
+      description: t('violations.reviewSections.dismissedDescription'),
+      count: dismissedViolations.length,
+      colorClassName: 'is-dismissed',
+      violations: dismissedViolations,
+    },
+  ];
+
+  return (
+    <div className="review-sections">
+      {sections.map((section) => (
+        <section key={section.key} className={`review-section ${section.colorClassName}`}>
+          <div className="review-section-header">
+            <div>
+              <strong>{section.title}</strong>
+              <p>{section.description}</p>
+            </div>
+            <Tag>{t('shared.counts.items', { count: section.count })}</Tag>
+          </div>
+          {section.count > 0 ? (
+            renderViolationGroups(
+              section.violations,
+              onSelectViolation,
+              onHumanReviewStatusChange,
+              onViolationNoteChange,
+            )
+          ) : (
+            <Empty description={t('violations.emptyCategory')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          )}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 interface ViolationCardProps {
   violation: Violation;
   index: number;
@@ -276,24 +344,34 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
             >
               {getReviewLabel(violation)}
             </Tag>
-            <div className="violation-human-review-controls">
+            <div
+              className="violation-human-review-controls"
+              onClick={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
               <Checkbox
                 checked={violation.humanReviewStatus === 'confirmed'}
                 onClick={(event) => event.stopPropagation()}
-                onChange={(event) => onHumanReviewStatusChange?.(
-                  violation,
-                  event.target.checked ? 'confirmed' : 'pending',
-                )}
+                onChange={(event) => {
+                  event.stopPropagation();
+                  onHumanReviewStatusChange?.(
+                    violation,
+                    event.target.checked ? 'confirmed' : 'pending',
+                  );
+                }}
               >
                 {t('violations.checkboxProblem')}
               </Checkbox>
               <Checkbox
                 checked={violation.humanReviewStatus === 'dismissed'}
                 onClick={(event) => event.stopPropagation()}
-                onChange={(event) => onHumanReviewStatusChange?.(
-                  violation,
-                  event.target.checked ? 'dismissed' : 'pending',
-                )}
+                onChange={(event) => {
+                  event.stopPropagation();
+                  onHumanReviewStatusChange?.(
+                    violation,
+                    event.target.checked ? 'dismissed' : 'pending',
+                  );
+                }}
               >
                 {t('violations.checkboxNotProblem')}
               </Checkbox>
@@ -565,7 +643,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
           {
             key: 'review',
             label: t('violations.tabReview', { count: filteredReviewViolations.length }),
-            children: renderViolationGroups(
+            children: renderReviewSections(
               filteredReviewViolations,
               onSelectViolation,
               onHumanReviewStatusChange,
