@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Card, Checkbox, Collapse, Empty, Input, Select, Space, Tabs, Tag, Tooltip } from 'antd';
+import { Button, Card, Checkbox, Collapse, ColorPicker, Empty, Input, Modal, Select, Space, Tabs, Tag, Tooltip } from 'antd';
 import {
   BoldOutlined,
+  BgColorsOutlined,
   ClearOutlined,
   CopyOutlined,
   FileTextOutlined,
@@ -16,6 +17,7 @@ import {
 import { t } from '@/i18n';
 import { getRuleTopicCategory, type RuleTopicCategory } from '@/rules';
 import type { HumanReviewStatus, Violation } from '@/types';
+import { getContrastRatio } from '@/utils';
 import '../styles/violations-list.css';
 
 interface ViolationsListProps {
@@ -101,6 +103,10 @@ function buildGroups(violations: Violation[]): ViolationGroup[] {
 
 function getRuleTopicLabel(topicCategory: RuleTopicCategory): string {
   return t(`ruleTopics.${topicCategory}`);
+}
+
+function getContrastPreviewText(context: NonNullable<Violation['contrastDetails']>['context']): string {
+  return t(`contrast.preview.${context}`);
 }
 
 function getElementTitle(violation: Violation): string {
@@ -290,11 +296,19 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
   pinned = false,
 }) => {
   const [isNotesOpen, setIsNotesOpen] = React.useState(false);
+  const [isContrastModalOpen, setIsContrastModalOpen] = React.useState(false);
   const [noteDraft, setNoteDraft] = React.useState(violation.userNote || '');
+  const [foregroundHex, setForegroundHex] = React.useState(violation.contrastDetails?.foregroundHex || '#000000');
+  const [backgroundHex, setBackgroundHex] = React.useState(violation.contrastDetails?.backgroundHex || '#ffffff');
 
   React.useEffect(() => {
     setNoteDraft(violation.userNote || '');
   }, [violation.id, violation.userNote]);
+
+  React.useEffect(() => {
+    setForegroundHex(violation.contrastDetails?.foregroundHex || '#000000');
+    setBackgroundHex(violation.contrastDetails?.backgroundHex || '#ffffff');
+  }, [violation.contrastDetails, violation.id]);
 
   const insertAtEnd = React.useCallback((value: string) => {
     setNoteDraft((current) => `${current}${current ? '\n' : ''}${value}`);
@@ -309,10 +323,21 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
     onSelectViolation?.(violation);
   }, [onSelectViolation, violation]);
 
+  const contrastRatio = React.useMemo(() => {
+    if (!violation.contrastDetails) return null;
+    return getContrastRatio(foregroundHex, backgroundHex);
+  }, [backgroundHex, foregroundHex, violation.contrastDetails]);
+
+  const contrastPasses = React.useMemo(() => (
+    violation.contrastDetails && contrastRatio !== null
+      ? contrastRatio >= violation.contrastDetails.minimumRatio
+      : false
+  ), [contrastRatio, violation.contrastDetails]);
+
   return (
     <Card
       size="small"
-      className={`violation-item-card${pinned ? ' is-pinned' : ''}`}
+      className={`violation-item-card${pinned ? ' is-pinned' : ''} review-state-${violation.humanReviewStatus}`}
       onClick={handleCardClick}
     >
       <div className="violation-item-header">
@@ -419,7 +444,41 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
           </pre>
         </div>
 
+        {violation.contrastDetails && (
+          <div className="violation-contrast-helper">
+            <div className="violation-contrast-helper-copy">
+              <strong>{t('violations.contrastBoardTitle')}</strong>
+              <p>{t('violations.contrastBoardDescription')}</p>
+              <span>
+                {t('violations.contrastRatio')}: {violation.contrastDetails.measuredRatio.toFixed(2)}:1 · {t('violations.contrastMinimum')}: {violation.contrastDetails.minimumRatio.toFixed(1)}:1
+              </span>
+            </div>
+            <Button
+              icon={<BgColorsOutlined />}
+              onClick={(event) => {
+                event.stopPropagation();
+                setIsContrastModalOpen(true);
+              }}
+            >
+              {t('violations.contrastBoard')}
+            </Button>
+          </div>
+        )}
+
         <Space className="violation-actions">
+          {violation.contrastDetails && (
+            <Tooltip title={t('violations.contrastBoard')}>
+              <Button
+                type="text"
+                size="small"
+                icon={<BgColorsOutlined />}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsContrastModalOpen(true);
+                }}
+              />
+            </Tooltip>
+          )}
           <Tooltip title={t('violations.notesTooltip')}>
             <Button
               type={violation.userNote ? 'default' : 'text'}
@@ -536,6 +595,79 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
               </span>
             )}
           </div>
+        )}
+
+        {violation.contrastDetails && (
+          <Modal
+            open={isContrastModalOpen}
+            title={t('violations.contrastBoardTitle')}
+            footer={null}
+            onCancel={() => setIsContrastModalOpen(false)}
+            width={400}
+            className="contrast-board-modal"
+            destroyOnHidden
+            centered
+          >
+            <div className="contrast-board">
+              <p className="contrast-board-description">{t('violations.contrastBoardDescription')}</p>
+
+              <div className="contrast-board-grid">
+                <label className="contrast-board-field">
+                  <span>{violation.contrastDetails.foregroundLabel || t('contrast.foreground.text')}</span>
+                  <div className="contrast-board-picker-row">
+                    <ColorPicker value={foregroundHex} onChange={(value) => setForegroundHex(value.toHexString())} />
+                    <code>{foregroundHex}</code>
+                  </div>
+                </label>
+
+                <label className="contrast-board-field">
+                  <span>{violation.contrastDetails.backgroundLabel || t('contrast.background.surface')}</span>
+                  <div className="contrast-board-picker-row">
+                    <ColorPicker value={backgroundHex} onChange={(value) => setBackgroundHex(value.toHexString())} />
+                    <code>{backgroundHex}</code>
+                  </div>
+                </label>
+              </div>
+
+              <div className="contrast-board-metrics">
+                <div className="contrast-board-metric">
+                  <span>{t('violations.contrastRatio')}</span>
+                  <strong>{contrastRatio?.toFixed(2)}:1</strong>
+                </div>
+                <div className="contrast-board-metric">
+                  <span>{t('violations.contrastMinimum')}</span>
+                  <strong>{violation.contrastDetails.minimumRatio.toFixed(1)}:1</strong>
+                </div>
+                <Tag color={contrastPasses ? 'green' : 'red'}>
+                  {contrastPasses ? t('violations.contrastCurrentStatusPass') : t('violations.contrastCurrentStatusFail')}
+                </Tag>
+              </div>
+
+              <div className="contrast-board-preview-wrap">
+                <span className="contrast-board-preview-label">{t('violations.contrastPreview')}</span>
+                <div
+                  className={`contrast-board-preview is-${violation.contrastDetails.context}`}
+                  style={{ backgroundColor: backgroundHex, color: foregroundHex, borderColor: foregroundHex }}
+                >
+                  <span>{getContrastPreviewText(violation.contrastDetails.context)}</span>
+                </div>
+              </div>
+
+              {violation.contrastDetails.comparisonHex && (
+                <div className="contrast-board-comparison">
+                  <span>{t('violations.contrastComparison')}</span>
+                  <div className="contrast-board-comparison-row">
+                    <div
+                      className="contrast-board-comparison-swatch"
+                      style={{ backgroundColor: violation.contrastDetails.comparisonHex }}
+                    />
+                    <strong>{violation.contrastDetails.comparisonLabel || t('contrast.background.adjacent')}</strong>
+                    <code>{violation.contrastDetails.comparisonHex}</code>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Modal>
         )}
       </div>
     </Card>

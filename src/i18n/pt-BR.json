@@ -269,6 +269,15 @@
     "goToElement": "Ir para elemento",
     "notesTooltip": "Anotações",
     "notesLength": "{{count}}/600",
+    "contrastBoard": "Abrir board de contraste",
+    "contrastBoardTitle": "Board auxiliar de contraste",
+    "contrastBoardDescription": "Ajuste as cores em tempo real para validar a razão de contraste e orientar a correção.",
+    "contrastRatio": "Razão de contraste",
+    "contrastMinimum": "Mínimo exigido",
+    "contrastCurrentStatusPass": "Atende ao mínimo",
+    "contrastCurrentStatusFail": "Abaixo do mínimo",
+    "contrastPreview": "Pré-visualização",
+    "contrastComparison": "Comparação auxiliar",
     "insertBold": "Inserir destaque em negrito",
     "insertItalic": "Inserir destaque em itálico",
     "insertList": "Inserir lista",
@@ -286,6 +295,25 @@
       "confirmedDescription": "Itens que já foram revisados e continuam exigindo correção.",
       "dismissed": "Descartados na revisão humana",
       "dismissedDescription": "Itens que não se confirmaram como problema, mas continuam disponíveis para reavaliação."
+    }
+  },
+  "contrast": {
+    "foreground": {
+      "text": "Texto",
+      "border": "Borda ou indicador",
+      "graphic": "Elemento gráfico",
+      "focus": "Indicador de foco"
+    },
+    "background": {
+      "surface": "Fundo",
+      "component": "Fundo do componente",
+      "adjacent": "Área adjacente"
+    },
+    "preview": {
+      "text": "Texto de exemplo",
+      "component": "Botão de exemplo",
+      "graphic": "Gráfico de exemplo",
+      "focus": "Foco visível"
     }
   },
   "ruleTopics": {

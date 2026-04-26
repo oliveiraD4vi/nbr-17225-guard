@@ -318,6 +318,7 @@ export function createViolation(
     severity?: SeverityLevel;
     wcagLevel?: WCAGLevel;
     customIdPrefix?: string;
+    contrastDetails?: Violation['contrastDetails'];
   }
 ): Violation {
   const element = options.element;
@@ -349,6 +350,7 @@ export function createViolation(
     elementTagName: element ? element.tagName.toLowerCase() : undefined,
     elementAccessibleName: element ? getAccessibleName(element) || undefined : undefined,
     elementVisibleText: element ? getVisibleText(element) || undefined : undefined,
+    contrastDetails: options.contrastDetails,
     customId: generateCustomId(options.customIdPrefix || rule.id, stableSeed),
   };
 }

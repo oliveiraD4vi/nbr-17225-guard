@@ -439,6 +439,15 @@ export const graphicContrastRule: Rule = {
           message: t('rules.documentalCompletenessB.graphicContrast.message', { ratio: ratio.toFixed(2) }),
           suggestion: t('rules.documentalCompletenessB.graphicContrast.suggestion'),
           remediationAdvice: t('rules.documentalCompletenessB.graphicContrast.remediation'),
+          contrastDetails: {
+            context: 'graphic',
+            foregroundHex: foreground,
+            backgroundHex: background,
+            measuredRatio: ratio,
+            minimumRatio: 3,
+            foregroundLabel: t('contrast.foreground.graphic'),
+            backgroundLabel: t('contrast.background.surface'),
+          },
           customIdPrefix: 'graphic-contrast',
         }));
       }
@@ -478,6 +487,15 @@ export const focusIndicatorContrastRule: Rule = {
         message: t('rules.documentalCompletenessB.focusIndicatorContrast.message', { ratio: ratio.toFixed(2) }),
         suggestion: t('rules.documentalCompletenessB.focusIndicatorContrast.suggestion'),
         remediationAdvice: t('rules.documentalCompletenessB.focusIndicatorContrast.remediation'),
+        contrastDetails: {
+          context: 'focus',
+          foregroundHex: outlineColor,
+          backgroundHex: background,
+          measuredRatio: ratio,
+          minimumRatio: 3,
+          foregroundLabel: t('contrast.foreground.focus'),
+          backgroundLabel: t('contrast.background.surface'),
+        },
         customIdPrefix: 'focus-contrast',
       }));
     }

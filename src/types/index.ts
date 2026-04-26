@@ -12,6 +12,7 @@ export const AUTOMATION_CATEGORIES = {
 
 export type AutomationCategory = (typeof AUTOMATION_CATEGORIES)[keyof typeof AUTOMATION_CATEGORIES];
 export type HumanReviewStatus = 'not_applicable' | 'pending' | 'confirmed' | 'dismissed';
+export type ContrastContext = 'text' | 'component' | 'graphic' | 'focus';
 
 export function isFullyAutomatedCategory(category: AutomationCategory): boolean {
   return category === AUTOMATION_CATEGORIES.fully;
@@ -48,6 +49,17 @@ export interface Violation {
   elementTagName?: string;
   elementAccessibleName?: string;
   elementVisibleText?: string;
+  contrastDetails?: {
+    context: ContrastContext;
+    foregroundHex: string;
+    backgroundHex: string;
+    measuredRatio: number;
+    minimumRatio: number;
+    comparisonHex?: string;
+    comparisonLabel?: string;
+    foregroundLabel?: string;
+    backgroundLabel?: string;
+  };
   userNote?: string;
   noteUpdatedAt?: number;
   inheritedFromHistory?: boolean;

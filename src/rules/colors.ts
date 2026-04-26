@@ -53,6 +53,15 @@ export const textContrastRule: Rule = {
           message: t('rules.colors.textContrast.message', { ratio: ratio.toFixed(2), minRatio }),
           suggestion: t('rules.colors.textContrast.suggestion'),
           remediationAdvice: t('rules.colors.textContrast.remediation', { ratio: ratio.toFixed(2), minRatio }),
+          contrastDetails: {
+            context: 'text',
+            foregroundHex: textHex,
+            backgroundHex: bgHex,
+            measuredRatio: ratio,
+            minimumRatio: minRatio,
+            foregroundLabel: t('contrast.foreground.text'),
+            backgroundLabel: t('contrast.background.surface'),
+          },
           customIdPrefix: 'contrast',
         }));
       }
@@ -100,6 +109,17 @@ export const componentContrastRule: Rule = {
           message: t('rules.colors.componentContrast.message', { tagName: el.tagName, ratio: ratio.toFixed(2) }),
           suggestion: t('rules.colors.componentContrast.suggestion'),
           remediationAdvice: t('rules.colors.componentContrast.remediation', { ratio: ratio.toFixed(2) }),
+          contrastDetails: {
+            context: 'component',
+            foregroundHex: borderHex,
+            backgroundHex: bgHex,
+            comparisonHex: surroundingHex,
+            comparisonLabel: t('contrast.background.adjacent'),
+            measuredRatio: ratio,
+            minimumRatio: 3,
+            foregroundLabel: t('contrast.foreground.border'),
+            backgroundLabel: t('contrast.background.component'),
+          },
           customIdPrefix: 'component-contrast',
         }));
       }

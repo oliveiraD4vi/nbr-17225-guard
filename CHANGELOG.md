@@ -16,7 +16,11 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - herança de revisão humana e anotações entre auditorias equivalentes;
 - destaques visuais com foco em itens prioritários;
 - verificador de cobertura das 94 regras do escopo v1;
-- matriz normativa em `RULES_NORMATIVE_MATRIX.md`.
+- matriz normativa em `RULES_NORMATIVE_MATRIX.md`;
+- escopo de auditoria com alternância entre requisitos e recomendações;
+- exclusão de históricos com confirmação no popup;
+- filtro visual por categoria natural das regras;
+- board auxiliar de contraste com simulação em tempo real.
 
 ### Changed
 - extração restante de textos visíveis para o catálogo centralizado, incluindo mensagens dinâmicas das regras documentais, nomes de exportação e metadados de highlight;
@@ -24,7 +28,8 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - motor de histórico unificado com identidade consistente para URL e violações;
 - fluxo de bootstrap do content script endurecido para evitar falhas de carregamento por chunk;
 - popup dividido em chunks menores, com melhor comportamento de carregamento;
-- UX do relatório e do popup refinada para revisão humana, histórico e comparação.
+- UX do relatório e do popup refinada para revisão humana, histórico e comparação;
+- README reestruturado para apresentar capacidades, fluxo de uso e papel do simulador de visão.
 
 ### Fixed
 - variações de auditoria causadas por pontos de persistência e deduplicação inconsistentes;

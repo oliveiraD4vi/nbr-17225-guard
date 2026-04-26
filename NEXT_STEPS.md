@@ -68,7 +68,21 @@ Sugestões:
 Benefício:
 - melhora a utilidade prática do histórico para equipes de produto e acessibilidade.
 
-### 5. Refinar performance de renderização do popup
+### 5. Expandir o apoio visual para regras sensíveis
+
+Objetivo:
+- aumentar a capacidade de análise assistida sem inflar o número de heurísticas frágeis no motor.
+
+Sugestões:
+- ampliar a board de contraste para outros cenários visuais quando houver metadados estruturados suficientes;
+- avaliar inclusão de explicações curtas por contexto visual, como texto, componente, gráfico e foco;
+- permitir reaproveitar parâmetros ajustados pelo usuário como referência local de correção.
+
+Benefício:
+- aproxima a experiência de ferramentas maduras;
+- ajuda o usuário a sair do diagnóstico e ir para a correção com menos fricção.
+
+### 6. Refinar performance de renderização do popup
 
 Objetivo:
 - reduzir recomputação e rerender em listas, histórico e exportações.
@@ -84,7 +98,7 @@ Benefício:
 
 ## Prioridade baixa
 
-### 6. Ampliar documentação pública do projeto
+### 7. Ampliar documentação pública do projeto
 
 Objetivo:
 - facilitar contribuição externa sem exigir leitura completa do código.
@@ -99,7 +113,7 @@ Sugestões:
 - exportação;
 - incluir exemplos de contribuição para novas regras dentro do escopo v1.
 
-### 7. Revisar logs e telemetria de depuração local
+### 8. Revisar logs e telemetria de depuração local
 
 Objetivo:
 - facilitar diagnóstico quando algum fluxo falhar em ambiente real.
@@ -112,7 +126,7 @@ Sugestões:
 - falha de mensagem;
 - falha de regra.
 
-### 8. Formalizar a política de catálogo de textos
+### 9. Formalizar a política de catálogo de textos
 
 Objetivo:
 - evitar regressões em que texto de usuário volte a aparecer fora do catálogo.
