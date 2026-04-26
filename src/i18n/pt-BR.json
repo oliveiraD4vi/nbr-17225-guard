@@ -139,7 +139,13 @@
       "priorityFocus": "Foco no item prioritário: {{name}}",
       "comparisonSelectInfo": "Selecione duas auditorias diferentes para comparar",
       "recommendationsIncluded": "Recomendações incluídas na auditoria atual",
-      "recommendationsLoadError": "Não foi possível concluir a auditoria com recomendações"
+      "recommendationsLoadError": "Não foi possível concluir a auditoria com recomendações",
+      "contrastSaved": "Correção de contraste salva",
+      "contrastRemoved": "Correção de contraste resetada para os valores originais da página",
+      "quotaUnsavedAudit": "A auditoria foi concluída, mas não pôde ser salva localmente por falta de espaço.",
+      "quotaUnsavedReview": "A alteração foi aplicada na interface, mas ainda não foi salva localmente por falta de espaço.",
+      "quotaRecovered": "Espaço liberado e alteração salva com sucesso.",
+      "quotaRecoveryFailed": "Não foi possível liberar espaço suficiente no armazenamento local."
     },
     "scope": {
       "toggleLabel": "Escopo da auditoria",
@@ -214,6 +220,30 @@
         "resolvedProblems": "problemas_resolvidos",
         "persistentProblems": "problemas_persistentes"
       }
+    },
+    "quota": {
+      "alertTitle": "Armazenamento local cheio",
+      "alertDescription": "Alguns dados da auditoria não puderam ser persistidos. Escolha uma ação para liberar espaço.",
+      "alertDescriptionUnsaved": "A auditoria continua visível, mas há alterações ainda não salvas por falta de espaço no armazenamento local.",
+      "modalTitle": "Liberar espaço no armazenamento",
+      "modalAlertTitle": "Falha ao persistir dados locais",
+      "modalAlertDescriptionAudit": "A extensão não conseguiu persistir a auditoria atual. Isso costuma acontecer quando o histórico local acumulado fica grande demais.",
+      "modalAlertDescriptionReview": "A extensão não conseguiu persistir a revisão humana, as anotações ou a correção de contraste desta auditoria.",
+      "modalDescription": "Escolha uma estratégia de recuperação. A opção recomendada é limpar apenas o histórico da URL atual e tentar salvar novamente.",
+      "options": {
+        "currentUrl": "Limpar o histórico salvo apenas da URL atual e tentar novamente.",
+        "globalCompact": "Compactar o armazenamento global, mantendo somente os registros mais recentes de cada URL.",
+        "dismiss": "Fechar por enquanto e manter a auditoria apenas em memória até a próxima recarga.",
+        "deleteOldestAudit": "Excluir a auditoria mais antiga salva e tentar gravar a atual novamente."
+      },
+      "actions": {
+        "dismiss": "Fechar",
+        "compactGlobal": "Compactar",
+        "clearCurrentUrl": "Limpar URL",
+        "deleteOldestAudit": "Excluir mais antiga",
+        "reopen": "Resolver quota"
+      },
+      "resumeLabel": "Recuperar salvamento"
     }
   },
   "summary": {
@@ -295,7 +325,14 @@
       "confirmedDescription": "Itens que já foram revisados e continuam exigindo correção.",
       "dismissed": "Descartados na revisão humana",
       "dismissedDescription": "Itens que não se confirmaram como problema, mas continuam disponíveis para reavaliação."
-    }
+    },
+    "contrastUserOverrideSaved": "Correção do usuário salva",
+    "contrastSavedAt": "Correção salva em {{date}}",
+    "contrastOriginalPageValues": "Usando os valores originais detectados na página.",
+    "contrastReset": "Resetar",
+    "contrastSaveCorrection": "Salvar",
+    "contrastResetTooltip": "Voltar para as cores originais detectadas na página.",
+    "contrastSaveCorrectionTooltip": "Salvar esta combinação de cores como correção do usuário para este item."
   },
   "contrast": {
     "foreground": {
@@ -369,7 +406,8 @@
     "noActiveTab": "Nenhuma aba ativa encontrada.",
     "unsupportedUrl": "A auditoria só pode ser executada em páginas http(s) ou arquivos locais com permissão.",
     "contentExecutionError": "Erro ao executar a auditoria no content script.",
-    "domUnavailable": "Não foi possível acessar o DOM da página. Recarregue a aba e tente novamente."
+    "domUnavailable": "Não foi possível acessar o DOM da página. Recarregue a aba e tente novamente.",
+    "quotaExceeded": "Não foi possível salvar os dados da auditoria porque o armazenamento local da extensão atingiu o limite."
   },
   "background": {
     "installed": "Extensão instalada com sucesso",

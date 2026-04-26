@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Layout, message, Modal, Space, Switch, Tabs, Tag } from 'antd';
 import {
   ArrowLeftOutlined,
@@ -22,12 +22,16 @@ import {
 } from '@/utils/audit-comparison';
 import { buildExportableAuditResult } from '@/utils/audit-export';
 import {
+  clearAuditHistoryForUrl,
+  compactAuditStorage,
+  deleteOldestAuditHistoryEntry,
   deleteAuditHistoryEntry,
   ensureContentScriptReady,
   getDisplayResultForScope,
   getActiveTab,
   getAuditHistoryForUrl,
   getAuditResult,
+  isAuditStorageQuotaError,
   resetAuditCache,
   runAccessibilityAudit,
   saveAuditResult,
@@ -117,6 +121,7 @@ function getComparisonQuickReadingLabel(label: string): string {
 }
 
 export const PopupApp: React.FC = () => {
+  const quotaRetryRef = useRef<(() => Promise<unknown>) | null>(null);
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([]);
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
@@ -130,6 +135,13 @@ export const PopupApp: React.FC = () => {
   const [historyEntryPendingDeletion, setHistoryEntryPendingDeletion] = useState<AuditHistoryEntry | null>(null);
   const [comparisonBaselineId, setComparisonBaselineId] = useState<string | undefined>(undefined);
   const [comparisonTargetId, setComparisonTargetId] = useState<string | undefined>(undefined);
+  const [quotaIssue, setQuotaIssue] = useState<{
+    url: string;
+    scope: 'audit' | 'history' | 'review';
+    hasUnsavedChanges: boolean;
+  } | null>(null);
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
+  const [quotaRecoveryLoading, setQuotaRecoveryLoading] = useState(false);
   const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon.png'), []);
 
   const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
@@ -168,6 +180,32 @@ export const PopupApp: React.FC = () => {
       setComparisonTargetId(undefined);
     } finally {
       setInitialLoading(false);
+    }
+  }, []);
+
+  const persistWithQuotaHandling = useCallback(async <T,>(
+    operation: () => Promise<T>,
+    issue: {
+      url: string;
+      scope: 'audit' | 'history' | 'review';
+      hasUnsavedChanges: boolean;
+    },
+  ): Promise<T | null> => {
+    try {
+      const result = await operation();
+      setQuotaIssue(null);
+      setIsQuotaModalOpen(false);
+      quotaRetryRef.current = null;
+      return result;
+    } catch (error) {
+      if (isAuditStorageQuotaError(error)) {
+        quotaRetryRef.current = operation;
+        setQuotaIssue(issue);
+        setIsQuotaModalOpen(true);
+        return null;
+      }
+
+      throw error;
     }
   }, []);
 
@@ -243,25 +281,40 @@ export const PopupApp: React.FC = () => {
       const result = await runAccessibilityAudit({ includeRecommendations });
       const tab = await getActiveTab();
       setActiveTab(tab);
-      const persistedResult = await saveAuditResult(result, tab.id);
-      const history = await getAuditHistoryForUrl(tab.url);
-      setAuditResult(persistedResult);
-      setAuditHistory(history);
-      setSelectedHistoryId(null);
-      setShowAboutView(false);
-      setPriorityIndex(0);
-      setComparisonTargetId(history[0]?.id);
-      setComparisonBaselineId(history[1]?.id || history[0]?.id);
-      message.success(t('popup.messages.auditCompleted', {
-        count: getDisplayResultForScope(persistedResult, includeRecommendations)?.totalViolations ?? result.totalViolations,
-      }));
+      const persistAudit = async () => {
+        const persistedResult = await saveAuditResult(result, tab.id);
+        const history = await getAuditHistoryForUrl(tab.url);
+        setAuditResult(persistedResult);
+        setAuditHistory(history);
+        setSelectedHistoryId(null);
+        setShowAboutView(false);
+        setPriorityIndex(0);
+        setComparisonTargetId(history[0]?.id);
+        setComparisonBaselineId(history[1]?.id || history[0]?.id);
+        message.success(t('popup.messages.auditCompleted', {
+          count: getDisplayResultForScope(persistedResult, includeRecommendations)?.totalViolations ?? result.totalViolations,
+        }));
+        return persistedResult;
+      };
+
+      const persistedResult = await persistWithQuotaHandling(
+        persistAudit,
+        { url: tab.url || result.url, scope: 'audit', hasUnsavedChanges: true },
+      );
+      if (!persistedResult) {
+        setAuditResult(result);
+        setSelectedHistoryId(null);
+        setShowAboutView(false);
+        setPriorityIndex(0);
+        message.warning(t('popup.messages.quotaUnsavedAudit'));
+      }
     } catch (error) {
       console.error('Erro ao executar auditoria:', error);
       message.error(error instanceof Error ? error.message : t('popup.messages.auditRunError'));
     } finally {
       setLoading(false);
     }
-  }, [clearHighlightsOnPage, includeRecommendations]);
+  }, [clearHighlightsOnPage, includeRecommendations, persistWithQuotaHandling]);
 
   const handleResetAudit = useCallback(async () => {
     setLoading(true);
@@ -303,7 +356,17 @@ export const PopupApp: React.FC = () => {
       };
 
       syncAuditResultUpdate(preservedResult);
-      await updateStoredAuditResult(preservedResult, activeTab?.id);
+      const persisted = await persistWithQuotaHandling(
+        async () => {
+          await updateStoredAuditResult(preservedResult, activeTab?.id);
+          return true;
+        },
+        { url: preservedResult.url, scope: 'audit', hasUnsavedChanges: true },
+      );
+      if (persisted === null) {
+        message.warning(t('popup.messages.quotaUnsavedAudit'));
+        return;
+      }
 
       const refreshedHistory = await getAuditHistoryForUrl(activeTab?.url || preservedResult.url);
       setAuditHistory(refreshedHistory);
@@ -316,7 +379,7 @@ export const PopupApp: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTab?.id, activeTab?.url, auditResult, clearHighlightsOnPage, isHistoricalView, syncAuditResultUpdate]);
+  }, [activeTab?.id, activeTab?.url, auditResult, clearHighlightsOnPage, isHistoricalView, persistWithQuotaHandling, syncAuditResultUpdate]);
 
   const handleExportJSON = useCallback(() => {
     if (!displayedAuditResult) {
@@ -544,8 +607,17 @@ export const PopupApp: React.FC = () => {
     };
 
     syncAuditResultUpdate(updatedResult);
-    await updateStoredAuditResult(updatedResult, activeTab?.id);
-  }, [activeTab?.id, syncAuditResultUpdate, viewedAuditResult]);
+    const persisted = await persistWithQuotaHandling(
+      async () => {
+        await updateStoredAuditResult(updatedResult, activeTab?.id);
+        return true;
+      },
+      { url: updatedResult.url, scope: 'review', hasUnsavedChanges: true },
+    );
+    if (persisted === null) {
+      message.warning(t('popup.messages.quotaUnsavedReview'));
+    }
+  }, [activeTab?.id, persistWithQuotaHandling, syncAuditResultUpdate, viewedAuditResult]);
 
   const handleViolationNoteChange = useCallback(async (violation: Violation, note: string) => {
     if (!viewedAuditResult) return;
@@ -564,9 +636,86 @@ export const PopupApp: React.FC = () => {
     };
 
     syncAuditResultUpdate(updatedResult);
-    await updateStoredAuditResult(updatedResult, activeTab?.id);
+    const persisted = await persistWithQuotaHandling(
+      async () => {
+        await updateStoredAuditResult(updatedResult, activeTab?.id);
+        return true;
+      },
+      { url: updatedResult.url, scope: 'review', hasUnsavedChanges: true },
+    );
+    if (persisted === null) {
+      message.warning(t('popup.messages.quotaUnsavedReview'));
+      return;
+    }
     message.success(note ? t('popup.messages.noteSaved') : t('popup.messages.noteRemoved'));
-  }, [activeTab?.id, syncAuditResultUpdate, viewedAuditResult]);
+  }, [activeTab?.id, persistWithQuotaHandling, syncAuditResultUpdate, viewedAuditResult]);
+
+  const handleViolationContrastOverrideChange = useCallback(async (
+    violation: Violation,
+    override: Violation['userContrastOverride'] | undefined,
+  ) => {
+    if (!viewedAuditResult) return;
+
+    const updatedResult: AuditResult = {
+      ...viewedAuditResult,
+      violations: viewedAuditResult.violations.map((currentViolation) => (
+        currentViolation.id === violation.id
+          ? {
+              ...currentViolation,
+              userContrastOverride: override,
+            }
+          : currentViolation
+      )),
+    };
+
+    syncAuditResultUpdate(updatedResult);
+    const persisted = await persistWithQuotaHandling(
+      async () => {
+        await updateStoredAuditResult(updatedResult, activeTab?.id);
+        return true;
+      },
+      { url: updatedResult.url, scope: 'review', hasUnsavedChanges: true },
+    );
+    if (persisted === null) {
+      message.warning(t('popup.messages.quotaUnsavedReview'));
+      return;
+    }
+    message.success(override ? t('popup.messages.contrastSaved') : t('popup.messages.contrastRemoved'));
+  }, [activeTab?.id, persistWithQuotaHandling, syncAuditResultUpdate, viewedAuditResult]);
+
+  const handleResolveQuotaIssue = useCallback(async (strategy: 'current-url' | 'oldest-audit' | 'global') => {
+    if (!quotaIssue || !quotaRetryRef.current) return;
+
+    setQuotaRecoveryLoading(true);
+    try {
+      if (strategy === 'current-url') {
+        await clearAuditHistoryForUrl(quotaIssue.url);
+      } else if (strategy === 'oldest-audit') {
+        await deleteOldestAuditHistoryEntry();
+      } else {
+        await compactAuditStorage(activeTab?.id);
+      }
+
+      await quotaRetryRef.current();
+      const refreshedHistory = await getAuditHistoryForUrl(quotaIssue.url);
+      setAuditHistory(refreshedHistory);
+      setComparisonTargetId(refreshedHistory[0]?.id);
+      setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id);
+      setQuotaIssue(null);
+      setIsQuotaModalOpen(false);
+      quotaRetryRef.current = null;
+      message.success(t('popup.messages.quotaRecovered'));
+    } catch (error) {
+      console.error('Erro ao recuperar quota do storage:', error);
+      if (isAuditStorageQuotaError(error)) {
+        message.error(t('popup.messages.quotaRecoveryFailed'));
+        return;
+      }
+      message.error(error instanceof Error ? error.message : t('popup.messages.quotaRecoveryFailed'));
+    } finally {
+      setQuotaRecoveryLoading(false);
+    }
+  }, [activeTab?.id, quotaIssue]);
 
   const handleNextPriorityIssue = useCallback(async () => {
     if (isHistoricalView) {
@@ -627,6 +776,7 @@ export const PopupApp: React.FC = () => {
             onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
             onHumanReviewStatusChange={handleHumanReviewStatusChange}
             onViolationNoteChange={handleViolationNoteChange}
+            onViolationContrastOverrideChange={handleViolationContrastOverrideChange}
           />
         ),
       },
@@ -671,6 +821,7 @@ export const PopupApp: React.FC = () => {
     handleHighlightViolation,
     handleHumanReviewStatusChange,
     handleViolationNoteChange,
+    handleViolationContrastOverrideChange,
     auditHistory.length,
     activeTab?.title,
     auditHistory,
@@ -760,6 +911,18 @@ export const PopupApp: React.FC = () => {
                   </div>
                 </div>
               </div>
+              {quotaIssue && !isQuotaModalOpen && (
+                <div className="tab-status-item tab-status-item-toggle">
+                  <span className="tab-status-label">{t('popup.quota.resumeLabel')}</span>
+                  <Button
+                    danger
+                    className="quota-resume-button"
+                    onClick={() => setIsQuotaModalOpen(true)}
+                  >
+                    {t('popup.quota.actions.reopen')}
+                  </Button>
+                </div>
+              )}
               <Tag color={isHistoricalView ? 'gold' : 'blue'}>
                 {isHistoricalView ? t('shared.labels.historyByUrl') : t('shared.labels.currentAudit')}
               </Tag>
@@ -772,6 +935,20 @@ export const PopupApp: React.FC = () => {
                 showIcon
                 message={t('popup.history.warningTitle')}
                 description={t('popup.history.warningDescription')}
+              />
+            )}
+
+            {quotaIssue && (
+              <Alert
+                className="history-alert"
+                type="error"
+                showIcon
+                message={t('popup.quota.alertTitle')}
+                description={t(
+                  quotaIssue.hasUnsavedChanges
+                    ? 'popup.quota.alertDescriptionUnsaved'
+                    : 'popup.quota.alertDescription',
+                )}
               />
             )}
 
@@ -802,6 +979,7 @@ export const PopupApp: React.FC = () => {
           message.success(t('popup.messages.historyDeleted'));
         }}
         getContainer={false}
+        centered
       >
         <p>{t('popup.history.deleteModalDescription')}</p>
         {historyEntryPendingDeletion && (
@@ -809,6 +987,60 @@ export const PopupApp: React.FC = () => {
             <strong>{historyEntryPendingDeletion.pageTitle || historyEntryPendingDeletion.url}</strong>
           </p>
         )}
+      </Modal>
+
+      <Modal
+        open={Boolean(quotaIssue) && isQuotaModalOpen}
+        title={t('popup.quota.modalTitle')}
+        onCancel={() => setIsQuotaModalOpen(false)}
+        footer={null}
+        getContainer={false}
+        centered
+        width={480}
+      >
+        <Space direction="vertical" size={12} className="quota-modal-content">
+          <Alert
+            type="warning"
+            showIcon
+            message={t('popup.quota.modalAlertTitle')}
+            description={t(
+              quotaIssue?.scope === 'audit'
+                ? 'popup.quota.modalAlertDescriptionAudit'
+                : 'popup.quota.modalAlertDescriptionReview',
+            )}
+          />
+          <p>{t('popup.quota.modalDescription')}</p>
+          <ul className="quota-modal-options">
+            <li>{t('popup.quota.options.currentUrl')}</li>
+            <li>{t('popup.quota.options.deleteOldestAudit')}</li>
+            <li>{t('popup.quota.options.globalCompact')}</li>
+            <li>{t('popup.quota.options.dismiss')}</li>
+          </ul>
+          <div className="quota-modal-actions-grid">
+            <Button
+              type="primary"
+              loading={quotaRecoveryLoading}
+              onClick={() => { void handleResolveQuotaIssue('current-url'); }}
+            >
+              {t('popup.quota.actions.clearCurrentUrl')}
+            </Button>
+            <Button
+              loading={quotaRecoveryLoading}
+              onClick={() => { void handleResolveQuotaIssue('oldest-audit'); }}
+            >
+              {t('popup.quota.actions.deleteOldestAudit')}
+            </Button>
+            <Button
+              loading={quotaRecoveryLoading}
+              onClick={() => { void handleResolveQuotaIssue('global'); }}
+            >
+              {t('popup.quota.actions.compactGlobal')}
+            </Button>
+            <Button onClick={() => setIsQuotaModalOpen(false)}>
+              {t('popup.quota.actions.dismiss')}
+            </Button>
+          </div>
+        </Space>
       </Modal>
 
       {!showAboutView && (

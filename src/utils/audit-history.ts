@@ -84,7 +84,7 @@ export function inheritViolationStateFromHistory(
       const hasPersistedState = (
         violation.humanReviewStatus !== 'not_applicable' &&
         violation.humanReviewStatus !== 'pending'
-      ) || Boolean(violation.userNote?.trim());
+      ) || Boolean(violation.userNote?.trim()) || Boolean(violation.userContrastOverride);
 
       if (!hasPersistedState) return;
 
@@ -106,6 +106,7 @@ export function inheritViolationStateFromHistory(
         humanReviewStatus: violation.requiresHumanReview
           ? persistedViolation.humanReviewStatus ?? violation.humanReviewStatus
           : violation.humanReviewStatus,
+        userContrastOverride: persistedViolation.userContrastOverride ?? violation.userContrastOverride,
         userNote: persistedViolation.userNote ?? violation.userNote,
         noteUpdatedAt: persistedViolation.noteUpdatedAt ?? violation.noteUpdatedAt,
         inheritedFromHistory: true,

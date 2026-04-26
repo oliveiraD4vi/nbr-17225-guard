@@ -10,6 +10,15 @@ import {
   inheritViolationStateFromHistory,
 } from '@/utils/audit-history';
 
+export class AuditStorageQuotaError extends Error {
+  readonly code = 'quota_exceeded';
+
+  constructor(message = t('engine.quotaExceeded')) {
+    super(message);
+    this.name = 'AuditStorageQuotaError';
+  }
+}
+
 interface RunAuditOptions {
   includeRecommendations?: boolean;
 }
@@ -122,6 +131,21 @@ function isSupportedTabUrl(url: string): boolean {
   return /^(https?:|file:)/.test(url);
 }
 
+function isQuotaExceededError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+
+  const candidate = error as { message?: string };
+  return candidate.message?.toLowerCase().includes('quota') ?? false;
+}
+
+function throwIfQuotaExceeded(error: unknown): never {
+  if (isQuotaExceededError(error)) {
+    throw new AuditStorageQuotaError();
+  }
+
+  throw error;
+}
+
 /**
  * Reseta o cache de auditoria da aba ativa
  */
@@ -175,7 +199,8 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     return normalizedResult;
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao salvar resultado:', error);
-    return result;
+    throwIfQuotaExceeded(error);
+    throw error;
   }
 }
 
@@ -270,6 +295,86 @@ export async function updateStoredAuditResult(updatedResult: AuditResult, tabId?
     });
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao atualizar auditoria persistida:', error);
+    throwIfQuotaExceeded(error);
   }
+}
+
+export function isAuditStorageQuotaError(error: unknown): error is AuditStorageQuotaError {
+  return error instanceof AuditStorageQuotaError;
+}
+
+export async function clearAuditHistoryForUrl(url: string): Promise<AuditHistoryEntry[]> {
+  const data = await chrome.storage.local.get('auditHistoryByUrl');
+  const auditHistoryByUrl = {
+    ...((data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}),
+  };
+  const urlKey = getAuditUrlStorageKey(url);
+  delete auditHistoryByUrl[urlKey];
+
+  await chrome.storage.local.set({ auditHistoryByUrl });
+  return [];
+}
+
+export async function compactAuditStorage(preserveTabId?: number): Promise<void> {
+  const data = await chrome.storage.local.get(['auditResult', 'auditResultsByTab', 'auditHistoryByUrl']);
+  const currentAuditResult = normalizeAuditResult(data.auditResult as AuditResult | null);
+  const currentTabKey = preserveTabId ? getTabStorageKey(preserveTabId) : null;
+  const auditResultsByTab = { ...(data.auditResultsByTab as Record<string, AuditResult> | undefined) };
+  const compactedResultsByTab = currentTabKey && auditResultsByTab[currentTabKey]
+    ? { [currentTabKey]: normalizeAuditResult(auditResultsByTab[currentTabKey]) as AuditResult }
+    : {};
+  const sourceHistory = ((data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {});
+  const compactedHistory = Object.fromEntries(
+    Object.entries(sourceHistory)
+      .map(([urlKey, entries]) => [
+        urlKey,
+        dedupeAndSortAuditHistory(
+          entries.map((entry) => normalizeAuditResult(entry) as AuditHistoryEntry),
+          1,
+        ),
+      ])
+      .filter(([, entries]) => entries.length > 0),
+  );
+
+  await chrome.storage.local.set({
+    auditResult: currentAuditResult && currentTabKey ? compactedResultsByTab[currentTabKey] ?? currentAuditResult : currentAuditResult,
+    auditResultsByTab: compactedResultsByTab,
+    auditHistoryByUrl: compactedHistory,
+  });
+}
+
+export async function deleteOldestAuditHistoryEntry(): Promise<boolean> {
+  const data = await chrome.storage.local.get('auditHistoryByUrl');
+  const auditHistoryByUrl = {
+    ...((data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}),
+  };
+
+  let oldestUrlKey: string | null = null;
+  let oldestEntryId: string | null = null;
+  let oldestTimestamp = Number.POSITIVE_INFINITY;
+
+  Object.entries(auditHistoryByUrl).forEach(([urlKey, entries]) => {
+    entries.forEach((entry) => {
+      if (entry.timestamp < oldestTimestamp) {
+        oldestTimestamp = entry.timestamp;
+        oldestUrlKey = urlKey;
+        oldestEntryId = entry.id;
+      }
+    });
+  });
+
+  if (!oldestUrlKey || !oldestEntryId) {
+    return false;
+  }
+
+  auditHistoryByUrl[oldestUrlKey] = auditHistoryByUrl[oldestUrlKey]
+    .filter((entry) => entry.id !== oldestEntryId);
+
+  if (auditHistoryByUrl[oldestUrlKey].length === 0) {
+    delete auditHistoryByUrl[oldestUrlKey];
+  }
+
+  await chrome.storage.local.set({ auditHistoryByUrl });
+  return true;
 }
 

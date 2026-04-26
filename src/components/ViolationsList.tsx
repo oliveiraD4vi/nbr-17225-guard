@@ -25,6 +25,7 @@ interface ViolationsListProps {
   onSelectViolation?: (violation: Violation) => void;
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void;
   onViolationNoteChange?: (violation: Violation, note: string) => void;
+  onViolationContrastOverrideChange?: (violation: Violation, override: Violation['userContrastOverride'] | undefined) => void;
 }
 
 interface ViolationGroup {
@@ -121,6 +122,7 @@ function renderViolationGroups(
   onSelectViolation?: (violation: Violation) => void,
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
   onViolationNoteChange?: (violation: Violation, note: string) => void,
+  onViolationContrastOverrideChange?: (violation: Violation, override: Violation['userContrastOverride'] | undefined) => void,
 ): React.ReactNode {
   if (violations.length === 0) {
     return <Empty description={t('violations.emptyCategory')} />;
@@ -176,6 +178,7 @@ function renderViolationGroups(
                   onSelectViolation={onSelectViolation}
                   onHumanReviewStatusChange={onHumanReviewStatusChange}
                   onViolationNoteChange={onViolationNoteChange}
+                  onViolationContrastOverrideChange={onViolationContrastOverrideChange}
                   pinned
                 />
               ))}
@@ -197,6 +200,7 @@ function renderViolationGroups(
                     onSelectViolation={onSelectViolation}
                     onHumanReviewStatusChange={onHumanReviewStatusChange}
                     onViolationNoteChange={onViolationNoteChange}
+                    onViolationContrastOverrideChange={onViolationContrastOverrideChange}
                   />
                 ))}
               </div>
@@ -215,6 +219,7 @@ function renderReviewSections(
   onSelectViolation?: (violation: Violation) => void,
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
   onViolationNoteChange?: (violation: Violation, note: string) => void,
+  onViolationContrastOverrideChange?: (violation: Violation, override: Violation['userContrastOverride'] | undefined) => void,
 ): React.ReactNode {
   if (violations.length === 0) {
     return <Empty description={t('violations.emptyCategory')} />;
@@ -268,6 +273,7 @@ function renderReviewSections(
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
+              onViolationContrastOverrideChange,
             )
           ) : (
             <Empty description={t('violations.emptyCategory')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
@@ -284,6 +290,7 @@ interface ViolationCardProps {
   onSelectViolation?: (violation: Violation) => void;
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void;
   onViolationNoteChange?: (violation: Violation, note: string) => void;
+  onViolationContrastOverrideChange?: (violation: Violation, override: Violation['userContrastOverride'] | undefined) => void;
   pinned?: boolean;
 }
 
@@ -293,22 +300,23 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
   onSelectViolation,
   onHumanReviewStatusChange,
   onViolationNoteChange,
+  onViolationContrastOverrideChange,
   pinned = false,
 }) => {
   const [isNotesOpen, setIsNotesOpen] = React.useState(false);
   const [isContrastModalOpen, setIsContrastModalOpen] = React.useState(false);
   const [noteDraft, setNoteDraft] = React.useState(violation.userNote || '');
-  const [foregroundHex, setForegroundHex] = React.useState(violation.contrastDetails?.foregroundHex || '#000000');
-  const [backgroundHex, setBackgroundHex] = React.useState(violation.contrastDetails?.backgroundHex || '#ffffff');
+  const [foregroundHex, setForegroundHex] = React.useState(violation.userContrastOverride?.foregroundHex || violation.contrastDetails?.foregroundHex || '#000000');
+  const [backgroundHex, setBackgroundHex] = React.useState(violation.userContrastOverride?.backgroundHex || violation.contrastDetails?.backgroundHex || '#ffffff');
 
   React.useEffect(() => {
     setNoteDraft(violation.userNote || '');
   }, [violation.id, violation.userNote]);
 
   React.useEffect(() => {
-    setForegroundHex(violation.contrastDetails?.foregroundHex || '#000000');
-    setBackgroundHex(violation.contrastDetails?.backgroundHex || '#ffffff');
-  }, [violation.contrastDetails, violation.id]);
+    setForegroundHex(violation.userContrastOverride?.foregroundHex || violation.contrastDetails?.foregroundHex || '#000000');
+    setBackgroundHex(violation.userContrastOverride?.backgroundHex || violation.contrastDetails?.backgroundHex || '#ffffff');
+  }, [violation.contrastDetails, violation.id, violation.userContrastOverride]);
 
   const insertAtEnd = React.useCallback((value: string) => {
     setNoteDraft((current) => `${current}${current ? '\n' : ''}${value}`);
@@ -327,12 +335,45 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
     if (!violation.contrastDetails) return null;
     return getContrastRatio(foregroundHex, backgroundHex);
   }, [backgroundHex, foregroundHex, violation.contrastDetails]);
+  const persistedContrastRatio = React.useMemo(() => {
+    if (!violation.contrastDetails) return null;
+    if (!violation.userContrastOverride) return violation.contrastDetails.measuredRatio;
+    return getContrastRatio(
+      violation.userContrastOverride.foregroundHex,
+      violation.userContrastOverride.backgroundHex,
+    );
+  }, [violation.contrastDetails, violation.userContrastOverride]);
 
   const contrastPasses = React.useMemo(() => (
     violation.contrastDetails && contrastRatio !== null
       ? contrastRatio >= violation.contrastDetails.minimumRatio
       : false
   ), [contrastRatio, violation.contrastDetails]);
+  const hasUnsavedContrastChanges = React.useMemo(() => {
+    if (!violation.contrastDetails) return false;
+
+    const referenceForeground = violation.userContrastOverride?.foregroundHex || violation.contrastDetails.foregroundHex;
+    const referenceBackground = violation.userContrastOverride?.backgroundHex || violation.contrastDetails.backgroundHex;
+
+    return referenceForeground.toLowerCase() !== foregroundHex.toLowerCase()
+      || referenceBackground.toLowerCase() !== backgroundHex.toLowerCase();
+  }, [backgroundHex, foregroundHex, violation.contrastDetails, violation.userContrastOverride]);
+
+  const handleSaveContrastOverride = React.useCallback(() => {
+    if (!violation.contrastDetails) return;
+    onViolationContrastOverrideChange?.(violation, {
+      foregroundHex,
+      backgroundHex,
+      updatedAt: Date.now(),
+    });
+  }, [backgroundHex, foregroundHex, onViolationContrastOverrideChange, violation]);
+
+  const handleClearContrastOverride = React.useCallback(() => {
+    if (!violation.contrastDetails) return;
+    setForegroundHex(violation.contrastDetails.foregroundHex);
+    setBackgroundHex(violation.contrastDetails.backgroundHex);
+    onViolationContrastOverrideChange?.(violation, undefined);
+  }, [onViolationContrastOverrideChange, violation]);
 
   return (
     <Card
@@ -450,8 +491,11 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
               <strong>{t('violations.contrastBoardTitle')}</strong>
               <p>{t('violations.contrastBoardDescription')}</p>
               <span>
-                {t('violations.contrastRatio')}: {violation.contrastDetails.measuredRatio.toFixed(2)}:1 · {t('violations.contrastMinimum')}: {violation.contrastDetails.minimumRatio.toFixed(1)}:1
+                {t('violations.contrastRatio')}: {(persistedContrastRatio ?? violation.contrastDetails.measuredRatio).toFixed(2)}:1
+                {' · '}
+                {t('violations.contrastMinimum')}: {violation.contrastDetails.minimumRatio.toFixed(1)}:1
               </span>
+              {violation.userContrastOverride && <Tag color="blue">{t('violations.contrastUserOverrideSaved')}</Tag>}
             </div>
             <Button
               icon={<BgColorsOutlined />}
@@ -666,6 +710,46 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(({
                   </div>
                 </div>
               )}
+
+              <div className="contrast-board-actions">
+                <div className="contrast-board-actions-copy">
+                  {violation.userContrastOverride ? (
+                    <span>
+                      {t('violations.contrastSavedAt', {
+                        date: new Date(violation.userContrastOverride.updatedAt).toLocaleString('pt-BR'),
+                      })}
+                    </span>
+                  ) : (
+                    <span>{t('violations.contrastOriginalPageValues')}</span>
+                  )}
+                </div>
+                <Space wrap>
+                  <Tooltip title={t('violations.contrastResetTooltip')}>
+                    <Button
+                      icon={<ClearOutlined />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleClearContrastOverride();
+                      }}
+                    >
+                      {t('violations.contrastReset')}
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title={t('violations.contrastSaveCorrectionTooltip')}>
+                    <Button
+                      type="primary"
+                      icon={<SaveOutlined />}
+                      disabled={!hasUnsavedContrastChanges}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSaveContrastOverride();
+                      }}
+                    >
+                      {t('violations.contrastSaveCorrection')}
+                    </Button>
+                  </Tooltip>
+                </Space>
+              </div>
             </div>
           </Modal>
         )}
@@ -679,6 +763,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
   onSelectViolation,
   onHumanReviewStatusChange,
   onViolationNoteChange,
+  onViolationContrastOverrideChange,
 }) => {
   const [selectedCategory, setSelectedCategory] = React.useState<'all' | RuleTopicCategory>('all');
   const sortedViolations = React.useMemo(() => sortViolations(violations), [violations]);
@@ -760,6 +845,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
+              onViolationContrastOverrideChange,
             ),
           },
           {
@@ -770,6 +856,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
+              onViolationContrastOverrideChange,
             ),
           },
           {
@@ -780,6 +867,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(({
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
+              onViolationContrastOverrideChange,
             ),
           },
         ]}

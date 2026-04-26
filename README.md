@@ -249,14 +249,30 @@ export const myRule: Rule = {
 };
 ```
 
-Após adicionar uma regra:
+### Processo atual para adicionar uma nova regra
+
+Ao adicionar uma regra ao escopo v1, trate a mudança como um fluxo completo do produto.
+
+Passo a passo recomendado:
+
+1. implemente ou ajuste a regra em `src/rules/`;
+2. registre a regra no agregador correspondente em `src/rules/index.ts`;
+3. confirme a coerência entre `ruleId`, `nbrReference`, severidade, nível WCAG e categoria de automação;
+4. crie a tupla de tradução antes de ligar a regra à interface:
+   - `src/i18n/pt-BR.json` para textos de popup, relatório, resumo, estados, alertas e exportações;
+   - `src/i18n/rules-pt-BR.json` para `name`, `description`, mensagens, sugestões e remediações da regra;
+5. use apenas chaves de catálogo no código, sem texto visível hardcoded;
+6. se a regra introduzir novos campos em `Violation`, atualize também tipos, persistência, histórico, comparação e exportações;
+7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md` e neste `README.md`;
+8. valide o resultado no motor e no catálogo documental.
+
+Checklist mínimo ao final:
 
 ```bash
 pnpm verify:rules
 pnpm type-check
 pnpm build
 ```
-
 ## Referências
 
 - ABNT NBR 17225:2025

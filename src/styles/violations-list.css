@@ -599,6 +599,20 @@
   overflow-wrap: anywhere;
 }
 
+.contrast-board-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.contrast-board-actions-copy {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 @keyframes review-card-enter {
   from {
     opacity: 0;

@@ -157,6 +157,11 @@
   line-height: 1.4;
 }
 
+.quota-resume-button {
+  width: 100%;
+  height: 36px;
+}
+
 .tab-status-item strong {
   display: inline-flex;
   align-items: center;
@@ -351,6 +356,31 @@
   margin-top: 12px;
   color: #475569;
   font-size: 12px;
+}
+
+.quota-modal-options {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+}
+
+.quota-modal-options li + li {
+  margin-top: 6px;
+}
+
+.quota-modal-content {
+  width: 100%;
+}
+
+.quota-modal-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quota-modal-actions-grid .ant-btn {
+  width: 100%;
+  height: 40px;
 }
 
 .history-item {

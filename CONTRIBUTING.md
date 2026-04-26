@@ -57,6 +57,28 @@ pnpm verify:rules
   - herança de revisão humana;
   - exportação.
 
+## Como adicionar ou alterar uma regra
+
+Ao mexer em regra, trate a mudança como um fluxo completo do produto, não só como uma função nova no motor.
+
+Checklist recomendado:
+
+1. implemente ou ajuste a regra em `src/rules/`;
+2. registre a regra no agregador correto em `src/rules/index.ts`;
+3. mantenha `nbrReference`, severidade, nível WCAG e categoria de automação alinhados ao catálogo v1;
+4. crie a tupla de tradução antes de ligar a regra à UI:
+   - `src/i18n/rules-pt-BR.json` para nome, descrição, mensagens, sugestões e remediações;
+   - `src/i18n/pt-BR.json` para textos de interface, estados, alertas e exportações;
+5. use apenas chaves de catálogo no código, sem texto visível hardcoded;
+6. se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação;
+7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md` e `README.md`;
+8. valide a mudança com:
+
+```bash
+pnpm verify:rules
+pnpm type-check
+pnpm build
+```
 ## Regras fora do escopo v1
 
 Os itens abaixo já foram identificados como candidatos a contribuições futuras, mas não fazem parte da implementação da v1:

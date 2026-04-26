@@ -60,6 +60,11 @@ export interface Violation {
     foregroundLabel?: string;
     backgroundLabel?: string;
   };
+  userContrastOverride?: {
+    foregroundHex: string;
+    backgroundHex: string;
+    updatedAt: number;
+  };
   userNote?: string;
   noteUpdatedAt?: number;
   inheritedFromHistory?: boolean;
