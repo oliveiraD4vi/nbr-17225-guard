@@ -37,6 +37,8 @@ Instalação:
 pnpm install
 ```
 
+O `pnpm install` também executa `prepare` e habilita os hooks locais do Husky para este clone.
+
 Validação local:
 
 ```bash
@@ -46,6 +48,11 @@ pnpm type-check
 pnpm build
 pnpm verify:rules
 ```
+
+Validação automática no fluxo de Git:
+
+- `pre-commit`: `pnpm stage-lint` + `pnpm check:staged-text`
+- `pre-push`: `pnpm test` + `pnpm build`
 
 ## Diretrizes de contribuição
 

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+pnpm test
+pnpm build
