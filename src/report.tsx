@@ -1,76 +1,88 @@
-import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom/client';
-import { Alert, Button, ConfigProvider, Empty, Layout, Space, Tag } from 'antd';
-import { DownloadOutlined, PrinterOutlined, RobotOutlined, UserSwitchOutlined } from '@ant-design/icons';
-import ptBR from 'antd/locale/pt_BR';
-import { ReportSkeleton } from './components/LoadingSkeletons';
-import { t } from './i18n';
-import type { AuditResult } from './types';
-import { buildExportableAuditResult } from './utils/audit-export';
+import React, { Suspense } from 'react'
+import ReactDOM from 'react-dom/client'
+import { Alert, Button, ConfigProvider, Empty, Layout, Space, Tag } from 'antd'
+import {
+  DownloadOutlined,
+  PrinterOutlined,
+  RobotOutlined,
+  UserSwitchOutlined,
+} from '@ant-design/icons'
+import ptBR from 'antd/locale/pt_BR'
+import { ReportSkeleton } from './components/LoadingSkeletons'
+import { t } from './i18n'
+import type { AuditResult } from './types'
+import { buildExportableAuditResult } from './utils/audit-export'
 import {
   getConfirmedHumanReviewCount,
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
-} from './utils/audit-comparison';
-import { getActiveTab, getAuditResult } from './utils/audit-engine';
-import './styles/popup.css';
+} from './utils/audit-comparison'
+import { getActiveTab, getAuditResult } from './utils/audit-engine'
+import './styles/theme.css'
+import './styles/popup.css'
 
 const ViolationsList = React.lazy(async () => {
-  const module = await import('./components/ViolationsList');
-  return { default: module.ViolationsList };
-});
+  const module = await import('./components/ViolationsList')
+  return { default: module.ViolationsList }
+})
 
 const ViolationsSummary = React.lazy(async () => {
-  const module = await import('./components/ViolationsSummary');
-  return { default: module.ViolationsSummary };
-});
+  const module = await import('./components/ViolationsSummary')
+  return { default: module.ViolationsSummary }
+})
 
-const { Header, Content, Footer } = Layout;
+const { Header, Content, Footer } = Layout
 
 export const ReportApp: React.FC = () => {
-  const [auditResult, setAuditResult] = React.useState<AuditResult | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [auditResult, setAuditResult] = React.useState<AuditResult | null>(null)
+  const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
-    void loadAuditResult();
-  }, []);
+    void loadAuditResult()
+  }, [])
 
   const loadAuditResult = async () => {
     try {
-      const tab = await getActiveTab();
-      const result = await getAuditResult(tab.id);
-      setAuditResult(result);
+      const tab = await getActiveTab()
+      const result = await getAuditResult(tab.id)
+      setAuditResult(result)
     } catch (error) {
-      console.error('Erro ao carregar resultado:', error);
+      console.error('Erro ao carregar resultado:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handlePrint = React.useCallback(() => {
-    window.print();
-  }, []);
+    window.print()
+  }, [])
 
   const handleExport = React.useCallback(() => {
-    if (!auditResult) return;
+    if (!auditResult) return
 
-    const dataStr = JSON.stringify(buildExportableAuditResult(auditResult), null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${t('shared.exports.reportFilePrefix')}-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, [auditResult]);
+    const dataStr = JSON.stringify(buildExportableAuditResult(auditResult), null, 2)
+    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${t('shared.exports.reportFilePrefix')}-${new Date().toISOString().split('T')[0]}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }, [auditResult])
 
-  const confirmedReviews = auditResult ? getConfirmedHumanReviewCount(auditResult) : 0;
-  const dismissedReviews = auditResult ? getDismissedHumanReviewCount(auditResult) : 0;
-  const pendingReviews = auditResult ? getPendingHumanReviewCount(auditResult) : 0;
+  const confirmedReviews = auditResult ? getConfirmedHumanReviewCount(auditResult) : 0
+  const dismissedReviews = auditResult ? getDismissedHumanReviewCount(auditResult) : 0
+  const pendingReviews = auditResult ? getPendingHumanReviewCount(auditResult) : 0
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ background: '#ffffff', color: '#0f172a', borderBottom: '1px solid #e2e8f0' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--guard-color-page-bg)' }}>
+      <Header
+        style={{
+          background: 'var(--guard-color-surface)',
+          color: 'var(--guard-color-text-primary)',
+          borderBottom: '1px solid var(--guard-color-border)',
+        }}
+      >
         <h1 style={{ margin: 0, fontSize: '24px' }}>{t('report.title')}</h1>
       </Header>
 
@@ -86,16 +98,20 @@ export const ReportApp: React.FC = () => {
               type="info"
               showIcon
               message={t('report.introTitle')}
-              description={(
+              description={
                 <Space wrap size={[8, 8]}>
-                  <Tag icon={<RobotOutlined />} color="blue">{t('shared.states.automaticDetection')}</Tag>
-                  <Tag icon={<UserSwitchOutlined />} color="gold">{t('shared.states.humanConfirmation')}</Tag>
+                  <Tag icon={<RobotOutlined />} color="blue">
+                    {t('shared.states.automaticDetection')}
+                  </Tag>
+                  <Tag icon={<UserSwitchOutlined />} color="gold">
+                    {t('shared.states.humanConfirmation')}
+                  </Tag>
                   <span>{t('report.introDescription')}</span>
                   <Tag color="red">{t('shared.counts.confirmed', { count: confirmedReviews })}</Tag>
                   <Tag>{t('shared.counts.dismissed', { count: dismissedReviews })}</Tag>
                   <Tag color="gold">{t('shared.counts.pending', { count: pendingReviews })}</Tag>
                 </Space>
-              )}
+              }
             />
             <Suspense fallback={<ReportSkeleton />}>
               <ViolationsSummary result={auditResult} />
@@ -108,7 +124,13 @@ export const ReportApp: React.FC = () => {
         )}
       </Content>
 
-      <Footer style={{ textAlign: 'center', background: '#f8fafc', padding: '16px' }}>
+      <Footer
+        style={{
+          textAlign: 'center',
+          background: 'var(--guard-color-surface-muted)',
+          padding: '16px',
+        }}
+      >
         <Space>
           <Button icon={<PrinterOutlined />} onClick={handlePrint}>
             {t('shared.actions.print')}
@@ -119,15 +141,29 @@ export const ReportApp: React.FC = () => {
         </Space>
       </Footer>
     </Layout>
-  );
-};
+  )
+}
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
+const root = ReactDOM.createRoot(document.getElementById('root')!)
 
 root.render(
   <React.StrictMode>
-    <ConfigProvider locale={ptBR}>
+    <ConfigProvider
+      locale={ptBR}
+      theme={{
+        token: {
+          colorPrimary: 'var(--guard-color-primary)',
+          colorBgBase: 'var(--guard-color-page-bg)',
+          colorBgContainer: 'var(--guard-color-surface)',
+          colorBorder: 'var(--guard-color-border)',
+          colorTextBase: 'var(--guard-color-text-primary)',
+          colorTextSecondary: 'var(--guard-color-text-secondary)',
+          borderRadius: 8,
+          fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+        },
+      }}
+    >
       <ReportApp />
     </ConfigProvider>
   </React.StrictMode>,
-);
+)

@@ -1,0 +1,33 @@
+:root {
+  --guard-color-page-bg: #f3f6fb;
+  --guard-color-surface: #ffffff;
+  --guard-color-surface-muted: #f8fafc;
+  --guard-color-surface-soft: #f8fbff;
+  --guard-color-text-primary: #0f172a;
+  --guard-color-text-secondary: #475569;
+  --guard-color-text-muted: #64748b;
+  --guard-color-border: #e2e8f0;
+  --guard-color-border-soft: #dbeafe;
+  --guard-color-border-strong: #bfdbfe;
+  --guard-color-primary: #0f766e;
+  --guard-color-primary-strong: #115e59;
+  --guard-color-primary-soft: rgba(15, 118, 110, 0.1);
+  --guard-color-warning-bg: #fffbeb;
+  --guard-color-warning-soft: #fff7ed;
+  --guard-color-warning-border: #fcd34d;
+  --guard-color-warning-accent: #fdba74;
+  --guard-color-warning-text: #a16207;
+  --guard-color-danger-bg: #fef2f2;
+  --guard-color-danger-border: #fca5a5;
+  --guard-color-danger-text: #b91c1c;
+  --guard-color-success-bg: #f0fdf4;
+  --guard-color-success-soft: #ecfdf3;
+  --guard-color-success-border: #86efac;
+  --guard-color-success-text: #166534;
+  --guard-color-info-bg: #eff6ff;
+  --guard-color-info-soft: #f8fbff;
+  --guard-color-info-border: #bfdbfe;
+  --guard-color-score-gradient: linear-gradient(90deg, #ef4444 0%, #f59e0b 55%, #22c55e 100%);
+  --guard-color-shadow: rgba(15, 23, 42, 0.08);
+  --guard-color-shadow-strong: rgba(15, 23, 42, 0.14);
+}

@@ -11,8 +11,8 @@
 
 .summary-card {
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--guard-color-border);
+  box-shadow: 0 10px 30px var(--guard-color-shadow);
 }
 
 .summary-hero {
@@ -34,19 +34,19 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #475569;
+  color: var(--guard-color-text-secondary);
 }
 
 .summary-hero-copy h2 {
   margin: 0;
   font-size: 22px;
   line-height: 1.15;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .summary-hero-copy p {
   margin: 0;
-  color: #475569;
+  color: var(--guard-color-text-secondary);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -63,13 +63,13 @@
 }
 
 .summary-status-pill.is-warning {
-  background: #fff7ed;
-  color: #b45309;
+  background: var(--guard-color-warning-soft);
+  color: var(--guard-color-warning-text);
 }
 
 .summary-status-pill.is-success {
-  background: #ecfdf3;
-  color: #166534;
+  background: var(--guard-color-success-soft);
+  color: var(--guard-color-success-text);
 }
 
 .summary-meta {
@@ -83,10 +83,10 @@
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--guard-color-surface-muted);
+  border: 1px solid var(--guard-color-border);
   border-radius: 8px;
-  color: #475569;
+  color: var(--guard-color-text-secondary);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -102,24 +102,24 @@
   align-items: flex-start;
   margin-bottom: 18px;
   padding: 16px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--guard-color-border-soft);
   border-radius: 8px;
-  background: #f8fbff;
+  background: var(--guard-color-info-soft);
 }
 
 .summary-score-card.is-good {
-  border-color: #86efac;
+  border-color: var(--guard-color-success-border);
   background: #f0fdf4;
 }
 
 .summary-score-card.is-medium {
-  border-color: #fcd34d;
-  background: #fffbeb;
+  border-color: var(--guard-color-warning-border);
+  background: var(--guard-color-warning-bg);
 }
 
 .summary-score-card.is-critical {
-  border-color: #fca5a5;
-  background: #fef2f2;
+  border-color: var(--guard-color-danger-border);
+  background: var(--guard-color-danger-bg);
 }
 
 .summary-score-copy {
@@ -131,24 +131,24 @@
 .summary-score-copy strong {
   font-size: 36px;
   line-height: 1;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .summary-score-card.is-good .summary-score-copy strong {
-  color: #166534;
+  color: var(--guard-color-success-text);
 }
 
 .summary-score-card.is-medium .summary-score-copy strong {
-  color: #a16207;
+  color: var(--guard-color-warning-text);
 }
 
 .summary-score-card.is-critical .summary-score-copy strong {
-  color: #b91c1c;
+  color: var(--guard-color-danger-text);
 }
 
 .summary-score-copy p {
   margin: 0;
-  color: #475569;
+  color: var(--guard-color-text-secondary);
   font-size: 12px;
   line-height: 1.5;
   max-width: 460px;
@@ -168,7 +168,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #ef4444 0%, #f59e0b 55%, #22c55e 100%);
+  background: var(--guard-color-score-gradient);
 }
 
 .summary-score-meta {
@@ -184,9 +184,9 @@
   gap: 12px;
   margin-bottom: 18px;
   padding: 16px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--guard-color-border-soft);
   border-radius: 8px;
-  background: #f8fbff;
+  background: var(--guard-color-info-soft);
 }
 
 .summary-total-wrapper > .summary-stat-grid {
@@ -201,18 +201,18 @@
   gap: 4px;
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--guard-color-border);
   min-height: 110px;
 }
 
 .summary-stat-card strong {
   font-size: 32px;
   line-height: 1;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .summary-stat-card small {
-  color: #64748b;
+  color: var(--guard-color-text-muted);
   font-size: 12px;
 }
 
@@ -220,24 +220,24 @@
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #475569;
+  color: var(--guard-color-text-secondary);
 }
 
 .summary-stat-card.is-total {
-  background: #eff6ff;
-  border-color: #bfdbfe;
+  background: var(--guard-color-info-bg);
+  border-color: var(--guard-color-info-border);
 }
 
 .summary-stat-card.is-error {
-  background: #fef2f2;
+  background: var(--guard-color-danger-bg);
 }
 
 .summary-stat-card.is-warning {
-  background: #fff7ed;
+  background: var(--guard-color-warning-soft);
 }
 
 .summary-stat-card.is-review {
-  background: #fffbeb;
+  background: var(--guard-color-warning-bg);
 }
 
 .summary-breakdown {
@@ -263,7 +263,7 @@
 .summary-review-progress-header h3 {
   margin: 0;
   font-size: 15px;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .summary-review-progress-grid {
@@ -278,30 +278,30 @@
   gap: 4px;
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--guard-color-border);
 }
 
 .summary-review-card strong {
   font-size: 28px;
   line-height: 1;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .summary-review-card small {
-  color: #64748b;
+  color: var(--guard-color-text-muted);
   font-size: 12px;
 }
 
 .summary-review-card.is-confirmed {
-  background: #fef2f2;
+  background: var(--guard-color-danger-bg);
 }
 
 .summary-review-card.is-dismissed {
-  background: #f8fafc;
+  background: var(--guard-color-surface-muted);
 }
 
 .summary-review-card.is-pending {
-  background: #fffbeb;
+  background: var(--guard-color-warning-bg);
 }
 
 .summary-breakdown-header {
@@ -314,7 +314,7 @@
 .summary-breakdown-header h3 {
   margin: 0;
   font-size: 15px;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .summary-priority-list {
@@ -329,21 +329,21 @@
   gap: 12px;
   align-items: center;
   padding: 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--guard-color-surface-muted);
+  border: 1px solid var(--guard-color-border);
   border-radius: 8px;
 }
 
 .summary-priority-item strong {
   display: block;
   margin-bottom: 4px;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
   font-size: 14px;
 }
 
 .summary-priority-item p {
   margin: 0;
-  color: #475569;
+  color: var(--guard-color-text-secondary);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -360,7 +360,7 @@
 
 .summary-priority-icon.is-error {
   background: #fee2e2;
-  color: #b91c1c;
+  color: var(--guard-color-danger-text);
 }
 
 .summary-priority-icon.is-warning {
@@ -370,7 +370,7 @@
 
 .summary-priority-icon.is-review {
   background: #fef3c7;
-  color: #a16207;
+  color: var(--guard-color-warning-text);
 }
 
 .summary-priority-value {
@@ -378,7 +378,7 @@
   text-align: right;
   font-size: 22px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--guard-color-text-primary);
 }
 
 .success-message {
@@ -396,7 +396,7 @@
 .success-message p {
   margin: 0;
   font-size: 14px;
-  color: #166534;
+  color: var(--guard-color-success-text);
   font-weight: 600;
 }
 
