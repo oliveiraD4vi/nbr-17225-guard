@@ -2,7 +2,7 @@
  * Motor de auditoria de acessibilidade
  */
 import { t } from '@/i18n';
-import type { AuditHistoryEntry, AuditResult, Violation } from '@/types';
+import type { AuditHistoryEntry, AuditResult } from '@/types';
 import {
   dedupeAndSortAuditHistory,
   getDisplayAuditResult,

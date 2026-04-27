@@ -8,11 +8,23 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "stage-lint": "lint-staged",
     "preview": "vite preview",
     "verify:rules": "node scripts/verify-rules.mjs",
     "type-check": "tsc --noEmit",
     "test:audit-history": "pnpm build && node scripts/test-audit-history.mjs",
     "test:audit-history-utils": "node scripts/test-audit-history-utils.mjs"
+  },
+  "lint-staged": {
+    "*.{md,json,css,js,mjs,ts,tsx,html}": [
+      "prettier --write"
+    ],
+    "*.{js,mjs,ts,tsx}": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "antd": "^6.3.4",
@@ -28,9 +40,12 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.57.0",
     "vite": "^8.0.1"

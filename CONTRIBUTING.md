@@ -7,6 +7,7 @@ Obrigado por considerar uma contribuição para o Guardião NBR 17225.
 A versão 1 deste projeto trabalha com um catálogo fechado de 94 itens, derivado de `docs/Analise_Documental_NBR17225.xlsx`.
 
 Neste momento:
+
 - correções de implementação dentro desse escopo são bem-vindas;
 - melhorias de UX, performance, robustez e testes são bem-vindas;
 - itens da norma fora do escopo v1 devem entrar como proposta futura, não como alteração direta do catálogo atual, salvo alinhamento explícito no repositório.
@@ -14,6 +15,7 @@ Neste momento:
 ## Antes de abrir uma contribuição
 
 Leia estes arquivos:
+
 - `README.md`
 - `RULES_ANALYSIS.md`
 - `RULES_CODE_MAPPING.md`
@@ -24,6 +26,7 @@ Eles explicam o escopo atual, o mapeamento das regras e as divergências residua
 ## Ambiente local
 
 Pré-requisitos:
+
 - Node.js
 - pnpm
 - navegador Chromium compatível com Manifest V3
@@ -37,6 +40,8 @@ pnpm install
 Validação local:
 
 ```bash
+pnpm format:check
+pnpm lint
 pnpm type-check
 pnpm build
 pnpm verify:rules
@@ -75,10 +80,13 @@ Checklist recomendado:
 8. valide a mudança com:
 
 ```bash
+pnpm format:check
+pnpm lint
 pnpm verify:rules
 pnpm type-check
 pnpm build
 ```
+
 ## Regras fora do escopo v1
 
 Os itens abaixo já foram identificados como candidatos a contribuições futuras, mas não fazem parte da implementação da v1:
@@ -98,6 +106,7 @@ Os itens abaixo já foram identificados como candidatos a contribuições futura
 ## Pull requests
 
 Ao abrir um PR, descreva:
+
 - o problema;
 - a abordagem adotada;
 - os riscos conhecidos;

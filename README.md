@@ -67,14 +67,14 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 O escopo da versão 1 vem de `docs/Analise_Documental_NBR17225.xlsx`. O catálogo local da v1 contém 94 itens.
 
-| Situação | Quantidade |
-| --- | ---: |
-| Requisitos documentados | 94 |
-| Regras implementadas no motor | 94 |
-| Regras ausentes | 0 |
-| Totalmente automatizáveis | 40 |
-| Semi-automatizáveis | 53 |
-| Não automatizáveis | 1 |
+| Situação                      | Quantidade |
+| ----------------------------- | ---------: |
+| Requisitos documentados       |         94 |
+| Regras implementadas no motor |         94 |
+| Regras ausentes               |          0 |
+| Totalmente automatizáveis     |         40 |
+| Semi-automatizáveis           |         53 |
+| Não automatizáveis            |          1 |
 
 Importante:
 
@@ -189,6 +189,10 @@ Depois, carregue a pasta `dist/` em `chrome://extensions/` usando `Carregar exte
 pnpm dev
 pnpm build
 pnpm lint
+pnpm lint:fix
+pnpm format
+pnpm format:check
+pnpm stage-lint
 pnpm type-check
 pnpm verify:rules
 pnpm test:audit-history
@@ -233,7 +237,7 @@ Cada regra implementa a interface `Rule` e declara:
 Exemplo:
 
 ```ts
-import type { Rule, Violation } from '@/types';
+import type { Rule, Violation } from '@/types'
 
 export const myRule: Rule = {
   id: 'my-rule',
@@ -244,9 +248,9 @@ export const myRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    return [];
+    return []
   },
-};
+}
 ```
 
 ### Processo atual para adicionar uma nova regra
@@ -273,6 +277,7 @@ pnpm verify:rules
 pnpm type-check
 pnpm build
 ```
+
 ## Referências
 
 - ABNT NBR 17225:2025
