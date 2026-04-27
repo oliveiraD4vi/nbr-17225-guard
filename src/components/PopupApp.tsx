@@ -142,7 +142,7 @@ export const PopupApp: React.FC = () => {
   } | null>(null);
   const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false);
   const [quotaRecoveryLoading, setQuotaRecoveryLoading] = useState(false);
-  const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon.png'), []);
+  const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon-white.png'), []);
 
   const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
     setAuditHistory((currentHistory) =>
