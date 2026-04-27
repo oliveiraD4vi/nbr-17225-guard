@@ -141,6 +141,21 @@ Benefício:
 - reduz retrabalho de revisão textual;
 - dificulta reintrodução de mojibake e strings dispersas.
 
+### 10. Formalizar a estratégia de limites de storage
+
+Objetivo:
+- tornar previsível o comportamento da extensão quando o `chrome.storage.local` atingir o limite.
+
+Sugestões:
+- registrar política de retenção para histórico por URL e retenção global;
+- indicar ao usuário, com antecedência, quando o volume salvo estiver alto;
+- avaliar compactação preventiva antes de chegar ao erro;
+- documentar o critério de exclusão da auditoria mais antiga.
+
+Benefício:
+- reduz surpresa operacional;
+- torna a recuperação de `QuotaExceeded` mais transparente.
+
 ## Backlog futuro fora do escopo v1
 
 Itens da norma já identificados, mas não incluídos na v1:
