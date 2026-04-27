@@ -7,30 +7,37 @@ Este arquivo organiza melhorias recomendadas para aumentar robustez, previsibili
 ### 1. Ampliar testes automatizados para histórico e revisão humana
 
 Objetivo:
+
 - garantir que persistência e comparação de auditorias não se deteriorem com refactors futuros.
 
 Sugestões:
-- testar herança de `humanReviewStatus` e `userNote` entre auditorias equivalentes;
+
+- testar herança de `humanReviewStatus`, `userNote` e correções de contraste entre auditorias equivalentes;
 - testar deduplicação e ordenação do histórico por URL;
 - testar comparação entre auditorias com itens novos, resolvidos e persistentes;
-- testar exclusão visual de itens descartados na revisão humana.
+- testar exclusão visual de itens descartados na revisão humana;
+- testar os fluxos de recuperação após `QuotaExceeded`.
 
 Benefício:
+
 - reduz risco de inconsistência silenciosa;
 - protege o fluxo mais sensível do produto hoje.
 
 ### 2. Tornar mais explícita a diferença entre fonte da verdade por aba e por URL
 
 Objetivo:
+
 - manter a estrutura de storage simples e previsível.
 
 Sugestões:
+
 - revisar o uso residual de `auditResult` global no storage e, se possível, descontinuá-lo de vez;
 - documentar claramente:
   - `auditResultsByTab` como estado corrente da aba;
   - `auditHistoryByUrl` como histórico consolidado da URL.
 
 Benefício:
+
 - reduz ambiguidade na manutenção;
 - evita bugs de sincronização entre abas.
 
@@ -39,9 +46,11 @@ Benefício:
 ### 3. Reduzir heurísticas frágeis nas regras mais sensíveis
 
 Objetivo:
+
 - diminuir ruído, especialmente falsos positivos em verificações sem contexto suficiente.
 
 Sugestões:
+
 - revisar continuamente regras como:
   - `5.13.3`
   - `5.13.8`
@@ -51,108 +60,145 @@ Sugestões:
 - documentar em comentários curtos o limite observável de cada heurística mais frágil.
 
 Benefício:
+
 - aproxima o motor do comportamento esperado em ferramentas maduras;
-- melhora confiança no resultado.
+- melhora a confiança no resultado.
 
 ### 4. Melhorar a exportação comparativa
 
 Objetivo:
+
 - tornar os relatórios de evolução mais úteis para acompanhamento real de melhoria ou regressão.
 
 Sugestões:
+
 - incluir resumo executivo padronizado nas exportações;
 - indicar com mais clareza itens herdados, confirmados, descartados e pendentes;
 - permitir exportação comparativa já consolidada por requisito e recomendação;
 - revisar a formatação dos percentuais para leitura mais consistente.
 
 Benefício:
+
 - melhora a utilidade prática do histórico para equipes de produto e acessibilidade.
 
 ### 5. Expandir o apoio visual para regras sensíveis
 
 Objetivo:
+
 - aumentar a capacidade de análise assistida sem inflar o número de heurísticas frágeis no motor.
 
 Sugestões:
+
 - ampliar a board de contraste para outros cenários visuais quando houver metadados estruturados suficientes;
 - avaliar inclusão de explicações curtas por contexto visual, como texto, componente, gráfico e foco;
 - permitir reaproveitar parâmetros ajustados pelo usuário como referência local de correção.
 
 Benefício:
+
 - aproxima a experiência de ferramentas maduras;
 - ajuda o usuário a sair do diagnóstico e ir para a correção com menos fricção.
 
 ### 6. Refinar performance de renderização do popup
 
 Objetivo:
+
 - reduzir recomputação e rerender em listas, histórico e exportações.
 
 Sugestões:
+
 - estabilizar callbacks e estruturas de dados mais pesadas em `PopupApp.tsx`;
 - revisar componentes com listas longas para uso criterioso de `memo`, `useMemo` e `useCallback`;
 - evitar recriar arrays de ações e abas quando não houver mudança de dependência real.
 
 Benefício:
-- melhora responsividade;
+
+- melhora a responsividade;
 - reduz custo de manutenção da UI.
+
+### 7. Consolidar a política de tema compartilhado
+
+Objetivo:
+
+- evitar regressões visuais ao evoluir popup, relatório e superfícies do Ant Design.
+
+Sugestões:
+
+- manter variáveis CSS como fonte da verdade do tema;
+- continuar resolvendo tokens do Ant Design a partir dessas variáveis, evitando `var(...)` cru dentro do `ConfigProvider`;
+- testar explicitamente CTAs principais, tags, modais, drawers, tooltips e popovers em revisões visuais.
+
+Benefício:
+
+- preserva consistência entre superfícies;
+- reduz risco de regressão visual em componentes interativos.
 
 ## Prioridade baixa
 
-### 7. Ampliar documentação pública do projeto
+### 8. Ampliar documentação pública do projeto
 
 Objetivo:
+
 - facilitar contribuição externa sem exigir leitura completa do código.
 
 Sugestões:
+
 - adicionar convenções de arquitetura do motor de regras;
 - documentar o ciclo completo da auditoria:
   - execução;
   - persistência;
   - histórico;
-- comparação;
-- exportação;
+  - comparação;
+  - exportação;
 - incluir exemplos de contribuição para novas regras dentro do escopo v1.
 
-### 8. Revisar logs e telemetria de depuração local
+### 9. Revisar logs e telemetria de depuração local
 
 Objetivo:
+
 - facilitar diagnóstico quando algum fluxo falhar em ambiente real.
 
 Sugestões:
+
 - padronizar logs do bootstrap, content script e auditoria;
 - diferenciar claramente:
   - falha de injeção;
-- falha de carregamento de chunk;
-- falha de mensagem;
-- falha de regra.
+  - falha de carregamento de chunk;
+  - falha de mensagem;
+  - falha de regra.
 
-### 9. Formalizar a política de catálogo de textos
+### 10. Formalizar a política de catálogo de textos
 
 Objetivo:
+
 - evitar regressões em que texto de usuário volte a aparecer fora do catálogo.
 
 Sugestões:
+
 - definir em `CONTRIBUTING.md` que texto de interface, exportação e mensagens visíveis deve usar o catálogo;
 - deixar explícito que apenas logs técnicos e heurísticas internas podem permanecer fora do i18n;
 - adicionar uma checagem simples em revisão ou script para localizar texto novo fora do catálogo.
 
 Benefício:
+
 - preserva consistência de linguagem;
 - reduz retrabalho de revisão textual;
 - dificulta reintrodução de mojibake e strings dispersas.
 
-### 10. Formalizar a estratégia de limites de storage
+### 11. Formalizar a estratégia de limites de storage
 
 Objetivo:
+
 - tornar previsível o comportamento da extensão quando o `chrome.storage.local` atingir o limite.
 
 Sugestões:
+
 - registrar política de retenção para histórico por URL e retenção global;
 - indicar ao usuário, com antecedência, quando o volume salvo estiver alto;
 - avaliar compactação preventiva antes de chegar ao erro;
 - documentar o critério de exclusão da auditoria mais antiga.
 
 Benefício:
+
 - reduz surpresa operacional;
 - torna a recuperação de `QuotaExceeded` mais transparente.
 

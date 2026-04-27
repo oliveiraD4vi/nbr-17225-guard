@@ -513,3 +513,78 @@
   max-width: 100%;
   width: 100%;
 }
+
+.popup-app .ant-modal .ant-modal-content,
+.popup-app .ant-modal .ant-modal-header,
+.popup-app .ant-drawer .ant-drawer-content,
+.popup-app .ant-drawer .ant-drawer-header,
+.popup-app .ant-drawer .ant-drawer-body,
+.popup-app .ant-popover .ant-popover-inner,
+.popup-app .ant-tooltip .ant-tooltip-inner,
+.popup-app .ant-dropdown .ant-dropdown-menu,
+.popup-app .ant-select-dropdown,
+.popup-app .ant-picker-dropdown,
+.popup-app .ant-color-picker-panel {
+  background: var(--guard-color-surface);
+  color: var(--guard-color-text-primary);
+}
+
+.popup-app .ant-modal .ant-modal-content,
+.popup-app .ant-drawer .ant-drawer-content,
+.popup-app .ant-popover .ant-popover-inner,
+.popup-app .ant-dropdown .ant-dropdown-menu,
+.popup-app .ant-select-dropdown,
+.popup-app .ant-picker-dropdown,
+.popup-app .ant-color-picker-panel,
+.popup-app .ant-card,
+.popup-app .ant-collapse,
+.popup-app .ant-collapse > .ant-collapse-item,
+.popup-app .ant-collapse-content,
+.popup-app .ant-tabs .ant-tabs-content-holder,
+.popup-app .ant-empty,
+.popup-app .ant-alert,
+.popup-app .ant-list,
+.popup-app .ant-list-item,
+.popup-app .ant-statistic,
+.popup-app .ant-input,
+.popup-app .ant-input-affix-wrapper,
+.popup-app .ant-input-number,
+.popup-app .ant-input-number-input-wrap,
+.popup-app .ant-select-selector,
+.popup-app .ant-tag {
+  color: var(--guard-color-text-primary);
+}
+
+.popup-app .ant-tag,
+.popup-app .ant-tag.ant-tag-default,
+.popup-app .ant-btn-default,
+.popup-app .ant-btn-color-default,
+.popup-app .ant-input,
+.popup-app .ant-input-affix-wrapper,
+.popup-app .ant-select-selector,
+.popup-app .ant-collapse-content-box {
+  background: var(--guard-color-surface);
+}
+
+.popup-app .ant-btn-default,
+.popup-app .ant-btn-color-default {
+  color: var(--guard-color-text-primary);
+  border-color: var(--guard-color-border);
+}
+
+.popup-app .ant-modal .ant-modal-title,
+.popup-app .ant-drawer .ant-drawer-title,
+.popup-app .ant-popover .ant-popover-title,
+.popup-app .ant-select-item,
+.popup-app .ant-dropdown-menu-item,
+.popup-app .ant-statistic-content,
+.popup-app .ant-empty-description,
+.popup-app .ant-tabs-tab-btn,
+.popup-app .ant-alert-description,
+.popup-app .ant-alert-message {
+  color: var(--guard-color-text-primary);
+}
+
+.popup-app .ant-tag {
+  border-color: var(--guard-color-border);
+}
