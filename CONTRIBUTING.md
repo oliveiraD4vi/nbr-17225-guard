@@ -1,16 +1,16 @@
 # Contribuindo
 
-Obrigado por considerar uma contribuição para o Guardião NBR 17225.
+Este guia descreve como contribuir com a extensão open-source do Guardião NBR 17225.
 
 ## Escopo atual
 
-A versão 1 deste projeto trabalha com um catálogo fechado de 94 itens, derivado de `docs/Analise_Documental_NBR17225.xlsx`.
+A V1 Farol trabalha com um catálogo fechado de 112 itens: 96 requisitos normativos e 16 recomendações priorizadas, revisados contra a referência pública da ABNT NBR 17225.
 
 Neste momento:
 
 - correções de implementação dentro desse escopo são bem-vindas;
 - melhorias de UX, performance, robustez e testes são bem-vindas;
-- itens da norma fora do escopo v1 devem entrar como proposta futura, não como alteração direta do catálogo atual, salvo alinhamento explícito no repositório.
+- recomendações fora da V1 devem entrar como proposta futura, não como alteração direta do catálogo atual, salvo alinhamento explícito no repositório.
 
 ## Antes de abrir uma contribuição
 
@@ -20,6 +20,8 @@ Leia estes arquivos:
 - `RULES_ANALYSIS.md`
 - `RULES_CODE_MAPPING.md`
 - `RULES_NORMATIVE_MATRIX.md`
+- `FUTURE_RULES_PLAN.md`
+- `VERSIONING.md`
 
 Eles explicam o escopo atual, o mapeamento das regras e as divergências residuais já conhecidas.
 
@@ -45,8 +47,9 @@ Validação local:
 pnpm format:check
 pnpm lint
 pnpm type-check
-pnpm build
 pnpm verify:rules
+pnpm test
+pnpm build
 ```
 
 Validação automática no fluxo de Git:
@@ -58,7 +61,7 @@ Validação automática no fluxo de Git:
 
 - mantenha o texto da interface em português brasileiro UTF-8;
 - concentre novos textos no catálogo de i18n, evitando strings soltas em componentes;
-- preserve o escopo v1 das regras;
+- preserve o escopo da V1 Farol;
 - prefira mudanças pequenas e bem delimitadas;
 - siga os padrões já existentes de tipagem, persistência e nomes de arquivos;
 - não misture refatoração ampla com correção funcional se isso puder ser separado;
@@ -84,32 +87,22 @@ Checklist recomendado:
 5. use apenas chaves de catálogo no código, sem texto visível hardcoded;
 6. se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação;
 7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md`, `FUTURE_RULES_PLAN.md` e `README.md`;
-8. quando a matriz normativa mudar, atualize também a landing page em `../nbr-17225-guard-page` rodando `pnpm sync:rules` naquele repositório.
-9. valide a mudança com:
+8. quando a matriz normativa mudar, abra ou referencie uma issue pública solicitando a atualização correspondente da landing page;
+9. se a alteração mudar, remover ou criar uma função de verificação, inclua no PR o link da issue relacionada à atualização da página pública de regras;
+10. valide a mudança com:
 
 ```bash
 pnpm format:check
 pnpm lint
 pnpm verify:rules
 pnpm type-check
+pnpm test
 pnpm build
 ```
 
 ## Regras fora do escopo v1
 
-Os itens abaixo já foram identificados como candidatos a contribuições futuras, mas não fazem parte da implementação da v1:
-
-- `5.2.6`
-- `5.4.3`
-- `5.4.4`
-- `5.7.3`
-- `5.8.4`
-- `5.12.10`
-- `5.12.11`
-- `5.12.12`
-- `5.12.13`
-- `5.13.9`
-- `5.13.11`
+As recomendações ainda fora da V1 Farol estão listadas em `FUTURE_RULES_PLAN.md`. Elas devem ser tratadas como backlog público para contribuições futuras.
 
 ## Pull requests
 

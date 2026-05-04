@@ -1,6 +1,6 @@
 # Guardião NBR 17225
 
-Verificador de acessibilidade para navegadores Chromium, alinhado ao escopo v1 do catálogo documental da ABNT NBR 17225:2025 e aos requisitos obrigatórios adicionais já incorporados ao motor.
+Verificador de acessibilidade para navegadores Chromium, alinhado à V1 Farol do catálogo documental da ABNT NBR 17225:2025.
 
 ## Visão geral
 
@@ -10,7 +10,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ### Auditoria e diagnóstico
 
-- cobertura de 97 regras revisadas contra a referência pública da ABNT NBR 17225: 96 requisitos normativos e 1 recomendação normativa;
+- cobertura de 112 regras revisadas contra a referência pública da ABNT NBR 17225: 96 requisitos normativos e 16 recomendações normativas;
 - execução por aba, com suporte a páginas `http(s)` e arquivos locais com permissão;
 - auditoria por escopo:
   - somente requisitos;
@@ -42,10 +42,11 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ### Apoio à decisão
 
-- nota de requisitos baseada apenas nos requisitos do escopo v1;
+- nota geral baseada em requisitos, recomendações do escopo atual e conclusão da revisão humana;
 - feedback visual para a nota, com leitura rápida de risco;
 - contadores do resumo baseados no estado atual da revisão humana, evitando inflar pendências já descartadas;
 - relatório detalhado em página dedicada.
+- exportação de resumo simples da auditoria diretamente pela aba de resumo.
 
 ### Simulador de visão
 
@@ -61,7 +62,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 - verificação automática de cobertura entre catálogo documentado, requisitos incorporados e regras implementadas;
 - matriz normativa formal em `RULES_NORMATIVE_MATRIX.md`;
-- plano de expansão futura em `FUTURE_RULES_PLAN.md`, com as 49 recomendações ainda não implementadas listadas individualmente;
+- plano de expansão futura em `FUTURE_RULES_PLAN.md`, com as 34 recomendações ainda não implementadas listadas individualmente;
 - centralização de textos visíveis em catálogo de i18n PT-BR UTF-8;
 - tema centralizado em variáveis CSS, compartilhado entre popup, relatório e superfícies do Ant Design;
 - resolução correta dos tokens do Ant Design a partir das variáveis CSS, preservando consistência visual em CTAs, tags, modais, drawers, tooltips e popovers.
@@ -77,17 +78,17 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ## Cobertura de regras
 
-O escopo implementado atual contém o catálogo v1 de 97 regras revisado contra a referência pública da ABNT NBR 17225.
+O escopo implementado atual contém a V1 Farol, com 112 regras revisadas contra a referência pública da ABNT NBR 17225.
 
 | Situação                               | Quantidade |
 | -------------------------------------- | ---------: |
-| Itens documentados                     |         97 |
-| Regras implementadas no motor          |         97 |
+| Itens documentados                     |        112 |
+| Regras implementadas no motor          |        112 |
 | Regras ausentes                        |          0 |
 | Requisitos normativos implementados    |         96 |
-| Recomendações normativas implementadas |          1 |
-| Totalmente automatizáveis              |         41 |
-| Semi-automatizáveis                    |         55 |
+| Recomendações normativas implementadas |         16 |
+| Totalmente automatizáveis              |         46 |
+| Semi-automatizáveis                    |         65 |
 | Não automatizáveis                     |          1 |
 
 Importante:
@@ -102,10 +103,11 @@ Consulte também:
 - [RULES_CODE_MAPPING.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_CODE_MAPPING.md)
 - [RULES_NORMATIVE_MATRIX.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_NORMATIVE_MATRIX.md)
 - [FUTURE_RULES_PLAN.md](C:/Users/davic/Documents/Development/nbr-17225-guard/FUTURE_RULES_PLAN.md)
+- [VERSIONING.md](C:/Users/davic/Documents/Development/nbr-17225-guard/VERSIONING.md)
 
 ## Rastreabilidade pública
 
-A landing page do projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 97 regras implementadas:
+A landing page do projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 112 regras implementadas:
 
 - referência da ABNT NBR 17225;
 - recorte normativo interpretativo com referência à fonte pública;
@@ -180,20 +182,25 @@ O script verifica:
 
 ## Escopo da ABNT NBR 17225 x escopo implementado
 
-A norma possui recomendações adicionais fora do escopo implementado aqui. Elas não serão adicionadas agora, mas estão registradas como backlog para futuras contribuições.
+A norma possui recomendações adicionais fora do escopo implementado aqui. Elas não serão adicionadas à V1 Farol, mas estão registradas como backlog para futuras contribuições em `FUTURE_RULES_PLAN.md`.
 
-Itens já identificados fora do escopo implementado:
+## Origem, abertura e governança pública
 
-- `5.4.3`
-- `5.4.4`
-- `5.7.3`
-- `5.8.4`
-- `5.12.10`
-- `5.12.11`
-- `5.12.12`
-- `5.12.13`
-- `5.13.9`
-- `5.13.11`
+O Guardião NBR 17225 nasceu como projeto acadêmico e mantém a extensão como software open-source hoje e sempre.
+
+- Espelho público da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror>
+- Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror/issues>
+- Domínio recomendado para a landing page: `guardiaonbr17225.com.br`
+- Página pública de regras: `https://guardiaonbr17225.com.br/rules.html`
+- Política de privacidade: `https://guardiaonbr17225.com.br/privacy.html`
+
+A landing page é a vitrine oficial do projeto e não faz parte do código open-source da extensão. Bugs, pedidos de ajuste visual, problemas de conteúdo e solicitações de atualização da página de regras devem ser abertos como issue no GitHub público da extensão.
+
+Quando um PR alterar, remover ou criar uma função de verificação de regra, o PR deve referenciar a issue que solicita a atualização correspondente na landing page. A alteração da landing page é mantida separadamente.
+
+## Versionamento
+
+A versão atual é `1.0.0`, nomeada como **V1 Farol**. A política de nomes e evolução está documentada em `VERSIONING.md`.
 
 ## Instalação
 
