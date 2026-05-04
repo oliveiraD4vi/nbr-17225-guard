@@ -3,9 +3,9 @@
  * ABNT NBR 17225:2025
  */
 
-import { t } from '@/i18n';
-import type { Rule, Violation } from '@/types';
-import { createViolation, isElementVisible } from '@/utils';
+import { t } from '@/i18n'
+import type { Rule, Violation } from '@/types'
+import { createViolation, getAccessibleName, isElementVisible } from '@/utils'
 
 export const imageAltTextRule: Rule = {
   id: 'image-alt-text',
@@ -16,29 +16,31 @@ export const imageAltTextRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
-      if (!isElementVisible(img)) return;
-      const alt = img.getAttribute('alt');
-      const ariaLabel = img.getAttribute('aria-label');
-      const role = img.getAttribute('role');
-      if (role === 'presentation' || role === 'none') return;
+      if (!isElementVisible(img)) return
+      const alt = img.getAttribute('alt')
+      const ariaLabel = img.getAttribute('aria-label')
+      const role = img.getAttribute('role')
+      if (role === 'presentation' || role === 'none') return
 
-      if ((!alt || !alt.trim()) && (!ariaLabel || !ariaLabel.trim())) {
-        violations.push(createViolation(imageAltTextRule, {
-          element: img,
-          message: t('rules.images.imageAltText.message'),
-          suggestion: t('rules.images.imageAltText.suggestion'),
-          remediationAdvice: t('rules.images.imageAltText.remediation'),
-          customIdPrefix: 'image-alt',
-        }));
+      if (alt === null && (!ariaLabel || !ariaLabel.trim())) {
+        violations.push(
+          createViolation(imageAltTextRule, {
+            element: img,
+            message: t('rules.images.imageAltText.message'),
+            suggestion: t('rules.images.imageAltText.suggestion'),
+            remediationAdvice: t('rules.images.imageAltText.remediation'),
+            customIdPrefix: 'image-alt',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const imageFunctionalAltRule: Rule = {
   id: 'image-functional-alt',
@@ -49,25 +51,30 @@ export const imageFunctionalAltRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLImageElement>('a img, button img').forEach((img) => {
-      if (!isElementVisible(img)) return;
-      const alt = img.getAttribute('alt');
-      if (!alt || !alt.trim()) {
-        violations.push(createViolation(imageFunctionalAltRule, {
-          element: img,
-          message: t('rules.images.imageFunctionalAlt.message'),
-          suggestion: t('rules.images.imageFunctionalAlt.suggestion'),
-          remediationAdvice: t('rules.images.imageFunctionalAlt.remediation'),
-          customIdPrefix: 'image-functional',
-        }));
-      }
-    });
+      if (!isElementVisible(img)) return
+      const alt = img.getAttribute('alt')
+      const parentControl = img.closest<HTMLElement>('a, button')
+      const parentName = parentControl ? getAccessibleName(parentControl).trim() : ''
 
-    return violations;
+      if ((!alt || !alt.trim()) && !parentName) {
+        violations.push(
+          createViolation(imageFunctionalAltRule, {
+            element: img,
+            message: t('rules.images.imageFunctionalAlt.message'),
+            suggestion: t('rules.images.imageFunctionalAlt.suggestion'),
+            remediationAdvice: t('rules.images.imageFunctionalAlt.remediation'),
+            customIdPrefix: 'image-functional',
+          }),
+        )
+      }
+    })
+
+    return violations
   },
-};
+}
 
 export const imageDecorativeRule: Rule = {
   id: 'image-decorative',
@@ -78,31 +85,40 @@ export const imageDecorativeRule: Rule = {
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
-      if (!isElementVisible(img)) return;
-      const alt = img.getAttribute('alt');
-      const role = img.getAttribute('role');
-      const ariaHidden = img.getAttribute('aria-hidden');
-      const className = img.className.toLowerCase();
-      const isSmallAsset = img.width <= 48 && img.height <= 48;
+      if (!isElementVisible(img)) return
+      const alt = img.getAttribute('alt')
+      const role = img.getAttribute('role')
+      const ariaHidden = img.getAttribute('aria-hidden')
+      const className = img.className.toLowerCase()
+      const isSmallAsset = img.width <= 48 && img.height <= 48
 
-      const looksDecorative = isSmallAsset && ['icon', 'decor', 'divider', 'spacer', 'background'].some((token) => className.includes(token));
-      if (looksDecorative && !(alt === '' || role === 'presentation' || role === 'none' || ariaHidden === 'true')) {
-        violations.push(createViolation(imageDecorativeRule, {
-          element: img,
-          message: t('rules.images.imageDecorative.message'),
-          suggestion: t('rules.images.imageDecorative.suggestion'),
-          remediationAdvice: t('rules.images.imageDecorative.remediation'),
-          customIdPrefix: 'image-decorative',
-        }));
+      const looksDecorative =
+        isSmallAsset &&
+        ['icon', 'decor', 'divider', 'spacer', 'background'].some((token) =>
+          className.includes(token),
+        )
+      if (
+        looksDecorative &&
+        !(alt === '' || role === 'presentation' || role === 'none' || ariaHidden === 'true')
+      ) {
+        violations.push(
+          createViolation(imageDecorativeRule, {
+            element: img,
+            message: t('rules.images.imageDecorative.message'),
+            suggestion: t('rules.images.imageDecorative.suggestion'),
+            remediationAdvice: t('rules.images.imageDecorative.remediation'),
+            customIdPrefix: 'image-decorative',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const complexImageDescriptionRule: Rule = {
   id: 'complex-image-description',
@@ -113,33 +129,38 @@ export const complexImageDescriptionRule: Rule = {
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
-      if (!isElementVisible(img)) return;
-      const alt = img.getAttribute('alt') || '';
-      const className = img.className.toLowerCase();
-      const src = img.src.toLowerCase();
-      const sufficientlyLarge = img.width >= 120 || img.height >= 120;
-      const looksComplex = ['chart', 'graph', 'map', 'diagram', 'infographic'].some((token) =>
-        className.includes(token) || src.includes(token) || alt.toLowerCase().includes(token),
-      );
-      const hasLongDescription = Boolean(img.getAttribute('longdesc') || img.getAttribute('aria-describedby'));
+      if (!isElementVisible(img)) return
+      const alt = img.getAttribute('alt') || ''
+      const className = img.className.toLowerCase()
+      const src = img.src.toLowerCase()
+      const sufficientlyLarge = img.width >= 120 || img.height >= 120
+      const looksComplex = ['chart', 'graph', 'map', 'diagram', 'infographic'].some(
+        (token) =>
+          className.includes(token) || src.includes(token) || alt.toLowerCase().includes(token),
+      )
+      const hasLongDescription = Boolean(
+        img.getAttribute('longdesc') || img.getAttribute('aria-describedby'),
+      )
 
       if (looksComplex && sufficientlyLarge && !hasLongDescription) {
-        violations.push(createViolation(complexImageDescriptionRule, {
-          element: img,
-          message: t('rules.images.complexImageDescription.message'),
-          suggestion: t('rules.images.complexImageDescription.suggestion'),
-          remediationAdvice: t('rules.images.complexImageDescription.remediation'),
-          customIdPrefix: 'image-complex',
-        }));
+        violations.push(
+          createViolation(complexImageDescriptionRule, {
+            element: img,
+            message: t('rules.images.complexImageDescription.message'),
+            suggestion: t('rules.images.complexImageDescription.suggestion'),
+            remediationAdvice: t('rules.images.complexImageDescription.remediation'),
+            customIdPrefix: 'image-complex',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const imageOfTextRule: Rule = {
   id: 'image-of-text',
@@ -150,28 +171,31 @@ export const imageOfTextRule: Rule = {
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLImageElement>('img').forEach((img) => {
-      if (!isElementVisible(img)) return;
-      const alt = (img.getAttribute('alt') || '').trim();
-      const metadata = `${img.src} ${img.className} ${alt}`.toLowerCase();
-      const looksLikeTextAsset = /\b(text|texto|title|titulo|headline|heading|banner|cta|button)\b/.test(metadata);
+      if (!isElementVisible(img)) return
+      const alt = (img.getAttribute('alt') || '').trim()
+      const metadata = `${img.src} ${img.className} ${alt}`.toLowerCase()
+      const looksLikeTextAsset =
+        /\b(text|texto|title|titulo|headline|heading|banner|cta|button)\b/.test(metadata)
 
       if (looksLikeTextAsset && alt.length >= 12 && !img.closest('a, button')) {
-        violations.push(createViolation(imageOfTextRule, {
-          element: img,
-          message: t('rules.images.imageOfText.message'),
-          suggestion: t('rules.images.imageOfText.suggestion'),
-          remediationAdvice: t('rules.images.imageOfText.remediation'),
-          customIdPrefix: 'image-text',
-        }));
+        violations.push(
+          createViolation(imageOfTextRule, {
+            element: img,
+            message: t('rules.images.imageOfText.message'),
+            suggestion: t('rules.images.imageOfText.suggestion'),
+            remediationAdvice: t('rules.images.imageOfText.remediation'),
+            customIdPrefix: 'image-text',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const imageRules: Rule[] = [
   imageAltTextRule,
@@ -179,4 +203,4 @@ export const imageRules: Rule[] = [
   imageDecorativeRule,
   complexImageDescriptionRule,
   imageOfTextRule,
-];
+]

@@ -3,15 +3,15 @@
  * ABNT NBR 17225:2025
  */
 
-import { t } from '@/i18n';
-import type { Rule, Violation } from '@/types';
+import { t } from '@/i18n'
+import type { Rule, Violation } from '@/types'
 import {
   createViolation,
   getFocusableElements,
   isElementFullyInViewport,
   isElementPartiallyInViewport,
   isElementVisible,
-} from '@/utils';
+} from '@/utils'
 
 export const keyboardAccessibilityRule: Rule = {
   id: 'keyboard-accessibility',
@@ -22,40 +22,44 @@ export const keyboardAccessibilityRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
     const interactiveElements = document.querySelectorAll<HTMLElement>(
-      'a, button, input, select, textarea, [role="button"], [role="link"], [role="menuitem"], [onclick]',
-    );
+      'button, input, select, textarea, a[href], [role="button"], [role="link"], [role="menuitem"], [onclick]',
+    )
 
     interactiveElements.forEach((el) => {
-      if (!isElementVisible(el)) return;
+      if (!isElementVisible(el)) return
 
-      const tabIndex = el.getAttribute('tabindex');
-      const hasHref = el.tagName !== 'A' || Boolean(el.getAttribute('href'));
-      const isNaturallyFocusable = ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) || (el.tagName === 'A' && hasHref);
+      const tabIndex = el.getAttribute('tabindex')
+      const hasHref = el.tagName !== 'A' || Boolean(el.getAttribute('href')?.trim())
+      const isNaturallyFocusable =
+        ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) ||
+        (el.tagName === 'A' && hasHref)
       const isGenericOnClickOnly =
         el.hasAttribute('onclick') &&
         !el.hasAttribute('role') &&
         el.tagName !== 'A' &&
         el.tagName !== 'BUTTON' &&
-        !el.matches('input, select, textarea');
+        !el.matches('input, select, textarea')
 
-      if (isGenericOnClickOnly && !el.textContent?.trim()) return;
+      if (isGenericOnClickOnly && !el.textContent?.trim()) return
 
       if (!isNaturallyFocusable && (!tabIndex || parseInt(tabIndex, 10) < 0)) {
-        violations.push(createViolation(keyboardAccessibilityRule, {
-          element: el,
-          message: t('rules.keyboard.keyboardAccessibility.message', { tagName: el.tagName }),
-          suggestion: t('rules.keyboard.keyboardAccessibility.suggestion'),
-          remediationAdvice: t('rules.keyboard.keyboardAccessibility.remediation'),
-          customIdPrefix: 'keyboard',
-        }));
+        violations.push(
+          createViolation(keyboardAccessibilityRule, {
+            element: el,
+            message: t('rules.keyboard.keyboardAccessibility.message', { tagName: el.tagName }),
+            suggestion: t('rules.keyboard.keyboardAccessibility.suggestion'),
+            remediationAdvice: t('rules.keyboard.keyboardAccessibility.remediation'),
+            customIdPrefix: 'keyboard',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const focusIndicatorRule: Rule = {
   id: 'focus-indicator',
@@ -66,32 +70,43 @@ export const focusIndicatorRule: Rule = {
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
-    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    if (!activeElement || !isElementVisible(activeElement) || !getFocusableElements().includes(activeElement)) {
-      return violations;
+    const violations: Violation[] = []
+    const activeElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (
+      !activeElement ||
+      !isElementVisible(activeElement) ||
+      !getFocusableElements().includes(activeElement)
+    ) {
+      return violations
     }
 
-    const styles = window.getComputedStyle(activeElement);
-    const outlineStyle = styles.outlineStyle;
-    const outlineWidth = parseFloat(styles.outlineWidth || '0');
-    const boxShadow = styles.boxShadow;
-    const borderStyle = styles.borderStyle;
-    const borderWidth = parseFloat(styles.borderWidth || '0');
+    const styles = window.getComputedStyle(activeElement)
+    const outlineStyle = styles.outlineStyle
+    const outlineWidth = parseFloat(styles.outlineWidth || '0')
+    const boxShadow = styles.boxShadow
+    const borderStyle = styles.borderStyle
+    const borderWidth = parseFloat(styles.borderWidth || '0')
 
-    if ((outlineStyle === 'none' || outlineWidth === 0) && (!boxShadow || boxShadow === 'none') && (borderStyle === 'none' || borderWidth === 0)) {
-      violations.push(createViolation(focusIndicatorRule, {
-        element: activeElement,
-        message: t('rules.keyboard.focusIndicator.message', { tagName: activeElement.tagName }),
-        suggestion: t('rules.keyboard.focusIndicator.suggestion'),
-        remediationAdvice: t('rules.keyboard.focusIndicator.remediation'),
-        customIdPrefix: 'focus',
-      }));
+    if (
+      (outlineStyle === 'none' || outlineWidth === 0) &&
+      (!boxShadow || boxShadow === 'none') &&
+      (borderStyle === 'none' || borderWidth === 0)
+    ) {
+      violations.push(
+        createViolation(focusIndicatorRule, {
+          element: activeElement,
+          message: t('rules.keyboard.focusIndicator.message', { tagName: activeElement.tagName }),
+          suggestion: t('rules.keyboard.focusIndicator.suggestion'),
+          remediationAdvice: t('rules.keyboard.focusIndicator.remediation'),
+          customIdPrefix: 'focus',
+        }),
+      )
     }
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const focusFullyVisibleRule: Rule = {
   id: 'focus-fully-visible',
@@ -102,22 +117,29 @@ export const focusFullyVisibleRule: Rule = {
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    if (!activeElement || !isElementVisible(activeElement) || !getFocusableElements().includes(activeElement)) {
-      return [];
+    const activeElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (
+      !activeElement ||
+      !isElementVisible(activeElement) ||
+      !getFocusableElements().includes(activeElement)
+    ) {
+      return []
     }
 
     return !isElementFullyInViewport(activeElement)
-      ? [createViolation(focusFullyVisibleRule, {
-          element: activeElement,
-          message: t('rules.keyboard.focusFullyVisible.message'),
-          suggestion: t('rules.keyboard.focusFullyVisible.suggestion'),
-          remediationAdvice: t('rules.keyboard.focusFullyVisible.remediation'),
-          customIdPrefix: 'focus-full',
-        })]
-      : [];
+      ? [
+          createViolation(focusFullyVisibleRule, {
+            element: activeElement,
+            message: t('rules.keyboard.focusFullyVisible.message'),
+            suggestion: t('rules.keyboard.focusFullyVisible.suggestion'),
+            remediationAdvice: t('rules.keyboard.focusFullyVisible.remediation'),
+            customIdPrefix: 'focus-full',
+          }),
+        ]
+      : []
   },
-};
+}
 
 export const focusPartiallyVisibleRule: Rule = {
   id: 'focus-partially-visible',
@@ -128,22 +150,29 @@ export const focusPartiallyVisibleRule: Rule = {
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    if (!activeElement || !isElementVisible(activeElement) || !getFocusableElements().includes(activeElement)) {
-      return [];
+    const activeElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null
+    if (
+      !activeElement ||
+      !isElementVisible(activeElement) ||
+      !getFocusableElements().includes(activeElement)
+    ) {
+      return []
     }
 
     return !isElementPartiallyInViewport(activeElement)
-      ? [createViolation(focusPartiallyVisibleRule, {
-          element: activeElement,
-          message: t('rules.keyboard.focusPartiallyVisible.message'),
-          suggestion: t('rules.keyboard.focusPartiallyVisible.suggestion'),
-          remediationAdvice: t('rules.keyboard.focusPartiallyVisible.remediation'),
-          customIdPrefix: 'focus-partial',
-        })]
-      : [];
+      ? [
+          createViolation(focusPartiallyVisibleRule, {
+            element: activeElement,
+            message: t('rules.keyboard.focusPartiallyVisible.message'),
+            suggestion: t('rules.keyboard.focusPartiallyVisible.suggestion'),
+            remediationAdvice: t('rules.keyboard.focusPartiallyVisible.remediation'),
+            customIdPrefix: 'focus-partial',
+          }),
+        ]
+      : []
   },
-};
+}
 
 export const focusOrderRule: Rule = {
   id: 'focus-order',
@@ -154,24 +183,26 @@ export const focusOrderRule: Rule = {
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLElement>('[tabindex]').forEach((el) => {
-      const value = Number(el.getAttribute('tabindex'));
+      const value = Number(el.getAttribute('tabindex'))
       if (value > 0) {
-        violations.push(createViolation(focusOrderRule, {
-          element: el,
-          message: t('rules.keyboard.focusOrder.message', { value }),
-          suggestion: t('rules.keyboard.focusOrder.suggestion'),
-          remediationAdvice: t('rules.keyboard.focusOrder.remediation'),
-          customIdPrefix: 'focus-order',
-        }));
+        violations.push(
+          createViolation(focusOrderRule, {
+            element: el,
+            message: t('rules.keyboard.focusOrder.message', { value }),
+            suggestion: t('rules.keyboard.focusOrder.suggestion'),
+            remediationAdvice: t('rules.keyboard.focusOrder.remediation'),
+            customIdPrefix: 'focus-order',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const focusTrapRule: Rule = {
   id: 'focus-trap',
@@ -182,29 +213,35 @@ export const focusTrapRule: Rule = {
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
-    document.querySelectorAll<HTMLElement>('dialog, [role="dialog"], [role="alertdialog"]').forEach((dialog) => {
-      const focusable = getFocusableElements(dialog);
-      const hasCloseControl = focusable.some((item) => {
-        const text = (item.textContent || item.getAttribute('aria-label') || '').toLowerCase();
-        return text.includes('fechar') || text.includes('close') || item.hasAttribute('data-close');
-      });
+    document
+      .querySelectorAll<HTMLElement>('dialog, [role="dialog"], [role="alertdialog"]')
+      .forEach((dialog) => {
+        const focusable = getFocusableElements(dialog)
+        const hasCloseControl = focusable.some((item) => {
+          const text = (item.textContent || item.getAttribute('aria-label') || '').toLowerCase()
+          return (
+            text.includes('fechar') || text.includes('close') || item.hasAttribute('data-close')
+          )
+        })
 
-      if (!hasCloseControl) {
-        violations.push(createViolation(focusTrapRule, {
-          element: dialog,
-          message: t('rules.keyboard.focusTrap.message'),
-          suggestion: t('rules.keyboard.focusTrap.suggestion'),
-          remediationAdvice: t('rules.keyboard.focusTrap.remediation'),
-          customIdPrefix: 'focus-trap',
-        }));
-      }
-    });
+        if (!hasCloseControl) {
+          violations.push(
+            createViolation(focusTrapRule, {
+              element: dialog,
+              message: t('rules.keyboard.focusTrap.message'),
+              suggestion: t('rules.keyboard.focusTrap.suggestion'),
+              remediationAdvice: t('rules.keyboard.focusTrap.remediation'),
+              customIdPrefix: 'focus-trap',
+            }),
+          )
+        }
+      })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const additionalContentPersistentRule: Rule = {
   id: 'additional-content-persistent',
@@ -215,23 +252,27 @@ export const additionalContentPersistentRule: Rule = {
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
-    document.querySelectorAll<HTMLElement>('[role="tooltip"], [aria-describedby]').forEach((element) => {
-      if (element.getAttribute('role') === 'tooltip' && !element.id) {
-        violations.push(createViolation(additionalContentPersistentRule, {
-          element,
-          message: t('rules.keyboard.additionalContentPersistent.message'),
-          suggestion: t('rules.keyboard.additionalContentPersistent.suggestion'),
-          remediationAdvice: t('rules.keyboard.additionalContentPersistent.remediation'),
-          customIdPrefix: 'tooltip-persistent',
-        }));
-      }
-    });
+    document
+      .querySelectorAll<HTMLElement>('[role="tooltip"], [aria-describedby]')
+      .forEach((element) => {
+        if (element.getAttribute('role') === 'tooltip' && !element.id) {
+          violations.push(
+            createViolation(additionalContentPersistentRule, {
+              element,
+              message: t('rules.keyboard.additionalContentPersistent.message'),
+              suggestion: t('rules.keyboard.additionalContentPersistent.suggestion'),
+              remediationAdvice: t('rules.keyboard.additionalContentPersistent.remediation'),
+              customIdPrefix: 'tooltip-persistent',
+            }),
+          )
+        }
+      })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const additionalContentDismissibleRule: Rule = {
   id: 'additional-content-dismissible',
@@ -242,24 +283,32 @@ export const additionalContentDismissibleRule: Rule = {
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
-    document.querySelectorAll<HTMLElement>('[role="tooltip"], [role="dialog"], [popover]').forEach((element) => {
-      const hasDismissControl = Boolean(element.querySelector('button, [role="button"], [aria-label*="fechar" i], [aria-label*="close" i]'));
-      if (!hasDismissControl && element.getAttribute('role') !== 'tooltip') {
-        violations.push(createViolation(additionalContentDismissibleRule, {
-          element,
-          message: t('rules.keyboard.additionalContentDismissible.message'),
-          suggestion: t('rules.keyboard.additionalContentDismissible.suggestion'),
-          remediationAdvice: t('rules.keyboard.additionalContentDismissible.remediation'),
-          customIdPrefix: 'dismissible',
-        }));
-      }
-    });
+    document
+      .querySelectorAll<HTMLElement>('[role="tooltip"], [role="dialog"], [popover]')
+      .forEach((element) => {
+        const hasDismissControl = Boolean(
+          element.querySelector(
+            'button, [role="button"], [aria-label*="fechar" i], [aria-label*="close" i]',
+          ),
+        )
+        if (!hasDismissControl && element.getAttribute('role') !== 'tooltip') {
+          violations.push(
+            createViolation(additionalContentDismissibleRule, {
+              element,
+              message: t('rules.keyboard.additionalContentDismissible.message'),
+              suggestion: t('rules.keyboard.additionalContentDismissible.suggestion'),
+              remediationAdvice: t('rules.keyboard.additionalContentDismissible.remediation'),
+              customIdPrefix: 'dismissible',
+            }),
+          )
+        }
+      })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const keyboardShortcutRule: Rule = {
   id: 'keyboard-shortcut',
@@ -269,18 +318,19 @@ export const keyboardShortcutRule: Rule = {
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
-  check: async (): Promise<Violation[]> => (
+  check: async (): Promise<Violation[]> =>
     Array.from(document.querySelectorAll<HTMLElement>('[accesskey]')).map((el) =>
       createViolation(keyboardShortcutRule, {
         element: el,
-        message: t('rules.keyboard.keyboardShortcut.message', { accessKey: el.getAttribute('accesskey') }),
+        message: t('rules.keyboard.keyboardShortcut.message', {
+          accessKey: el.getAttribute('accesskey'),
+        }),
         suggestion: t('rules.keyboard.keyboardShortcut.suggestion'),
         remediationAdvice: t('rules.keyboard.keyboardShortcut.remediation'),
         customIdPrefix: 'accesskey',
       }),
-    )
-  ),
-};
+    ),
+}
 
 export const keyboardRules: Rule[] = [
   keyboardAccessibilityRule,
@@ -292,4 +342,4 @@ export const keyboardRules: Rule[] = [
   additionalContentPersistentRule,
   additionalContentDismissibleRule,
   keyboardShortcutRule,
-];
+]

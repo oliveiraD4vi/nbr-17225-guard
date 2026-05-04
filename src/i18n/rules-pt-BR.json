@@ -631,6 +631,7 @@
       "name": "Idioma da página",
       "description": "O elemento html deve declarar o idioma principal da página",
       "message": "Elemento html sem atributo lang.",
+      "invalidMessage": "Elemento html com valor de lang potencialmente inválido: \"{{lang}}\".",
       "suggestion": "Declare o idioma principal da página no elemento html.",
       "remediation": "<html lang=\"pt-BR\">"
     },
