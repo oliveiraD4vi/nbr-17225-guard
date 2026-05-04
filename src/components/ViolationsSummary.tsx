@@ -133,6 +133,13 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                   })}
                 </Tag>
               )}
+              {auditScore.volumeScoreCap < auditScore.baseScore && (
+                <Tag color="purple">
+                  {t('summary.volumeScoreCap', {
+                    score: auditScore.volumeScoreCap,
+                  })}
+                </Tag>
+              )}
             </div>
           </div>
 

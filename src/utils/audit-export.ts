@@ -60,6 +60,9 @@ export function buildAuditSummaryMarkdown(result: AuditResult): string {
     `## ${t('summaryExport.scoreTitle')}`,
     '',
     `- ${t('summaryExport.generalScore')}: ${auditScore.score}/100`,
+    `- ${t('summaryExport.baseScore')}: ${auditScore.baseScore}/100`,
+    `- ${t('summaryExport.volumeScoreCap')}: ${auditScore.volumeScoreCap}/100`,
+    `- ${t('summaryExport.scoredViolationCount')}: ${auditScore.scoredViolationCount}`,
     `- ${t('summaryExport.requirementScore')}: ${auditScore.requirementScore}/100`,
     `- ${t('summaryExport.recommendationScore')}: ${
       auditScore.includesRecommendations

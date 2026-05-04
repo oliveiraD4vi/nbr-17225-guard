@@ -51,6 +51,16 @@ function getRuleScore(totalRules: number, violatedRules: number): number {
   return Math.max(0, Math.round(((totalRules - violatedRules) / totalRules) * 100))
 }
 
+function getViolationVolumeScoreCap(violationCount: number): number {
+  if (violationCount <= 0) return 100
+  if (violationCount <= 20) return 100 - Math.ceil(violationCount / 2)
+  if (violationCount <= 40) return 90 - Math.ceil((violationCount - 20) / 2)
+  if (violationCount <= 60) return 80 - Math.ceil((violationCount - 40) / 2)
+  if (violationCount <= 80) return 70 - Math.ceil((violationCount - 60) / 2)
+  if (violationCount <= 100) return 60 - Math.ceil((violationCount - 80) / 2)
+  return Math.max(0, 50 - Math.ceil((violationCount - 100) / 5))
+}
+
 export interface AuditScoreWeights {
   requirements: number
   recommendations: number
@@ -59,6 +69,9 @@ export interface AuditScoreWeights {
 
 export interface AuditScoreData {
   score: number
+  baseScore: number
+  volumeScoreCap: number
+  scoredViolationCount: number
   requirementScore: number
   recommendationScore: number
   humanReviewScore: number
@@ -122,7 +135,7 @@ export function getAuditScoreData(result: AuditResult): AuditScoreData {
   const weights: AuditScoreWeights = includesRecommendations
     ? { requirements: 0.7, recommendations: 0.2, humanReview: 0.1 }
     : { requirements: 0.9, recommendations: 0, humanReview: 0.1 }
-  const score = Math.max(
+  const baseScore = Math.max(
     0,
     Math.round(
       requirementScore * weights.requirements +
@@ -130,9 +143,15 @@ export function getAuditScoreData(result: AuditResult): AuditScoreData {
         humanReviewScore * weights.humanReview,
     ),
   )
+  const scoredViolationCount = result.totalViolations || result.violations.length
+  const volumeScoreCap = getViolationVolumeScoreCap(scoredViolationCount)
+  const score = Math.min(baseScore, volumeScoreCap)
 
   return {
     score,
+    baseScore,
+    volumeScoreCap,
+    scoredViolationCount,
     requirementScore,
     recommendationScore,
     humanReviewScore,
