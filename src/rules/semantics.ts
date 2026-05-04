@@ -1,6 +1,11 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation, getAccessibleName, isElementVisible } from '@/utils'
+import {
+  createViolation,
+  getAccessibleName,
+  getAssociatedLabelText,
+  isElementVisible,
+} from '@/utils'
 
 function isLikelyValidLanguageTag(value: string): boolean {
   return /^[a-z]{2,3}(-[a-z0-9]{2,8})*$/i.test(value.trim())
@@ -168,6 +173,85 @@ export const accessibleNameRule: Rule = {
   },
 }
 
+const autocompletePurposeByPattern: Array<[RegExp, string]> = [
+  [/\b(nome|name)\b/i, 'name'],
+  [/\b(email|e-mail)\b/i, 'email'],
+  [/\b(telefone|celular|phone|whatsapp)\b/i, 'tel'],
+  [/\b(cep|postal)\b/i, 'postal-code'],
+  [/\b(endere[cç]o|address)\b/i, 'street-address'],
+  [/\b(cidade|city)\b/i, 'address-level2'],
+  [/\b(estado|uf|state)\b/i, 'address-level1'],
+]
+
+export const identifiablePurposeRule: Rule = {
+  id: 'identifiable-purpose',
+  nbrReference: '5.13.9',
+  name: t('rules.semantics.identifiablePurpose.name'),
+  description: t('rules.semantics.identifiablePurpose.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+
+    document.querySelectorAll<HTMLInputElement>('input').forEach((field) => {
+      if (!isElementVisible(field)) return
+      if (['hidden', 'submit', 'button', 'reset', 'checkbox', 'radio', 'file'].includes(field.type))
+        return
+      if (field.getAttribute('autocomplete')?.trim()) return
+
+      const context =
+        `${getAssociatedLabelText(field)} ${field.name} ${field.id} ${field.placeholder}`.trim()
+      const expectedPurpose = autocompletePurposeByPattern.find(([pattern]) =>
+        pattern.test(context),
+      )?.[1]
+      if (!expectedPurpose) return
+
+      violations.push(
+        createViolation(identifiablePurposeRule, {
+          element: field,
+          message: t('rules.semantics.identifiablePurpose.message', { purpose: expectedPurpose }),
+          suggestion: t('rules.semantics.identifiablePurpose.suggestion'),
+          remediationAdvice: t('rules.semantics.identifiablePurpose.remediation', {
+            purpose: expectedPurpose,
+          }),
+          customIdPrefix: 'identifiable-purpose',
+        }),
+      )
+    })
+
+    return violations
+  },
+}
+
+export const nativeElementsRule: Rule = {
+  id: 'native-elements',
+  nbrReference: '5.13.11',
+  name: t('rules.semantics.nativeElements.name'),
+  description: t('rules.semantics.nativeElements.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const customInteractiveSelector =
+      'div[role="button"], span[role="button"], div[role="link"], span[role="link"], div[role="checkbox"], span[role="checkbox"], div[role="switch"], span[role="switch"], div[tabindex][onclick], span[tabindex][onclick]'
+
+    return Array.from(document.querySelectorAll<HTMLElement>(customInteractiveSelector))
+      .filter(isElementVisible)
+      .map((element) =>
+        createViolation(nativeElementsRule, {
+          element,
+          message: t('rules.semantics.nativeElements.message', {
+            tagName: element.tagName.toLowerCase(),
+          }),
+          suggestion: t('rules.semantics.nativeElements.suggestion'),
+          remediationAdvice: t('rules.semantics.nativeElements.remediation'),
+          customIdPrefix: 'native-elements',
+        }),
+      )
+  },
+}
+
 export const customStateRule: Rule = {
   id: 'custom-component-state',
   nbrReference: '5.13.13',
@@ -219,5 +303,7 @@ export const semanticRules: Rule[] = [
   frameTitleRule,
   zoomAllowedRule,
   accessibleNameRule,
+  identifiablePurposeRule,
+  nativeElementsRule,
   customStateRule,
 ]

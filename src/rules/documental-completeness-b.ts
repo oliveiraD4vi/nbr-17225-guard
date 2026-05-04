@@ -963,6 +963,30 @@ export const audioTranscriptRule: Rule = {
     ),
 }
 
+export const videoTranscriptRule: Rule = {
+  id: 'video-transcript',
+  nbrReference: '5.14.3',
+  name: t('rules.documentalCompletenessB.videoTranscript.name'),
+  description: t('rules.documentalCompletenessB.videoTranscript.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async () =>
+    createWarnings(
+      videoTranscriptRule,
+      Array.from(document.querySelectorAll<HTMLVideoElement>('video')).filter((video) => {
+        const container =
+          (video.closest('figure, section, article, div') as HTMLElement | null) || document.body
+        const text = getVisibleText(container).toLowerCase()
+        return !/transcri|transcript|descri[cç][aã]o textual|vers[aã]o em texto/.test(text)
+      }) as unknown as HTMLElement[],
+      () => t('rules.documentalCompletenessB.videoTranscript.message'),
+      t('rules.documentalCompletenessB.videoTranscript.suggestion'),
+      t('rules.documentalCompletenessB.videoTranscript.remediation'),
+      'video-transcript',
+    ),
+}
+
 export const videoCaptionsRule: Rule = {
   id: 'video-captions',
   nbrReference: '5.14.2',
@@ -1218,6 +1242,7 @@ export const documentalCompletenessRulesB: Rule[] = [
   statusMessageRule,
   customComponentSemanticRule,
   audioTranscriptRule,
+  videoTranscriptRule,
   videoCaptionsRule,
   audioDescriptionRule,
   liveCaptionsRule,

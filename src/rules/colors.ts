@@ -156,4 +156,79 @@ export const componentContrastRule: Rule = {
   },
 }
 
-export const colorRules: Rule[] = [textContrastRule, componentContrastRule]
+export const enhancedTextContrastRule: Rule = {
+  id: 'enhanced-text-contrast',
+  nbrReference: '5.11.2',
+  name: t('rules.colors.enhancedTextContrast.name'),
+  description: t('rules.colors.enhancedTextContrast.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Totalmente Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+    const seenParents = new Set<HTMLElement>()
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null)
+
+    let node
+    while ((node = walker.nextNode())) {
+      const textNode = node as Text
+      const text = textNode.textContent?.trim()
+      if (!text || text.length < 3) continue
+
+      const parent = textNode.parentElement
+      if (!parent || !isElementVisible(parent) || seenParents.has(parent)) continue
+      seenParents.add(parent)
+
+      const styles = window.getComputedStyle(parent)
+      const textHex = rgbToHex(styles.color)
+      const bgHex = rgbToHex(getEffectiveBackgroundColor(parent))
+      const ratio = getContrastRatio(textHex, bgHex)
+      const fontSize = parseFloat(styles.fontSize)
+      const fontWeight = styles.fontWeight
+      const isLargeText =
+        fontSize >= 18 ||
+        (fontSize >= 14 && (fontWeight === 'bold' || parseInt(fontWeight, 10) >= 700))
+      const minimumRatio = isLargeText ? 3 : 4.5
+      const enhancedRatio = isLargeText ? 4.5 : 7
+
+      if (ratio >= minimumRatio && ratio < enhancedRatio) {
+        violations.push(
+          createViolation(enhancedTextContrastRule, {
+            element: parent,
+            description: t('rules.colors.enhancedTextContrast.detail', {
+              ratio: ratio.toFixed(2),
+              minRatio: enhancedRatio,
+            }),
+            message: t('rules.colors.enhancedTextContrast.message', {
+              ratio: ratio.toFixed(2),
+              minRatio: enhancedRatio,
+            }),
+            suggestion: t('rules.colors.enhancedTextContrast.suggestion'),
+            remediationAdvice: t('rules.colors.enhancedTextContrast.remediation', {
+              ratio: ratio.toFixed(2),
+              minRatio: enhancedRatio,
+            }),
+            contrastDetails: {
+              context: 'text',
+              foregroundHex: textHex,
+              backgroundHex: bgHex,
+              measuredRatio: ratio,
+              minimumRatio: enhancedRatio,
+              foregroundLabel: t('contrast.foreground.text'),
+              backgroundLabel: t('contrast.background.surface'),
+            },
+            customIdPrefix: 'enhanced-contrast',
+          }),
+        )
+      }
+    }
+
+    return violations
+  },
+}
+
+export const colorRules: Rule[] = [
+  enhancedTextContrastRule,
+  textContrastRule,
+  componentContrastRule,
+]

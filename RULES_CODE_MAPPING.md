@@ -2,7 +2,7 @@
 
 Este documento relaciona o catálogo v1 implementado com as rotinas em `src/rules`.
 
-O escopo aqui documentado é o catálogo implementado atual de 97 itens, revisado contra a referência pública da ABNT NBR 17225.
+O escopo aqui documentado é a V1 Farol, com 112 itens revisados contra a referência pública da ABNT NBR 17225.
 
 Legenda:
 
@@ -12,32 +12,21 @@ Legenda:
 
 ## Resumo
 
-| Status                   |                      Quantidade |
-| ------------------------ | ------------------------------: |
-| Implementadas            |                              97 |
-| Ausentes                 |                               0 |
-| Requisitos normativos    |                              96 |
-| Recomendações normativas |                               1 |
-| Incorporadas neste lote  | 3 (`5.1.16`, `5.2.6`, `5.7.13`) |
+| Status                   |                   Quantidade |
+| ------------------------ | ---------------------------: |
+| Implementadas            |                          112 |
+| Ausentes                 |                            0 |
+| Requisitos normativos    |                           96 |
+| Recomendações normativas |                           16 |
+| Incorporadas na V1 Farol | 15 recomendações priorizadas |
 
 A classificação normativa vem de `src/normative.ts`, construída a partir da própria ABNT NBR 17225. Ela não deve ser inferida por severidade (`error`/`warning`) nem por nível WCAG.
 
 ## Fora do Escopo da V1
 
-Na confrontação com fontes públicas da NBR 17225, foram identificadas recomendações adicionais que não fazem parte do catálogo implementado atual e, portanto, não têm implementação nesta versão:
+Na confrontação com a referência pública da NBR 17225, foram identificadas 34 recomendações adicionais que não fazem parte da V1 Farol e, portanto, não têm implementação nesta versão.
 
-- `5.4.3`
-- `5.4.4`
-- `5.7.3`
-- `5.8.4`
-- `5.12.10`
-- `5.12.11`
-- `5.12.12`
-- `5.12.13`
-- `5.13.9`
-- `5.13.11`
-
-Esses itens devem ser tratados como backlog para contribuições futuras, e não como falhas da cobertura declarada da v1.
+Esses itens devem ser tratados como backlog para contribuições futuras, e não como falhas da cobertura declarada da V1. A lista completa está em `FUTURE_RULES_PLAN.md`.
 
 ## Mapeamento por Regra
 
@@ -61,9 +50,11 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.2.6 Texto alternativo para mapas de imagens                       | Implementada         | `src/rules/images.ts` `imageMapAltTextRule`                            |
 | 5.3.1 Semântica de cabeçalho                                        | Implementada         | `src/rules/headings.ts` `headingSemanticRule`                          |
 | 5.3.2 Uso de cabeçalhos                                             | Heurística assistida | `src/rules/headings.ts` `headingUsageRule`                             |
+| 5.3.3 Cabeçalho principal                                           | Heurística assistida | `src/rules/headings.ts` `mainHeadingRecommendationRule`                |
 | 5.3.5 Estrutura de cabeçalhos                                       | Implementada         | `src/rules/headings.ts` `headingStructureRule`                         |
 | 5.4.1 Semântica de região                                           | Implementada         | `src/rules/regions.ts` `regionSemanticRule`                            |
 | 5.4.2 Uso de regiões                                                | Heurística assistida | `src/rules/documental-completeness-a.ts` `regionUsageRule`             |
+| 5.4.3 Conteúdo em regiões                                           | Heurística assistida | `src/rules/regions.ts` `contentInRegionsRule`                          |
 | 5.4.5 Regiões identificadas unicamente                              | Implementada         | `src/rules/regions.ts` `uniqueRegionIdentificationRule`                |
 | 5.5.1 Semântica de lista                                            | Implementada         | `src/rules/lists.ts` `listSemanticRule`                                |
 | 5.5.2 Uso de listas                                                 | Heurística assistida | `src/rules/documental-completeness-a.ts` `listUsageRule`               |
@@ -74,6 +65,9 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.7.1 Semântica de link                                             | Implementada         | `src/rules/navigation.ts` `linkSemanticRule`                           |
 | 5.7.2 Uso de links                                                  | Heurística assistida | `src/rules/documental-completeness-a.ts` `linkUsageRule`               |
 | 5.7.4 Propósito do link no contexto                                 | Heurística assistida | `src/rules/documental-completeness-a.ts` `linkPurposeRule`             |
+| 5.7.6 Links que abrem em uma nova guia ou janela                    | Heurística assistida | `src/rules/navigation.ts` `newWindowLinkRule`                          |
+| 5.7.7 Links para arquivos não HTML                                  | Heurística assistida | `src/rules/navigation.ts` `nonHtmlFileLinkRule`                        |
+| 5.7.8 Links para sites externos                                     | Heurística assistida | `src/rules/navigation.ts` `externalLinkRule`                           |
 | 5.7.12 Links para contornar blocos de conteúdo                      | Implementada         | `src/rules/navigation.ts` `skipLinksRule`                              |
 | 5.7.13 Alternativas para localização                                | Heurística assistida | `src/rules/navigation.ts` `locationAlternativesRule`                   |
 | 5.7.15 Navegação consistente                                        | Heurística assistida | `src/rules/documental-completeness-a.ts` `navigationConsistencyRule`   |
@@ -82,6 +76,7 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.8.2 Uso de botões                                                 | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonUsageRule`             |
 | 5.8.3 Propósito do botão                                            | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonPurposeRule`           |
 | 5.8.5 Identificação consistente em conjunto de páginas              | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonConsistencyRule`       |
+| 5.8.6 Área de acionamento aprimorada                                | Implementada         | `src/rules/controls.ts` `enhancedTargetSizeRule`                       |
 | 5.8.7 Área de acionamento mínima                                    | Implementada         | `src/rules/controls.ts` `targetSizeRule`                               |
 | 5.8.9 Mudança de contexto previsível no foco                        | Heurística assistida | `src/rules/documental-completeness-a.ts` `contextChangeOnFocusRule`    |
 | 5.8.10 Mudança de contexto previsível na entrada                    | Heurística assistida | `src/rules/documental-completeness-a.ts` `contextChangeOnInputRule`    |
@@ -100,6 +95,8 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.9.9 Mensagem de erro descritiva                                   | Heurística assistida | `src/rules/documental-completeness-b.ts` `descriptiveErrorRule`        |
 | 5.9.10 Sugestão de correção                                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `correctionSuggestionRule`    |
 | 5.9.12 Prevenção de erro para formulários críticos                  | Heurística assistida | `src/rules/documental-completeness-b.ts` `criticalFormPreventionRule`  |
+| 5.9.13 Ajuda contextual                                             | Heurística assistida | `src/rules/forms.ts` `contextualHelpRule`                              |
+| 5.9.14 Botão de submissão                                           | Heurística assistida | `src/rules/forms.ts` `submitButtonRule`                                |
 | 5.9.15 Reentrada de dados                                           | Heurística assistida | `src/rules/documental-completeness-b.ts` `dataReentryRule`             |
 | 5.9.16 Validação sensorial ou por movimento                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `sensoryValidationRule`       |
 | 5.9.18 Autenticação acessível mínima                                | Heurística assistida | `src/rules/forms.ts` `accessibleAuthenticationRule`                    |
@@ -108,6 +105,7 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.10.3 Orientação de exibição                                       | Implementada         | `src/rules/documental-completeness-b.ts` `orientationRule`             |
 | 5.10.4 Design responsivo                                            | Implementada         | `src/rules/presentation.ts` `responsiveDesignRule`                     |
 | 5.11.1 Uso de cores                                                 | Heurística assistida | `src/rules/documental-completeness-b.ts` `colorUsageRule`              |
+| 5.11.2 Contraste para texto aprimorado                              | Implementada         | `src/rules/colors.ts` `enhancedTextContrastRule`                       |
 | 5.11.3 Contraste para texto                                         | Implementada         | `src/rules/colors.ts` `textContrastRule`                               |
 | 5.11.4 Contraste para componentes                                   | Implementada         | `src/rules/colors.ts` `componentContrastRule`                          |
 | 5.11.5 Contraste para objetos gráficos                              | Implementada         | `src/rules/documental-completeness-b.ts` `graphicContrastRule`         |
@@ -116,10 +114,12 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.12.2 Espaçamento entre parágrafos                                 | Implementada         | `src/rules/documental-completeness-b.ts` `paragraphSpacingRule`        |
 | 5.12.3 Espaçamento entre letras                                     | Implementada         | `src/rules/documental-completeness-b.ts` `letterSpacingRule`           |
 | 5.12.4 Espaçamento entre palavras                                   | Implementada         | `src/rules/documental-completeness-b.ts` `wordSpacingRule`             |
+| 5.12.5 Alinhamento de blocos de texto                               | Implementada         | `src/rules/text-content.ts` `textAlignmentRule`                        |
 | 5.12.6 Largura de blocos de texto                                   | Implementada         | `src/rules/documental-completeness-b.ts` `textWidthRule`               |
 | 5.12.7 Texto redimensionado                                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `resizedTextRule`             |
 | 5.12.8 Semântica de texto especial                                  | Implementada         | `src/rules/text-content.ts` `specialTextSemanticRule`                  |
 | 5.12.9 Uso de texto especial                                        | Revisão manual       | `src/rules/text-content.ts` `specialTextUsageRule`                     |
+| 5.12.11 Siglas e abreviaturas                                       | Heurística assistida | `src/rules/text-content.ts` `abbreviationMeaningRule`                  |
 | 5.13.1 Título da página                                             | Implementada         | `src/rules/semantics.ts` `pageTitleRule`                               |
 | 5.13.2 Idioma da página                                             | Implementada         | `src/rules/semantics.ts` `pageLanguageRule`                            |
 | 5.13.3 Idioma das partes da página                                  | Implementada         | `src/rules/documental-completeness-b.ts` `pagePartLanguageRule`        |
@@ -128,16 +128,20 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.13.6 Ordem de leitura                                             | Heurística assistida | `src/rules/documental-completeness-b.ts` `readingOrderRule`            |
 | 5.13.7 Texto visível no nome acessível                              | Heurística assistida | `src/rules/documental-completeness-b.ts` `visibleTextInNameRule`       |
 | 5.13.8 Mensagens de status                                          | Implementada         | `src/rules/documental-completeness-b.ts` `statusMessageRule`           |
+| 5.13.9 Propósito identificável                                      | Heurística assistida | `src/rules/semantics.ts` `identifiablePurposeRule`                     |
 | 5.13.10 Componentes com nome acessível                              | Implementada         | `src/rules/semantics.ts` `accessibleNameRule`                          |
+| 5.13.11 Elementos nativos                                           | Heurística assistida | `src/rules/semantics.ts` `nativeElementsRule`                          |
 | 5.13.12 Semântica de componentes customizados                       | Heurística assistida | `src/rules/documental-completeness-b.ts` `customComponentSemanticRule` |
 | 5.13.13 Estados, propriedades e valores de componentes customizados | Implementada         | `src/rules/semantics.ts` `customStateRule`                             |
 | 5.14.1 Alternativa em texto para áudio                              | Heurística assistida | `src/rules/documental-completeness-b.ts` `audioTranscriptRule`         |
 | 5.14.2 Legendas descritivas para vídeo                              | Heurística assistida | `src/rules/documental-completeness-b.ts` `videoCaptionsRule`           |
+| 5.14.3 Transcrição para vídeo                                       | Heurística assistida | `src/rules/documental-completeness-b.ts` `videoTranscriptRule`         |
 | 5.14.4 Audiodescrição para vídeo                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `audioDescriptionRule`        |
 | 5.14.7 Controle de áudio                                            | Implementada         | `src/rules/media.ts` `audioControlRule`                                |
 | 5.14.9 Legendas para áudio e vídeo ao vivo                          | Heurística assistida | `src/rules/documental-completeness-b.ts` `liveCaptionsRule`            |
 | 5.15.1 Controle de animação                                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `animationControlRule`        |
 | 5.15.4 Flash intermitente limitado                                  | Implementada         | `src/rules/documental-completeness-b.ts` `flashingContentRule`         |
+| 5.16.1 Limite de tempo                                              | Heurística assistida | `src/rules/time.ts` `timeLimitRule`                                    |
 | 5.16.2 Limite de tempo ajustável                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `adjustableTimeLimitRule`     |
 | 5.16.3 Controle de atualização                                      | Heurística assistida | `src/rules/time.ts` `refreshControlRule`                               |
 
@@ -161,5 +165,5 @@ pnpm verify:rules
 Resultado esperado:
 
 ```text
-Rule verification passed: 97 documented requirements mapped to 97 rule implementation(s).
+Verificação de regras concluída: 112 itens documentados mapeados para 112 implementação(ões): 96 requisitos e 16 recomendações.
 ```

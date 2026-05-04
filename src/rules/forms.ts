@@ -1,8 +1,15 @@
-import { t } from '@/i18n';
-import type { Rule, Violation } from '@/types';
-import { createViolation, getAssociatedLabelText, isElementVisible } from '@/utils';
+import { t } from '@/i18n'
+import type { Rule, Violation } from '@/types'
+import {
+  createViolation,
+  getAssociatedDescriptionText,
+  getAssociatedLabelText,
+  getVisibleText,
+  isElementVisible,
+} from '@/utils'
 
-const formFieldsSelector = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), select, textarea';
+const formFieldsSelector =
+  'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), select, textarea'
 
 export const fieldLabelRule: Rule = {
   id: 'field-label',
@@ -13,26 +20,32 @@ export const fieldLabelRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(formFieldsSelector).forEach((field) => {
-      if (!isElementVisible(field as unknown as HTMLElement)) return;
+    document
+      .querySelectorAll<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >(formFieldsSelector)
+      .forEach((field) => {
+        if (!isElementVisible(field as unknown as HTMLElement)) return
 
-      const label = getAssociatedLabelText(field);
-      if (!label.trim()) {
-        violations.push(createViolation(fieldLabelRule, {
-          element: field as unknown as HTMLElement,
-          message: t('rules.forms.fieldLabel.message'),
-          suggestion: t('rules.forms.fieldLabel.suggestion'),
-          remediationAdvice: t('rules.forms.fieldLabel.remediation'),
-          customIdPrefix: 'field-label',
-        }));
-      }
-    });
+        const label = getAssociatedLabelText(field)
+        if (!label.trim()) {
+          violations.push(
+            createViolation(fieldLabelRule, {
+              element: field as unknown as HTMLElement,
+              message: t('rules.forms.fieldLabel.message'),
+              suggestion: t('rules.forms.fieldLabel.suggestion'),
+              remediationAdvice: t('rules.forms.fieldLabel.remediation'),
+              customIdPrefix: 'field-label',
+            }),
+          )
+        }
+      })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const associatedFieldLabelRule: Rule = {
   id: 'field-label-associated',
@@ -43,30 +56,36 @@ export const associatedFieldLabelRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(formFieldsSelector).forEach((field) => {
-      if (!isElementVisible(field as unknown as HTMLElement)) return;
+    document
+      .querySelectorAll<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >(formFieldsSelector)
+      .forEach((field) => {
+        if (!isElementVisible(field as unknown as HTMLElement)) return
 
-      const hasProgrammaticLabel =
-        Boolean(getAssociatedLabelText(field).trim()) ||
-        Boolean(field.getAttribute('aria-label')?.trim()) ||
-        Boolean(field.getAttribute('aria-labelledby')?.trim());
+        const hasProgrammaticLabel =
+          Boolean(getAssociatedLabelText(field).trim()) ||
+          Boolean(field.getAttribute('aria-label')?.trim()) ||
+          Boolean(field.getAttribute('aria-labelledby')?.trim())
 
-      if (!hasProgrammaticLabel) {
-        violations.push(createViolation(associatedFieldLabelRule, {
-          element: field as unknown as HTMLElement,
-          message: t('rules.forms.associatedFieldLabel.message'),
-          suggestion: t('rules.forms.associatedFieldLabel.suggestion'),
-          remediationAdvice: t('rules.forms.associatedFieldLabel.remediation'),
-          customIdPrefix: 'field-label-associated',
-        }));
-      }
-    });
+        if (!hasProgrammaticLabel) {
+          violations.push(
+            createViolation(associatedFieldLabelRule, {
+              element: field as unknown as HTMLElement,
+              message: t('rules.forms.associatedFieldLabel.message'),
+              suggestion: t('rules.forms.associatedFieldLabel.suggestion'),
+              remediationAdvice: t('rules.forms.associatedFieldLabel.remediation'),
+              customIdPrefix: 'field-label-associated',
+            }),
+          )
+        }
+      })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const relatedFieldsRule: Rule = {
   id: 'related-fields',
@@ -77,32 +96,36 @@ export const relatedFieldsRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
-    const groups = new Map<string, HTMLInputElement[]>();
+    const violations: Violation[] = []
+    const groups = new Map<string, HTMLInputElement[]>()
 
-    document.querySelectorAll<HTMLInputElement>('input[type="radio"], input[type="checkbox"]').forEach((field) => {
-      if (!field.name) return;
-      if (!groups.has(field.name)) groups.set(field.name, []);
-      groups.get(field.name)?.push(field);
-    });
+    document
+      .querySelectorAll<HTMLInputElement>('input[type="radio"], input[type="checkbox"]')
+      .forEach((field) => {
+        if (!field.name) return
+        if (!groups.has(field.name)) groups.set(field.name, [])
+        groups.get(field.name)?.push(field)
+      })
 
     groups.forEach((fields) => {
-      if (fields.length < 2) return;
-      const first = fields[0];
+      if (fields.length < 2) return
+      const first = fields[0]
       if (!first.closest('fieldset, [role="group"], [role="radiogroup"]')) {
-        violations.push(createViolation(relatedFieldsRule, {
-          element: first,
-          message: t('rules.forms.relatedFields.message', { name: first.name }),
-          suggestion: t('rules.forms.relatedFields.suggestion'),
-          remediationAdvice: t('rules.forms.relatedFields.remediation'),
-          customIdPrefix: 'field-group',
-        }));
+        violations.push(
+          createViolation(relatedFieldsRule, {
+            element: first,
+            message: t('rules.forms.relatedFields.message', { name: first.name }),
+            suggestion: t('rules.forms.relatedFields.suggestion'),
+            remediationAdvice: t('rules.forms.relatedFields.remediation'),
+            customIdPrefix: 'field-group',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const requiredFieldsRule: Rule = {
   id: 'required-fields',
@@ -113,29 +136,37 @@ export const requiredFieldsRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
-    document.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(formFieldsSelector).forEach((field) => {
-      if (!isElementVisible(field as unknown as HTMLElement)) return;
+    document
+      .querySelectorAll<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >(formFieldsSelector)
+      .forEach((field) => {
+        if (!isElementVisible(field as unknown as HTMLElement)) return
 
-      const label = getAssociatedLabelText(field).toLowerCase();
-      const visuallyRequired = label.includes('*') || label.includes('obrigatório') || label.includes('obrigatorio');
-      const programmaticallyRequired = field.hasAttribute('required') || field.getAttribute('aria-required') === 'true';
+        const label = getAssociatedLabelText(field).toLowerCase()
+        const visuallyRequired =
+          label.includes('*') || label.includes('obrigatório') || label.includes('obrigatorio')
+        const programmaticallyRequired =
+          field.hasAttribute('required') || field.getAttribute('aria-required') === 'true'
 
-      if (visuallyRequired && !programmaticallyRequired) {
-        violations.push(createViolation(requiredFieldsRule, {
-          element: field as unknown as HTMLElement,
-          message: t('rules.forms.requiredFields.message'),
-          suggestion: t('rules.forms.requiredFields.suggestion'),
-          remediationAdvice: t('rules.forms.requiredFields.remediation'),
-          customIdPrefix: 'required-field',
-        }));
-      }
-    });
+        if (visuallyRequired && !programmaticallyRequired) {
+          violations.push(
+            createViolation(requiredFieldsRule, {
+              element: field as unknown as HTMLElement,
+              message: t('rules.forms.requiredFields.message'),
+              suggestion: t('rules.forms.requiredFields.suggestion'),
+              remediationAdvice: t('rules.forms.requiredFields.remediation'),
+              customIdPrefix: 'required-field',
+            }),
+          )
+        }
+      })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const dataTypeRule: Rule = {
   id: 'field-data-type',
@@ -146,35 +177,44 @@ export const dataTypeRule: Rule = {
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLInputElement>('input').forEach((field) => {
-      if (!isElementVisible(field)) return;
-      if (['hidden', 'submit', 'button', 'reset', 'checkbox', 'radio', 'file'].includes(field.type)) return;
+      if (!isElementVisible(field)) return
+      if (['hidden', 'submit', 'button', 'reset', 'checkbox', 'radio', 'file'].includes(field.type))
+        return
 
-      const label = `${getAssociatedLabelText(field)} ${field.name} ${field.id} ${field.placeholder}`.toLowerCase();
-      const autocomplete = field.getAttribute('autocomplete')?.toLowerCase() || '';
-      const inputMode = field.getAttribute('inputmode')?.toLowerCase() || '';
+      const label =
+        `${getAssociatedLabelText(field)} ${field.name} ${field.id} ${field.placeholder}`.toLowerCase()
+      const autocomplete = field.getAttribute('autocomplete')?.toLowerCase() || ''
+      const inputMode = field.getAttribute('inputmode')?.toLowerCase() || ''
       const expectedType =
-        /\b(e-?mail|email)\b/.test(label) || autocomplete === 'email' ? 'email' :
-        /\b(telefone|phone|celular|whatsapp)\b/.test(label) || autocomplete === 'tel' || inputMode === 'tel' ? 'tel' :
-        /\b(url|site|website|link)\b/.test(label) || inputMode === 'url' ? 'url' :
-        '';
+        /\b(e-?mail|email)\b/.test(label) || autocomplete === 'email'
+          ? 'email'
+          : /\b(telefone|phone|celular|whatsapp)\b/.test(label) ||
+              autocomplete === 'tel' ||
+              inputMode === 'tel'
+            ? 'tel'
+            : /\b(url|site|website|link)\b/.test(label) || inputMode === 'url'
+              ? 'url'
+              : ''
 
       if (expectedType && field.type === 'text') {
-        violations.push(createViolation(dataTypeRule, {
-          element: field,
-          message: t('rules.forms.dataType.message', { type: expectedType }),
-          suggestion: t('rules.forms.dataType.suggestion', { type: expectedType }),
-          remediationAdvice: t('rules.forms.dataType.remediation', { type: expectedType }),
-          customIdPrefix: 'field-type',
-        }));
+        violations.push(
+          createViolation(dataTypeRule, {
+            element: field,
+            message: t('rules.forms.dataType.message', { type: expectedType }),
+            suggestion: t('rules.forms.dataType.suggestion', { type: expectedType }),
+            remediationAdvice: t('rules.forms.dataType.remediation', { type: expectedType }),
+            customIdPrefix: 'field-type',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const accessibleAuthenticationRule: Rule = {
   id: 'accessible-authentication',
@@ -185,19 +225,130 @@ export const accessibleAuthenticationRule: Rule = {
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
-    document.querySelectorAll<HTMLElement>('[class*="captcha" i], [id*="captcha" i], [title*="captcha" i], [aria-label*="captcha" i], [src*="captcha" i], [data-sitekey]').forEach((element) => {
-      violations.push(createViolation(accessibleAuthenticationRule, {
-        element,
-        message: t('rules.forms.accessibleAuthentication.message'),
-        suggestion: t('rules.forms.accessibleAuthentication.suggestion'),
-        remediationAdvice: t('rules.forms.accessibleAuthentication.remediation'),
-        customIdPrefix: 'captcha',
-      }));
-    });
-    return violations;
+    const violations: Violation[] = []
+    document
+      .querySelectorAll<HTMLElement>(
+        '[class*="captcha" i], [id*="captcha" i], [title*="captcha" i], [aria-label*="captcha" i], [src*="captcha" i], [data-sitekey]',
+      )
+      .forEach((element) => {
+        violations.push(
+          createViolation(accessibleAuthenticationRule, {
+            element,
+            message: t('rules.forms.accessibleAuthentication.message'),
+            suggestion: t('rules.forms.accessibleAuthentication.suggestion'),
+            remediationAdvice: t('rules.forms.accessibleAuthentication.remediation'),
+            customIdPrefix: 'captcha',
+          }),
+        )
+      })
+    return violations
   },
-};
+}
+
+export const contextualHelpRule: Rule = {
+  id: 'contextual-help',
+  nbrReference: '5.9.13',
+  name: t('rules.forms.contextualHelp.name'),
+  description: t('rules.forms.contextualHelp.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+
+    document
+      .querySelectorAll<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >(formFieldsSelector)
+      .forEach((field) => {
+        if (!isElementVisible(field as unknown as HTMLElement)) return
+        const input = field as HTMLInputElement
+        const descriptor =
+          `${getAssociatedLabelText(field)} ${field.getAttribute('name') || ''} ${field.getAttribute('id') || ''} ${field.getAttribute('placeholder') || ''}`.toLowerCase()
+        const isComplexField =
+          input.type === 'password' ||
+          input.hasAttribute('pattern') ||
+          input.hasAttribute('minlength') ||
+          input.hasAttribute('maxlength') ||
+          /\b(cpf|cnpj|senha|password|cartao|cartão|cep|telefone|data|nascimento|codigo|código)\b/.test(
+            descriptor,
+          )
+        if (!isComplexField) return
+
+        const associatedHelp = getAssociatedDescriptionText(field as unknown as HTMLElement)
+        const nearbyText = getVisibleText(
+          (field.closest('label, .field, .form-field, .ant-form-item') as HTMLElement | null) ||
+            (field.parentElement as HTMLElement) ||
+            (field as unknown as HTMLElement),
+        )
+        const hasHelp =
+          Boolean(associatedHelp.trim()) ||
+          /\b(ajuda|dica|formato|exemplo|mínimo|minimo|caracteres|obrigatório|obrigatorio)\b/i.test(
+            nearbyText,
+          )
+
+        if (!hasHelp) {
+          violations.push(
+            createViolation(contextualHelpRule, {
+              element: field as unknown as HTMLElement,
+              message: t('rules.forms.contextualHelp.message'),
+              suggestion: t('rules.forms.contextualHelp.suggestion'),
+              remediationAdvice: t('rules.forms.contextualHelp.remediation'),
+              customIdPrefix: 'contextual-help',
+            }),
+          )
+        }
+      })
+
+    return violations
+  },
+}
+
+export const submitButtonRule: Rule = {
+  id: 'submit-button',
+  nbrReference: '5.9.14',
+  name: t('rules.forms.submitButton.name'),
+  description: t('rules.forms.submitButton.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+
+    document.querySelectorAll<HTMLFormElement>('form').forEach((form) => {
+      if (!isElementVisible(form)) return
+      const hasDataFields = Boolean(form.querySelector(formFieldsSelector))
+      if (!hasDataFields) return
+
+      const submitControls = Array.from(
+        form.querySelectorAll<HTMLElement>('button, input[type="submit"], [role="button"]'),
+      ).filter(isElementVisible)
+      const hasClearSubmit = submitControls.some((control) => {
+        if (control instanceof HTMLInputElement && control.type === 'submit') return true
+        const type = control.getAttribute('type')?.toLowerCase()
+        const text = getVisibleText(control).toLowerCase()
+        return (
+          type === 'submit' ||
+          /\b(enviar|salvar|confirmar|concluir|continuar|finalizar)\b/.test(text)
+        )
+      })
+
+      if (!hasClearSubmit) {
+        violations.push(
+          createViolation(submitButtonRule, {
+            element: form,
+            message: t('rules.forms.submitButton.message'),
+            suggestion: t('rules.forms.submitButton.suggestion'),
+            remediationAdvice: t('rules.forms.submitButton.remediation'),
+            customIdPrefix: 'submit-button',
+          }),
+        )
+      }
+    })
+
+    return violations
+  },
+}
 
 export const formRules: Rule[] = [
   fieldLabelRule,
@@ -205,5 +356,7 @@ export const formRules: Rule[] = [
   relatedFieldsRule,
   requiredFieldsRule,
   dataTypeRule,
+  contextualHelpRule,
+  submitButtonRule,
   accessibleAuthenticationRule,
-];
+]

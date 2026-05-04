@@ -15,6 +15,14 @@
       "message": "Componente {{tagName}} com contraste {{ratio}}:1 (mínimo: 3:1)",
       "suggestion": "Aumente o contraste entre a borda e o fundo do componente.",
       "remediation": "Garanta contraste mínimo de 3:1 entre o indicador visual do componente e as áreas adjacentes. Razão atual: {{ratio}}:1."
+    },
+    "enhancedTextContrast": {
+      "name": "Contraste para texto aprimorado",
+      "description": "Texto deve buscar contraste aprimorado quando possível",
+      "detail": "Contraste abaixo do nível aprimorado: {{ratio}}:1 (recomendado: {{minRatio}}:1)",
+      "message": "Razão de contraste {{ratio}}:1 está abaixo da recomendação {{minRatio}}:1",
+      "suggestion": "Aumente o contraste para aproximar o texto do nível aprimorado.",
+      "remediation": "Ajuste cor do texto ou fundo para atingir {{minRatio}}:1 quando isso não prejudicar a identidade visual. Razão atual: {{ratio}}:1."
     }
   },
   "controls": {
@@ -31,6 +39,13 @@
       "message": "Área acionável muito pequena ({{width}}x{{height}}px).",
       "suggestion": "Aumente a área clicável para pelo menos 24x24 px.",
       "remediation": "button { min-width: 24px; min-height: 24px; }"
+    },
+    "enhancedTargetSize": {
+      "name": "Área de acionamento aprimorada",
+      "description": "Controles importantes devem buscar área de acionamento mais confortável",
+      "message": "Área acionável abaixo do recomendado ({{width}}x{{height}}px).",
+      "suggestion": "Aumente a área clicável para aproximar o controle de 44x44 px.",
+      "remediation": "Use padding, min-width e min-height para ampliar a área de interação sem depender apenas do ícone."
     }
   },
   "documentalCompletenessA": {
@@ -326,6 +341,13 @@
       "suggestion": "Disponibilize transcrição próxima ao áudio ou vinculada a ele.",
       "remediation": "Inclua link ou bloco com a transcrição completa do conteúdo em áudio."
     },
+    "videoTranscript": {
+      "name": "Transcrição para vídeo",
+      "description": "Vídeos gravados devem oferecer transcrição ou alternativa textual equivalente quando aplicável",
+      "message": "Vídeo sem indício de transcrição ou alternativa textual associada.",
+      "suggestion": "Inclua transcrição próxima ao vídeo ou link para alternativa textual equivalente.",
+      "remediation": "Disponibilize uma transcrição com falas e informações visuais relevantes do vídeo."
+    },
     "videoCaptions": {
       "name": "Legendas descritivas para vídeo",
       "description": "Vídeos gravados devem oferecer legendas sincronizadas",
@@ -412,6 +434,20 @@
       "suggestion": "Use type=\"{{type}}\" para melhorar entrada e validação.",
       "remediation": "<input type=\"{{type}}\" />"
     },
+    "contextualHelp": {
+      "name": "Ajuda contextual",
+      "description": "Campos complexos devem oferecer ajuda contextual quando necessário",
+      "message": "Campo complexo sem ajuda contextual detectável.",
+      "suggestion": "Associe dica, exemplo ou instrução com aria-describedby ou texto próximo ao campo.",
+      "remediation": "<small id=\"senha-ajuda\">Use ao menos 8 caracteres.</small><input aria-describedby=\"senha-ajuda\" />"
+    },
+    "submitButton": {
+      "name": "Botão de submissão",
+      "description": "Formulários devem apresentar ação de envio clara",
+      "message": "Formulário com campos de dados sem botão de submissão claramente identificado.",
+      "suggestion": "Inclua botão de envio com rótulo específico da ação.",
+      "remediation": "<button type=\"submit\">Enviar cadastro</button>"
+    },
     "accessibleAuthentication": {
       "name": "Autenticação acessível mínima",
       "description": "Autenticação não deve depender apenas de quebra-cabeças cognitivos sem alternativa",
@@ -434,6 +470,13 @@
       "message": "Cabeçalho sem conteúdo subsequente claramente associado.",
       "suggestion": "Verifique se o cabeçalho realmente introduz uma seção de conteúdo.",
       "remediation": "<h2>Informações do evento</h2>\n<p>Descrição da seção.</p>"
+    },
+    "mainHeadingRecommendation": {
+      "name": "Cabeçalho principal",
+      "description": "A página deve ter um cabeçalho principal claro e preferencialmente único",
+      "message": "Há mais de um h1 visível na página.",
+      "suggestion": "Mantenha um h1 principal e organize os demais títulos como h2 ou níveis subsequentes.",
+      "remediation": "<h1>Título da página</h1>\n<h2>Seção</h2>"
     },
     "headingStructure": {
       "name": "Estrutura de cabeçalhos",
@@ -594,6 +637,27 @@
       "nameSuggestion": "Forneça texto visível, aria-label ou conteúdo alternativo descritivo.",
       "nameRemediation": "<a href=\"/contato\">Fale conosco</a>"
     },
+    "newWindowLink": {
+      "name": "Links que abrem em nova guia ou janela",
+      "description": "Links que mudam o contexto para nova guia ou janela devem comunicar esse comportamento",
+      "message": "Link abre em nova guia ou janela sem aviso claro no nome acessível.",
+      "suggestion": "Informe no texto ou nome acessível que o link abre em nova guia ou janela.",
+      "remediation": "<a target=\"_blank\" rel=\"noreferrer\" aria-label=\"Abrir relatório em nova guia\">Relatório</a>"
+    },
+    "nonHtmlFileLink": {
+      "name": "Links para arquivos não HTML",
+      "description": "Links para arquivos devem indicar o tipo de arquivo quando isso não estiver claro",
+      "message": "Link para arquivo sem indicação clara do formato.",
+      "suggestion": "Inclua o tipo do arquivo no texto ou no nome acessível do link.",
+      "remediation": "<a href=\"relatorio.pdf\">Baixar relatório em PDF</a>"
+    },
+    "externalLink": {
+      "name": "Links para sites externos",
+      "description": "Links externos devem deixar claro quando o destino sai do site atual",
+      "message": "Link aponta para site externo ({{host}}) sem aviso claro.",
+      "suggestion": "Informe que o destino é externo quando isso for relevante para o usuário.",
+      "remediation": "<a href=\"https://exemplo.gov.br\">Acessar site externo</a>"
+    },
     "skipLinks": {
       "name": "Links para contornar blocos de conteúdo",
       "description": "A página deve oferecer mecanismo para pular blocos repetidos",
@@ -638,6 +702,13 @@
       "message": "Região repetida sem nome acessível para diferenciá-la das demais.",
       "suggestion": "Adicione aria-label ou aria-labelledby em regiões repetidas.",
       "remediation": "<nav aria-label=\"Navegação principal\">...</nav>"
+    },
+    "contentInRegions": {
+      "name": "Conteúdo em regiões",
+      "description": "Conteúdos extensos devem estar organizados dentro de regiões ou seções identificáveis",
+      "message": "Conteúdo extenso fora de uma região semântica clara.",
+      "suggestion": "Agrupe conteúdo principal em main, section, article, aside, nav ou região com nome acessível.",
+      "remediation": "<main><section aria-labelledby=\"titulo-secao\">...</section></main>"
     }
   },
   "semantics": {
@@ -677,6 +748,20 @@
       "suggestion": "Forneça texto visível, aria-label, aria-labelledby ou equivalente.",
       "remediation": "<button aria-label=\"Abrir menu\"></button>"
     },
+    "identifiablePurpose": {
+      "name": "Propósito identificável",
+      "description": "Campos comuns devem expor propósito identificável para tecnologias de apoio",
+      "message": "Campo parece coletar dado com propósito \"{{purpose}}\", mas não declara autocomplete.",
+      "suggestion": "Use autocomplete adequado para permitir identificação programática do propósito do campo.",
+      "remediation": "<input autocomplete=\"{{purpose}}\" />"
+    },
+    "nativeElements": {
+      "name": "Elementos nativos",
+      "description": "Componentes interativos devem preferir elementos HTML nativos quando possível",
+      "message": "Elemento <{{tagName}}> customizado poderia ser substituído por controle nativo.",
+      "suggestion": "Use button, a, input, select ou outro elemento nativo sempre que representar melhor a função.",
+      "remediation": "<button type=\"button\">Ação</button>"
+    },
     "customState": {
       "name": "Estados, propriedades e valores de componentes customizados",
       "description": "Componentes customizados devem expor estados ARIA quando aplicável",
@@ -712,6 +797,13 @@
     }
   },
   "textContent": {
+    "textAlignment": {
+      "name": "Alinhamento de blocos de texto",
+      "description": "Blocos extensos de texto devem evitar alinhamento justificado quando prejudicar a leitura",
+      "message": "Bloco textual extenso com alinhamento justificado.",
+      "suggestion": "Prefira alinhamento à esquerda para leitura contínua.",
+      "remediation": "p { text-align: left; }"
+    },
     "specialTextSemantic": {
       "name": "Semântica de texto especial",
       "description": "Texto com ênfase ou significado especial deve usar elementos semânticos apropriados",
@@ -725,9 +817,23 @@
       "message": "Texto especial detectado; a adequação semântica do uso exige revisão humana.",
       "suggestion": "Confirme se a marcação usada comunica corretamente importância, ênfase, abreviação, citação ou outro significado pretendido.",
       "remediation": "Revise o contexto do texto especial e substitua marcação puramente visual por elemento semântico quando aplicável."
+    },
+    "abbreviationMeaning": {
+      "name": "Siglas e abreviaturas",
+      "description": "Siglas e abreviaturas devem ter significado identificável quando necessário",
+      "message": "Possíveis siglas sem expansão detectável: {{terms}}.",
+      "suggestion": "Explique a sigla na primeira ocorrência ou use abbr com title quando apropriado.",
+      "remediation": "<abbr title=\"Lei Geral de Proteção de Dados\">LGPD</abbr>"
     }
   },
   "time": {
+    "timeLimit": {
+      "name": "Limite de tempo",
+      "description": "Limites de tempo devem ser identificáveis e ter alternativa quando aplicável",
+      "timerMessage": "Possível limite de tempo detectado no conteúdo da página.",
+      "suggestion": "Confirme se o usuário consegue pausar, estender ou compreender o limite de tempo.",
+      "remediation": "Inclua controles de extensão, pausa ou aviso claro antes do encerramento da sessão."
+    },
     "refreshControl": {
       "name": "Controle de atualização",
       "description": "Atualizações automáticas da página devem ser controláveis",

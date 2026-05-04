@@ -84,4 +84,44 @@ export const targetSizeRule: Rule = {
   },
 }
 
-export const controlRules: Rule[] = [buttonSemanticRule, targetSizeRule]
+export const enhancedTargetSizeRule: Rule = {
+  id: 'enhanced-target-size',
+  nbrReference: '5.8.6',
+  name: t('rules.controls.enhancedTargetSize.name'),
+  description: t('rules.controls.enhancedTargetSize.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Totalmente Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+    const controls = document.querySelectorAll<HTMLElement>(
+      'button, input, select, textarea, [role="button"], [role="link"], a[role="button"], a[class*="button" i], a[class*="btn" i]',
+    )
+
+    controls.forEach((control) => {
+      if (!isElementVisible(control)) return
+      if ((control as HTMLInputElement).type === 'hidden') return
+      if (isInlineTextLink(control)) return
+
+      const rect = control.getBoundingClientRect()
+      if ((rect.width >= 24 && rect.width < 44) || (rect.height >= 24 && rect.height < 44)) {
+        violations.push(
+          createViolation(enhancedTargetSizeRule, {
+            element: control,
+            message: t('rules.controls.enhancedTargetSize.message', {
+              width: Math.round(rect.width),
+              height: Math.round(rect.height),
+            }),
+            suggestion: t('rules.controls.enhancedTargetSize.suggestion'),
+            remediationAdvice: t('rules.controls.enhancedTargetSize.remediation'),
+            customIdPrefix: 'enhanced-target-size',
+          }),
+        )
+      }
+    })
+
+    return violations
+  },
+}
+
+export const controlRules: Rule[] = [buttonSemanticRule, enhancedTargetSizeRule, targetSizeRule]

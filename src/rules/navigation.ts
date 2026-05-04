@@ -21,6 +21,21 @@ const isInternalLink = (anchor: HTMLAnchorElement): boolean => {
   }
 }
 
+const getNavigableUrl = (anchor: HTMLAnchorElement): URL | null => {
+  const href = anchor.getAttribute('href')?.trim()
+  if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+    return null
+  }
+
+  try {
+    return new URL(href, window.location.href)
+  } catch {
+    return null
+  }
+}
+
+const fileExtensionPattern = /\.(pdf|docx?|xlsx?|pptx?|zip|rar|7z|csv|xml|json)(?:$|[?#])/i
+
 export const linkSemanticRule: Rule = {
   id: 'link-semantic',
   nbrReference: '5.7.1',
@@ -163,4 +178,93 @@ export const locationAlternativesRule: Rule = {
   },
 }
 
-export const navigationRules: Rule[] = [linkSemanticRule, skipLinksRule, locationAlternativesRule]
+export const newWindowLinkRule: Rule = {
+  id: 'new-window-link',
+  nbrReference: '5.7.6',
+  name: t('rules.navigation.newWindowLink.name'),
+  description: t('rules.navigation.newWindowLink.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> =>
+    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[target="_blank"]'))
+      .filter((anchor) => isElementVisible(anchor))
+      .filter((anchor) => {
+        const text = normalizeText(`${getAccessibleName(anchor)} ${getVisibleText(anchor)}`)
+        return !/\b(nova guia|nova janela|abre em outra|abre nova|new tab|new window)\b/.test(text)
+      })
+      .map((anchor) =>
+        createViolation(newWindowLinkRule, {
+          element: anchor,
+          message: t('rules.navigation.newWindowLink.message'),
+          suggestion: t('rules.navigation.newWindowLink.suggestion'),
+          remediationAdvice: t('rules.navigation.newWindowLink.remediation'),
+          customIdPrefix: 'new-window-link',
+        }),
+      ),
+}
+
+export const nonHtmlFileLinkRule: Rule = {
+  id: 'non-html-file-link',
+  nbrReference: '5.7.7',
+  name: t('rules.navigation.nonHtmlFileLink.name'),
+  description: t('rules.navigation.nonHtmlFileLink.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> =>
+    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
+      .filter((anchor) => isElementVisible(anchor))
+      .filter((anchor) => {
+        const url = getNavigableUrl(anchor)
+        if (!url || !fileExtensionPattern.test(url.pathname)) return false
+        const text = normalizeText(`${getAccessibleName(anchor)} ${getVisibleText(anchor)}`)
+        return !/\b(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|csv|arquivo|download)\b/.test(text)
+      })
+      .map((anchor) =>
+        createViolation(nonHtmlFileLinkRule, {
+          element: anchor,
+          message: t('rules.navigation.nonHtmlFileLink.message'),
+          suggestion: t('rules.navigation.nonHtmlFileLink.suggestion'),
+          remediationAdvice: t('rules.navigation.nonHtmlFileLink.remediation'),
+          customIdPrefix: 'file-link',
+        }),
+      ),
+}
+
+export const externalLinkRule: Rule = {
+  id: 'external-link',
+  nbrReference: '5.7.8',
+  name: t('rules.navigation.externalLink.name'),
+  description: t('rules.navigation.externalLink.description'),
+  severity: 'warning',
+  wcagLevel: 'AAA',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> =>
+    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
+      .filter((anchor) => isElementVisible(anchor))
+      .filter((anchor) => {
+        const url = getNavigableUrl(anchor)
+        if (!url || url.origin === window.location.origin) return false
+        const text = normalizeText(`${getAccessibleName(anchor)} ${getVisibleText(anchor)}`)
+        return !/\b(externo|site externo|fora do site|external)\b/.test(text)
+      })
+      .map((anchor) =>
+        createViolation(externalLinkRule, {
+          element: anchor,
+          message: t('rules.navigation.externalLink.message', { host: anchor.hostname }),
+          suggestion: t('rules.navigation.externalLink.suggestion'),
+          remediationAdvice: t('rules.navigation.externalLink.remediation'),
+          customIdPrefix: 'external-link',
+        }),
+      ),
+}
+
+export const navigationRules: Rule[] = [
+  linkSemanticRule,
+  newWindowLinkRule,
+  nonHtmlFileLinkRule,
+  externalLinkRule,
+  skipLinksRule,
+  locationAlternativesRule,
+]

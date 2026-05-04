@@ -1,32 +1,45 @@
-# Plano para Regras Futuras Fora do Escopo V1
+# Plano para Recomendações Futuras Fora da V1
 
-Este documento lista os itens da ABNT NBR 17225:2025 que ainda não fazem parte do escopo implementado no Guardião NBR 17225.
+Este documento lista as recomendações da ABNT NBR 17225:2025 que ainda não fazem parte da V1 Farol do Guardião NBR 17225.
 
-O escopo implementado atual possui 97 regras: 94 itens do catálogo v1 local e 3 requisitos obrigatórios adicionais incorporados ao motor.
+A V1 Farol possui 112 regras implementadas: todos os 96 requisitos normativos identificados na referência pública e 16 recomendações priorizadas por relevância operacional, baixo risco de ruído e possibilidade de verificação assistida.
 
 Fontes usadas para esta lista:
 
 - cópia pública da ABNT NBR 17225:2025 hospedada pela Câmara dos Deputados;
 - matriz local `RULES_NORMATIVE_MATRIX.md`;
-- catálogo v1 validado por `pnpm verify:rules`.
+- catálogo validado por `pnpm verify:rules`.
 
 ## Resumo
 
 | Grupo                                 | Quantidade |
 | ------------------------------------- | ---------: |
 | Requisitos obrigatórios pendentes     |          0 |
-| Recomendações ainda não implementadas |         49 |
-| Total fora do escopo implementado     |         49 |
+| Recomendações implementadas na V1     |         16 |
+| Recomendações ainda não implementadas |         34 |
+| Total fora do escopo implementado     |         34 |
 
-## Requisitos obrigatórios incorporados
+## Recomendações incorporadas na V1 Farol
 
-Os três requisitos obrigatórios que estavam fora do recorte inicial foram incorporados ao motor:
+Além de `5.1.2 Elemento em foco totalmente visível`, a V1 Farol incorpora 15 recomendações adicionais:
 
-- `5.1.16` — Instruções para componentes customizados;
-- `5.2.6` — Texto alternativo para mapas de imagens;
-- `5.7.13` — Alternativas para localização.
+- `5.3.3` — Cabeçalho principal;
+- `5.4.3` — Conteúdo em regiões;
+- `5.7.6` — Links que abrem em uma nova guia ou janela;
+- `5.7.7` — Links para arquivos não HTML;
+- `5.7.8` — Links para sites externos;
+- `5.8.6` — Área de acionamento aprimorada;
+- `5.9.13` — Ajuda contextual;
+- `5.9.14` — Botão de submissão;
+- `5.11.2` — Contraste para texto aprimorado;
+- `5.12.5` — Alinhamento de blocos de texto;
+- `5.12.11` — Siglas e abreviaturas;
+- `5.13.9` — Propósito identificável;
+- `5.13.11` — Elementos nativos;
+- `5.14.3` — Transcrição para vídeo;
+- `5.16.1` — Limite de tempo.
 
-Eles agora constam em `RULES_CODE_MAPPING.md`, `RULES_NORMATIVE_MATRIX.md`, `scripts/verify-rules.mjs` e na página pública de rastreabilidade.
+Essas recomendações entram apenas quando o usuário ativa o escopo `Requisitos e recomendações`, preservando a auditoria padrão focada em requisitos.
 
 ## Recomendações ainda não implementadas
 
@@ -46,7 +59,6 @@ Direção técnica:
 
 ### Cabeçalhos
 
-- `5.3.3` — Cabeçalho principal
 - `5.3.4` — Seções com cabeçalhos
 
 Direção técnica:
@@ -56,12 +68,11 @@ Direção técnica:
 
 ### Regiões
 
-- `5.4.3` — Conteúdo em regiões
 - `5.4.4` — Regiões únicas
 
 Direção técnica:
 
-- validar landmarks duplicados e conteúdo fora de regiões principais;
+- validar landmarks duplicados e nomes acessíveis conflitantes;
 - evitar exigir landmarks em páginas pequenas sem estrutura complexa.
 
 ### Tabelas
@@ -78,9 +89,6 @@ Direção técnica:
 
 - `5.7.3` — Propósito do link sem contexto
 - `5.7.5` — Links com identificação consistente
-- `5.7.6` — Links que abrem em uma nova guia ou janela
-- `5.7.7` — Links para arquivos não HTML
-- `5.7.8` — Links para sites externos
 - `5.7.9` — Texto complementar do link
 - `5.7.10` — Links adjacentes
 - `5.7.11` — Links para contornar blocos de conteúdo
@@ -89,26 +97,22 @@ Direção técnica:
 Direção técnica:
 
 - dividir as recomendações entre verificações estruturais objetivas e verificações dependentes de conjunto de páginas;
-- para links externos, arquivos e nova guia, avaliar avisos visíveis ou acessíveis sem criar ruído excessivo.
+- evitar duplicidade com os requisitos já implementados de propósito, skip link e localização.
 
 ### Botões e controles
 
 - `5.8.4` — Identificação consistente na página
-- `5.8.6` — Área de acionamento aprimorada
 - `5.8.8` — Mudança de contexto previsível
 - `5.8.15` — Controles com retorno
 
 Direção técnica:
 
-- reaproveitar a identidade de controles já usada na v1;
-- separar alvo mínimo obrigatório de alvo aprimorado;
-- exigir confirmação humana para retorno visual/sonoro/háptico de controles.
+- reaproveitar a identidade de controles já usada na V1;
+- exigir confirmação humana para retorno visual, sonoro ou háptico de controles.
 
 ### Formulários e entrada de dados
 
 - `5.9.11` — Prevenção de erro
-- `5.9.13` — Ajuda contextual
-- `5.9.14` — Botão de submissão
 - `5.9.17` — Autenticação acessível aprimorada
 
 Direção técnica:
@@ -125,41 +129,19 @@ Direção técnica:
 - usar medição geométrica do indicador quando possível;
 - manter confirmação humana quando o estado de foco depender de interação real.
 
-### Uso de cores
-
-- `5.11.2` — Contraste para texto aprimorado
-
-Direção técnica:
-
-- reaproveitar o motor de contraste textual com limite AAA;
-- apresentar como recomendação separada para não confundir com o requisito mínimo.
-
 ### Conteúdo textual
 
-- `5.12.5` — Alinhamento de blocos de texto
 - `5.12.10` — Definições de significado
-- `5.12.11` — Siglas e abreviaturas
 - `5.12.12` — Nível de linguagem
 - `5.12.13` — Pronúncia identificada
 
 Direção técnica:
 
-- tratar alinhamento como verificação estrutural assistida;
-- tratar significado, siglas, linguagem e pronúncia como revisão humana, com heurísticas conservadoras.
-
-### Codificação e marcação semântica
-
-- `5.13.9` — Propósito identificável
-- `5.13.11` — Elementos nativos
-
-Direção técnica:
-
-- para propósito identificável, avaliar atributos como `autocomplete`, nomes acessíveis e padrões de campos;
-- para elementos nativos, sinalizar componentes customizados que poderiam usar controles HTML nativos.
+- tratar significado, linguagem e pronúncia como revisão humana, com heurísticas conservadoras;
+- evitar análise semântica agressiva que gere excesso de falso positivo.
 
 ### Áudio e vídeo
 
-- `5.14.3` — Transcrição para vídeo
 - `5.14.5` — Audiodescrição estendida para vídeo
 - `5.14.6` — Janela de Libras para conteúdo em áudio
 - `5.14.8` — Áudio sem ruído
@@ -182,26 +164,20 @@ Direção técnica:
 
 ### Tempo
 
-- `5.16.1` — Limite de tempo
 - `5.16.4` — Interrupções
 - `5.16.5` — Reautenticação
 - `5.16.6` — Tempo de inatividade
 
 Direção técnica:
 
-- detectar timers, meta refresh, sessão expirada e padrões de interrupção;
+- detectar sessão expirada, padrões de interrupção e fluxos de reautenticação;
 - manter como revisão humana quando depender de fluxo autenticado ou evento em tempo real.
 
 ## Ordem sugerida de implementação
 
-1. Implementar recomendações com baixa ambiguidade estrutural:
-   - `5.7.6`
-   - `5.7.7`
-   - `5.7.8`
-   - `5.11.2`
-   - `5.13.11`
-2. Depois, avançar nas recomendações que dependem de contexto de página atual.
-3. Por último, tratar recomendações que exigem conjunto de páginas, fluxo autenticado, mídia ou julgamento humano mais forte.
+1. Implementar recomendações com baixa ambiguidade estrutural e baixo risco de duplicidade com requisitos.
+2. Avançar em recomendações que dependem de contexto de página atual, mantendo revisão humana explícita.
+3. Tratar por último recomendações que exigem conjunto de páginas, fluxo autenticado, mídia ou julgamento humano forte.
 
 ## Critérios para aceitar novas regras
 
