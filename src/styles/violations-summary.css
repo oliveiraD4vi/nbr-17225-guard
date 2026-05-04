@@ -72,6 +72,12 @@
   color: var(--guard-color-success-text);
 }
 
+.summary-download-button {
+  flex: 0 0 auto;
+  border: 1px solid var(--guard-color-border);
+  color: var(--guard-color-text-primary);
+}
+
 .summary-meta {
   display: grid;
   gap: 10px;
@@ -126,6 +132,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.summary-score-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--guard-color-text-secondary);
+}
+
+.summary-score-label-row .anticon {
+  color: var(--guard-color-text-muted);
 }
 
 .summary-score-copy strong {

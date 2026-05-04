@@ -25,7 +25,7 @@ import type {
   VisionSimulationFilter,
 } from '@/types'
 import { compareAuditResults } from '@/utils/audit-comparison'
-import { buildExportableAuditResult } from '@/utils/audit-export'
+import { buildAuditSummaryMarkdown, buildExportableAuditResult } from '@/utils/audit-export'
 import {
   clearAuditHistoryForUrl,
   compactAuditStorage,
@@ -471,6 +471,23 @@ export const PopupApp: React.FC = () => {
     link.click()
     URL.revokeObjectURL(url)
     message.success(t('popup.messages.exportCsvSuccess'))
+  }, [displayedAuditResult])
+
+  const handleExportSummary = useCallback(() => {
+    if (!displayedAuditResult) {
+      message.warning(t('popup.messages.noAuditToExport'))
+      return
+    }
+
+    const markdown = buildAuditSummaryMarkdown(displayedAuditResult)
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${t('shared.exports.summaryFilePrefix')}-${new Date().toISOString().split('T')[0]}.md`
+    link.click()
+    URL.revokeObjectURL(url)
+    message.success(t('popup.messages.exportSummarySuccess'))
   }, [displayedAuditResult])
 
   const handleFilterChange = useCallback(
@@ -926,6 +943,7 @@ export const PopupApp: React.FC = () => {
           <ViolationsSummary
             result={displayedAuditResult}
             reviewSourceResult={reviewSourceResult}
+            onDownloadSummary={handleExportSummary}
           />
         ),
       },
@@ -978,6 +996,7 @@ export const PopupApp: React.FC = () => {
   }, [
     displayedAuditResult,
     reviewSourceResult,
+    handleExportSummary,
     scopedRawViolations,
     isHistoricalView,
     handleHighlightViolation,

@@ -1,9 +1,11 @@
 import React from 'react'
-import { Card, Empty, Tag } from 'antd'
+import { Button, Card, Empty, Tag, Tooltip } from 'antd'
 import {
   CalendarOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  DownloadOutlined,
+  InfoCircleOutlined,
   LinkOutlined,
   WarningOutlined,
 } from '@ant-design/icons'
@@ -14,7 +16,7 @@ import {
   getDismissedHumanReviewCount,
   getPendingHumanReviewCount,
 } from '@/utils/audit-comparison'
-import { getRequirementScoreData } from '@/utils/audit-score'
+import { getAuditScoreData } from '@/utils/audit-score'
 import { SummarySkeleton } from './LoadingSkeletons'
 import '../styles/violations-summary.css'
 
@@ -22,10 +24,11 @@ interface ViolationsSummaryProps {
   result: AuditResult | null
   reviewSourceResult?: AuditResult | null
   loading?: boolean
+  onDownloadSummary?: () => void
 }
 
 export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
-  ({ result, reviewSourceResult, loading = false }) => {
+  ({ result, reviewSourceResult, loading = false, onDownloadSummary }) => {
     if (loading) {
       return <SummarySkeleton />
     }
@@ -35,13 +38,13 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
     }
 
     const hasViolations = result.totalViolations > 0
-    const requirementScore = getRequirementScoreData(result)
+    const auditScore = getAuditScoreData(result)
     const reviewBase = reviewSourceResult ?? result
     const confirmedReviews = getConfirmedHumanReviewCount(reviewBase)
     const dismissedReviews = getDismissedHumanReviewCount(reviewBase)
     const pendingReviews = getPendingHumanReviewCount(reviewBase)
     const scoreTone =
-      requirementScore.score >= 90 ? 'good' : requirementScore.score >= 70 ? 'medium' : 'critical'
+      auditScore.score >= 90 ? 'good' : auditScore.score >= 70 ? 'medium' : 'critical'
 
     return (
       <div className="violations-summary">
@@ -66,6 +69,18 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                   : t('shared.states.verifiedCompliant')}
               </span>
             </div>
+            {onDownloadSummary && (
+              <Tooltip title={t('summary.downloadTooltip')}>
+                <Button
+                  aria-label={t('summary.downloadTooltip')}
+                  className="summary-download-button"
+                  icon={<DownloadOutlined />}
+                  onClick={onDownloadSummary}
+                  shape="circle"
+                  type="text"
+                />
+              </Tooltip>
+            )}
           </div>
 
           <div className="summary-meta">
@@ -81,34 +96,40 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
 
           <div className={`summary-score-card is-${scoreTone}`}>
             <div className="summary-score-copy">
-              <span className="summary-stat-label">{t('summary.scoreLabel')}</span>
-              <strong>{t('summary.scoreOutOf', { score: requirementScore.score })}</strong>
+              <span className="summary-score-label-row">
+                <span className="summary-stat-label">{t('summary.scoreLabel')}</span>
+                <Tooltip title={t('summary.scoreTooltip')}>
+                  <InfoCircleOutlined aria-label={t('summary.scoreTooltip')} />
+                </Tooltip>
+              </span>
+              <strong>{t('summary.scoreOutOf', { score: auditScore.score })}</strong>
               <p>{t('summary.scoreDescription')}</p>
               <div className="summary-score-meter" aria-hidden="true">
                 <span
                   className="summary-score-meter-fill"
-                  style={{ width: `${requirementScore.score}%` }}
+                  style={{ width: `${auditScore.score}%` }}
                 />
               </div>
             </div>
             <div className="summary-score-meta">
               <Tag
-                color={
-                  requirementScore.score >= 90
-                    ? 'green'
-                    : requirementScore.score >= 70
-                      ? 'gold'
-                      : 'red'
-                }
+                color={auditScore.score >= 90 ? 'green' : auditScore.score >= 70 ? 'gold' : 'red'}
               >
                 {t('summary.failingRequirements', {
-                  count: requirementScore.violatedRequirementRules,
+                  count: auditScore.violatedRequirementRules,
                 })}
               </Tag>
-              {requirementScore.pendingHumanRequirementRules > 0 && (
+              {auditScore.includesRecommendations && (
+                <Tag color={auditScore.violatedRecommendationRules > 0 ? 'blue' : 'green'}>
+                  {t('summary.failingRecommendations', {
+                    count: auditScore.violatedRecommendationRules,
+                  })}
+                </Tag>
+              )}
+              {auditScore.pendingHumanReviewItems > 0 && (
                 <Tag color="gold">
-                  {t('summary.pendingRequirementReview', {
-                    count: requirementScore.pendingHumanRequirementRules,
+                  {t('summary.pendingHumanReviewScore', {
+                    count: auditScore.pendingHumanReviewItems,
                   })}
                 </Tag>
               )}

@@ -1,43 +1,91 @@
-import React from 'react';
-import { Button, Space } from 'antd';
-import { ArrowLeftOutlined, PlayCircleOutlined } from '@ant-design/icons';
-import { t } from '@/i18n';
+import React from 'react'
+import { Button, Space } from 'antd'
+import {
+  ArrowLeftOutlined,
+  FileSearchOutlined,
+  GithubOutlined,
+  GlobalOutlined,
+  PlayCircleOutlined,
+  SafetyCertificateOutlined,
+} from '@ant-design/icons'
+import {
+  EXTENSION_PUBLIC_REPOSITORY_URL,
+  LANDING_PAGE_URL,
+  LANDING_PRIVACY_URL,
+  LANDING_RULES_URL,
+} from '@/config/links'
+import { t } from '@/i18n'
+import { APP_VERSION_LABEL } from '@/version'
 
 interface AboutPanelProps {
-  hasAudit: boolean;
-  loading: boolean;
-  onBack: () => void;
-  onStart: () => void;
+  hasAudit: boolean
+  loading: boolean
+  onBack: () => void
+  onStart: () => void
 }
 
-export const AboutPanel: React.FC<AboutPanelProps> = React.memo(({
-  hasAudit,
-  loading,
-  onBack,
-  onStart,
-}) => (
-  <div className="empty-state empty-state-with-about">
-    <div className="about-card">
-      <span className="about-eyebrow">{t('popup.about.eyebrow')}</span>
-      <h2>{t('popup.about.title')}</h2>
-      <p>{t('popup.about.descriptionA')}</p>
-      <p>{t('popup.about.descriptionB')}</p>
-    </div>
-    <Space>
-      {hasAudit && (
-        <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-          {t('popup.about.backToAudit')}
+export const AboutPanel: React.FC<AboutPanelProps> = React.memo(
+  ({ hasAudit, loading, onBack, onStart }) => (
+    <div className="empty-state empty-state-with-about">
+      <div className="about-card">
+        <span className="about-eyebrow">{t('popup.about.eyebrow')}</span>
+        <h2>{t('popup.about.title')}</h2>
+        <span className="about-version">
+          {t('popup.about.version').replace('{{version}}', APP_VERSION_LABEL)}
+        </span>
+        <p>{t('popup.about.descriptionA')}</p>
+        <p>{t('popup.about.descriptionB')}</p>
+        <div className="about-links-grid" aria-label={t('popup.about.links.label')}>
+          <Button
+            href={LANDING_PAGE_URL}
+            icon={<GlobalOutlined />}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {t('popup.about.links.landing')}
+          </Button>
+          <Button
+            href={LANDING_RULES_URL}
+            icon={<FileSearchOutlined />}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {t('popup.about.links.rules')}
+          </Button>
+          <Button
+            href={LANDING_PRIVACY_URL}
+            icon={<SafetyCertificateOutlined />}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {t('popup.about.links.privacy')}
+          </Button>
+          <Button
+            href={EXTENSION_PUBLIC_REPOSITORY_URL}
+            icon={<GithubOutlined />}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {t('popup.about.links.github')}
+          </Button>
+        </div>
+      </div>
+      <Space>
+        {hasAudit && (
+          <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
+            {t('popup.about.backToAudit')}
+          </Button>
+        )}
+        <Button
+          type="primary"
+          size="large"
+          icon={<PlayCircleOutlined />}
+          onClick={onStart}
+          loading={loading}
+        >
+          {t('shared.actions.startVerification')}
         </Button>
-      )}
-      <Button
-        type="primary"
-        size="large"
-        icon={<PlayCircleOutlined />}
-        onClick={onStart}
-        loading={loading}
-      >
-        {t('shared.actions.startVerification')}
-      </Button>
-    </Space>
-  </div>
-));
+      </Space>
+    </div>
+  ),
+)

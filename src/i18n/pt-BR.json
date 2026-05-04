@@ -10,6 +10,7 @@
       "exportJson": "Exportar JSON",
       "exportCsv": "Exportar CSV",
       "exportMarkdown": "Exportar MD",
+      "downloadSummary": "Baixar resumo",
       "view": "Visualizar",
       "viewCurrent": "Voltar para atual",
       "usingHistory": "Usando histórico",
@@ -89,6 +90,7 @@
     },
     "exports": {
       "auditFilePrefix": "nbr-17225-audit",
+      "summaryFilePrefix": "nbr-17225-resumo",
       "comparisonFilePrefix": "nbr-17225-comparacao",
       "reportFilePrefix": "nbr-17225-report",
       "csvHeaders": {
@@ -112,8 +114,16 @@
     "about": {
       "eyebrow": "Sobre",
       "title": "Auditoria assistida da ABNT NBR 17225",
+      "version": "{{version}}",
       "descriptionA": "O Guardião avalia o escopo da versão 1 do catálogo normativo do projeto e separa automaticamente requisitos, recomendações e itens que ainda precisam de confirmação humana.",
       "descriptionB": "Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página e manter um histórico local das auditorias já executadas.",
+      "links": {
+        "label": "Links do projeto",
+        "landing": "Landing",
+        "rules": "Regras",
+        "privacy": "Privacidade",
+        "github": "GitHub"
+      },
       "backToAudit": "Voltar à auditoria"
     },
     "messages": {
@@ -127,6 +137,7 @@
       "noViolationsToExport": "Nenhuma violação para exportar",
       "exportJsonSuccess": "Relatório exportado como JSON",
       "exportCsvSuccess": "Relatório exportado como CSV",
+      "exportSummarySuccess": "Resumo da auditoria exportado",
       "highlightsApplied": "Destaques aplicados na página",
       "highlightError": "Não foi possível destacar os elementos",
       "comparisonSelectWarning": "Selecione duas auditorias diferentes para exportar a comparação",
@@ -256,11 +267,14 @@
     "titleWithoutIssues": "Nenhuma violação detectada",
     "descriptionWithIssues": "Os pontos abaixo priorizam os requisitos obrigatórios e separam recomendações para revisão incremental.",
     "descriptionWithoutIssues": "A página auditada não apresentou violações nas regras atualmente verificadas pelo motor.",
-    "scoreLabel": "Nota de requisitos",
-    "scoreDescription": "Considera apenas os requisitos obrigatórios do escopo v1. Itens ainda pendentes de confirmação humana não entram nesta nota.",
+    "scoreLabel": "Nota geral",
+    "scoreDescription": "Combina requisitos, recomendações do escopo atual e conclusão da revisão humana.",
+    "scoreTooltip": "Cálculo: requisitos pesam 70%, recomendações pesam 20% quando auditadas e revisão humana pesa 10%. Sem recomendações, requisitos pesam 90% e revisão humana 10%. Pendências humanas reduzem a parte de revisão; itens confirmados contam como problema e itens descartados deixam de penalizar a regra.",
+    "downloadTooltip": "Baixar resumo simples da auditoria",
     "scoreOutOf": "{{score}}/100",
     "failingRequirements": "{{count}} regra(s) obrigatória(s) com falha",
-    "pendingRequirementReview": "{{count}} regra(s) aguardando confirmação humana",
+    "failingRecommendations": "{{count}} recomendação(ões) com achado",
+    "pendingHumanReviewScore": "{{count}} item(ns) aguardando revisão humana",
     "totalItemsFound": "itens encontrados",
     "requirementsMissed": "não atendidos",
     "recommendationsReview": "para revisão",
@@ -284,6 +298,27 @@
     "priorityHumanReview": "Confirmação humana",
     "priorityHumanReviewDescription": "Esses itens são indícios fortes, mas a conclusão depende de verificar o comportamento real, o contexto visual ou o fluxo da interface.",
     "success": "Auditoria concluída sem violações no conjunto atual de regras verificadas."
+  },
+  "summaryExport": {
+    "title": "Resumo da auditoria",
+    "url": "URL",
+    "auditedAt": "Auditado em",
+    "scope": "Escopo",
+    "scopeRequirementsOnly": "Somente requisitos",
+    "scopeWithRecommendations": "Requisitos e recomendações",
+    "scoreTitle": "Nota e composição",
+    "generalScore": "Nota geral",
+    "requirementScore": "Nota de requisitos",
+    "recommendationScore": "Nota de recomendações",
+    "humanReviewScore": "Conclusão da revisão humana",
+    "notAudited": "Não auditada neste escopo",
+    "countsTitle": "Contadores",
+    "confirmed": "Confirmados manualmente",
+    "dismissed": "Descartados manualmente",
+    "pending": "Pendentes de revisão",
+    "mainFindingsTitle": "Principais achados",
+    "noFindings": "Nenhum achado registrado neste escopo.",
+    "footer": "Resumo gerado pelo Guardião NBR 17225 para revisão básica dos achados."
   },
   "violations": {
     "emptyCategory": "Nenhum item nesta categoria",
