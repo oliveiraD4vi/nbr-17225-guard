@@ -1,8 +1,8 @@
 # Mapeamento de Regras ABNT NBR 17225
 
-Este documento relaciona as regras de `docs/Analise_Documental_NBR17225.xlsx` com as rotinas em `src/rules`.
+Este documento relaciona o catálogo v1 implementado com as rotinas em `src/rules`.
 
-O escopo aqui documentado é o catálogo implementado atual de 97 itens: o catálogo v1 confirmado no `.xlsx` local e 3 requisitos obrigatórios adicionais incorporados ao motor.
+O escopo aqui documentado é o catálogo implementado atual de 97 itens, revisado contra a referência pública da ABNT NBR 17225.
 
 Legenda:
 
@@ -12,11 +12,15 @@ Legenda:
 
 ## Resumo
 
-| Status                  |                      Quantidade |
-| ----------------------- | ------------------------------: |
-| Implementadas           |                              97 |
-| Ausentes                |                               0 |
-| Incorporadas neste lote | 3 (`5.1.16`, `5.2.6`, `5.7.13`) |
+| Status                   |                      Quantidade |
+| ------------------------ | ------------------------------: |
+| Implementadas            |                              97 |
+| Ausentes                 |                               0 |
+| Requisitos normativos    |                              96 |
+| Recomendações normativas |                               1 |
+| Incorporadas neste lote  | 3 (`5.1.16`, `5.2.6`, `5.7.13`) |
+
+A classificação normativa vem de `src/normative.ts`, construída a partir da própria ABNT NBR 17225. Ela não deve ser inferida por severidade (`error`/`warning`) nem por nível WCAG.
 
 ## Fora do Escopo da V1
 

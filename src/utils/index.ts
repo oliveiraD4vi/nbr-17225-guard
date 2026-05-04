@@ -1,4 +1,5 @@
 import type { Rule, SeverityLevel, Violation, WCAGLevel } from '@/types'
+import { getNormativeRuleType } from '@/normative'
 import { isFullyAutomatedCategory } from '@/types'
 
 /**
@@ -351,6 +352,7 @@ export function createViolation(
     severity: options.severity || rule.severity,
     wcagLevel: options.wcagLevel || rule.wcagLevel,
     automationCategory: rule.category,
+    normativeType: getNormativeRuleType(rule.nbrReference),
     requiresHumanReview,
     humanReviewStatus: requiresHumanReview ? 'pending' : 'not_applicable',
     message: options.message,

@@ -10,7 +10,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ### Auditoria e diagnóstico
 
-- cobertura de 97 regras: 94 regras derivadas de `docs/Analise_Documental_NBR17225.xlsx` e 3 requisitos obrigatórios adicionais incorporados ao motor;
+- cobertura de 97 regras revisadas contra a referência pública da ABNT NBR 17225: 96 requisitos normativos e 1 recomendação normativa;
 - execução por aba, com suporte a páginas `http(s)` e arquivos locais com permissão;
 - auditoria por escopo:
   - somente requisitos;
@@ -77,20 +77,23 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ## Cobertura de regras
 
-O escopo implementado atual combina o catálogo v1 de `docs/Analise_Documental_NBR17225.xlsx` com três requisitos obrigatórios adicionais identificados na referência pública da ABNT NBR 17225.
+O escopo implementado atual contém o catálogo v1 de 97 regras revisado contra a referência pública da ABNT NBR 17225.
 
-| Situação                      | Quantidade |
-| ----------------------------- | ---------: |
-| Itens documentados            |         97 |
-| Regras implementadas no motor |         97 |
-| Regras ausentes               |          0 |
-| Totalmente automatizáveis     |         41 |
-| Semi-automatizáveis           |         55 |
-| Não automatizáveis            |          1 |
+| Situação                               | Quantidade |
+| -------------------------------------- | ---------: |
+| Itens documentados                     |         97 |
+| Regras implementadas no motor          |         97 |
+| Regras ausentes                        |          0 |
+| Requisitos normativos implementados    |         96 |
+| Recomendações normativas implementadas |          1 |
+| Totalmente automatizáveis              |         41 |
+| Semi-automatizáveis                    |         55 |
+| Não automatizáveis                     |          1 |
 
 Importante:
 
 - `pnpm verify:rules` valida o motor contra o catálogo implementado atual;
+- a classificação `Requisito` ou `Recomendação` segue a própria ABNT NBR 17225, não o nível WCAG nem a severidade técnica do achado;
 - recomendações fora do catálogo implementado seguem registradas como backlog público, sem aumentar o ruído da auditoria padrão.
 
 Consulte também:

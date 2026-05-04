@@ -1,38 +1,53 @@
-import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import ts from 'typescript';
+import assert from 'node:assert/strict'
+import fs from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { pathToFileURL } from 'node:url'
+import ts from 'typescript'
 
 async function loadAuditHistoryModule() {
-  const sourcePath = path.resolve('src/utils/audit-history.ts');
-  const source = await fs.readFile(sourcePath, 'utf8');
-  const transpiled = ts.transpileModule(source, {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'audit-history-'))
+  const sourcePath = path.resolve('src/utils/audit-history.ts')
+  const normativeSourcePath = path.resolve('src/normative.ts')
+  const source = (await fs.readFile(sourcePath, 'utf8')).replace(
+    "from '@/normative'",
+    "from './normative.mjs'",
+  )
+  const normativeSource = await fs.readFile(normativeSourcePath, 'utf8')
+  const transpileOptions = {
     compilerOptions: {
       module: ts.ModuleKind.ESNext,
       target: ts.ScriptTarget.ES2022,
     },
+  }
+  const transpiled = ts.transpileModule(source, {
+    ...transpileOptions,
     fileName: sourcePath,
-  }).outputText;
+  }).outputText
+  const transpiledNormative = ts.transpileModule(normativeSource, {
+    ...transpileOptions,
+    fileName: normativeSourcePath,
+  }).outputText
 
-  const tempFile = path.join(os.tmpdir(), `audit-history-${Date.now()}.mjs`);
-  await fs.writeFile(tempFile, transpiled, 'utf8');
+  const tempFile = path.join(tempDir, 'audit-history.mjs')
+  const tempNormativeFile = path.join(tempDir, 'normative.mjs')
+  await fs.writeFile(tempFile, transpiled, 'utf8')
+  await fs.writeFile(tempNormativeFile, transpiledNormative, 'utf8')
 
   try {
-    return await import(pathToFileURL(tempFile).href);
+    return await import(pathToFileURL(tempFile).href)
   } finally {
-    await fs.unlink(tempFile).catch(() => {});
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {})
   }
 }
 
-const auditHistoryModule = await loadAuditHistoryModule();
+const auditHistoryModule = await loadAuditHistoryModule()
 const {
   dedupeAndSortAuditHistory,
   getAuditUrlStorageKey,
   getVisibleAuditViolations,
   inheritViolationStateFromHistory,
-} = auditHistoryModule;
+} = auditHistoryModule
 
 function createViolation(overrides = {}) {
   return {
@@ -44,6 +59,7 @@ function createViolation(overrides = {}) {
     severity: 'warning',
     wcagLevel: 'A',
     automationCategory: 'Semi-Automatizável',
+    normativeType: 'Requisito',
     requiresHumanReview: false,
     humanReviewStatus: 'not_applicable',
     message: 'Mensagem',
@@ -52,11 +68,11 @@ function createViolation(overrides = {}) {
     remediationAdvice: 'Correção',
     customId: 'custom-id',
     ...overrides,
-  };
+  }
 }
 
 function createAuditEntry(overrides = {}) {
-  const violations = overrides.violations ?? [];
+  const violations = overrides.violations ?? []
 
   return {
     id: 'audit-id',
@@ -64,46 +80,52 @@ function createAuditEntry(overrides = {}) {
     url: 'https://example.com',
     pageTitle: 'Página',
     totalViolations: violations.length,
-    errors: violations.filter((violation) => violation.severity === 'error').length,
-    warnings: violations.filter((violation) => violation.severity !== 'error').length,
+    errors: violations.filter((violation) => violation.normativeType === 'Requisito').length,
+    warnings: violations.filter((violation) => violation.normativeType === 'Recomendação').length,
     humanReviewItems: violations.filter((violation) => violation.requiresHumanReview).length,
     automatedFindings: violations.filter((violation) => !violation.requiresHumanReview).length,
     violations,
     violationsByRule: {},
     violationsBySeverity: { error: [], warning: [] },
     ...overrides,
-  };
+  }
 }
 
-assert.equal(
-  getAuditUrlStorageKey('https://example.com/path#section'),
-  'https://example.com/path'
-);
+assert.equal(getAuditUrlStorageKey('https://example.com/path#section'), 'https://example.com/path')
 
-const dedupedHistory = dedupeAndSortAuditHistory([
-  createAuditEntry({ id: 'older', timestamp: 100 }),
-  createAuditEntry({ id: 'newer', timestamp: 300 }),
-  createAuditEntry({ id: 'older', timestamp: 100 }),
-  createAuditEntry({ id: 'middle', timestamp: 200 }),
-], 10);
+const dedupedHistory = dedupeAndSortAuditHistory(
+  [
+    createAuditEntry({ id: 'older', timestamp: 100 }),
+    createAuditEntry({ id: 'newer', timestamp: 300 }),
+    createAuditEntry({ id: 'older', timestamp: 100 }),
+    createAuditEntry({ id: 'middle', timestamp: 200 }),
+  ],
+  10,
+)
 
 assert.deepEqual(
   dedupedHistory.map((entry) => entry.id),
-  ['newer', 'middle', 'older']
-);
+  ['newer', 'middle', 'older'],
+)
 
-const visibleViolations = getVisibleAuditViolations(createAuditEntry({
-  violations: [
-    createViolation({ id: 'kept', requiresHumanReview: true, humanReviewStatus: 'confirmed' }),
-    createViolation({ id: 'hidden', requiresHumanReview: true, humanReviewStatus: 'dismissed' }),
-    createViolation({ id: 'auto', requiresHumanReview: false, humanReviewStatus: 'not_applicable' }),
-  ],
-}));
+const visibleViolations = getVisibleAuditViolations(
+  createAuditEntry({
+    violations: [
+      createViolation({ id: 'kept', requiresHumanReview: true, humanReviewStatus: 'confirmed' }),
+      createViolation({ id: 'hidden', requiresHumanReview: true, humanReviewStatus: 'dismissed' }),
+      createViolation({
+        id: 'auto',
+        requiresHumanReview: false,
+        humanReviewStatus: 'not_applicable',
+      }),
+    ],
+  }),
+)
 
 assert.deepEqual(
   visibleViolations.map((violation) => violation.id),
-  ['kept', 'auto']
-);
+  ['kept', 'auto'],
+)
 
 const inheritedResult = inheritViolationStateFromHistory(
   createAuditEntry({
@@ -146,14 +168,14 @@ const inheritedResult = inheritViolationStateFromHistory(
         }),
       ],
     }),
-  ]
-);
+  ],
+)
 
-assert.equal(inheritedResult.violations[0].humanReviewStatus, 'dismissed');
-assert.equal(inheritedResult.violations[0].userNote, 'Não se aplica neste fluxo');
-assert.equal(inheritedResult.violations[0].noteUpdatedAt, 123);
-assert.equal(inheritedResult.violations[0].inheritedFromHistory, true);
-assert.equal(inheritedResult.violations[1].humanReviewStatus, 'pending');
-assert.equal(inheritedResult.violations[1].userNote, undefined);
+assert.equal(inheritedResult.violations[0].humanReviewStatus, 'dismissed')
+assert.equal(inheritedResult.violations[0].userNote, 'Não se aplica neste fluxo')
+assert.equal(inheritedResult.violations[0].noteUpdatedAt, 123)
+assert.equal(inheritedResult.violations[0].inheritedFromHistory, true)
+assert.equal(inheritedResult.violations[1].humanReviewStatus, 'pending')
+assert.equal(inheritedResult.violations[1].userNote, undefined)
 
-console.log('Audit history utility checks passed.');
+console.log('Audit history utility checks passed.')

@@ -61,6 +61,8 @@
       "inherited": "Herdado de auditoria anterior"
     },
     "severity": {
+      "error": "Erro",
+      "warning": "Aviso",
       "requirement": "Requisito",
       "recommendation": "Recomendação"
     },

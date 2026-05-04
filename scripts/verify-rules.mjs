@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-// Catálogo v1 derivado de docs/Analise_Documental_NBR17225.xlsx.
+// Catálogo v1 revisado contra a referência pública da ABNT NBR 17225.
 // A verificação garante consistência entre esse catálogo e src/rules.
 const requirements = [
   ['5.1.1', 'Indicador de foco visivel', 'AA', 'Semi-Automatizavel'],
@@ -121,6 +121,7 @@ const normalize = (value) =>
     .replace(/Ç/g, 'C')
 
 const rulesDir = join(process.cwd(), 'src', 'rules')
+const normativeSource = readFileSync(join(process.cwd(), 'src', 'normative.ts'), 'utf8')
 const ruleFiles = readdirSync(rulesDir).filter(
   (file) => file.endsWith('.ts') && file !== 'index.ts',
 )
@@ -129,6 +130,9 @@ const source = ruleFiles.map((file) => ({
   content: readFileSync(join(rulesDir, file), 'utf8'),
 }))
 const rules = []
+
+const getNormativeType = (reference) =>
+  normativeSource.includes(`'${reference}'`) ? 'Recomendação' : 'Requisito'
 
 for (const { file, content } of source) {
   const blocks = content.matchAll(
@@ -204,6 +208,16 @@ if (failures.length) {
   process.exit(1)
 }
 
+const normativeTypeCounts = requirements.reduce(
+  (acc, requirement) => {
+    acc[getNormativeType(requirement.reference)] += 1
+    return acc
+  },
+  { Requisito: 0, Recomendação: 0 },
+)
+const recommendationLabel =
+  normativeTypeCounts.Recomendação === 1 ? 'recomendação' : 'recomendações'
+
 console.log(
-  `Rule verification passed: ${requirements.length} documented requirements mapped to ${rules.length} rule implementation(s).`,
+  `Rule verification passed: ${requirements.length} documented requirements mapped to ${rules.length} rule implementation(s): ${normativeTypeCounts.Requisito} requisitos and ${normativeTypeCounts.Recomendação} ${recommendationLabel}.`,
 )

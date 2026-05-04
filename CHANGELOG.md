@@ -25,6 +25,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - fluxo de recuperação para `QuotaExceeded`, com ações guiadas no popup.
 - plano documentado para as 49 recomendações da ABNT NBR 17225 fora do escopo implementado;
 - regras `5.1.16`, `5.2.6` e `5.7.13`, incorporando os requisitos obrigatórios que estavam fora do recorte inicial.
+- classificação normativa canônica em `src/normative.ts`, baseada na própria ABNT NBR 17225.
 
 ### Changed
 
@@ -39,6 +40,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - superfícies do Ant Design alinhadas ao tema do produto, incluindo CTAs, tags, modais, drawers, tooltips e popovers.
 - matriz normativa atualizada após nova revisão técnica das heurísticas mais sensíveis;
 - documentação de cobertura atualizada para refletir 97 regras implementadas e nenhum requisito obrigatório pendente.
+- filtros, score e resumo passam a usar classificação normativa real, sem inferir requisito ou recomendação por severidade ou nível WCAG.
 
 ### Fixed
 

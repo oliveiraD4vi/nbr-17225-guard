@@ -1,114 +1,126 @@
-import { t } from './i18n';
-import { allRules } from './rules';
-import type { AuditResult, Violation, VisionSimulationFilter } from './types';
+import { t } from './i18n'
+import { isNormativeRequirement } from './normative'
+import { allRules } from './rules'
+import type { AuditResult, Violation, VisionSimulationFilter } from './types'
 
 const contentScope = globalThis as typeof globalThis & {
-  __nbrGuardContentLoaded?: boolean;
-};
+  __nbrGuardContentLoaded?: boolean
+}
 
 if (contentScope.__nbrGuardContentLoaded) {
-  console.log('[Guardião NBR 17225] Content script já carregado');
+  console.log('[Guardião NBR 17225] Content script já carregado')
 } else {
-  contentScope.__nbrGuardContentLoaded = true;
+  contentScope.__nbrGuardContentLoaded = true
 
-  const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host';
+  const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host'
   const VISION_FILTER_IDS = {
     protanopia: 'nbr-protanopia-filter',
     deuteranopia: 'nbr-deuteranopia-filter',
     tritanopia: 'nbr-tritanopia-filter',
-  } as const;
+  } as const
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('[Guardião NBR 17225] Mensagem recebida:', request.action);
+    console.log('[Guardião NBR 17225] Mensagem recebida:', request.action)
 
     switch (request.action) {
       case 'PING':
-        sendResponse({ status: 'OK' });
-        break;
+        sendResponse({ status: 'OK' })
+        break
 
       case 'RUN_AUDIT':
         runAuditInPage(Boolean(request.includeRecommendations))
           .then((result) => sendResponse({ result }))
           .catch((error: unknown) => {
-            const message = error instanceof Error ? error.message : t('content.unknownAuditError');
-            sendResponse({ error: message });
-          });
-        return true;
+            const message = error instanceof Error ? error.message : t('content.unknownAuditError')
+            sendResponse({ error: message })
+          })
+        return true
 
       case 'HIGHLIGHT_ALL_VIOLATIONS':
-        highlightAllViolations(request.violations);
-        sendResponse({ status: 'OK' });
-        break;
+        highlightAllViolations(request.violations)
+        sendResponse({ status: 'OK' })
+        break
 
       case 'HIGHLIGHT_VIOLATION':
-        highlightViolation(request.violation);
-        sendResponse({ status: 'OK' });
-        break;
+        highlightViolation(request.violation)
+        sendResponse({ status: 'OK' })
+        break
 
       case 'CLEAR_HIGHLIGHTS':
-        clearHighlights();
-        sendResponse({ status: 'OK' });
-        break;
+        clearHighlights()
+        sendResponse({ status: 'OK' })
+        break
 
       case 'APPLY_VISION_FILTER':
-        applyVisionFilter(request.filter);
-        sendResponse({ status: 'OK' });
-        break;
+        applyVisionFilter(request.filter)
+        sendResponse({ status: 'OK' })
+        break
 
       default:
-        sendResponse({ status: 'UNKNOWN_ACTION' });
+        sendResponse({ status: 'UNKNOWN_ACTION' })
     }
 
-    return true;
-  });
+    return true
+  })
 
   function highlightAllViolations(violations: Violation[]) {
-    clearHighlights();
-    violations.forEach((violation) => renderViolationHighlight(violation));
+    clearHighlights()
+    violations.forEach((violation) => renderViolationHighlight(violation))
   }
 
   async function runAuditInPage(includeRecommendations: boolean): Promise<AuditResult> {
-    await ensureDocumentReady();
-    clearHighlights();
-    await waitForAuditStability();
+    await ensureDocumentReady()
+    clearHighlights()
+    await waitForAuditStability()
 
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
     const rulesToRun = includeRecommendations
       ? allRules
-      : allRules.filter((rule) => rule.severity === 'error');
+      : allRules.filter((rule) => isNormativeRequirement(rule.nbrReference))
 
     for (const rule of rulesToRun) {
       try {
-        const ruleViolations = await rule.check();
-        violations.push(...ruleViolations);
+        const ruleViolations = await rule.check()
+        violations.push(...ruleViolations)
       } catch (error) {
-        console.error(`[Guardião NBR 17225] Erro na regra ${rule.id}:`, error);
+        console.error(`[Guardião NBR 17225] Erro na regra ${rule.id}:`, error)
       }
     }
 
-    const dedupedViolations = dedupeViolations(violations);
+    const dedupedViolations = dedupeViolations(violations)
 
-    const violationsByRule = dedupedViolations.reduce<Record<string, Violation[]>>((acc, violation) => {
-      acc[violation.ruleId] ??= [];
-      acc[violation.ruleId].push(violation);
-      return acc;
-    }, {});
+    const violationsByRule = dedupedViolations.reduce<Record<string, Violation[]>>(
+      (acc, violation) => {
+        acc[violation.ruleId] ??= []
+        acc[violation.ruleId].push(violation)
+        return acc
+      },
+      {},
+    )
 
     const violationsBySeverity = dedupedViolations.reduce<Record<'error' | 'warning', Violation[]>>(
       (acc, violation) => {
-        acc[violation.severity].push(violation);
-        return acc;
+        acc[violation.severity].push(violation)
+        return acc
       },
-      { error: [], warning: [] }
-    );
-    const humanReviewItems = dedupedViolations.filter((violation) => violation.requiresHumanReview).length;
-    const automatedFindings = dedupedViolations.length - humanReviewItems;
+      { error: [], warning: [] },
+    )
+    const requirementViolations = dedupedViolations.filter((violation) =>
+      isNormativeRequirement(violation.nbrReference),
+    )
+    const recommendationViolations = dedupedViolations.filter(
+      (violation) => !isNormativeRequirement(violation.nbrReference),
+    )
+    const humanReviewItems = dedupedViolations.filter(
+      (violation) => violation.requiresHumanReview,
+    ).length
+    const automatedFindings = dedupedViolations.length - humanReviewItems
 
     return {
       violations: dedupedViolations,
       totalViolations: dedupedViolations.length,
-      errors: violationsBySeverity.error.length,
-      warnings: violationsBySeverity.warning.length,
+      errors: requirementViolations.length,
+      warnings: recommendationViolations.length,
       humanReviewItems,
       automatedFindings,
       timestamp: Date.now(),
@@ -117,11 +129,11 @@ if (contentScope.__nbrGuardContentLoaded) {
       includeRecommendations,
       violationsByRule,
       violationsBySeverity,
-    };
+    }
   }
 
   function dedupeViolations(violations: Violation[]): Violation[] {
-    const seen = new Set<string>();
+    const seen = new Set<string>()
 
     return violations.filter((violation) => {
       const signature = [
@@ -129,60 +141,58 @@ if (contentScope.__nbrGuardContentLoaded) {
         violation.elementSelector || '',
         violation.message,
         violation.suggestion,
-      ].join('|');
+      ].join('|')
 
       if (seen.has(signature)) {
-        return false;
+        return false
       }
 
-      seen.add(signature);
-      return true;
-    });
+      seen.add(signature)
+      return true
+    })
   }
 
-  function highlightViolation(violation: Violation) {    
-    clearHighlights();
-    
-    const existingHighlight = document.getElementById(`nbr-highlight-${violation.customId}`);
-    if (existingHighlight) return;
+  function highlightViolation(violation: Violation) {
+    clearHighlights()
 
-    renderViolationHighlight(violation, true);
+    const existingHighlight = document.getElementById(`nbr-highlight-${violation.customId}`)
+    if (existingHighlight) return
 
-    if (!violation.elementSelector) return;
+    renderViolationHighlight(violation, true)
 
-    const element = document.querySelector(violation.elementSelector);
+    if (!violation.elementSelector) return
+
+    const element = document.querySelector(violation.elementSelector)
     if (element instanceof HTMLElement) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }
 
   function renderViolationHighlight(violation: Violation, startOpen = false) {
     try {
-      if (!violation.elementSelector) return;
+      if (!violation.elementSelector) return
 
-      const element = document.querySelector(violation.elementSelector);
+      const element = document.querySelector(violation.elementSelector)
       if (!(element instanceof HTMLElement)) {
-        console.warn('[Guardião NBR 17225] Elemento não encontrado:', violation.elementSelector);
-        return;
+        console.warn('[Guardião NBR 17225] Elemento não encontrado:', violation.elementSelector)
+        return
       }
 
-      const rect = element.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
+      const rect = element.getBoundingClientRect()
+      if (rect.width <= 0 || rect.height <= 0) return
 
-      const verticalPosition = rect.top < 88 ? 'bottom' : 'top';
+      const verticalPosition = rect.top < 88 ? 'bottom' : 'top'
       const horizontalPosition =
-        rect.left < 180 ? 'left' :
-        window.innerWidth - rect.right < 180 ? 'right' :
-        'center';
+        rect.left < 180 ? 'left' : window.innerWidth - rect.right < 180 ? 'right' : 'center'
 
-      const shadowHost = document.createElement('div');
-      shadowHost.id = `nbr-highlight-${violation.customId}`;
-      shadowHost.style.position = 'absolute';
-      shadowHost.style.pointerEvents = 'none';
-      shadowHost.style.zIndex = '999999';
+      const shadowHost = document.createElement('div')
+      shadowHost.id = `nbr-highlight-${violation.customId}`
+      shadowHost.style.position = 'absolute'
+      shadowHost.style.pointerEvents = 'none'
+      shadowHost.style.zIndex = '999999'
 
-      const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
-      const style = document.createElement('style');
+      const shadowRoot = shadowHost.attachShadow({ mode: 'open' })
+      const style = document.createElement('style')
       style.textContent = `
         :host {
           --highlight-color: ${violation.severity === 'error' ? '#dc2626' : '#d97706'};
@@ -294,110 +304,111 @@ if (contentScope.__nbrGuardContentLoaded) {
           display: block;
           color: rgba(255, 255, 255, 0.72);
         }
-      `;
+      `
 
-      const highlightBox = document.createElement('div');
-      highlightBox.className = 'highlight-box';
+      const highlightBox = document.createElement('div')
+      highlightBox.className = 'highlight-box'
 
-      const icon = document.createElement('button');
-      icon.className = 'highlight-icon';
-      icon.type = 'button';
-      icon.textContent = violation.severity === 'error' ? '!' : '?';
-      icon.setAttribute('aria-label', t('content.highlightAriaLabel', { ruleName: violation.ruleName }));
+      const icon = document.createElement('button')
+      icon.className = 'highlight-icon'
+      icon.type = 'button'
+      icon.textContent = violation.severity === 'error' ? '!' : '?'
+      icon.setAttribute(
+        'aria-label',
+        t('content.highlightAriaLabel', { ruleName: violation.ruleName }),
+      )
 
-      const tooltip = document.createElement('div');
-      tooltip.className = `tooltip position-${verticalPosition} position-${horizontalPosition}`;
+      const tooltip = document.createElement('div')
+      tooltip.className = `tooltip position-${verticalPosition} position-${horizontalPosition}`
       tooltip.innerHTML = `
         <span class="tooltip-title">${violation.ruleName}</span>
         <span class="tooltip-meta">${t('content.highlightMeta', {
           reference: violation.nbrReference,
-          severity: violation.severity === 'error'
-            ? t('shared.severity.requirement')
-            : t('shared.severity.recommendation'),
+          severity: violation.normativeType,
         })}</span>
-      `;
+      `
 
-      let pinnedOpen = startOpen;
+      let pinnedOpen = startOpen
 
       const syncTooltipVisibility = (forceOpen?: boolean) => {
-        const isOpen = typeof forceOpen === 'boolean' ? forceOpen : pinnedOpen;
-        tooltip.classList.toggle('open', isOpen);
-      };
+        const isOpen = typeof forceOpen === 'boolean' ? forceOpen : pinnedOpen
+        tooltip.classList.toggle('open', isOpen)
+      }
 
       icon.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        pinnedOpen = !pinnedOpen;
-        syncTooltipVisibility();
-      });
+        event.preventDefault()
+        event.stopPropagation()
+        pinnedOpen = !pinnedOpen
+        syncTooltipVisibility()
+      })
 
       highlightBox.addEventListener('mouseenter', () => {
-        syncTooltipVisibility(true);
-      });
+        syncTooltipVisibility(true)
+      })
 
       highlightBox.addEventListener('mouseleave', () => {
-        syncTooltipVisibility(pinnedOpen);
-      });
+        syncTooltipVisibility(pinnedOpen)
+      })
 
-      highlightBox.appendChild(icon);
-      highlightBox.appendChild(tooltip);
-      shadowRoot.appendChild(style);
-      shadowRoot.appendChild(highlightBox);
+      highlightBox.appendChild(icon)
+      highlightBox.appendChild(tooltip)
+      shadowRoot.appendChild(style)
+      shadowRoot.appendChild(highlightBox)
 
-      shadowHost.style.left = `${window.scrollX + rect.left}px`;
-      shadowHost.style.top = `${window.scrollY + rect.top}px`;
-      shadowHost.style.width = `${rect.width}px`;
-      shadowHost.style.height = `${rect.height}px`;
+      shadowHost.style.left = `${window.scrollX + rect.left}px`
+      shadowHost.style.top = `${window.scrollY + rect.top}px`
+      shadowHost.style.width = `${rect.width}px`
+      shadowHost.style.height = `${rect.height}px`
 
-      document.body.appendChild(shadowHost);
-      if (startOpen) syncTooltipVisibility(true);
+      document.body.appendChild(shadowHost)
+      if (startOpen) syncTooltipVisibility(true)
     } catch (error) {
-      console.error('[Guardião NBR 17225] Erro ao destacar violação:', error);
+      console.error('[Guardião NBR 17225] Erro ao destacar violação:', error)
     }
   }
 
   function clearHighlights() {
-    const highlights = document.querySelectorAll('[id^="nbr-highlight-"]');
-    highlights.forEach((highlight) => highlight.remove());
+    const highlights = document.querySelectorAll('[id^="nbr-highlight-"]')
+    highlights.forEach((highlight) => highlight.remove())
   }
 
   function applyVisionFilter(filter: VisionSimulationFilter) {
     try {
-      if (!document.body) return;
+      if (!document.body) return
 
-      ensureVisionFilterDefs();
+      ensureVisionFilterDefs()
 
-      const target = document.documentElement;
+      const target = document.documentElement
       if (!filter || filter.type === 'none') {
-        target.style.filter = 'none';
-        return;
+        target.style.filter = 'none'
+        return
       }
 
       switch (filter.type) {
         case 'protanopia':
         case 'deuteranopia':
         case 'tritanopia':
-          target.style.filter = `url(#${VISION_FILTER_IDS[filter.type]})`;
-          break;
+          target.style.filter = `url(#${VISION_FILTER_IDS[filter.type]})`
+          break
         case 'blur':
-          target.style.filter = `blur(${(filter.intensity / 100) * 10}px)`;
-          break;
+          target.style.filter = `blur(${(filter.intensity / 100) * 10}px)`
+          break
       }
     } catch (error) {
-      console.error('[Guardião NBR 17225] Erro ao aplicar simulador de visão:', error);
+      console.error('[Guardião NBR 17225] Erro ao aplicar simulador de visão:', error)
     }
   }
 
   function ensureVisionFilterDefs() {
-    if (document.getElementById(VISION_FILTER_HOST_ID)) return;
+    if (document.getElementById(VISION_FILTER_HOST_ID)) return
 
-    const host = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    host.setAttribute('id', VISION_FILTER_HOST_ID);
-    host.setAttribute('aria-hidden', 'true');
-    host.style.position = 'absolute';
-    host.style.width = '0';
-    host.style.height = '0';
-    host.style.pointerEvents = 'none';
+    const host = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    host.setAttribute('id', VISION_FILTER_HOST_ID)
+    host.setAttribute('aria-hidden', 'true')
+    host.style.position = 'absolute'
+    host.style.width = '0'
+    host.style.height = '0'
+    host.style.pointerEvents = 'none'
 
     host.innerHTML = `
       <defs>
@@ -411,40 +422,42 @@ if (contentScope.__nbrGuardContentLoaded) {
           <feColorMatrix type="matrix" values="0.95 0.05 0 0 0 0 0.433 0.567 0 0 0 0.475 0.525 0 0 0 0 0 1 0" />
         </filter>
       </defs>
-    `;
+    `
 
-    document.body.appendChild(host);
+    document.body.appendChild(host)
   }
 
   function ensureDocumentReady(): Promise<void> {
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      return Promise.resolve();
+      return Promise.resolve()
     }
 
     return new Promise((resolve) => {
-      document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
-    });
+      document.addEventListener('DOMContentLoaded', () => resolve(), { once: true })
+    })
   }
 
   async function waitForAuditStability(): Promise<void> {
-    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    )
 
     await new Promise<void>((resolve) => {
-      let settled = false;
-      let settleTimer = window.setTimeout(finish, 300);
-      const timeoutId = window.setTimeout(finish, 1500);
+      let settled = false
+      let settleTimer = window.setTimeout(finish, 300)
+      const timeoutId = window.setTimeout(finish, 1500)
       const observer = new MutationObserver(() => {
-        window.clearTimeout(settleTimer);
-        settleTimer = window.setTimeout(finish, 300);
-      });
+        window.clearTimeout(settleTimer)
+        settleTimer = window.setTimeout(finish, 300)
+      })
 
       function finish() {
-        if (settled) return;
-        settled = true;
-        observer.disconnect();
-        window.clearTimeout(settleTimer);
-        window.clearTimeout(timeoutId);
-        resolve();
+        if (settled) return
+        settled = true
+        observer.disconnect()
+        window.clearTimeout(settleTimer)
+        window.clearTimeout(timeoutId)
+        resolve()
       }
 
       observer.observe(document.documentElement, {
@@ -452,11 +465,9 @@ if (contentScope.__nbrGuardContentLoaded) {
         subtree: true,
         attributes: true,
         characterData: true,
-      });
-    });
+      })
+    })
   }
 
-  console.log('[Guardião NBR 17225] Content script carregado');
+  console.log('[Guardião NBR 17225] Content script carregado')
 }
-
-

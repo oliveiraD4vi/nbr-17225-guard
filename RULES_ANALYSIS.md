@@ -1,8 +1,8 @@
 # Análise das Regras da ABNT NBR 17225
 
-Esta análise consolida as regras extraídas de `docs/Analise_Documental_NBR17225.xlsx` e compara a cobertura com os módulos em `src/rules`.
+Esta análise consolida o catálogo v1 implementado e compara a cobertura com os módulos em `src/rules`.
 
-O catálogo implementado atual contém 97 itens: 94 itens do escopo v1 confirmado em `docs/Analise_Documental_NBR17225.xlsx` e 3 requisitos obrigatórios adicionais identificados na referência pública da ABNT NBR 17225.
+O catálogo implementado atual contém 97 itens revisados contra a referência pública da ABNT NBR 17225.
 
 ## Resumo Atual
 
@@ -11,6 +11,8 @@ O catálogo implementado atual contém 97 itens: 94 itens do escopo v1 confirmad
 | Itens documentados                |         97 | Catálogo v1 local mais requisitos obrigatórios adicionais incorporados ao motor          |
 | Regras com implementação no motor |         97 | Todas possuem `nbrReference` dedicado em `src/rules`                                     |
 | Regras ausentes                   |          0 | Nenhuma pendência após esta atualização                                                  |
+| Requisitos normativos             |         96 | Classificação extraída da ABNT NBR 17225, sem inferir por nível WCAG ou severidade       |
+| Recomendações normativas          |          1 | `5.1.2 Elemento em foco totalmente visível`                                              |
 | Totalmente automatizáveis         |         41 | Verificadas por DOM/CSS/metadados de forma objetiva                                      |
 | Semi-automatizáveis               |         55 | Implementadas como heurísticas assistidas e exigem revisão humana em parte do julgamento |
 | Não automatizáveis                |          1 | `5.12.9 Uso de texto especial`, registrado como revisão manual                           |
@@ -45,7 +47,7 @@ Essas entradas agora possuem regras dedicadas e são verificadas pelo script `pn
 
 ## Escopo Implementado e Limite Normativo
 
-O escopo implementado atual é o catálogo de 97 itens validado por `pnpm verify:rules`. Fontes públicas da NBR 17225 expõem 49 recomendações adicionais fora desse recorte. Elas não entram nesta versão, mas estão organizadas como plano de expansão futura.
+O escopo implementado atual é o catálogo de 97 itens validado por `pnpm verify:rules`. A classificação normativa `Requisito` ou `Recomendação` é extraída da própria ABNT NBR 17225 e mantida em `src/normative.ts`; ela não é inferida por `wcagLevel`, `severity` nem por documentação local. Fontes públicas da NBR 17225 expõem 49 recomendações adicionais fora desse recorte. Elas não entram nesta versão, mas estão organizadas como plano de expansão futura.
 
 Para o confronto formal regra a regra com a referência normativa pública, consulte `RULES_NORMATIVE_MATRIX.md`.
 
