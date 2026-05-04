@@ -520,13 +520,17 @@
 .popup-app .ant-drawer .ant-drawer-header,
 .popup-app .ant-drawer .ant-drawer-body,
 .popup-app .ant-popover .ant-popover-inner,
-.popup-app .ant-tooltip .ant-tooltip-inner,
 .popup-app .ant-dropdown .ant-dropdown-menu,
 .popup-app .ant-select-dropdown,
 .popup-app .ant-picker-dropdown,
 .popup-app .ant-color-picker-panel {
   background: var(--guard-color-surface);
   color: var(--guard-color-text-primary);
+}
+
+.ant-tooltip .ant-tooltip-inner {
+  background: var(--guard-color-tooltip-bg);
+  color: var(--guard-color-tooltip-text);
 }
 
 .popup-app .ant-modal .ant-modal-content,

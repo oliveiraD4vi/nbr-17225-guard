@@ -20,7 +20,7 @@ const antThemeTokens = {
   colorBgLayout: resolveGuardToken('--guard-color-page-bg', '#f3f6fb'),
   colorBgContainer: resolveGuardToken('--guard-color-surface', '#ffffff'),
   colorBgElevated: resolveGuardToken('--guard-color-surface', '#ffffff'),
-  colorBgSpotlight: resolveGuardToken('--guard-color-surface', '#ffffff'),
+  colorBgSpotlight: resolveGuardToken('--guard-color-tooltip-bg', '#0f172a'),
   colorFillAlter: resolveGuardToken('--guard-color-surface-muted', '#f8fafc'),
   colorBorder: resolveGuardToken('--guard-color-border', '#e2e8f0'),
   colorBorderSecondary: resolveGuardToken('--guard-color-border', '#e2e8f0'),
@@ -28,6 +28,7 @@ const antThemeTokens = {
   colorTextBase: resolveGuardToken('--guard-color-text-primary', '#0f172a'),
   colorText: resolveGuardToken('--guard-color-text-primary', '#0f172a'),
   colorTextSecondary: resolveGuardToken('--guard-color-text-secondary', '#475569'),
+  colorTextLightSolid: resolveGuardToken('--guard-color-tooltip-text', '#ffffff'),
   borderRadius: 8,
   fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
 }
@@ -46,6 +47,10 @@ const antThemeComponents = {
     defaultBg: resolveGuardToken('--guard-color-surface', '#ffffff'),
     defaultColor: resolveGuardToken('--guard-color-text-primary', '#0f172a'),
     defaultBorderColor: resolveGuardToken('--guard-color-border', '#e2e8f0'),
+  },
+  Tooltip: {
+    colorBgSpotlight: resolveGuardToken('--guard-color-tooltip-bg', '#0f172a'),
+    colorTextLightSolid: resolveGuardToken('--guard-color-tooltip-text', '#ffffff'),
   },
 }
 
