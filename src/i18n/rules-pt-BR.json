@@ -481,6 +481,13 @@
       "message": "Imagem com texto alternativo extenso pode representar imagem de texto.",
       "suggestion": "Prefira texto HTML estilizado sempre que o conteúdo textual não for essencialmente gráfico.",
       "remediation": "<h2>Resultados oficiais</h2>"
+    },
+    "imageMapAltText": {
+      "name": "Texto alternativo para mapas de imagens",
+      "description": "Áreas acionáveis de mapas de imagem devem possuir texto alternativo ou nome acessível.",
+      "message": "Área acionável de mapa de imagem sem texto alternativo ou nome acessível.",
+      "suggestion": "Adicione alt, aria-label, aria-labelledby ou title descritivo em cada área acionável.",
+      "remediation": "<area href=\"/setor-a\" alt=\"Acessar setor A\" shape=\"rect\" coords=\"0,0,80,80\" />"
     }
   },
   "keyboard": {
@@ -546,6 +553,13 @@
       "message": "Atalho de teclado detectado via accesskey=\"{{accessKey}}\".",
       "suggestion": "Evite atalhos de caractere único ou ofereça mecanismo para desativá-los.",
       "remediation": "<button aria-keyshortcuts=\"Alt+S\">Salvar</button>"
+    },
+    "customComponentInstructions": {
+      "name": "Instruções para componentes customizados",
+      "description": "Componentes customizados complexos devem apresentar instruções suficientes para operação.",
+      "message": "Componente customizado complexo sem instrução operacional associada detectável.",
+      "suggestion": "Informe como operar o componente por teclado, toque ou ponteiro, e associe a instrução ao componente.",
+      "remediation": "<div role=\"slider\" aria-describedby=\"volume-ajuda\" tabindex=\"0\"></div><p id=\"volume-ajuda\">Use as setas para ajustar o volume.</p>"
     }
   },
   "lists": {
@@ -586,6 +600,13 @@
       "message": "Nenhum link para pular blocos repetidos foi encontrado.",
       "suggestion": "Adicione um link de salto no início da página apontando para o conteúdo principal.",
       "remediation": "<a href=\"#conteudo-principal\" class=\"skip-link\">Pular para o conteúdo principal</a>"
+    },
+    "locationAlternatives": {
+      "name": "Alternativas para localização",
+      "description": "Conjuntos de páginas devem oferecer mais de uma forma de localizar páginas, quando aplicável.",
+      "message": "Não foi encontrada alternativa clara para localizar páginas além da navegação principal.",
+      "suggestion": "Confirme se há busca, trilha de navegação, mapa do site, índice ou outro mecanismo equivalente no conjunto de páginas.",
+      "remediation": "<nav aria-label=\"Trilha de navegação\">Início / Produtos / Detalhes</nav>"
     }
   },
   "presentation": {

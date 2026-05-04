@@ -68,12 +68,12 @@ Benefício:
 
 Objetivo:
 
-- preparar a implementação futura dos 52 itens da ABNT NBR 17225 que ainda não fazem parte da v1.
+- preparar a implementação futura das 49 recomendações da ABNT NBR 17225 que ainda não fazem parte do escopo implementado.
 
 Sugestões:
 
 - seguir a ordem proposta em `FUTURE_RULES_PLAN.md`;
-- implementar primeiro os três requisitos obrigatórios ausentes;
+- priorizar recomendações com baixa ambiguidade estrutural;
 - separar claramente regras realmente automatizáveis de achados que dependem de confirmação humana;
 - atualizar a página pública de rastreabilidade da landing no mesmo lote de cada nova regra.
 
@@ -220,8 +220,8 @@ Benefício:
 - reduz surpresa operacional;
 - torna a recuperação de `QuotaExceeded` mais transparente.
 
-## Backlog futuro fora do escopo v1
+## Backlog futuro fora do escopo implementado
 
-A lista completa dos 52 itens fora do escopo v1 está em `FUTURE_RULES_PLAN.md`.
+A lista completa das 49 recomendações fora do escopo implementado está em `FUTURE_RULES_PLAN.md`.
 
 Esses itens devem ser tratados como evolução futura do catálogo, não como falha da implementação atual da v1.

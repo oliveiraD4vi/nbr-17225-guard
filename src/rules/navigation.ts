@@ -1,6 +1,25 @@
-import { t } from '@/i18n';
-import type { Rule, Violation } from '@/types';
-import { createViolation, getAccessibleName, isElementVisible } from '@/utils';
+import { t } from '@/i18n'
+import type { Rule, Violation } from '@/types'
+import { createViolation, getAccessibleName, getVisibleText, isElementVisible } from '@/utils'
+
+const normalizeText = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+
+const isInternalLink = (anchor: HTMLAnchorElement): boolean => {
+  const href = anchor.getAttribute('href')?.trim()
+  if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+    return false
+  }
+
+  try {
+    return new URL(href, window.location.href).origin === window.location.origin
+  } catch {
+    return false
+  }
+}
 
 export const linkSemanticRule: Rule = {
   id: 'link-semantic',
@@ -11,38 +30,42 @@ export const linkSemanticRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
+    const violations: Violation[] = []
 
     document.querySelectorAll<HTMLAnchorElement>('a').forEach((anchor) => {
-      if (!isElementVisible(anchor)) return;
+      if (!isElementVisible(anchor)) return
 
-      const href = anchor.getAttribute('href');
-      const name = getAccessibleName(anchor);
+      const href = anchor.getAttribute('href')
+      const name = getAccessibleName(anchor)
 
       if (!href || href.trim() === '') {
-        violations.push(createViolation(linkSemanticRule, {
-          element: anchor,
-          message: t('rules.navigation.linkSemantic.hrefMessage'),
-          suggestion: t('rules.navigation.linkSemantic.hrefSuggestion'),
-          remediationAdvice: t('rules.navigation.linkSemantic.hrefRemediation'),
-          customIdPrefix: 'link-href',
-        }));
+        violations.push(
+          createViolation(linkSemanticRule, {
+            element: anchor,
+            message: t('rules.navigation.linkSemantic.hrefMessage'),
+            suggestion: t('rules.navigation.linkSemantic.hrefSuggestion'),
+            remediationAdvice: t('rules.navigation.linkSemantic.hrefRemediation'),
+            customIdPrefix: 'link-href',
+          }),
+        )
       }
 
       if (!name.trim()) {
-        violations.push(createViolation(linkSemanticRule, {
-          element: anchor,
-          message: t('rules.navigation.linkSemantic.nameMessage'),
-          suggestion: t('rules.navigation.linkSemantic.nameSuggestion'),
-          remediationAdvice: t('rules.navigation.linkSemantic.nameRemediation'),
-          customIdPrefix: 'link-name',
-        }));
+        violations.push(
+          createViolation(linkSemanticRule, {
+            element: anchor,
+            message: t('rules.navigation.linkSemantic.nameMessage'),
+            suggestion: t('rules.navigation.linkSemantic.nameSuggestion'),
+            remediationAdvice: t('rules.navigation.linkSemantic.nameRemediation'),
+            customIdPrefix: 'link-name',
+          }),
+        )
       }
-    });
+    })
 
-    return violations;
+    return violations
   },
-};
+}
 
 export const skipLinksRule: Rule = {
   id: 'skip-links',
@@ -53,27 +76,91 @@ export const skipLinksRule: Rule = {
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
-    const violations: Violation[] = [];
-    const skipLink = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')).find((link) => {
-      const text = getAccessibleName(link).toLowerCase();
-      return text.includes('pular') || text.includes('conteúdo') || text.includes('conteudo');
-    });
+    const violations: Violation[] = []
+    const skipLink = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')).find(
+      (link) => {
+        const text = getAccessibleName(link).toLowerCase()
+        return text.includes('pular') || text.includes('conteúdo') || text.includes('conteudo')
+      },
+    )
 
     if (!skipLink) {
-      violations.push(createViolation(skipLinksRule, {
-        element: document.body,
-        message: t('rules.navigation.skipLinks.message'),
-        suggestion: t('rules.navigation.skipLinks.suggestion'),
-        remediationAdvice: t('rules.navigation.skipLinks.remediation'),
-        customIdPrefix: 'skip-link',
-      }));
+      violations.push(
+        createViolation(skipLinksRule, {
+          element: document.body,
+          message: t('rules.navigation.skipLinks.message'),
+          suggestion: t('rules.navigation.skipLinks.suggestion'),
+          remediationAdvice: t('rules.navigation.skipLinks.remediation'),
+          customIdPrefix: 'skip-link',
+        }),
+      )
     }
 
-    return violations;
+    return violations
   },
-};
+}
 
-export const navigationRules: Rule[] = [
-  linkSemanticRule,
-  skipLinksRule,
-];
+export const locationAlternativesRule: Rule = {
+  id: 'location-alternatives',
+  nbrReference: '5.7.13',
+  name: t('rules.navigation.locationAlternatives.name'),
+  description: t('rules.navigation.locationAlternatives.description'),
+  severity: 'warning',
+  wcagLevel: 'A',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const internalLinks = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>('a[href]'),
+    ).filter((anchor) => isElementVisible(anchor) && isInternalLink(anchor))
+    const navigationBlocks = Array.from(
+      document.querySelectorAll<HTMLElement>('nav, [role="navigation"]'),
+    ).filter(isElementVisible)
+    const hasSiteNavigation = navigationBlocks.length > 0 || internalLinks.length >= 8
+
+    if (!hasSiteNavigation) return []
+
+    const bodyText = normalizeText(getVisibleText(document.body).slice(0, 5000))
+    const locationText = normalizeText(`${window.location.pathname} ${document.title} ${bodyText}`)
+    const processPattern =
+      /\b(checkout|pagamento|login|cadastro|formulario|inscricao|resultado|confirmacao|confirmar|etapa|passo|wizard)\b/
+
+    if (processPattern.test(locationText)) return []
+
+    const hasSearch = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        'input[type="search"], [role="search"], form[role="search"], [aria-label*="buscar" i], [aria-label*="pesquisar" i], [aria-label*="search" i]',
+      ),
+    ).some((element) => {
+      if (!isElementVisible(element)) return false
+      const text = normalizeText(
+        `${getAccessibleName(element)} ${element.getAttribute('placeholder') || ''}`,
+      )
+      return /\b(busca|buscar|pesquisa|pesquisar|search)\b/.test(text)
+    })
+
+    const hasBreadcrumb = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        '[aria-label*="breadcrumb" i], [aria-label*="trilha" i], [class*="breadcrumb" i], [data-testid*="breadcrumb" i]',
+      ),
+    ).some(isElementVisible)
+
+    const hasSitemapOrIndex = internalLinks.some((anchor) => {
+      const text = normalizeText(getAccessibleName(anchor))
+      return /\b(mapa do site|sitemap|indice|sumario)\b/.test(text)
+    })
+
+    if (hasSearch || hasBreadcrumb || hasSitemapOrIndex) return []
+
+    return [
+      createViolation(locationAlternativesRule, {
+        element: document.body,
+        message: t('rules.navigation.locationAlternatives.message'),
+        suggestion: t('rules.navigation.locationAlternatives.suggestion'),
+        remediationAdvice: t('rules.navigation.locationAlternatives.remediation'),
+        customIdPrefix: 'location-alternatives',
+      }),
+    ]
+  },
+}
+
+export const navigationRules: Rule[] = [linkSemanticRule, skipLinksRule, locationAlternativesRule]

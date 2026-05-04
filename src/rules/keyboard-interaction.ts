@@ -7,7 +7,10 @@ import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
 import {
   createViolation,
+  getAccessibleName,
+  getAssociatedDescriptionText,
   getFocusableElements,
+  getVisibleText,
   isElementFullyInViewport,
   isElementPartiallyInViewport,
   isElementVisible,
@@ -332,6 +335,90 @@ export const keyboardShortcutRule: Rule = {
     ),
 }
 
+const customComponentSelector = [
+  '[role="combobox"]',
+  '[role="grid"]',
+  '[role="listbox"]',
+  '[role="menu"]',
+  '[role="menubar"]',
+  '[role="slider"]',
+  '[role="spinbutton"]',
+  '[role="switch"]',
+  '[role="tablist"]',
+  '[role="tree"]',
+  '[aria-haspopup]',
+  '[aria-activedescendant]',
+  '[draggable="true"]',
+  '[data-carousel]',
+  '[data-slider]',
+  '[class*="carousel" i]',
+  '[class*="slider" i]',
+].join(', ')
+
+const instructionPattern =
+  /\b(pressione|aperte|utilize|use|tecla|atalho|seta|setas|tab|enter|escape|esc|espaço|space|arraste|deslize|mova|navegue|selecione|expanda|recolha|toque|clique)\b/i
+
+const getNearbyInstructionText = (element: HTMLElement): string => {
+  const directText = [
+    element.getAttribute('aria-description'),
+    element.getAttribute('title'),
+    element.getAttribute('data-instructions'),
+    getAssociatedDescriptionText(element),
+    getAccessibleName(element),
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const container =
+    element.closest<HTMLElement>('fieldset, section, article, form, [role="group"]') ||
+    element.parentElement
+  const nearbyText = container ? getVisibleText(container).slice(0, 800) : ''
+
+  return `${directText} ${nearbyText}`.trim()
+}
+
+export const customComponentInstructionsRule: Rule = {
+  id: 'custom-component-instructions',
+  nbrReference: '5.1.16',
+  name: t('rules.keyboard.customComponentInstructions.name'),
+  description: t('rules.keyboard.customComponentInstructions.description'),
+  severity: 'warning',
+  wcagLevel: 'A',
+  category: 'Semi-Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+    const checkedComponents = new Set<HTMLElement>()
+
+    document.querySelectorAll<HTMLElement>(customComponentSelector).forEach((element) => {
+      if (!isElementVisible(element) || checkedComponents.has(element)) return
+      checkedComponents.add(element)
+
+      const isNativeControl =
+        ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(element.tagName) &&
+        !element.hasAttribute('role') &&
+        !element.hasAttribute('aria-haspopup') &&
+        !element.hasAttribute('aria-activedescendant')
+
+      if (isNativeControl) return
+
+      const instructionText = getNearbyInstructionText(element)
+      if (instructionPattern.test(instructionText)) return
+
+      violations.push(
+        createViolation(customComponentInstructionsRule, {
+          element,
+          message: t('rules.keyboard.customComponentInstructions.message'),
+          suggestion: t('rules.keyboard.customComponentInstructions.suggestion'),
+          remediationAdvice: t('rules.keyboard.customComponentInstructions.remediation'),
+          customIdPrefix: 'custom-component-instructions',
+        }),
+      )
+    })
+
+    return violations
+  },
+}
+
 export const keyboardRules: Rule[] = [
   keyboardAccessibilityRule,
   focusIndicatorRule,
@@ -342,4 +429,5 @@ export const keyboardRules: Rule[] = [
   additionalContentPersistentRule,
   additionalContentDismissibleRule,
   keyboardShortcutRule,
+  customComponentInstructionsRule,
 ]

@@ -2,7 +2,7 @@
 
 Este documento relaciona as regras de `docs/Analise_Documental_NBR17225.xlsx` com as rotinas em `src/rules`.
 
-O escopo aqui documentado é o catálogo v1 de 94 itens confirmado no `.xlsx` local.
+O escopo aqui documentado é o catálogo implementado atual de 97 itens: o catálogo v1 confirmado no `.xlsx` local e 3 requisitos obrigatórios adicionais incorporados ao motor.
 
 Legenda:
 
@@ -12,17 +12,16 @@ Legenda:
 
 ## Resumo
 
-| Status | Quantidade |
-| --- | ---: |
-| Implementadas | 94 |
-| Ausentes | 0 |
-| Corrigidas nesta revisão | 2 (`5.9.3`, `5.12.9`) |
+| Status                  |                      Quantidade |
+| ----------------------- | ------------------------------: |
+| Implementadas           |                              97 |
+| Ausentes                |                               0 |
+| Incorporadas neste lote | 3 (`5.1.16`, `5.2.6`, `5.7.13`) |
 
 ## Fora do Escopo da V1
 
-Na confrontação com fontes públicas da NBR 17225, foram identificados itens adicionais que não fazem parte do catálogo v1 local e, portanto, não têm implementação nesta versão:
+Na confrontação com fontes públicas da NBR 17225, foram identificadas recomendações adicionais que não fazem parte do catálogo implementado atual e, portanto, não têm implementação nesta versão:
 
-- `5.2.6`
 - `5.4.3`
 - `5.4.4`
 - `5.7.3`
@@ -38,122 +37,125 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 
 ## Mapeamento por Regra
 
-| Regra | Automação | Código |
-| --- | --- | --- |
-| 5.1.1 Indicador de foco visível | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusIndicatorRule` |
-| 5.1.2 Elemento em foco totalmente visível | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusFullyVisibleRule` |
-| 5.1.3 Elemento em foco parcialmente visível | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusPartiallyVisibleRule` |
-| 5.1.4 Ordem de foco previsível | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusOrderRule` |
-| 5.1.6 Armadilha de foco | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusTrapRule` |
-| 5.1.8 Conteúdo adicional persistente | Heurística assistida | `src/rules/keyboard-interaction.ts` `additionalContentPersistentRule` |
-| 5.1.9 Conteúdo adicional dispensável | Heurística assistida | `src/rules/keyboard-interaction.ts` `additionalContentDismissibleRule` |
-| 5.1.11 Atalhos de teclado sem tecla modificadora | Heurística assistida | `src/rules/keyboard-interaction.ts` `keyboardShortcutRule` |
-| 5.1.13 Acessibilidade por teclado parcial | Implementada | `src/rules/keyboard-interaction.ts` `keyboardAccessibilityRule` |
-| 5.2.1 Texto alternativo para imagens de conteúdo | Implementada | `src/rules/images.ts` `imageAltTextRule` |
-| 5.2.2 Texto alternativo para imagens funcionais | Implementada | `src/rules/images.ts` `imageFunctionalAltRule` |
-| 5.2.3 Texto alternativo para imagens decorativas | Heurística assistida | `src/rules/images.ts` `imageDecorativeRule` |
-| 5.2.4 Descrição para imagens complexas | Heurística assistida | `src/rules/images.ts` `complexImageDescriptionRule` |
-| 5.2.5 Imagens de texto | Heurística assistida | `src/rules/images.ts` `imageOfTextRule` |
-| 5.3.1 Semântica de cabeçalho | Implementada | `src/rules/headings.ts` `headingSemanticRule` |
-| 5.3.2 Uso de cabeçalhos | Heurística assistida | `src/rules/headings.ts` `headingUsageRule` |
-| 5.3.5 Estrutura de cabeçalhos | Implementada | `src/rules/headings.ts` `headingStructureRule` |
-| 5.4.1 Semântica de região | Implementada | `src/rules/regions.ts` `regionSemanticRule` |
-| 5.4.2 Uso de regiões | Heurística assistida | `src/rules/documental-completeness-a.ts` `regionUsageRule` |
-| 5.4.5 Regiões identificadas unicamente | Implementada | `src/rules/regions.ts` `uniqueRegionIdentificationRule` |
-| 5.5.1 Semântica de lista | Implementada | `src/rules/lists.ts` `listSemanticRule` |
-| 5.5.2 Uso de listas | Heurística assistida | `src/rules/documental-completeness-a.ts` `listUsageRule` |
-| 5.6.1 Semântica de tabela | Implementada | `src/rules/tables.ts` `tableSemanticRule` |
-| 5.6.2 Uso de tabelas | Heurística assistida | `src/rules/documental-completeness-a.ts` `tableUsageRule` |
-| 5.6.3 Cabeçalhos de tabela | Implementada | `src/rules/tables.ts` `tableHeadersRule` |
-| 5.6.5 Título de tabela associado | Implementada | `src/rules/tables.ts` `tableCaptionRule` |
-| 5.7.1 Semântica de link | Implementada | `src/rules/navigation.ts` `linkSemanticRule` |
-| 5.7.2 Uso de links | Heurística assistida | `src/rules/documental-completeness-a.ts` `linkUsageRule` |
-| 5.7.4 Propósito do link no contexto | Heurística assistida | `src/rules/documental-completeness-a.ts` `linkPurposeRule` |
-| 5.7.12 Links para contornar blocos de conteúdo | Implementada | `src/rules/navigation.ts` `skipLinksRule` |
-| 5.7.15 Navegação consistente | Heurística assistida | `src/rules/documental-completeness-a.ts` `navigationConsistencyRule` |
-| 5.7.16 Ajuda consistente | Heurística assistida | `src/rules/documental-completeness-a.ts` `helpConsistencyRule` |
-| 5.8.1 Semântica de botão | Implementada | `src/rules/controls.ts` `buttonSemanticRule` |
-| 5.8.2 Uso de botões | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonUsageRule` |
-| 5.8.3 Propósito do botão | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonPurposeRule` |
-| 5.8.5 Identificação consistente em conjunto de páginas | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonConsistencyRule` |
-| 5.8.7 Área de acionamento mínima | Implementada | `src/rules/controls.ts` `targetSizeRule` |
-| 5.8.9 Mudança de contexto previsível no foco | Heurística assistida | `src/rules/documental-completeness-a.ts` `contextChangeOnFocusRule` |
-| 5.8.10 Mudança de contexto previsível na entrada | Heurística assistida | `src/rules/documental-completeness-a.ts` `contextChangeOnInputRule` |
-| 5.8.11 Acionamento por ponteiro único | Heurística assistida | `src/rules/documental-completeness-a.ts` `singlePointerRule` |
-| 5.8.12 Operação por gestos de ponteiro | Heurística assistida | `src/rules/documental-completeness-a.ts` `pointerGestureRule` |
-| 5.8.13 Operação por movimento de arrastar | Heurística assistida | `src/rules/documental-completeness-a.ts` `dragMovementRule` |
-| 5.8.14 Operação por movimento | Heurística assistida | `src/rules/documental-completeness-a.ts` `motionOperationRule` |
-| 5.9.1 Rótulo de campo | Implementada | `src/rules/forms.ts` `fieldLabelRule` |
-| 5.9.2 Rótulo de campo previsível | Heurística assistida | `src/rules/documental-completeness-b.ts` `predictableFieldLabelRule` |
-| 5.9.3 Rótulo de campo associado | Implementada | `src/rules/forms.ts` `associatedFieldLabelRule` |
-| 5.9.4 Rótulo de campo descritivo | Heurística assistida | `src/rules/documental-completeness-b.ts` `descriptiveFieldLabelRule` |
-| 5.9.5 Textos de ajuda previsíveis | Heurística assistida | `src/rules/documental-completeness-b.ts` `predictableHelpTextRule` |
-| 5.9.6 Campos relacionados | Implementada | `src/rules/forms.ts` `relatedFieldsRule` |
-| 5.9.7 Campos obrigatórios | Implementada | `src/rules/forms.ts` `requiredFieldsRule` |
-| 5.9.8 Tipo de dado determinado | Implementada | `src/rules/forms.ts` `dataTypeRule` |
-| 5.9.9 Mensagem de erro descritiva | Heurística assistida | `src/rules/documental-completeness-b.ts` `descriptiveErrorRule` |
-| 5.9.10 Sugestão de correção | Heurística assistida | `src/rules/documental-completeness-b.ts` `correctionSuggestionRule` |
-| 5.9.12 Prevenção de erro para formulários críticos | Heurística assistida | `src/rules/documental-completeness-b.ts` `criticalFormPreventionRule` |
-| 5.9.15 Reentrada de dados | Heurística assistida | `src/rules/documental-completeness-b.ts` `dataReentryRule` |
-| 5.9.16 Validação sensorial ou por movimento | Heurística assistida | `src/rules/documental-completeness-b.ts` `sensoryValidationRule` |
-| 5.9.18 Autenticação acessível mínima | Heurística assistida | `src/rules/forms.ts` `accessibleAuthenticationRule` |
-| 5.10.1 Características sensoriais | Heurística assistida | `src/rules/documental-completeness-b.ts` `sensoryCharacteristicsRule` |
-| 5.10.2 Ordem de apresentação | Heurística assistida | `src/rules/documental-completeness-b.ts` `presentationOrderRule` |
-| 5.10.3 Orientação de exibição | Implementada | `src/rules/documental-completeness-b.ts` `orientationRule` |
-| 5.10.4 Design responsivo | Implementada | `src/rules/presentation.ts` `responsiveDesignRule` |
-| 5.11.1 Uso de cores | Heurística assistida | `src/rules/documental-completeness-b.ts` `colorUsageRule` |
-| 5.11.3 Contraste para texto | Implementada | `src/rules/colors.ts` `textContrastRule` |
-| 5.11.4 Contraste para componentes | Implementada | `src/rules/colors.ts` `componentContrastRule` |
-| 5.11.5 Contraste para objetos gráficos | Implementada | `src/rules/documental-completeness-b.ts` `graphicContrastRule` |
-| 5.11.6 Contraste para indicador de foco visual | Implementada | `src/rules/documental-completeness-b.ts` `focusIndicatorContrastRule` |
-| 5.12.1 Espaçamento entre linhas | Implementada | `src/rules/documental-completeness-b.ts` `lineSpacingRule` |
-| 5.12.2 Espaçamento entre parágrafos | Implementada | `src/rules/documental-completeness-b.ts` `paragraphSpacingRule` |
-| 5.12.3 Espaçamento entre letras | Implementada | `src/rules/documental-completeness-b.ts` `letterSpacingRule` |
-| 5.12.4 Espaçamento entre palavras | Implementada | `src/rules/documental-completeness-b.ts` `wordSpacingRule` |
-| 5.12.6 Largura de blocos de texto | Implementada | `src/rules/documental-completeness-b.ts` `textWidthRule` |
-| 5.12.7 Texto redimensionado | Heurística assistida | `src/rules/documental-completeness-b.ts` `resizedTextRule` |
-| 5.12.8 Semântica de texto especial | Implementada | `src/rules/text-content.ts` `specialTextSemanticRule` |
-| 5.12.9 Uso de texto especial | Revisão manual | `src/rules/text-content.ts` `specialTextUsageRule` |
-| 5.13.1 Título da página | Implementada | `src/rules/semantics.ts` `pageTitleRule` |
-| 5.13.2 Idioma da página | Implementada | `src/rules/semantics.ts` `pageLanguageRule` |
-| 5.13.3 Idioma das partes da página | Implementada | `src/rules/documental-completeness-b.ts` `pagePartLanguageRule` |
-| 5.13.4 Título de frame | Implementada | `src/rules/semantics.ts` `frameTitleRule` |
-| 5.13.5 Zoom não bloqueado | Implementada | `src/rules/semantics.ts` `zoomAllowedRule` |
-| 5.13.6 Ordem de leitura | Heurística assistida | `src/rules/documental-completeness-b.ts` `readingOrderRule` |
-| 5.13.7 Texto visível no nome acessível | Heurística assistida | `src/rules/documental-completeness-b.ts` `visibleTextInNameRule` |
-| 5.13.8 Mensagens de status | Implementada | `src/rules/documental-completeness-b.ts` `statusMessageRule` |
-| 5.13.10 Componentes com nome acessível | Implementada | `src/rules/semantics.ts` `accessibleNameRule` |
-| 5.13.12 Semântica de componentes customizados | Heurística assistida | `src/rules/documental-completeness-b.ts` `customComponentSemanticRule` |
-| 5.13.13 Estados, propriedades e valores de componentes customizados | Implementada | `src/rules/semantics.ts` `customStateRule` |
-| 5.14.1 Alternativa em texto para áudio | Heurística assistida | `src/rules/documental-completeness-b.ts` `audioTranscriptRule` |
-| 5.14.2 Legendas descritivas para vídeo | Heurística assistida | `src/rules/documental-completeness-b.ts` `videoCaptionsRule` |
-| 5.14.4 Audiodescrição para vídeo | Heurística assistida | `src/rules/documental-completeness-b.ts` `audioDescriptionRule` |
-| 5.14.7 Controle de áudio | Implementada | `src/rules/media.ts` `audioControlRule` |
-| 5.14.9 Legendas para áudio e vídeo ao vivo | Heurística assistida | `src/rules/documental-completeness-b.ts` `liveCaptionsRule` |
-| 5.15.1 Controle de animação | Heurística assistida | `src/rules/documental-completeness-b.ts` `animationControlRule` |
-| 5.15.4 Flash intermitente limitado | Implementada | `src/rules/documental-completeness-b.ts` `flashingContentRule` |
-| 5.16.2 Limite de tempo ajustável | Heurística assistida | `src/rules/documental-completeness-b.ts` `adjustableTimeLimitRule` |
-| 5.16.3 Controle de atualização | Heurística assistida | `src/rules/time.ts` `refreshControlRule` |
+| Regra                                                               | Automação            | Código                                                                 |
+| ------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------- |
+| 5.1.1 Indicador de foco visível                                     | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusIndicatorRule`               |
+| 5.1.2 Elemento em foco totalmente visível                           | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusFullyVisibleRule`            |
+| 5.1.3 Elemento em foco parcialmente visível                         | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusPartiallyVisibleRule`        |
+| 5.1.4 Ordem de foco previsível                                      | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusOrderRule`                   |
+| 5.1.6 Armadilha de foco                                             | Heurística assistida | `src/rules/keyboard-interaction.ts` `focusTrapRule`                    |
+| 5.1.8 Conteúdo adicional persistente                                | Heurística assistida | `src/rules/keyboard-interaction.ts` `additionalContentPersistentRule`  |
+| 5.1.9 Conteúdo adicional dispensável                                | Heurística assistida | `src/rules/keyboard-interaction.ts` `additionalContentDismissibleRule` |
+| 5.1.11 Atalhos de teclado sem tecla modificadora                    | Heurística assistida | `src/rules/keyboard-interaction.ts` `keyboardShortcutRule`             |
+| 5.1.13 Acessibilidade por teclado parcial                           | Implementada         | `src/rules/keyboard-interaction.ts` `keyboardAccessibilityRule`        |
+| 5.1.16 Instruções para componentes customizados                     | Heurística assistida | `src/rules/keyboard-interaction.ts` `customComponentInstructionsRule`  |
+| 5.2.1 Texto alternativo para imagens de conteúdo                    | Implementada         | `src/rules/images.ts` `imageAltTextRule`                               |
+| 5.2.2 Texto alternativo para imagens funcionais                     | Implementada         | `src/rules/images.ts` `imageFunctionalAltRule`                         |
+| 5.2.3 Texto alternativo para imagens decorativas                    | Heurística assistida | `src/rules/images.ts` `imageDecorativeRule`                            |
+| 5.2.4 Descrição para imagens complexas                              | Heurística assistida | `src/rules/images.ts` `complexImageDescriptionRule`                    |
+| 5.2.5 Imagens de texto                                              | Heurística assistida | `src/rules/images.ts` `imageOfTextRule`                                |
+| 5.2.6 Texto alternativo para mapas de imagens                       | Implementada         | `src/rules/images.ts` `imageMapAltTextRule`                            |
+| 5.3.1 Semântica de cabeçalho                                        | Implementada         | `src/rules/headings.ts` `headingSemanticRule`                          |
+| 5.3.2 Uso de cabeçalhos                                             | Heurística assistida | `src/rules/headings.ts` `headingUsageRule`                             |
+| 5.3.5 Estrutura de cabeçalhos                                       | Implementada         | `src/rules/headings.ts` `headingStructureRule`                         |
+| 5.4.1 Semântica de região                                           | Implementada         | `src/rules/regions.ts` `regionSemanticRule`                            |
+| 5.4.2 Uso de regiões                                                | Heurística assistida | `src/rules/documental-completeness-a.ts` `regionUsageRule`             |
+| 5.4.5 Regiões identificadas unicamente                              | Implementada         | `src/rules/regions.ts` `uniqueRegionIdentificationRule`                |
+| 5.5.1 Semântica de lista                                            | Implementada         | `src/rules/lists.ts` `listSemanticRule`                                |
+| 5.5.2 Uso de listas                                                 | Heurística assistida | `src/rules/documental-completeness-a.ts` `listUsageRule`               |
+| 5.6.1 Semântica de tabela                                           | Implementada         | `src/rules/tables.ts` `tableSemanticRule`                              |
+| 5.6.2 Uso de tabelas                                                | Heurística assistida | `src/rules/documental-completeness-a.ts` `tableUsageRule`              |
+| 5.6.3 Cabeçalhos de tabela                                          | Implementada         | `src/rules/tables.ts` `tableHeadersRule`                               |
+| 5.6.5 Título de tabela associado                                    | Implementada         | `src/rules/tables.ts` `tableCaptionRule`                               |
+| 5.7.1 Semântica de link                                             | Implementada         | `src/rules/navigation.ts` `linkSemanticRule`                           |
+| 5.7.2 Uso de links                                                  | Heurística assistida | `src/rules/documental-completeness-a.ts` `linkUsageRule`               |
+| 5.7.4 Propósito do link no contexto                                 | Heurística assistida | `src/rules/documental-completeness-a.ts` `linkPurposeRule`             |
+| 5.7.12 Links para contornar blocos de conteúdo                      | Implementada         | `src/rules/navigation.ts` `skipLinksRule`                              |
+| 5.7.13 Alternativas para localização                                | Heurística assistida | `src/rules/navigation.ts` `locationAlternativesRule`                   |
+| 5.7.15 Navegação consistente                                        | Heurística assistida | `src/rules/documental-completeness-a.ts` `navigationConsistencyRule`   |
+| 5.7.16 Ajuda consistente                                            | Heurística assistida | `src/rules/documental-completeness-a.ts` `helpConsistencyRule`         |
+| 5.8.1 Semântica de botão                                            | Implementada         | `src/rules/controls.ts` `buttonSemanticRule`                           |
+| 5.8.2 Uso de botões                                                 | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonUsageRule`             |
+| 5.8.3 Propósito do botão                                            | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonPurposeRule`           |
+| 5.8.5 Identificação consistente em conjunto de páginas              | Heurística assistida | `src/rules/documental-completeness-a.ts` `buttonConsistencyRule`       |
+| 5.8.7 Área de acionamento mínima                                    | Implementada         | `src/rules/controls.ts` `targetSizeRule`                               |
+| 5.8.9 Mudança de contexto previsível no foco                        | Heurística assistida | `src/rules/documental-completeness-a.ts` `contextChangeOnFocusRule`    |
+| 5.8.10 Mudança de contexto previsível na entrada                    | Heurística assistida | `src/rules/documental-completeness-a.ts` `contextChangeOnInputRule`    |
+| 5.8.11 Acionamento por ponteiro único                               | Heurística assistida | `src/rules/documental-completeness-a.ts` `singlePointerRule`           |
+| 5.8.12 Operação por gestos de ponteiro                              | Heurística assistida | `src/rules/documental-completeness-a.ts` `pointerGestureRule`          |
+| 5.8.13 Operação por movimento de arrastar                           | Heurística assistida | `src/rules/documental-completeness-a.ts` `dragMovementRule`            |
+| 5.8.14 Operação por movimento                                       | Heurística assistida | `src/rules/documental-completeness-a.ts` `motionOperationRule`         |
+| 5.9.1 Rótulo de campo                                               | Implementada         | `src/rules/forms.ts` `fieldLabelRule`                                  |
+| 5.9.2 Rótulo de campo previsível                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `predictableFieldLabelRule`   |
+| 5.9.3 Rótulo de campo associado                                     | Implementada         | `src/rules/forms.ts` `associatedFieldLabelRule`                        |
+| 5.9.4 Rótulo de campo descritivo                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `descriptiveFieldLabelRule`   |
+| 5.9.5 Textos de ajuda previsíveis                                   | Heurística assistida | `src/rules/documental-completeness-b.ts` `predictableHelpTextRule`     |
+| 5.9.6 Campos relacionados                                           | Implementada         | `src/rules/forms.ts` `relatedFieldsRule`                               |
+| 5.9.7 Campos obrigatórios                                           | Implementada         | `src/rules/forms.ts` `requiredFieldsRule`                              |
+| 5.9.8 Tipo de dado determinado                                      | Implementada         | `src/rules/forms.ts` `dataTypeRule`                                    |
+| 5.9.9 Mensagem de erro descritiva                                   | Heurística assistida | `src/rules/documental-completeness-b.ts` `descriptiveErrorRule`        |
+| 5.9.10 Sugestão de correção                                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `correctionSuggestionRule`    |
+| 5.9.12 Prevenção de erro para formulários críticos                  | Heurística assistida | `src/rules/documental-completeness-b.ts` `criticalFormPreventionRule`  |
+| 5.9.15 Reentrada de dados                                           | Heurística assistida | `src/rules/documental-completeness-b.ts` `dataReentryRule`             |
+| 5.9.16 Validação sensorial ou por movimento                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `sensoryValidationRule`       |
+| 5.9.18 Autenticação acessível mínima                                | Heurística assistida | `src/rules/forms.ts` `accessibleAuthenticationRule`                    |
+| 5.10.1 Características sensoriais                                   | Heurística assistida | `src/rules/documental-completeness-b.ts` `sensoryCharacteristicsRule`  |
+| 5.10.2 Ordem de apresentação                                        | Heurística assistida | `src/rules/documental-completeness-b.ts` `presentationOrderRule`       |
+| 5.10.3 Orientação de exibição                                       | Implementada         | `src/rules/documental-completeness-b.ts` `orientationRule`             |
+| 5.10.4 Design responsivo                                            | Implementada         | `src/rules/presentation.ts` `responsiveDesignRule`                     |
+| 5.11.1 Uso de cores                                                 | Heurística assistida | `src/rules/documental-completeness-b.ts` `colorUsageRule`              |
+| 5.11.3 Contraste para texto                                         | Implementada         | `src/rules/colors.ts` `textContrastRule`                               |
+| 5.11.4 Contraste para componentes                                   | Implementada         | `src/rules/colors.ts` `componentContrastRule`                          |
+| 5.11.5 Contraste para objetos gráficos                              | Implementada         | `src/rules/documental-completeness-b.ts` `graphicContrastRule`         |
+| 5.11.6 Contraste para indicador de foco visual                      | Implementada         | `src/rules/documental-completeness-b.ts` `focusIndicatorContrastRule`  |
+| 5.12.1 Espaçamento entre linhas                                     | Implementada         | `src/rules/documental-completeness-b.ts` `lineSpacingRule`             |
+| 5.12.2 Espaçamento entre parágrafos                                 | Implementada         | `src/rules/documental-completeness-b.ts` `paragraphSpacingRule`        |
+| 5.12.3 Espaçamento entre letras                                     | Implementada         | `src/rules/documental-completeness-b.ts` `letterSpacingRule`           |
+| 5.12.4 Espaçamento entre palavras                                   | Implementada         | `src/rules/documental-completeness-b.ts` `wordSpacingRule`             |
+| 5.12.6 Largura de blocos de texto                                   | Implementada         | `src/rules/documental-completeness-b.ts` `textWidthRule`               |
+| 5.12.7 Texto redimensionado                                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `resizedTextRule`             |
+| 5.12.8 Semântica de texto especial                                  | Implementada         | `src/rules/text-content.ts` `specialTextSemanticRule`                  |
+| 5.12.9 Uso de texto especial                                        | Revisão manual       | `src/rules/text-content.ts` `specialTextUsageRule`                     |
+| 5.13.1 Título da página                                             | Implementada         | `src/rules/semantics.ts` `pageTitleRule`                               |
+| 5.13.2 Idioma da página                                             | Implementada         | `src/rules/semantics.ts` `pageLanguageRule`                            |
+| 5.13.3 Idioma das partes da página                                  | Implementada         | `src/rules/documental-completeness-b.ts` `pagePartLanguageRule`        |
+| 5.13.4 Título de frame                                              | Implementada         | `src/rules/semantics.ts` `frameTitleRule`                              |
+| 5.13.5 Zoom não bloqueado                                           | Implementada         | `src/rules/semantics.ts` `zoomAllowedRule`                             |
+| 5.13.6 Ordem de leitura                                             | Heurística assistida | `src/rules/documental-completeness-b.ts` `readingOrderRule`            |
+| 5.13.7 Texto visível no nome acessível                              | Heurística assistida | `src/rules/documental-completeness-b.ts` `visibleTextInNameRule`       |
+| 5.13.8 Mensagens de status                                          | Implementada         | `src/rules/documental-completeness-b.ts` `statusMessageRule`           |
+| 5.13.10 Componentes com nome acessível                              | Implementada         | `src/rules/semantics.ts` `accessibleNameRule`                          |
+| 5.13.12 Semântica de componentes customizados                       | Heurística assistida | `src/rules/documental-completeness-b.ts` `customComponentSemanticRule` |
+| 5.13.13 Estados, propriedades e valores de componentes customizados | Implementada         | `src/rules/semantics.ts` `customStateRule`                             |
+| 5.14.1 Alternativa em texto para áudio                              | Heurística assistida | `src/rules/documental-completeness-b.ts` `audioTranscriptRule`         |
+| 5.14.2 Legendas descritivas para vídeo                              | Heurística assistida | `src/rules/documental-completeness-b.ts` `videoCaptionsRule`           |
+| 5.14.4 Audiodescrição para vídeo                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `audioDescriptionRule`        |
+| 5.14.7 Controle de áudio                                            | Implementada         | `src/rules/media.ts` `audioControlRule`                                |
+| 5.14.9 Legendas para áudio e vídeo ao vivo                          | Heurística assistida | `src/rules/documental-completeness-b.ts` `liveCaptionsRule`            |
+| 5.15.1 Controle de animação                                         | Heurística assistida | `src/rules/documental-completeness-b.ts` `animationControlRule`        |
+| 5.15.4 Flash intermitente limitado                                  | Implementada         | `src/rules/documental-completeness-b.ts` `flashingContentRule`         |
+| 5.16.2 Limite de tempo ajustável                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `adjustableTimeLimitRule`     |
+| 5.16.3 Controle de atualização                                      | Heurística assistida | `src/rules/time.ts` `refreshControlRule`                               |
 
 ## Funcionalidades Propostas
 
-| Funcionalidade | Status | Código |
-| --- | --- | --- |
-| Destaque visual de problemas | Implementada | `src/content.ts`, `src/components/PopupApp.tsx` |
+| Funcionalidade                                  | Status       | Código                                                                      |
+| ----------------------------------------------- | ------------ | --------------------------------------------------------------------------- |
+| Destaque visual de problemas                    | Implementada | `src/content.ts`, `src/components/PopupApp.tsx`                             |
 | Painel de detalhes e sugestões contextualizadas | Implementada | `src/components/ViolationsList.tsx`, `src/components/ViolationsSummary.tsx` |
-| Simulação de visão | Implementada | `src/components/VisionSimulator.tsx`, `src/content.ts` |
-| Exportação simplificada de relatórios | Implementada | `src/components/PopupApp.tsx`, `src/report.tsx` |
+| Simulação de visão                              | Implementada | `src/components/VisionSimulator.tsx`, `src/content.ts`                      |
+| Exportação simplificada de relatórios           | Implementada | `src/components/PopupApp.tsx`, `src/report.tsx`                             |
 
 ## Verificação Individual
 
 Execute:
 
 ```bash
-npm run verify:rules
+pnpm verify:rules
 ```
 
 Resultado esperado:
 
 ```text
-Rule verification passed: 94 documented requirements mapped to 94 rule implementation(s).
+Rule verification passed: 97 documented requirements mapped to 97 rule implementation(s).
 ```

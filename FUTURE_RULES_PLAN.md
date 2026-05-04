@@ -1,8 +1,8 @@
 # Plano para Regras Futuras Fora do Escopo V1
 
-Este documento lista os itens da ABNT NBR 17225:2025 que não fazem parte do escopo v1 implementado no Guardião NBR 17225.
+Este documento lista os itens da ABNT NBR 17225:2025 que ainda não fazem parte do escopo implementado no Guardião NBR 17225.
 
-O escopo v1 permanece com 94 regras. Este plano não implementa novas regras; ele organiza a expansão futura de forma rastreável.
+O escopo implementado atual possui 97 regras: 94 itens do catálogo v1 local e 3 requisitos obrigatórios adicionais incorporados ao motor.
 
 Fontes usadas para esta lista:
 
@@ -12,50 +12,21 @@ Fontes usadas para esta lista:
 
 ## Resumo
 
-| Grupo                                           | Quantidade |
-| ----------------------------------------------- | ---------: |
-| Requisitos obrigatórios ainda não implementados |          3 |
-| Recomendações ainda não implementadas           |         49 |
-| Total fora do escopo v1                         |         52 |
+| Grupo                                 | Quantidade |
+| ------------------------------------- | ---------: |
+| Requisitos obrigatórios pendentes     |          0 |
+| Recomendações ainda não implementadas |         49 |
+| Total fora do escopo implementado     |         49 |
 
-## Requisitos obrigatórios ainda não implementados
+## Requisitos obrigatórios incorporados
 
-### 5.1.16 — Instruções para componentes customizados
+Os três requisitos obrigatórios que estavam fora do recorte inicial foram incorporados ao motor:
 
-Plano:
+- `5.1.16` — Instruções para componentes customizados;
+- `5.2.6` — Texto alternativo para mapas de imagens;
+- `5.7.13` — Alternativas para localização.
 
-- identificar componentes customizados que exigem instruções de uso;
-- verificar se há instrução textual ou programática próxima;
-- classificar como `Semi-Automatizável`, porque a suficiência da instrução depende de contexto humano.
-
-Risco técnico:
-
-- alto risco de falso positivo se a regra procurar apenas termos genéricos como "instrução" ou "ajuda".
-
-### 5.2.6 — Texto alternativo para mapas de imagens
-
-Plano:
-
-- detectar `img[usemap]`, `map` e `area`;
-- validar nome acessível da imagem principal;
-- validar texto alternativo ou nome acessível de cada `area`;
-- classificar como `Totalmente Automatizável` para ausência estrutural de texto, mantendo revisão humana para qualidade da descrição.
-
-Risco técnico:
-
-- a presença de texto alternativo pode ser validada automaticamente; a adequação do texto continua contextual.
-
-### 5.7.13 — Alternativas para localização
-
-Plano:
-
-- detectar sinais de conjunto de páginas com navegação, busca, mapa do site, trilha de navegação ou índice;
-- verificar presença de pelo menos um mecanismo alternativo de localização;
-- classificar como `Semi-Automatizável`, porque depende do conjunto real de páginas e não apenas da página atual.
-
-Risco técnico:
-
-- a extensão analisa a aba atual; validar um conjunto inteiro de páginas exige escopo de navegação adicional.
+Eles agora constam em `RULES_CODE_MAPPING.md`, `RULES_NORMATIVE_MATRIX.md`, `scripts/verify-rules.mjs` e na página pública de rastreabilidade.
 
 ## Recomendações ainda não implementadas
 
@@ -223,16 +194,14 @@ Direção técnica:
 
 ## Ordem sugerida de implementação
 
-1. Implementar primeiro os três requisitos obrigatórios ausentes.
-2. Em seguida, implementar recomendações com baixa ambiguidade estrutural:
-   - `5.2.6`
+1. Implementar recomendações com baixa ambiguidade estrutural:
    - `5.7.6`
    - `5.7.7`
    - `5.7.8`
    - `5.11.2`
    - `5.13.11`
-3. Depois, avançar nas recomendações que dependem de contexto de página atual.
-4. Por último, tratar recomendações que exigem conjunto de páginas, fluxo autenticado, mídia ou julgamento humano mais forte.
+2. Depois, avançar nas recomendações que dependem de contexto de página atual.
+3. Por último, tratar recomendações que exigem conjunto de páginas, fluxo autenticado, mídia ou julgamento humano mais forte.
 
 ## Critérios para aceitar novas regras
 

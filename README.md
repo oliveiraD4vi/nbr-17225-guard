@@ -1,6 +1,6 @@
 # Guardião NBR 17225
 
-Verificador de acessibilidade para navegadores Chromium, alinhado ao escopo v1 do catálogo documental da ABNT NBR 17225:2025.
+Verificador de acessibilidade para navegadores Chromium, alinhado ao escopo v1 do catálogo documental da ABNT NBR 17225:2025 e aos requisitos obrigatórios adicionais já incorporados ao motor.
 
 ## Visão geral
 
@@ -10,7 +10,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ### Auditoria e diagnóstico
 
-- cobertura do escopo v1 com 94 regras derivadas de `docs/Analise_Documental_NBR17225.xlsx`;
+- cobertura de 97 regras: 94 regras derivadas de `docs/Analise_Documental_NBR17225.xlsx` e 3 requisitos obrigatórios adicionais incorporados ao motor;
 - execução por aba, com suporte a páginas `http(s)` e arquivos locais com permissão;
 - auditoria por escopo:
   - somente requisitos;
@@ -59,9 +59,9 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ### Governança técnica
 
-- verificação automática de cobertura entre catálogo documentado e regras implementadas;
+- verificação automática de cobertura entre catálogo documentado, requisitos incorporados e regras implementadas;
 - matriz normativa formal em `RULES_NORMATIVE_MATRIX.md`;
-- plano de expansão futura em `FUTURE_RULES_PLAN.md`, com os 52 itens fora do escopo v1 listados individualmente;
+- plano de expansão futura em `FUTURE_RULES_PLAN.md`, com as 49 recomendações ainda não implementadas listadas individualmente;
 - centralização de textos visíveis em catálogo de i18n PT-BR UTF-8;
 - tema centralizado em variáveis CSS, compartilhado entre popup, relatório e superfícies do Ant Design;
 - resolução correta dos tokens do Ant Design a partir das variáveis CSS, preservando consistência visual em CTAs, tags, modais, drawers, tooltips e popovers.
@@ -77,21 +77,21 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ## Cobertura de regras
 
-O escopo da versão 1 vem de `docs/Analise_Documental_NBR17225.xlsx`. O catálogo local da v1 contém 94 itens.
+O escopo implementado atual combina o catálogo v1 de `docs/Analise_Documental_NBR17225.xlsx` com três requisitos obrigatórios adicionais identificados na referência pública da ABNT NBR 17225.
 
 | Situação                      | Quantidade |
 | ----------------------------- | ---------: |
-| Requisitos documentados       |         94 |
-| Regras implementadas no motor |         94 |
+| Itens documentados            |         97 |
+| Regras implementadas no motor |         97 |
 | Regras ausentes               |          0 |
-| Totalmente automatizáveis     |         40 |
-| Semi-automatizáveis           |         53 |
+| Totalmente automatizáveis     |         41 |
+| Semi-automatizáveis           |         55 |
 | Não automatizáveis            |          1 |
 
 Importante:
 
-- `pnpm verify:rules` valida o motor contra o catálogo v1 derivado desse `.xlsx`;
-- o projeto não tenta, nesta versão, expandir automaticamente o escopo para além do catálogo v1 adotado.
+- `pnpm verify:rules` valida o motor contra o catálogo implementado atual;
+- recomendações fora do catálogo implementado seguem registradas como backlog público, sem aumentar o ruído da auditoria padrão.
 
 Consulte também:
 
@@ -102,11 +102,13 @@ Consulte também:
 
 ## Rastreabilidade pública
 
-A landing page do projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 94 regras do escopo v1:
+A landing page do projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 97 regras implementadas:
 
 - referência da ABNT NBR 17225;
-- resumo normativo interpretativo;
+- recorte normativo interpretativo com referência à fonte pública;
 - função implementada na extensão;
+- trecho de código da regra;
+- link para o arquivo no repositório público;
 - classificação de automação;
 - limite residual da verificação.
 
@@ -173,13 +175,12 @@ O script verifica:
 - duplicidade de referências;
 - presença de regras fora do catálogo adotado.
 
-## Escopo da ABNT NBR 17225 x escopo v1
+## Escopo da ABNT NBR 17225 x escopo implementado
 
-A norma possui itens adicionais fora do escopo v1 adotado aqui. Eles não serão adicionados agora, mas estão registrados como backlog para futuras contribuições.
+A norma possui recomendações adicionais fora do escopo implementado aqui. Elas não serão adicionadas agora, mas estão registradas como backlog para futuras contribuições.
 
-Itens já identificados fora do escopo v1:
+Itens já identificados fora do escopo implementado:
 
-- `5.2.6`
 - `5.4.3`
 - `5.4.4`
 - `5.7.3`

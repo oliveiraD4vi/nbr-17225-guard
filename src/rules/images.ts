@@ -197,10 +197,46 @@ export const imageOfTextRule: Rule = {
   },
 }
 
+export const imageMapAltTextRule: Rule = {
+  id: 'image-map-alt-text',
+  nbrReference: '5.2.6',
+  name: t('rules.images.imageMapAltText.name'),
+  description: t('rules.images.imageMapAltText.description'),
+  severity: 'error',
+  wcagLevel: 'A',
+  category: 'Totalmente Automatizável',
+  check: async (): Promise<Violation[]> => {
+    const violations: Violation[] = []
+
+    document.querySelectorAll<HTMLAreaElement>('map area[href]').forEach((area) => {
+      const name = getAccessibleName(area as unknown as HTMLElement).trim()
+      const alt = area.getAttribute('alt')?.trim()
+      const ariaLabel = area.getAttribute('aria-label')?.trim()
+      const ariaLabelledBy = area.getAttribute('aria-labelledby')?.trim()
+      const title = area.getAttribute('title')?.trim()
+
+      if (!name && !alt && !ariaLabel && !ariaLabelledBy && !title) {
+        violations.push(
+          createViolation(imageMapAltTextRule, {
+            element: area as unknown as HTMLElement,
+            message: t('rules.images.imageMapAltText.message'),
+            suggestion: t('rules.images.imageMapAltText.suggestion'),
+            remediationAdvice: t('rules.images.imageMapAltText.remediation'),
+            customIdPrefix: 'image-map-alt',
+          }),
+        )
+      }
+    })
+
+    return violations
+  },
+}
+
 export const imageRules: Rule[] = [
   imageAltTextRule,
   imageFunctionalAltRule,
   imageDecorativeRule,
   complexImageDescriptionRule,
   imageOfTextRule,
+  imageMapAltTextRule,
 ]

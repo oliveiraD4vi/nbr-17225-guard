@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 // Catálogo v1 derivado de docs/Analise_Documental_NBR17225.xlsx.
 // A verificação garante consistência entre esse catálogo e src/rules.
@@ -13,11 +13,13 @@ const requirements = [
   ['5.1.9', 'Conteudo adicional dispensavel', 'AA', 'Semi-Automatizavel'],
   ['5.1.11', 'Atalhos de teclado sem tecla modificadora', 'A', 'Semi-Automatizavel'],
   ['5.1.13', 'Acessibilidade por teclado parcial', 'A', 'Totalmente Automatizavel'],
+  ['5.1.16', 'Instrucoes para componentes customizados', 'A', 'Semi-Automatizavel'],
   ['5.2.1', 'Texto alternativo para imagens de conteudo', 'A', 'Totalmente Automatizavel'],
   ['5.2.2', 'Texto alternativo para imagens funcionais', 'A', 'Totalmente Automatizavel'],
   ['5.2.3', 'Texto alternativo para imagens decorativas', 'A', 'Semi-Automatizavel'],
   ['5.2.4', 'Descricao para imagens complexas', 'A', 'Semi-Automatizavel'],
   ['5.2.5', 'Imagens de texto', 'AA', 'Semi-Automatizavel'],
+  ['5.2.6', 'Texto alternativo para mapas de imagens', 'A', 'Totalmente Automatizavel'],
   ['5.3.1', 'Semantica de cabecalho', 'A', 'Totalmente Automatizavel'],
   ['5.3.2', 'Uso de cabecalhos', 'A', 'Semi-Automatizavel'],
   ['5.3.5', 'Estrutura de cabecalhos', 'A', 'Totalmente Automatizavel'],
@@ -33,7 +35,13 @@ const requirements = [
   ['5.7.1', 'Semantica de link', 'A', 'Totalmente Automatizavel'],
   ['5.7.2', 'Uso de links', 'A', 'Semi-Automatizavel'],
   ['5.7.4', 'Proposito do link no contexto', 'A', 'Semi-Automatizavel'],
-  ['5.7.12', 'Links para contornar blocos de conteudo em conjunto de paginas', 'A', 'Totalmente Automatizavel'],
+  [
+    '5.7.12',
+    'Links para contornar blocos de conteudo em conjunto de paginas',
+    'A',
+    'Totalmente Automatizavel',
+  ],
+  ['5.7.13', 'Alternativas para localizacao', 'A', 'Semi-Automatizavel'],
   ['5.7.15', 'Navegacao consistente', 'AA', 'Semi-Automatizavel'],
   ['5.7.16', 'Ajuda consistente', 'A', 'Semi-Automatizavel'],
   ['5.8.1', 'Semantica de botao', 'A', 'Totalmente Automatizavel'],
@@ -88,7 +96,12 @@ const requirements = [
   ['5.13.8', 'Mensagens de status', 'AA', 'Totalmente Automatizavel'],
   ['5.13.10', 'Componentes com nome acessivel', 'A', 'Totalmente Automatizavel'],
   ['5.13.12', 'Semantica de componentes customizados', 'A', 'Semi-Automatizavel'],
-  ['5.13.13', 'Estados, propriedades e valores de componentes customizados', 'A', 'Totalmente Automatizavel'],
+  [
+    '5.13.13',
+    'Estados, propriedades e valores de componentes customizados',
+    'A',
+    'Totalmente Automatizavel',
+  ],
   ['5.14.1', 'Alternativa em texto para audio', 'A', 'Semi-Automatizavel'],
   ['5.14.2', 'Legendas descritivas para video', 'A', 'Semi-Automatizavel'],
   ['5.14.4', 'Audiodescricao para video', 'A', 'Semi-Automatizavel'],
@@ -98,75 +111,99 @@ const requirements = [
   ['5.15.4', 'Flash intermitente limitado', 'A', 'Totalmente Automatizavel'],
   ['5.16.2', 'Limite de tempo ajustavel', 'A', 'Semi-Automatizavel'],
   ['5.16.3', 'Controle de atualizacao', 'A', 'Semi-Automatizavel'],
-].map(([reference, name, wcagLevel, category]) => ({ reference, name, wcagLevel, category }));
+].map(([reference, name, wcagLevel, category]) => ({ reference, name, wcagLevel, category }))
 
-const normalize = (value) => value
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g, '')
-  .replace(/ç/g, 'c')
-  .replace(/Ç/g, 'C');
+const normalize = (value) =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ç/g, 'c')
+    .replace(/Ç/g, 'C')
 
-const rulesDir = join(process.cwd(), 'src', 'rules');
-const ruleFiles = readdirSync(rulesDir).filter((file) => file.endsWith('.ts') && file !== 'index.ts');
-const source = ruleFiles.map((file) => ({ file, content: readFileSync(join(rulesDir, file), 'utf8') }));
-const rules = [];
+const rulesDir = join(process.cwd(), 'src', 'rules')
+const ruleFiles = readdirSync(rulesDir).filter(
+  (file) => file.endsWith('.ts') && file !== 'index.ts',
+)
+const source = ruleFiles.map((file) => ({
+  file,
+  content: readFileSync(join(rulesDir, file), 'utf8'),
+}))
+const rules = []
 
 for (const { file, content } of source) {
-  const blocks = content.matchAll(/export const\s+(\w+):\s*Rule\s*=\s*{([\s\S]*?)\n};/g);
+  const blocks = content.matchAll(
+    /export const\s+(\w+):\s*Rule\s*=\s*{([\s\S]*?)(?=\nexport const\s+\w+:\s*Rule\s*=|\nexport const\s+\w+Rules\s*:|\n$)/g,
+  )
   for (const match of blocks) {
-    const [, exportName, body] = match;
-    const get = (key) => body.match(new RegExp(`${key}:\\s*'([^']+)'`))?.[1];
-    const id = get('id');
-    const reference = get('nbrReference');
-    const name = get('name');
-    const wcagLevel = get('wcagLevel');
-    const category = get('category');
-    rules.push({ exportName, file, id, reference, name, wcagLevel, category: normalize(category || '') });
+    const [, exportName, body] = match
+    const get = (key) => body.match(new RegExp(`${key}:\\s*'([^']+)'`))?.[1]
+    const id = get('id')
+    const reference = get('nbrReference')
+    const name = get('name')
+    const wcagLevel = get('wcagLevel')
+    const category = get('category')
+    rules.push({
+      exportName,
+      file,
+      id,
+      reference,
+      name,
+      wcagLevel,
+      category: normalize(category || ''),
+    })
   }
 }
 
-const byReference = new Map();
+const byReference = new Map()
 for (const rule of rules) {
-  if (!rule.reference) continue;
-  if (!byReference.has(rule.reference)) byReference.set(rule.reference, []);
-  byReference.get(rule.reference).push(rule);
+  if (!rule.reference) continue
+  if (!byReference.has(rule.reference)) byReference.set(rule.reference, [])
+  byReference.get(rule.reference).push(rule)
 }
 
-const failures = [];
+const failures = []
 
 for (const requirement of requirements) {
-  const matches = byReference.get(requirement.reference) || [];
+  const matches = byReference.get(requirement.reference) || []
   if (!matches.length) {
-    failures.push(`MISSING ${requirement.reference} ${requirement.name}`);
-    continue;
+    failures.push(`MISSING ${requirement.reference} ${requirement.name}`)
+    continue
   }
 
   for (const rule of matches) {
     if (rule.wcagLevel !== requirement.wcagLevel) {
-      failures.push(`WCAG ${requirement.reference} expected ${requirement.wcagLevel}, got ${rule.wcagLevel} in ${rule.file}:${rule.exportName}`);
+      failures.push(
+        `WCAG ${requirement.reference} expected ${requirement.wcagLevel}, got ${rule.wcagLevel} in ${rule.file}:${rule.exportName}`,
+      )
     }
     if (rule.category !== requirement.category) {
-      failures.push(`CATEGORY ${requirement.reference} expected ${requirement.category}, got ${rule.category} in ${rule.file}:${rule.exportName}`);
+      failures.push(
+        `CATEGORY ${requirement.reference} expected ${requirement.category}, got ${rule.category} in ${rule.file}:${rule.exportName}`,
+      )
     }
   }
 }
 
 for (const rule of rules) {
   if (!requirements.some((requirement) => requirement.reference === rule.reference)) {
-    failures.push(`EXTRA ${rule.reference || '<none>'} ${rule.file}:${rule.exportName}`);
+    failures.push(`EXTRA ${rule.reference || '<none>'} ${rule.file}:${rule.exportName}`)
   }
 }
 
 for (const [reference, matches] of byReference.entries()) {
   if (matches.length > 1) {
-    failures.push(`DUPLICATE ${reference} ${matches.map((rule) => `${rule.file}:${rule.exportName}`).join(', ')}`);
+    failures.push(
+      `DUPLICATE ${reference} ${matches.map((rule) => `${rule.file}:${rule.exportName}`).join(', ')}`,
+    )
   }
 }
 
 if (failures.length) {
-  console.error(`Rule verification failed with ${failures.length} issue(s):`);
-  for (const failure of failures) console.error(`- ${failure}`);
-  process.exit(1);
+  console.error(`Rule verification failed with ${failures.length} issue(s):`)
+  for (const failure of failures) console.error(`- ${failure}`)
+  process.exit(1)
 }
 
-console.log(`Rule verification passed: ${requirements.length} documented requirements mapped to ${rules.length} rule implementation(s).`);
+console.log(
+  `Rule verification passed: ${requirements.length} documented requirements mapped to ${rules.length} rule implementation(s).`,
+)

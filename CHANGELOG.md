@@ -16,14 +16,15 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - distinção explícita entre detecção automática e confirmação humana;
 - herança de revisão humana, anotações e correções de contraste entre auditorias equivalentes;
 - destaques visuais com foco em itens prioritários;
-- verificador de cobertura das 94 regras do escopo v1;
+- verificador de cobertura das 97 regras do escopo implementado;
 - matriz normativa em `RULES_NORMATIVE_MATRIX.md`;
 - escopo de auditoria com alternância entre requisitos e recomendações;
 - exclusão de históricos com confirmação no popup;
 - filtro visual por categoria natural das regras;
 - board auxiliar de contraste com simulação em tempo real, persistência da correção do usuário e restauração para o estado original da página;
 - fluxo de recuperação para `QuotaExceeded`, com ações guiadas no popup.
-- plano documentado para os 52 itens da ABNT NBR 17225 fora do escopo v1.
+- plano documentado para as 49 recomendações da ABNT NBR 17225 fora do escopo implementado;
+- regras `5.1.16`, `5.2.6` e `5.7.13`, incorporando os requisitos obrigatórios que estavam fora do recorte inicial.
 
 ### Changed
 
@@ -36,7 +37,8 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - README reestruturado para apresentar capacidades, fluxo de uso e papel do simulador de visão;
 - tema visual consolidado em variáveis CSS, com tokens do Ant Design resolvidos corretamente a partir dessas variáveis;
 - superfícies do Ant Design alinhadas ao tema do produto, incluindo CTAs, tags, modais, drawers, tooltips e popovers.
-- matriz normativa atualizada após nova revisão técnica das heurísticas mais sensíveis.
+- matriz normativa atualizada após nova revisão técnica das heurísticas mais sensíveis;
+- documentação de cobertura atualizada para refletir 97 regras implementadas e nenhum requisito obrigatório pendente.
 
 ### Fixed
 
