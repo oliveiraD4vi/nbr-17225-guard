@@ -61,6 +61,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 - verificação automática de cobertura entre catálogo documentado e regras implementadas;
 - matriz normativa formal em `RULES_NORMATIVE_MATRIX.md`;
+- plano de expansão futura em `FUTURE_RULES_PLAN.md`, com os 52 itens fora do escopo v1 listados individualmente;
 - centralização de textos visíveis em catálogo de i18n PT-BR UTF-8;
 - tema centralizado em variáveis CSS, compartilhado entre popup, relatório e superfícies do Ant Design;
 - resolução correta dos tokens do Ant Design a partir das variáveis CSS, preservando consistência visual em CTAs, tags, modais, drawers, tooltips e popovers.
@@ -97,6 +98,19 @@ Consulte também:
 - [RULES_ANALYSIS.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_ANALYSIS.md)
 - [RULES_CODE_MAPPING.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_CODE_MAPPING.md)
 - [RULES_NORMATIVE_MATRIX.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_NORMATIVE_MATRIX.md)
+- [FUTURE_RULES_PLAN.md](C:/Users/davic/Documents/Development/nbr-17225-guard/FUTURE_RULES_PLAN.md)
+
+## Rastreabilidade pública
+
+A landing page do projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 94 regras do escopo v1:
+
+- referência da ABNT NBR 17225;
+- resumo normativo interpretativo;
+- função implementada na extensão;
+- classificação de automação;
+- limite residual da verificação.
+
+Essa página usa a matriz `RULES_NORMATIVE_MATRIX.md` como fonte e não substitui a leitura da norma.
 
 ## Fluxo recomendado de uso
 

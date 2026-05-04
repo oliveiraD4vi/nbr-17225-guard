@@ -23,6 +23,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - filtro visual por categoria natural das regras;
 - board auxiliar de contraste com simulação em tempo real, persistência da correção do usuário e restauração para o estado original da página;
 - fluxo de recuperação para `QuotaExceeded`, com ações guiadas no popup.
+- plano documentado para os 52 itens da ABNT NBR 17225 fora do escopo v1.
 
 ### Changed
 
@@ -35,6 +36,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - README reestruturado para apresentar capacidades, fluxo de uso e papel do simulador de visão;
 - tema visual consolidado em variáveis CSS, com tokens do Ant Design resolvidos corretamente a partir dessas variáveis;
 - superfícies do Ant Design alinhadas ao tema do produto, incluindo CTAs, tags, modais, drawers, tooltips e popovers.
+- matriz normativa atualizada após nova revisão técnica das heurísticas mais sensíveis.
 
 ### Fixed
 
@@ -42,3 +44,4 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - falha de acesso ao DOM causada por recursos não expostos no bundle da extensão;
 - múltiplos pontos de texto degradado e inconsistências de PT-BR UTF-8, inclusive no `content.ts`;
 - fundos pretos indevidos em botões, tags e overlays após a centralização do tema.
+- falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página.

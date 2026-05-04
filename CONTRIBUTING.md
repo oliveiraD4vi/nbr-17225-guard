@@ -83,8 +83,9 @@ Checklist recomendado:
    - `src/i18n/pt-BR.json` para textos de interface, estados, alertas e exportações;
 5. use apenas chaves de catálogo no código, sem texto visível hardcoded;
 6. se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação;
-7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md` e `README.md`;
-8. valide a mudança com:
+7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md`, `FUTURE_RULES_PLAN.md` e `README.md`;
+8. quando a matriz normativa mudar, atualize também a landing page em `../nbr-17225-guard-page` rodando `pnpm sync:rules` naquele repositório.
+9. valide a mudança com:
 
 ```bash
 pnpm format:check

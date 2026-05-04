@@ -64,7 +64,25 @@ Benefício:
 - aproxima o motor do comportamento esperado em ferramentas maduras;
 - melhora a confiança no resultado.
 
-### 4. Melhorar a exportação comparativa
+### 4. Planejar expansão além do escopo v1
+
+Objetivo:
+
+- preparar a implementação futura dos 52 itens da ABNT NBR 17225 que ainda não fazem parte da v1.
+
+Sugestões:
+
+- seguir a ordem proposta em `FUTURE_RULES_PLAN.md`;
+- implementar primeiro os três requisitos obrigatórios ausentes;
+- separar claramente regras realmente automatizáveis de achados que dependem de confirmação humana;
+- atualizar a página pública de rastreabilidade da landing no mesmo lote de cada nova regra.
+
+Benefício:
+
+- permite ampliar cobertura sem perder previsibilidade;
+- mantém a comunicação pública alinhada ao motor real.
+
+### 5. Melhorar a exportação comparativa
 
 Objetivo:
 
@@ -81,7 +99,7 @@ Benefício:
 
 - melhora a utilidade prática do histórico para equipes de produto e acessibilidade.
 
-### 5. Expandir o apoio visual para regras sensíveis
+### 6. Expandir o apoio visual para regras sensíveis
 
 Objetivo:
 
@@ -98,7 +116,7 @@ Benefício:
 - aproxima a experiência de ferramentas maduras;
 - ajuda o usuário a sair do diagnóstico e ir para a correção com menos fricção.
 
-### 6. Refinar performance de renderização do popup
+### 7. Refinar performance de renderização do popup
 
 Objetivo:
 
@@ -115,7 +133,7 @@ Benefício:
 - melhora a responsividade;
 - reduz custo de manutenção da UI.
 
-### 7. Consolidar a política de tema compartilhado
+### 8. Consolidar a política de tema compartilhado
 
 Objetivo:
 
@@ -134,7 +152,7 @@ Benefício:
 
 ## Prioridade baixa
 
-### 8. Ampliar documentação pública do projeto
+### 9. Ampliar documentação pública do projeto
 
 Objetivo:
 
@@ -151,7 +169,7 @@ Sugestões:
   - exportação;
 - incluir exemplos de contribuição para novas regras dentro do escopo v1.
 
-### 9. Revisar logs e telemetria de depuração local
+### 10. Revisar logs e telemetria de depuração local
 
 Objetivo:
 
@@ -166,7 +184,7 @@ Sugestões:
   - falha de mensagem;
   - falha de regra.
 
-### 10. Formalizar a política de catálogo de textos
+### 11. Formalizar a política de catálogo de textos
 
 Objetivo:
 
@@ -184,7 +202,7 @@ Benefício:
 - reduz retrabalho de revisão textual;
 - dificulta reintrodução de mojibake e strings dispersas.
 
-### 11. Formalizar a estratégia de limites de storage
+### 12. Formalizar a estratégia de limites de storage
 
 Objetivo:
 
@@ -204,18 +222,6 @@ Benefício:
 
 ## Backlog futuro fora do escopo v1
 
-Itens da norma já identificados, mas não incluídos na v1:
-
-- `5.2.6`
-- `5.4.3`
-- `5.4.4`
-- `5.7.3`
-- `5.8.4`
-- `5.12.10`
-- `5.12.11`
-- `5.12.12`
-- `5.12.13`
-- `5.13.9`
-- `5.13.11`
+A lista completa dos 52 itens fora do escopo v1 está em `FUTURE_RULES_PLAN.md`.
 
 Esses itens devem ser tratados como evolução futura do catálogo, não como falha da implementação atual da v1.
