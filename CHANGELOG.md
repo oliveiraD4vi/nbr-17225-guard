@@ -56,3 +56,4 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - fundos pretos indevidos em botões, tags e overlays após a centralização do tema;
 - contraste das tooltips do Ant Design corrigido no tema para evitar fundo e texto brancos;
 - falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página.
+- ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários.

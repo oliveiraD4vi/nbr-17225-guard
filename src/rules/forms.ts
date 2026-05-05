@@ -262,17 +262,17 @@ export const contextualHelpRule: Rule = {
       >(formFieldsSelector)
       .forEach((field) => {
         if (!isElementVisible(field as unknown as HTMLElement)) return
-        const input = field as HTMLInputElement
+        const inputType = field instanceof HTMLInputElement ? field.type : ''
         const descriptor =
           `${getAssociatedLabelText(field)} ${field.getAttribute('name') || ''} ${field.getAttribute('id') || ''} ${field.getAttribute('placeholder') || ''}`.toLowerCase()
-        const isComplexField =
-          input.type === 'password' ||
-          input.hasAttribute('pattern') ||
-          input.hasAttribute('minlength') ||
-          input.hasAttribute('maxlength') ||
-          /\b(cpf|cnpj|senha|password|cartao|cartão|cep|telefone|data|nascimento|codigo|código)\b/.test(
-            descriptor,
-          )
+        const hasExplicitConstraint =
+          inputType === 'password' ||
+          field.hasAttribute('pattern') ||
+          field.hasAttribute('minlength') ||
+          field.hasAttribute('maxlength')
+        const hasSensitivePurpose =
+          /\b(cpf|cnpj|senha|password|cartao|cartão|codigo|código)\b/.test(descriptor)
+        const isComplexField = hasExplicitConstraint || hasSensitivePurpose
         if (!isComplexField) return
 
         const associatedHelp = getAssociatedDescriptionText(field as unknown as HTMLElement)
@@ -281,10 +281,11 @@ export const contextualHelpRule: Rule = {
             (field.parentElement as HTMLElement) ||
             (field as unknown as HTMLElement),
         )
+        const helperText = `${associatedHelp} ${nearbyText} ${field.getAttribute('title') || ''} ${field.getAttribute('placeholder') || ''}`
         const hasHelp =
           Boolean(associatedHelp.trim()) ||
           /\b(ajuda|dica|formato|exemplo|mínimo|minimo|caracteres|obrigatório|obrigatorio)\b/i.test(
-            nearbyText,
+            helperText,
           )
 
         if (!hasHelp) {

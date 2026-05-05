@@ -34,6 +34,34 @@ const getNavigableUrl = (anchor: HTMLAnchorElement): URL | null => {
   }
 }
 
+const isWebUrl = (url: URL): boolean => url.protocol === 'http:' || url.protocol === 'https:'
+
+const isDocumentUrl = (url: URL): boolean => isWebUrl(url) || url.protocol === 'file:'
+
+const getLinkText = (anchor: HTMLAnchorElement): string =>
+  normalizeText(
+    `${getAccessibleName(anchor)} ${getVisibleText(anchor)} ${anchor.getAttribute('title') || ''} ${anchor.getAttribute('aria-label') || ''}`,
+  )
+
+const getLinkIdentity = (anchor: HTMLAnchorElement): string => {
+  const url = getNavigableUrl(anchor)
+  return `${url?.origin || ''}${url?.pathname || ''}|${getLinkText(anchor)}`
+}
+
+const keepFirstOccurrence = <T extends HTMLElement>(
+  elements: T[],
+  getKey: (element: T) => string,
+): T[] => {
+  const seen = new Set<string>()
+
+  return elements.filter((element) => {
+    const key = getKey(element)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 const fileExtensionPattern = /\.(pdf|docx?|xlsx?|pptx?|zip|rar|7z|csv|xml|json)(?:$|[?#])/i
 
 export const linkSemanticRule: Rule = {
@@ -186,22 +214,28 @@ export const newWindowLinkRule: Rule = {
   severity: 'warning',
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
-  check: async (): Promise<Violation[]> =>
-    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[target="_blank"]'))
+  check: async (): Promise<Violation[]> => {
+    const candidates = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>('a[target="_blank"]'),
+    )
       .filter((anchor) => isElementVisible(anchor))
       .filter((anchor) => {
-        const text = normalizeText(`${getAccessibleName(anchor)} ${getVisibleText(anchor)}`)
+        const url = getNavigableUrl(anchor)
+        if (!url || !isWebUrl(url)) return false
+        const text = getLinkText(anchor)
         return !/\b(nova guia|nova janela|abre em outra|abre nova|new tab|new window)\b/.test(text)
       })
-      .map((anchor) =>
-        createViolation(newWindowLinkRule, {
-          element: anchor,
-          message: t('rules.navigation.newWindowLink.message'),
-          suggestion: t('rules.navigation.newWindowLink.suggestion'),
-          remediationAdvice: t('rules.navigation.newWindowLink.remediation'),
-          customIdPrefix: 'new-window-link',
-        }),
-      ),
+
+    return keepFirstOccurrence(candidates, getLinkIdentity).map((anchor) =>
+      createViolation(newWindowLinkRule, {
+        element: anchor,
+        message: t('rules.navigation.newWindowLink.message'),
+        suggestion: t('rules.navigation.newWindowLink.suggestion'),
+        remediationAdvice: t('rules.navigation.newWindowLink.remediation'),
+        customIdPrefix: 'new-window-link',
+      }),
+    )
+  },
 }
 
 export const nonHtmlFileLinkRule: Rule = {
@@ -212,24 +246,26 @@ export const nonHtmlFileLinkRule: Rule = {
   severity: 'warning',
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
-  check: async (): Promise<Violation[]> =>
-    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
+  check: async (): Promise<Violation[]> => {
+    const candidates = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
       .filter((anchor) => isElementVisible(anchor))
       .filter((anchor) => {
         const url = getNavigableUrl(anchor)
-        if (!url || !fileExtensionPattern.test(url.pathname)) return false
-        const text = normalizeText(`${getAccessibleName(anchor)} ${getVisibleText(anchor)}`)
+        if (!url || !isDocumentUrl(url) || !fileExtensionPattern.test(url.pathname)) return false
+        const text = getLinkText(anchor)
         return !/\b(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|csv|arquivo|download)\b/.test(text)
       })
-      .map((anchor) =>
-        createViolation(nonHtmlFileLinkRule, {
-          element: anchor,
-          message: t('rules.navigation.nonHtmlFileLink.message'),
-          suggestion: t('rules.navigation.nonHtmlFileLink.suggestion'),
-          remediationAdvice: t('rules.navigation.nonHtmlFileLink.remediation'),
-          customIdPrefix: 'file-link',
-        }),
-      ),
+
+    return keepFirstOccurrence(candidates, getLinkIdentity).map((anchor) =>
+      createViolation(nonHtmlFileLinkRule, {
+        element: anchor,
+        message: t('rules.navigation.nonHtmlFileLink.message'),
+        suggestion: t('rules.navigation.nonHtmlFileLink.suggestion'),
+        remediationAdvice: t('rules.navigation.nonHtmlFileLink.remediation'),
+        customIdPrefix: 'file-link',
+      }),
+    )
+  },
 }
 
 export const externalLinkRule: Rule = {
@@ -240,24 +276,33 @@ export const externalLinkRule: Rule = {
   severity: 'warning',
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
-  check: async (): Promise<Violation[]> =>
-    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
+  check: async (): Promise<Violation[]> => {
+    const candidates = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
       .filter((anchor) => isElementVisible(anchor))
       .filter((anchor) => {
         const url = getNavigableUrl(anchor)
-        if (!url || url.origin === window.location.origin) return false
-        const text = normalizeText(`${getAccessibleName(anchor)} ${getVisibleText(anchor)}`)
-        return !/\b(externo|site externo|fora do site|external)\b/.test(text)
+        if (!url || !isWebUrl(url) || url.origin === window.location.origin) return false
+        const text = getLinkText(anchor)
+        const host = normalizeText(url.hostname.replace(/^www\./, ''))
+        const textExposesDestination = host.length > 3 && text.includes(host)
+        return (
+          !textExposesDestination &&
+          !/\b(externo|site externo|fora do site|external|fora desta pagina|fora desta página)\b/.test(
+            text,
+          )
+        )
       })
-      .map((anchor) =>
-        createViolation(externalLinkRule, {
-          element: anchor,
-          message: t('rules.navigation.externalLink.message', { host: anchor.hostname }),
-          suggestion: t('rules.navigation.externalLink.suggestion'),
-          remediationAdvice: t('rules.navigation.externalLink.remediation'),
-          customIdPrefix: 'external-link',
-        }),
-      ),
+
+    return keepFirstOccurrence(candidates, getLinkIdentity).map((anchor) =>
+      createViolation(externalLinkRule, {
+        element: anchor,
+        message: t('rules.navigation.externalLink.message', { host: anchor.hostname }),
+        suggestion: t('rules.navigation.externalLink.suggestion'),
+        remediationAdvice: t('rules.navigation.externalLink.remediation'),
+        customIdPrefix: 'external-link',
+      }),
+    )
+  },
 }
 
 export const navigationRules: Rule[] = [

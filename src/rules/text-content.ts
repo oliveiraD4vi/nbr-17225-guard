@@ -2,6 +2,35 @@ import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
 import { createViolation, getVisibleText, isElementVisible } from '@/utils'
 
+const commonUppercaseTerms = new Set([
+  'ABNT',
+  'API',
+  'CEP',
+  'CPF',
+  'CNPJ',
+  'CSV',
+  'CSS',
+  'DOM',
+  'FAQ',
+  'HTML',
+  'HTTP',
+  'HTTPS',
+  'ID',
+  'JSON',
+  'LGPD',
+  'NBR',
+  'PDF',
+  'RG',
+  'SAAS',
+  'SEO',
+  'UI',
+  'URI',
+  'URL',
+  'UX',
+  'WCAG',
+  'XML',
+])
+
 export const specialTextSemanticRule: Rule = {
   id: 'special-text-semantic',
   nbrReference: '5.12.8',
@@ -109,6 +138,7 @@ export const abbreviationMeaningRule: Rule = {
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = []
     const knownAbbreviations = new Set<string>()
+    const reportedAbbreviations = new Set<string>()
 
     document.querySelectorAll<HTMLElement>('abbr[title], acronym[title]').forEach((element) => {
       const text = getVisibleText(element).trim().toUpperCase()
@@ -120,11 +150,17 @@ export const abbreviationMeaningRule: Rule = {
       const text = getVisibleText(element)
       if (text.length < 24) return
       const matches = [...text.matchAll(/\b\p{Lu}{2,6}\b/gu)]
-        .map((match) => match[0])
-        .filter((token) => !knownAbbreviations.has(token))
+        .map((match) => match[0].toUpperCase())
+        .filter(
+          (token) =>
+            !knownAbbreviations.has(token) &&
+            !commonUppercaseTerms.has(token) &&
+            !reportedAbbreviations.has(token),
+        )
       const uniqueMatches = [...new Set(matches)]
 
       if (uniqueMatches.length >= 2) {
+        uniqueMatches.forEach((term) => reportedAbbreviations.add(term))
         violations.push(
           createViolation(abbreviationMeaningRule, {
             element,
