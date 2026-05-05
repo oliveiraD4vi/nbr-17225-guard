@@ -47,6 +47,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - documentação de cobertura atualizada para refletir 112 regras implementadas e nenhum requisito obrigatório pendente;
 - filtros, score e resumo passam a usar classificação normativa real, sem inferir requisito ou recomendação por severidade ou nível WCAG.
 - nota do resumo passa a considerar requisitos, recomendações do escopo atual e conclusão da revisão humana.
+- resumo da auditoria passa a mostrar um único próximo passo, reduzindo redundância visual.
 
 ### Fixed
 
@@ -57,3 +58,4 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - contraste das tooltips do Ant Design corrigido no tema para evitar fundo e texto brancos;
 - falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página.
 - ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários.
+- título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto.

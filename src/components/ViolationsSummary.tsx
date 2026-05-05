@@ -3,7 +3,6 @@ import { Button, Card, Empty, Tag, Tooltip } from 'antd'
 import {
   CalendarOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
   DownloadOutlined,
   InfoCircleOutlined,
   LinkOutlined,
@@ -45,6 +44,34 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
     const pendingReviews = getPendingHumanReviewCount(reviewBase)
     const scoreTone =
       auditScore.score >= 90 ? 'good' : auditScore.score >= 70 ? 'medium' : 'critical'
+    const nextStep =
+      result.errors > 0
+        ? {
+            tone: 'error',
+            icon: <WarningOutlined />,
+            title: t('summary.nextStepRequirementsTitle'),
+            description: t('summary.nextStepRequirementsDescription'),
+          }
+        : pendingReviews > 0
+          ? {
+              tone: 'review',
+              icon: <WarningOutlined />,
+              title: t('summary.nextStepHumanReviewTitle'),
+              description: t('summary.nextStepHumanReviewDescription'),
+            }
+          : result.warnings > 0
+            ? {
+                tone: 'warning',
+                icon: <WarningOutlined />,
+                title: t('summary.nextStepRecommendationsTitle'),
+                description: t('summary.nextStepRecommendationsDescription'),
+              }
+            : {
+                tone: 'success',
+                icon: <CheckCircleOutlined />,
+                title: t('summary.nextStepClearTitle'),
+                description: t('summary.nextStepClearDescription'),
+              }
 
     return (
       <div className="violations-summary">
@@ -197,47 +224,12 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
             </div>
           </div>
 
-          <div className="summary-breakdown">
-            <div className="summary-breakdown-header">
-              <h3>{t('summary.reviewPriority')}</h3>
-              <Tag color={hasViolations ? 'orange' : 'green'}>
-                {hasViolations ? t('summary.priorityOpen') : t('summary.priorityClear')}
-              </Tag>
-            </div>
-
-            <div className="summary-priority-list">
-              <div className="summary-priority-item">
-                <span className="summary-priority-icon is-error">
-                  <CloseCircleOutlined />
-                </span>
-                <div>
-                  <strong>{t('summary.priorityRequirements')}</strong>
-                  <p>{t('summary.priorityRequirementsDescription')}</p>
-                </div>
-                <span className="summary-priority-value">{result.errors}</span>
-              </div>
-
-              <div className="summary-priority-item">
-                <span className="summary-priority-icon is-warning">
-                  <WarningOutlined />
-                </span>
-                <div>
-                  <strong>{t('summary.priorityRecommendations')}</strong>
-                  <p>{t('summary.priorityRecommendationsDescription')}</p>
-                </div>
-                <span className="summary-priority-value">{result.warnings}</span>
-              </div>
-
-              <div className="summary-priority-item">
-                <span className="summary-priority-icon is-review">
-                  <WarningOutlined />
-                </span>
-                <div>
-                  <strong>{t('summary.priorityHumanReview')}</strong>
-                  <p>{t('summary.priorityHumanReviewDescription')}</p>
-                </div>
-                <span className="summary-priority-value">{result.humanReviewItems}</span>
-              </div>
+          <div className={`summary-next-step is-${nextStep.tone}`}>
+            <span className="summary-next-step-icon">{nextStep.icon}</span>
+            <div>
+              <span className="summary-stat-label">{t('summary.nextStepLabel')}</span>
+              <strong>{nextStep.title}</strong>
+              <p>{nextStep.description}</p>
             </div>
           </div>
 

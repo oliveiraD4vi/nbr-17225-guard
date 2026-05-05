@@ -76,6 +76,13 @@ const severityRank: Record<Violation['severity'], number> = {
   warning: 1,
 }
 
+const maxHeaderTabTitleLength = 300
+
+function truncateHeaderTabTitle(value: string): string {
+  if (value.length <= maxHeaderTabTitleLength) return value
+  return `${value.slice(0, maxHeaderTabTitleLength - 3).trimEnd()}...`
+}
+
 function getPriorityViolations(violations: Violation[]): Violation[] {
   const seenRules = new Set<string>()
 
@@ -1029,7 +1036,7 @@ export const PopupApp: React.FC = () => {
             </h1>
             <p>
               {activeTab?.title
-                ? t('popup.header.activeTab', { title: activeTab.title })
+                ? t('popup.header.activeTab', { title: truncateHeaderTabTitle(activeTab.title) })
                 : t('popup.header.fallback')}
             </p>
           </div>
