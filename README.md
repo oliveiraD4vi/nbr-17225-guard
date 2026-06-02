@@ -4,7 +4,7 @@ Verificador de acessibilidade para navegadores Chromium, alinhado à V1 Farol do
 
 ## Visão geral
 
-O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e organiza os achados com referência normativa, severidade, contexto do elemento afetado, revisão humana e histórico por URL.
+O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e organiza os achados com referência normativa, severidade, contexto do elemento afetado, revisão humana e histórico local por URL.
 
 ## Principais capacidades
 
@@ -33,7 +33,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ### Histórico e comparação
 
-- histórico de auditorias por URL;
+- histórico compacto de auditorias por URL;
 - herança de revisão humana, anotações e correções de contraste entre auditorias equivalentes;
 - exclusão de entradas do histórico com confirmação explícita no popup;
 - comparação entre auditorias salvas, com indicadores de evolução, regressão e estabilidade;
@@ -70,6 +70,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 ### Resiliência de armazenamento
 
 - tratamento orientado para `QuotaExceeded` no `chrome.storage.local`;
+- persistência enxuta do histórico, removendo dados derivados e reconstruindo agrupamentos na leitura sem descartar revisão humana, anotações ou correções de contraste;
 - opções de recuperação no popup:
   - limpar o histórico da URL atual;
   - excluir a auditoria mais antiga;

@@ -48,6 +48,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - filtros, score e resumo passam a usar classificação normativa real, sem inferir requisito ou recomendação por severidade ou nível WCAG.
 - nota do resumo passa a considerar requisitos, recomendações do escopo atual e conclusão da revisão humana.
 - resumo da auditoria passa a mostrar um único próximo passo, reduzindo redundância visual.
+- histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local.
 
 ### Fixed
 

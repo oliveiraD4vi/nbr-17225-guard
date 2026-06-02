@@ -43,9 +43,11 @@ async function loadAuditHistoryModule() {
 
 const auditHistoryModule = await loadAuditHistoryModule()
 const {
+  compactAuditResultForStorage,
   dedupeAndSortAuditHistory,
   getAuditUrlStorageKey,
   getVisibleAuditViolations,
+  hydrateAuditResult,
   inheritViolationStateFromHistory,
 } = auditHistoryModule
 
@@ -177,5 +179,40 @@ assert.equal(inheritedResult.violations[0].noteUpdatedAt, 123)
 assert.equal(inheritedResult.violations[0].inheritedFromHistory, true)
 assert.equal(inheritedResult.violations[1].humanReviewStatus, 'pending')
 assert.equal(inheritedResult.violations[1].userNote, undefined)
+
+const auditWithDerivedData = createAuditEntry({
+  id: 'with-derived-data',
+  violations: [
+    createViolation({
+      id: 'error-a',
+      ruleId: 'rule-a',
+      severity: 'error',
+      nbrReference: '5.1.1',
+      element: { nodeName: 'INPUT' },
+      inheritedFromHistory: true,
+    }),
+    createViolation({
+      id: 'warning-b',
+      ruleId: 'rule-b',
+      severity: 'warning',
+      nbrReference: '5.3.3',
+      userNote: 'Revisar com o time',
+    }),
+  ],
+})
+const compactedAudit = compactAuditResultForStorage(auditWithDerivedData)
+
+assert.equal('violationsByRule' in compactedAudit, false)
+assert.equal('violationsBySeverity' in compactedAudit, false)
+assert.equal('element' in compactedAudit.violations[0], false)
+assert.equal('inheritedFromHistory' in compactedAudit.violations[0], false)
+assert.equal(compactedAudit.violations[1].userNote, 'Revisar com o time')
+
+const hydratedAudit = hydrateAuditResult(compactedAudit)
+
+assert.equal(hydratedAudit.totalViolations, 2)
+assert.equal(hydratedAudit.violationsByRule['rule-a'].length, 1)
+assert.equal(hydratedAudit.violationsBySeverity.error.length, 1)
+assert.equal(hydratedAudit.violationsBySeverity.warning.length, 1)
 
 console.log('Audit history utility checks passed.')

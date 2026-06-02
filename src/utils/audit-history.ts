@@ -1,6 +1,61 @@
 import type { AuditHistoryEntry, AuditResult, Violation } from '@/types'
 import { isNormativeRequirement } from '@/normative'
 
+function getAuditCollections(violations: Violation[]) {
+  const violationsByRule = violations.reduce<Record<string, Violation[]>>((acc, violation) => {
+    acc[violation.ruleId] ??= []
+    acc[violation.ruleId].push(violation)
+    return acc
+  }, {})
+
+  const violationsBySeverity = violations.reduce<Record<'error' | 'warning', Violation[]>>(
+    (acc, violation) => {
+      acc[violation.severity].push(violation)
+      return acc
+    },
+    { error: [], warning: [] },
+  )
+
+  return { violationsByRule, violationsBySeverity }
+}
+
+export function hydrateAuditResult<T extends AuditResult>(result: T): T {
+  const violations = result.violations ?? []
+  const requirementViolations = violations.filter((violation) =>
+    isNormativeRequirement(violation.nbrReference),
+  )
+  const recommendationViolations = violations.filter(
+    (violation) => !isNormativeRequirement(violation.nbrReference),
+  )
+  const humanReviewItems = violations.filter((violation) => violation.requiresHumanReview).length
+  const automatedFindings = violations.length - humanReviewItems
+  const collections = getAuditCollections(violations)
+
+  return {
+    ...result,
+    totalViolations: violations.length,
+    errors: requirementViolations.length,
+    warnings: recommendationViolations.length,
+    humanReviewItems,
+    automatedFindings,
+    violations,
+    ...collections,
+  }
+}
+
+export function compactAuditResultForStorage<T extends AuditResult>(result: T): T {
+  const { violationsByRule, violationsBySeverity, ...compactResult } = result
+  const violations = result.violations.map((violation) => {
+    const { element, inheritedFromHistory, ...persistableViolation } = violation
+    return persistableViolation as Violation
+  })
+
+  return {
+    ...compactResult,
+    violations,
+  } as T
+}
+
 export function getAuditUrlStorageKey(url: string): string {
   try {
     const parsed = new URL(url)
@@ -49,44 +104,19 @@ export function getDisplayAuditResult(
   const visibleViolations = getVisibleAuditViolations(result).filter(
     (violation) => includeRecommendations || isNormativeRequirement(violation.nbrReference),
   )
-  const requirementViolations = visibleViolations.filter((violation) =>
-    isNormativeRequirement(violation.nbrReference),
-  )
-  const recommendationViolations = visibleViolations.filter(
-    (violation) => !isNormativeRequirement(violation.nbrReference),
-  )
-
-  const violationsByRule = visibleViolations.reduce<Record<string, Violation[]>>(
-    (acc, violation) => {
-      acc[violation.ruleId] ??= []
-      acc[violation.ruleId].push(violation)
-      return acc
-    },
-    {},
-  )
-
-  const violationsBySeverity = visibleViolations.reduce<Record<'error' | 'warning', Violation[]>>(
-    (acc, violation) => {
-      acc[violation.severity].push(violation)
-      return acc
-    },
-    { error: [], warning: [] },
-  )
-
   const pendingHumanReviewItems = visibleViolations.filter(
     (violation) => violation.requiresHumanReview && violation.humanReviewStatus === 'pending',
   ).length
 
-  return {
+  const hydratedResult = hydrateAuditResult({
     ...result,
-    totalViolations: visibleViolations.length,
-    errors: requirementViolations.length,
-    warnings: recommendationViolations.length,
+    violations: visibleViolations,
+  })
+
+  return {
+    ...hydratedResult,
     humanReviewItems: pendingHumanReviewItems,
     automatedFindings: visibleViolations.length - pendingHumanReviewItems,
-    violations: visibleViolations,
-    violationsByRule,
-    violationsBySeverity,
   }
 }
 

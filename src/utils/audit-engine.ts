@@ -5,9 +5,11 @@ import { t } from '@/i18n'
 import { getNormativeRuleType } from '@/normative'
 import type { AuditHistoryEntry, AuditResult } from '@/types'
 import {
+  compactAuditResultForStorage,
   dedupeAndSortAuditHistory,
   getDisplayAuditResult,
   getAuditUrlStorageKey,
+  hydrateAuditResult,
   inheritViolationStateFromHistory,
 } from '@/utils/audit-history'
 
@@ -48,19 +50,15 @@ function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null
     humanReviewStatus:
       violation.humanReviewStatus ?? (violation.requiresHumanReview ? 'pending' : 'not_applicable'),
   }))
-  const humanReviewItems = violations.filter((violation) => violation.requiresHumanReview).length
-  const automatedFindings = violations.length - humanReviewItems
   const auditId = result.id || `${getAuditUrlStorageKey(result.url)}|${result.timestamp}`
 
-  return {
+  return hydrateAuditResult({
     ...result,
     id: auditId,
     includeRecommendations: result.includeRecommendations ?? true,
     violations,
-    humanReviewItems: result.humanReviewItems ?? humanReviewItems,
-    automatedFindings: result.automatedFindings ?? automatedFindings,
     pageTitle: result.pageTitle ?? '',
-  }
+  })
 }
 
 /**
@@ -183,7 +181,9 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     const urlKey = getAuditUrlStorageKey(result.url)
     const history =
       (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}
-    const currentHistory = history[urlKey] ?? []
+    const currentHistory = (history[urlKey] ?? []).map(
+      (entry) => normalizeAuditResult(entry) as AuditHistoryEntry,
+    )
     const normalizedResult = inheritViolationStateFromHistory(
       normalizeAuditResult(result)!,
       currentHistory,
@@ -191,15 +191,17 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     const historyEntry: AuditHistoryEntry = normalizedResult as AuditHistoryEntry
     const auditResultsByTab = {
       ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
-      [getTabStorageKey(resolvedTabId)]: normalizedResult,
+      [getTabStorageKey(resolvedTabId)]: compactAuditResultForStorage(normalizedResult),
     }
     const auditHistoryByUrl = {
       ...history,
-      [urlKey]: dedupeAndSortAuditHistory([historyEntry, ...currentHistory]),
+      [urlKey]: dedupeAndSortAuditHistory([historyEntry, ...currentHistory]).map((entry) =>
+        compactAuditResultForStorage(entry),
+      ),
     }
 
     await chrome.storage.local.set({
-      auditResult: normalizedResult,
+      auditResult: null,
       auditResultsByTab,
       auditHistoryByUrl,
     })
@@ -240,6 +242,10 @@ export async function deleteAuditHistoryEntry(
     const urlKey = getAuditUrlStorageKey(url)
     const currentHistory = auditHistoryByUrl[urlKey] ?? []
     auditHistoryByUrl[urlKey] = currentHistory.filter((entry) => entry.id !== historyId)
+
+    auditHistoryByUrl[urlKey] = auditHistoryByUrl[urlKey].map((entry) =>
+      compactAuditResultForStorage(normalizeAuditResult(entry) as AuditHistoryEntry),
+    )
 
     await chrome.storage.local.set({ auditHistoryByUrl })
     return dedupeAndSortAuditHistory(
@@ -292,14 +298,14 @@ export async function updateStoredAuditResult(
       'auditResultsByTab',
       'auditHistoryByUrl',
     ])
-    const storedAuditResult = normalizeAuditResult(data.auditResult as AuditResult | null)
     const auditResultsByTab = {
       ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
     }
     const currentTabResult = auditResultsByTab[getTabStorageKey(resolvedTabId)]
 
     if (currentTabResult?.id === normalizedResult.id) {
-      auditResultsByTab[getTabStorageKey(resolvedTabId)] = normalizedResult
+      auditResultsByTab[getTabStorageKey(resolvedTabId)] =
+        compactAuditResultForStorage(normalizedResult)
     }
 
     const auditHistoryByUrl = {
@@ -309,13 +315,16 @@ export async function updateStoredAuditResult(
     const currentHistory = auditHistoryByUrl[urlKey] ?? []
     auditHistoryByUrl[urlKey] = dedupeAndSortAuditHistory(
       currentHistory.map((entry) =>
-        entry.id === normalizedResult.id ? (normalizedResult as AuditHistoryEntry) : entry,
+        compactAuditResultForStorage(
+          normalizeAuditResult(
+            entry.id === normalizedResult.id ? (normalizedResult as AuditHistoryEntry) : entry,
+          ) as AuditHistoryEntry,
+        ),
       ),
     )
 
     await chrome.storage.local.set({
-      auditResult:
-        storedAuditResult?.id === normalizedResult.id ? normalizedResult : storedAuditResult,
+      auditResult: null,
       auditResultsByTab,
       auditHistoryByUrl,
     })
@@ -347,14 +356,17 @@ export async function compactAuditStorage(preserveTabId?: number): Promise<void>
     'auditResultsByTab',
     'auditHistoryByUrl',
   ])
-  const currentAuditResult = normalizeAuditResult(data.auditResult as AuditResult | null)
   const currentTabKey = preserveTabId ? getTabStorageKey(preserveTabId) : null
   const auditResultsByTab = {
     ...(data.auditResultsByTab as Record<string, AuditResult> | undefined),
   }
   const compactedResultsByTab =
     currentTabKey && auditResultsByTab[currentTabKey]
-      ? { [currentTabKey]: normalizeAuditResult(auditResultsByTab[currentTabKey]) as AuditResult }
+      ? {
+          [currentTabKey]: compactAuditResultForStorage(
+            normalizeAuditResult(auditResultsByTab[currentTabKey]) as AuditResult,
+          ),
+        }
       : {}
   const sourceHistory =
     (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}
@@ -365,16 +377,13 @@ export async function compactAuditStorage(preserveTabId?: number): Promise<void>
         dedupeAndSortAuditHistory(
           entries.map((entry) => normalizeAuditResult(entry) as AuditHistoryEntry),
           1,
-        ),
+        ).map((entry) => compactAuditResultForStorage(entry)),
       ])
       .filter(([, entries]) => entries.length > 0),
   )
 
   await chrome.storage.local.set({
-    auditResult:
-      currentAuditResult && currentTabKey
-        ? (compactedResultsByTab[currentTabKey] ?? currentAuditResult)
-        : currentAuditResult,
+    auditResult: null,
     auditResultsByTab: compactedResultsByTab,
     auditHistoryByUrl: compactedHistory,
   })
