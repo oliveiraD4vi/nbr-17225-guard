@@ -61,8 +61,8 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 ### Governança técnica
 
 - verificação automática de cobertura entre catálogo documentado, requisitos incorporados e regras implementadas;
-- matriz normativa formal em `RULES_NORMATIVE_MATRIX.md`;
-- plano de expansão futura em `FUTURE_RULES_PLAN.md`, com as 34 recomendações ainda não implementadas listadas individualmente;
+- matriz normativa formal em `docs/RULES_NORMATIVE_MATRIX.md`;
+- plano de expansão futura em `docs/FUTURE_RULES_PLAN.md`, com as 34 recomendações ainda não implementadas listadas individualmente;
 - centralização de textos visíveis em catálogo de i18n PT-BR UTF-8;
 - tema centralizado em variáveis CSS, compartilhado entre popup, relatório e superfícies do Ant Design;
 - resolução correta dos tokens do Ant Design a partir das variáveis CSS, preservando consistência visual em CTAs, tags, modais, drawers, tooltips e popovers.
@@ -99,11 +99,12 @@ Importante:
 
 Consulte também:
 
-- [RULES_ANALYSIS.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_ANALYSIS.md)
-- [RULES_CODE_MAPPING.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_CODE_MAPPING.md)
-- [RULES_NORMATIVE_MATRIX.md](C:/Users/davic/Documents/Development/nbr-17225-guard/RULES_NORMATIVE_MATRIX.md)
-- [FUTURE_RULES_PLAN.md](C:/Users/davic/Documents/Development/nbr-17225-guard/FUTURE_RULES_PLAN.md)
-- [VERSIONING.md](C:/Users/davic/Documents/Development/nbr-17225-guard/VERSIONING.md)
+- [docs/README.md](docs/README.md)
+- [RULES_ANALYSIS.md](docs/RULES_ANALYSIS.md)
+- [RULES_CODE_MAPPING.md](docs/RULES_CODE_MAPPING.md)
+- [RULES_NORMATIVE_MATRIX.md](docs/RULES_NORMATIVE_MATRIX.md)
+- [FUTURE_RULES_PLAN.md](docs/FUTURE_RULES_PLAN.md)
+- [VERSIONING.md](docs/VERSIONING.md)
 
 ## Rastreabilidade pública
 
@@ -117,7 +118,7 @@ A landing page do projeto possui uma página dedicada de rastreabilidade em `/ru
 - classificação de automação;
 - limite residual da verificação.
 
-Essa página usa a matriz `RULES_NORMATIVE_MATRIX.md` como fonte e não substitui a leitura da norma.
+Essa página usa a matriz `docs/RULES_NORMATIVE_MATRIX.md` como fonte e não substitui a leitura da norma.
 
 ## Fluxo recomendado de uso
 
@@ -182,7 +183,7 @@ O script verifica:
 
 ## Escopo da ABNT NBR 17225 x escopo implementado
 
-A norma possui recomendações adicionais fora do escopo implementado aqui. Elas não serão adicionadas à V1 Farol, mas estão registradas como backlog para futuras contribuições em `FUTURE_RULES_PLAN.md`.
+A norma possui recomendações adicionais fora do escopo implementado aqui. Elas não serão adicionadas à V1 Farol, mas estão registradas como backlog para futuras contribuições em `docs/FUTURE_RULES_PLAN.md`.
 
 ## Origem, abertura e governança pública
 
@@ -200,7 +201,7 @@ Quando um PR alterar, remover ou criar uma função de verificação de regra, o
 
 ## Versionamento
 
-A versão atual é `1.0.0`, nomeada como **V1 Farol**. A política de nomes e evolução está documentada em `VERSIONING.md`.
+A versão atual é `1.0.0`, nomeada como **V1 Farol**. A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
 
 ## Instalação
 
@@ -252,7 +253,7 @@ Após `pnpm install`, o Husky passa a controlar os hooks locais do repositório.
 
 ```text
 nbr-17225-guard/
-|-- docs/                         # Documentos-fonte de requisitos e funcionalidades
+|-- docs/                         # Documentação de regras, governança, versão e requisitos-fonte
 |-- scripts/                      # Verificações de cobertura e utilitários
 |-- src/
 |   |-- components/               # Popup, relatório, histórico e simulador
