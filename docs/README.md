@@ -2,7 +2,6 @@
 
 Este diretório concentra a documentação complementar da extensão Guardião NBR 17225.
 
-- `Analise_Documental_NBR17225.xlsx`: planilha-fonte da análise documental.
 - `Funcionalidades Propostas.docx`: documento-fonte de funcionalidades propostas.
 - `RULES_NORMATIVE_MATRIX.md`: matriz normativa da V1 Farol.
 - `RULES_CODE_MAPPING.md`: mapeamento entre regras e implementação.
