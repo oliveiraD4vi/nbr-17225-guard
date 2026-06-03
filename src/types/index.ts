@@ -92,6 +92,7 @@ export interface AuditResult {
 
 export interface AuditHistoryEntry extends AuditResult {
   id: string
+  importedAt?: number
 }
 
 export interface HighlightState {
@@ -110,7 +111,6 @@ export interface ExtensionMessage {
 }
 
 export interface StorageData {
-  auditResult?: AuditResult | null
   auditResultsByTab?: Record<string, AuditResult>
   auditHistoryByUrl?: Record<string, AuditHistoryEntry[]>
   highlightState?: HighlightState

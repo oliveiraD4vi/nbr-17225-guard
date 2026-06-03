@@ -36,7 +36,9 @@ import {
   getActiveTab,
   getAuditHistoryForUrl,
   getAuditResult,
+  importAuditReportToHistory,
   isAuditStorageQuotaError,
+  parseImportedAuditReport,
   resetAuditCache,
   runAccessibilityAudit,
   saveAuditResult,
@@ -132,8 +134,26 @@ function getComparisonQuickReadingLabel(label: string): string {
   return t('popup.history.quickReadingStable')
 }
 
+function getQuotaAlertDescriptionKey(
+  scope: 'audit' | 'history' | 'review',
+  hasUnsavedChanges: boolean,
+): string {
+  if (!hasUnsavedChanges) return 'popup.quota.alertDescription'
+
+  if (scope === 'audit') return 'popup.quota.alertDescriptionUnsavedAudit'
+  if (scope === 'history') return 'popup.quota.alertDescriptionUnsavedHistory'
+  return 'popup.quota.alertDescriptionUnsavedReview'
+}
+
+function getQuotaModalAlertDescriptionKey(scope: 'audit' | 'history' | 'review'): string {
+  if (scope === 'audit') return 'popup.quota.modalAlertDescriptionAudit'
+  if (scope === 'history') return 'popup.quota.modalAlertDescriptionHistory'
+  return 'popup.quota.modalAlertDescriptionReview'
+}
+
 export const PopupApp: React.FC = () => {
   const quotaRetryRef = useRef<(() => Promise<unknown>) | null>(null)
+  const importInputRef = useRef<HTMLInputElement | null>(null)
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([])
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
@@ -496,6 +516,68 @@ export const PopupApp: React.FC = () => {
     URL.revokeObjectURL(url)
     message.success(t('popup.messages.exportSummarySuccess'))
   }, [displayedAuditResult])
+
+  const handleOpenImportPicker = useCallback(() => {
+    importInputRef.current?.click()
+  }, [])
+
+  const handleImportAuditFile = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0]
+      event.target.value = ''
+      if (!file) return
+
+      setLoading(true)
+      try {
+        const rawContent = await file.text()
+        const parsedPayload = JSON.parse(rawContent) as unknown
+        const importedEntry = parseImportedAuditReport(parsedPayload)
+        const persistImportedAudit = async () => {
+          const persisted = await importAuditReportToHistory(importedEntry)
+          const tab = activeTab ?? (await getActiveTab())
+          setActiveTab(tab)
+
+          const refreshedHistory = await getAuditHistoryForUrl(tab.url)
+          const importedInCurrentUrl = refreshedHistory.some(
+            (entry) => entry.id === persisted.entry.id,
+          )
+
+          if (importedInCurrentUrl) {
+            setAuditHistory(refreshedHistory)
+            setSelectedHistoryId(persisted.entry.id)
+            setComparisonTargetId(refreshedHistory[0]?.id)
+            setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
+            setActiveTabKey('history')
+            setShowAboutView(false)
+            message.success(t('popup.messages.importReadyForComparison'))
+            return persisted
+          }
+
+          message.success(t('popup.messages.importStoredForUrl', { url: persisted.entry.url }))
+          return persisted
+        }
+
+        const persisted = await persistWithQuotaHandling(persistImportedAudit, {
+          url: importedEntry.url,
+          scope: 'history',
+          hasUnsavedChanges: true,
+        })
+
+        if (!persisted) {
+          message.warning(t('popup.messages.quotaUnsavedImport'))
+          return
+        }
+      } catch (error) {
+        console.error('Erro ao importar relatório:', error)
+        message.error(
+          error instanceof Error ? error.message : t('popup.messages.importAuditError'),
+        )
+      } finally {
+        setLoading(false)
+      }
+    },
+    [activeTab, persistWithQuotaHandling],
+  )
 
   const handleFilterChange = useCallback(
     async (filter: VisionSimulationFilter) => {
@@ -991,6 +1073,7 @@ export const PopupApp: React.FC = () => {
             onExportMarkdown={handleExportComparisonReport}
             onExportJson={handleExportComparisonJson}
             onExportCsv={handleExportComparisonCsv}
+            onImportJson={handleOpenImportPicker}
           />
         ),
       },
@@ -1022,6 +1105,7 @@ export const PopupApp: React.FC = () => {
     handleExportComparisonReport,
     handleExportComparisonJson,
     handleExportComparisonCsv,
+    handleOpenImportPicker,
     handleFilterChange,
   ])
 
@@ -1055,6 +1139,15 @@ export const PopupApp: React.FC = () => {
       </Header>
 
       <Content className="popup-content">
+        <input
+          ref={importInputRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={(event) => {
+            void handleImportAuditFile(event)
+          }}
+          hidden
+        />
         {initialLoading || loading ? (
           <PopupPanelSkeleton />
         ) : showAboutView || !displayedAuditResult ? (
@@ -1063,6 +1156,7 @@ export const PopupApp: React.FC = () => {
               hasAudit={Boolean(viewedAuditResult)}
               loading={loading}
               onBack={() => setShowAboutView(false)}
+              onImport={handleOpenImportPicker}
               onStart={() => {
                 void handleRunAudit()
               }}
@@ -1140,9 +1234,7 @@ export const PopupApp: React.FC = () => {
                 showIcon
                 message={t('popup.quota.alertTitle')}
                 description={t(
-                  quotaIssue.hasUnsavedChanges
-                    ? 'popup.quota.alertDescriptionUnsaved'
-                    : 'popup.quota.alertDescription',
+                  getQuotaAlertDescriptionKey(quotaIssue.scope, quotaIssue.hasUnsavedChanges),
                 )}
               />
             )}
@@ -1204,9 +1296,7 @@ export const PopupApp: React.FC = () => {
             showIcon
             message={t('popup.quota.modalAlertTitle')}
             description={t(
-              quotaIssue?.scope === 'audit'
-                ? 'popup.quota.modalAlertDescriptionAudit'
-                : 'popup.quota.modalAlertDescriptionReview',
+              getQuotaModalAlertDescriptionKey(quotaIssue?.scope ?? 'audit'),
             )}
           />
           <p>{t('popup.quota.modalDescription')}</p>

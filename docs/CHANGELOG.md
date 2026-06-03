@@ -31,6 +31,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - links para landing page, página de regras, política de privacidade e GitHub público na tela Sobre;
 - exportação de resumo simples da auditoria direto pela aba de resumo;
 - classificação normativa canônica em `src/normative.ts`, baseada na própria ABNT NBR 17225.
+- importação de relatórios JSON exportados pela própria extensão para retomar contexto e comparação em outro navegador ou computador.
 
 ### Changed
 

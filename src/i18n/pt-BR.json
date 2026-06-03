@@ -8,6 +8,7 @@
       "back": "Voltar",
       "print": "Imprimir",
       "exportJson": "Exportar JSON",
+      "importJson": "Importar JSON",
       "exportCsv": "Exportar CSV",
       "exportMarkdown": "Exportar MD",
       "downloadSummary": "Baixar resumo",
@@ -53,6 +54,7 @@
       "moreRecent": "Mais recente",
       "currentlyViewing": "Em visualização",
       "currentInFocus": "Atual em foco",
+      "imported": "Importado",
       "actionRequired": "Ação necessária",
       "verifiedCompliant": "Conforme verificado",
       "improvement": "Melhoria",
@@ -116,7 +118,7 @@
       "title": "Auditoria assistida da ABNT NBR 17225",
       "version": "{{version}}",
       "descriptionA": "O Guardião avalia o escopo da versão 1 do catálogo normativo do projeto e separa automaticamente requisitos, recomendações e itens que ainda precisam de confirmação humana.",
-      "descriptionB": "Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página e manter um histórico local das auditorias já executadas.",
+      "descriptionB": "Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página, manter um histórico local compacto e reimportar relatórios JSON quando precisar continuar o trabalho em outro ambiente.",
       "links": {
         "label": "Links do projeto",
         "landing": "Landing",
@@ -153,10 +155,14 @@
       "comparisonSelectInfo": "Selecione duas auditorias diferentes para comparar",
       "recommendationsIncluded": "Recomendações incluídas na auditoria atual",
       "recommendationsLoadError": "Não foi possível concluir a auditoria com recomendações",
+      "importReadyForComparison": "Relatório importado e pronto para comparação nesta URL.",
+      "importStoredForUrl": "Relatório importado para a URL {{url}}. Abra essa página para comparar ou continuar a revisão.",
+      "importAuditError": "Não foi possível importar o relatório",
       "contrastSaved": "Correção de contraste salva",
       "contrastRemoved": "Correção de contraste resetada para os valores originais da página",
       "quotaUnsavedAudit": "A auditoria foi concluída, mas não pôde ser salva localmente por falta de espaço.",
       "quotaUnsavedReview": "A alteração foi aplicada na interface, mas ainda não foi salva localmente por falta de espaço.",
+      "quotaUnsavedImport": "O relatório foi lido, mas não pôde ser salvo localmente por falta de espaço.",
       "quotaRecovered": "Espaço liberado e alteração salva com sucesso.",
       "quotaRecoveryFailed": "Não foi possível liberar espaço suficiente no armazenamento local."
     },
@@ -177,6 +183,8 @@
       "warningDescription": "Os dados abaixo pertencem a uma execução anterior da mesma URL. Destaques visuais na página atual podem não corresponder a esse estado.",
       "comparisonTitle": "Comparar auditorias",
       "comparisonDescription": "Compare a evolução desta URL entre duas execuções salvas.",
+      "importTitle": "Importar relatório salvo",
+      "importDescription": "Traga um JSON exportado pelo Guardião para continuar a revisão em outro navegador ou comparar com a auditoria atual desta URL.",
       "exportTitle": "Relatório de comparação de auditorias",
       "exportIndicatorsTitle": "Indicadores",
       "exportHumanReviewTitle": "Revisão humana",
@@ -237,10 +245,13 @@
     "quota": {
       "alertTitle": "Armazenamento local cheio",
       "alertDescription": "Alguns dados da auditoria não puderam ser persistidos. Escolha uma ação para liberar espaço.",
-      "alertDescriptionUnsaved": "A auditoria continua visível, mas há alterações ainda não salvas por falta de espaço no armazenamento local.",
+      "alertDescriptionUnsavedAudit": "A auditoria continua visível, mas o resultado atual ainda não foi salvo localmente por falta de espaço.",
+      "alertDescriptionUnsavedHistory": "O relatório foi lido, mas ainda não pôde ser salvo no histórico local por falta de espaço.",
+      "alertDescriptionUnsavedReview": "As alterações de revisão humana, anotações ou contraste ainda não foram salvas localmente por falta de espaço.",
       "modalTitle": "Liberar espaço no armazenamento",
       "modalAlertTitle": "Falha ao persistir dados locais",
       "modalAlertDescriptionAudit": "A extensão não conseguiu persistir a auditoria atual. Isso costuma acontecer quando o histórico local acumulado fica grande demais.",
+      "modalAlertDescriptionHistory": "A extensão não conseguiu persistir o relatório importado no histórico local. Isso costuma acontecer quando o armazenamento já está próximo do limite.",
       "modalAlertDescriptionReview": "A extensão não conseguiu persistir a revisão humana, as anotações ou a correção de contraste desta auditoria.",
       "modalDescription": "Escolha uma estratégia de recuperação. A opção recomendada é limpar apenas o histórico da URL atual e tentar salvar novamente.",
       "options": {
@@ -448,7 +459,8 @@
     "unsupportedUrl": "A auditoria só pode ser executada em páginas http(s) ou arquivos locais com permissão.",
     "contentExecutionError": "Erro ao executar a auditoria no content script.",
     "domUnavailable": "Não foi possível acessar o DOM da página. Recarregue a aba e tente novamente.",
-    "quotaExceeded": "Não foi possível salvar os dados da auditoria porque o armazenamento local da extensão atingiu o limite."
+    "quotaExceeded": "Não foi possível salvar os dados da auditoria porque o armazenamento local da extensão atingiu o limite.",
+    "invalidImportReport": "O arquivo selecionado não é um relatório JSON válido exportado pelo Guardião NBR 17225."
   },
   "background": {
     "installed": "Extensão instalada com sucesso",

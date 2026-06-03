@@ -7,6 +7,7 @@ import {
   GlobalOutlined,
   PlayCircleOutlined,
   SafetyCertificateOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
 import {
   EXTENSION_PUBLIC_REPOSITORY_URL,
@@ -21,11 +22,12 @@ interface AboutPanelProps {
   hasAudit: boolean
   loading: boolean
   onBack: () => void
+  onImport: () => void
   onStart: () => void
 }
 
 export const AboutPanel: React.FC<AboutPanelProps> = React.memo(
-  ({ hasAudit, loading, onBack, onStart }) => (
+  ({ hasAudit, loading, onBack, onImport, onStart }) => (
     <div className="empty-state empty-state-with-about">
       <div className="about-card">
         <span className="about-eyebrow">{t('popup.about.eyebrow')}</span>
@@ -76,6 +78,9 @@ export const AboutPanel: React.FC<AboutPanelProps> = React.memo(
             {t('popup.about.backToAudit')}
           </Button>
         )}
+        <Button icon={<UploadOutlined />} onClick={onImport}>
+          {t('shared.actions.importJson')}
+        </Button>
         <Button
           type="primary"
           size="large"

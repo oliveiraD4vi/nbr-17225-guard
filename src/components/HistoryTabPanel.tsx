@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert, Button, Empty, List, Select, Space, Statistic, Tag } from 'antd';
-import { DeleteOutlined, DownloadOutlined, FileSearchOutlined, HistoryOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, FileSearchOutlined, HistoryOutlined, UploadOutlined } from '@ant-design/icons';
 import { t } from '@/i18n';
 import type { AuditHistoryEntry } from '@/types';
 import {
@@ -33,6 +33,7 @@ interface HistoryTabPanelProps {
   onExportMarkdown: () => void;
   onExportJson: () => void;
   onExportCsv: () => void;
+  onImportJson: () => void;
 }
 
 function getHistoryOptionLabel(entry: AuditHistoryEntry): string {
@@ -121,6 +122,9 @@ function HistoryListSection({
                       {isCurrent && selectedHistoryId && (
                         <Tag color="blue">{t('shared.states.currentInFocus')}</Tag>
                       )}
+                      {entry.importedAt && (
+                        <Tag>{t('shared.states.imported')}</Tag>
+                      )}
                       <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
                         {pendingReviews > 0 ? t('shared.states.reviewPending') : t('shared.states.reviewComplete')}
                       </Tag>
@@ -176,6 +180,7 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(({
   onExportMarkdown,
   onExportJson,
   onExportCsv,
+  onImportJson,
 }) => {
   const pendingHistoryEntries = React.useMemo(
     () => auditHistory.filter((entry) => getPendingHumanReviewCount(entry) > 0),
@@ -188,6 +193,16 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(({
 
   return (
     <div className="history-tab">
+      <div className="history-toolbar">
+        <div>
+          <strong>{t('popup.history.importTitle')}</strong>
+          <p>{t('popup.history.importDescription')}</p>
+        </div>
+        <Button icon={<UploadOutlined />} onClick={onImportJson}>
+          {t('shared.actions.importJson')}
+        </Button>
+      </div>
+
       {comparisonEntries.length >= 2 && (
         <div className="history-comparison-card">
           <div className="history-comparison-header">

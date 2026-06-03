@@ -14,8 +14,10 @@ Sugestões:
 
 - testar herança de `humanReviewStatus`, `userNote` e correções de contraste entre auditorias equivalentes;
 - testar deduplicação e ordenação do histórico por URL;
+- integrar ao fluxo automatizado os testes já criados para compactação e reidratação do histórico persistido;
 - testar comparação entre auditorias com itens novos, resolvidos e persistentes;
 - testar exclusão visual de itens descartados na revisão humana;
+- ampliar a cobertura automatizada e a execução recorrente dos testes de importação de relatórios JSON válidos e rejeição de arquivos inválidos;
 - testar os fluxos de recuperação após `QuotaExceeded`.
 
 Benefício:
@@ -23,23 +25,23 @@ Benefício:
 - reduz risco de inconsistência silenciosa;
 - protege o fluxo mais sensível do produto hoje.
 
-### 2. Tornar mais explícita a diferença entre fonte da verdade por aba e por URL
+### 2. Tornar o limite de armazenamento previsível antes do erro
 
 Objetivo:
 
-- manter a estrutura de storage simples e previsível.
+- reduzir surpresa operacional quando o histórico local começar a ficar grande.
 
 Sugestões:
 
-- revisar o uso residual de `auditResult` global no storage e, se possível, descontinuá-lo de vez;
-- documentar claramente:
-  - `auditResultsByTab` como estado corrente da aba;
-  - `auditHistoryByUrl` como histórico consolidado da URL.
+- indicar visualmente quando o volume salvo estiver se aproximando do limite local;
+- considerar compactação preventiva antes do primeiro `QuotaExceeded`;
+- tornar explícita a política de retenção por URL e a retenção global;
+- orientar o usuário sobre quando exportar e reimportar relatórios para continuidade entre ambientes.
 
 Benefício:
 
-- reduz ambiguidade na manutenção;
-- evita bugs de sincronização entre abas.
+- reduz perda de contexto por surpresa de storage;
+- melhora a sensação de controle sobre o histórico salvo.
 
 ## Prioridade média
 
@@ -213,7 +215,8 @@ Sugestões:
 - registrar política de retenção para histórico por URL e retenção global;
 - indicar ao usuário, com antecedência, quando o volume salvo estiver alto;
 - avaliar compactação preventiva antes de chegar ao erro;
-- documentar o critério de exclusão da auditoria mais antiga.
+- documentar o critério de exclusão da auditoria mais antiga;
+- orientar o uso de exportação e importação como extensão natural da retenção local.
 
 Benefício:
 

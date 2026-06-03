@@ -15,10 +15,11 @@
     "stage-lint": "lint-staged",
     "check:staged-text": "node scripts/check-staged-text.mjs",
     "preview": "vite preview",
-    "test": "pnpm test:audit-history-utils && pnpm test:audit-history",
+    "test": "pnpm test:audit-history-utils && pnpm test:audit-import && pnpm test:audit-history",
     "verify:rules": "node scripts/verify-rules.mjs",
     "type-check": "tsc --noEmit",
     "test:audit-history": "node scripts/test-audit-history.mjs",
+    "test:audit-import": "node scripts/test-audit-import.mjs",
     "test:audit-history-utils": "node scripts/test-audit-history-utils.mjs"
   },
   "lint-staged": {

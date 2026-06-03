@@ -37,6 +37,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 - herança de revisão humana, anotações e correções de contraste entre auditorias equivalentes;
 - exclusão de entradas do histórico com confirmação explícita no popup;
 - comparação entre auditorias salvas, com indicadores de evolução, regressão e estabilidade;
+- importação de relatórios JSON exportados pela própria extensão para retomar a análise em outro navegador ou computador;
 - exportação da auditoria em JSON e CSV;
 - exportação de comparações em Markdown, JSON e CSV.
 
@@ -71,6 +72,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 - tratamento orientado para `QuotaExceeded` no `chrome.storage.local`;
 - persistência enxuta do histórico, removendo dados derivados e reconstruindo agrupamentos na leitura sem descartar revisão humana, anotações ou correções de contraste;
+- importação de relatórios como caminho de continuidade quando o armazenamento local não for suficiente para reter todo o histórico indefinidamente;
 - opções de recuperação no popup:
   - limpar o histórico da URL atual;
   - excluir a auditoria mais antiga;
@@ -144,7 +146,11 @@ Na aba `Verificação humana`, confirme ou descarte os itens pendentes. Esse pas
 
 Ative o escopo `Requisitos e recomendações` quando a base obrigatória já estiver compreendida. O Guardião amplia a auditoria atual sem criar um novo histórico só por causa dessa troca de escopo.
 
-### 5. Usar o simulador de visão
+### 5. Exportar ou importar contexto quando necessário
+
+Quando a auditoria precisar continuar em outro ambiente, exporte o relatório em JSON e depois use a importação pela aba de histórico ou pela tela inicial. Se a URL importada for a mesma da aba atual, o relatório volta pronto para comparação.
+
+### 6. Usar o simulador de visão
 
 O simulador de visão deve entrar como validação complementar, não como substituto da auditoria automática. Um fluxo profissional de uso é:
 

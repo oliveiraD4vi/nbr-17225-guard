@@ -147,6 +147,56 @@ function throwIfQuotaExceeded(error: unknown): never {
   throw error
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function isImportedViolationCandidate(value: unknown): value is Record<string, unknown> {
+  return (
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    typeof value.ruleId === 'string' &&
+    typeof value.ruleName === 'string' &&
+    typeof value.nbrReference === 'string' &&
+    typeof value.description === 'string' &&
+    typeof value.message === 'string' &&
+    typeof value.suggestion === 'string' &&
+    typeof value.remediationAdvice === 'string'
+  )
+}
+
+export function parseImportedAuditReport(payload: unknown): AuditHistoryEntry {
+  if (!isRecord(payload)) {
+    throw new Error(t('engine.invalidImportReport'))
+  }
+
+  const candidate = isRecord(payload.audit) ? payload.audit : payload
+  if (!isRecord(candidate)) {
+    throw new Error(t('engine.invalidImportReport'))
+  }
+
+  const timestamp =
+    typeof candidate.timestamp === 'number'
+      ? candidate.timestamp
+      : Number(candidate.timestamp)
+
+  if (
+    typeof candidate.url !== 'string' ||
+    candidate.url.trim().length === 0 ||
+    !Number.isFinite(timestamp) ||
+    !Array.isArray(candidate.violations) ||
+    candidate.violations.some((violation) => !isImportedViolationCandidate(violation))
+  ) {
+    throw new Error(t('engine.invalidImportReport'))
+  }
+
+  return normalizeAuditResult({
+    ...(candidate as unknown as AuditResult),
+    timestamp,
+    url: candidate.url,
+  }) as AuditHistoryEntry
+}
+
 /**
  * Reseta o cache de auditoria da aba ativa
  */
@@ -161,7 +211,6 @@ export async function resetAuditCache(): Promise<void> {
     delete auditResultsByTab[getTabStorageKey(activeTab.id)]
 
     await chrome.storage.local.set({
-      auditResult: null,
       auditResultsByTab,
     })
 
@@ -201,7 +250,6 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
     }
 
     await chrome.storage.local.set({
-      auditResult: null,
       auditResultsByTab,
       auditHistoryByUrl,
     })
@@ -284,6 +332,36 @@ export async function getAuditHistoryForUrl(url?: string): Promise<AuditHistoryE
   }
 }
 
+export async function importAuditReportToHistory(
+  importedResult: AuditResult,
+): Promise<{ entry: AuditHistoryEntry; history: AuditHistoryEntry[]; urlKey: string }> {
+  try {
+    const data = await chrome.storage.local.get('auditHistoryByUrl')
+    const auditHistoryByUrl = {
+      ...((data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}),
+    }
+    const normalizedEntry = {
+      ...(normalizeAuditResult(importedResult) as AuditHistoryEntry),
+      importedAt: Date.now(),
+    }
+    const urlKey = getAuditUrlStorageKey(normalizedEntry.url)
+    const currentHistory = (auditHistoryByUrl[urlKey] ?? []).map(
+      (entry) => normalizeAuditResult(entry) as AuditHistoryEntry,
+    )
+    const history = dedupeAndSortAuditHistory([normalizedEntry, ...currentHistory])
+
+    auditHistoryByUrl[urlKey] = history.map((entry) => compactAuditResultForStorage(entry))
+
+    await chrome.storage.local.set({ auditHistoryByUrl })
+
+    return { entry: normalizedEntry, history, urlKey }
+  } catch (error) {
+    console.error('[Guardião NBR 17225] Erro ao importar relatório:', error)
+    throwIfQuotaExceeded(error)
+    throw error
+  }
+}
+
 export async function updateStoredAuditResult(
   updatedResult: AuditResult,
   tabId?: number,
@@ -294,7 +372,6 @@ export async function updateStoredAuditResult(
 
     const resolvedTabId = tabId ?? (await getActiveTab()).id
     const data = await chrome.storage.local.get([
-      'auditResult',
       'auditResultsByTab',
       'auditHistoryByUrl',
     ])
@@ -324,7 +401,6 @@ export async function updateStoredAuditResult(
     )
 
     await chrome.storage.local.set({
-      auditResult: null,
       auditResultsByTab,
       auditHistoryByUrl,
     })
@@ -352,7 +428,6 @@ export async function clearAuditHistoryForUrl(url: string): Promise<AuditHistory
 
 export async function compactAuditStorage(preserveTabId?: number): Promise<void> {
   const data = await chrome.storage.local.get([
-    'auditResult',
     'auditResultsByTab',
     'auditHistoryByUrl',
   ])
@@ -383,7 +458,6 @@ export async function compactAuditStorage(preserveTabId?: number): Promise<void>
   )
 
   await chrome.storage.local.set({
-    auditResult: null,
     auditResultsByTab: compactedResultsByTab,
     auditHistoryByUrl: compactedHistory,
   })

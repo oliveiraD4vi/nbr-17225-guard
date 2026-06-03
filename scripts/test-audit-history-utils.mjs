@@ -182,6 +182,11 @@ assert.equal(inheritedResult.violations[1].userNote, undefined)
 
 const auditWithDerivedData = createAuditEntry({
   id: 'with-derived-data',
+  summary: {
+    auditScore: {
+      score: 91,
+    },
+  },
   violations: [
     createViolation({
       id: 'error-a',
@@ -204,6 +209,7 @@ const compactedAudit = compactAuditResultForStorage(auditWithDerivedData)
 
 assert.equal('violationsByRule' in compactedAudit, false)
 assert.equal('violationsBySeverity' in compactedAudit, false)
+assert.equal('summary' in compactedAudit, false)
 assert.equal('element' in compactedAudit.violations[0], false)
 assert.equal('inheritedFromHistory' in compactedAudit.violations[0], false)
 assert.equal(compactedAudit.violations[1].userNote, 'Revisar com o time')
