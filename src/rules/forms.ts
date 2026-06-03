@@ -11,6 +11,44 @@ import {
 const formFieldsSelector =
   'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), select, textarea'
 
+function getVisibleFieldLabelText(
+  field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+): string {
+  if (field.labels?.length) {
+    return Array.from(field.labels)
+      .map((label) => getVisibleText(label))
+      .join(' ')
+      .trim()
+  }
+
+  if (field.id) {
+    const explicitLabel = document.querySelector<HTMLElement>(`label[for="${CSS.escape(field.id)}"]`)
+    const explicitLabelText = explicitLabel ? getVisibleText(explicitLabel).trim() : ''
+    if (explicitLabelText) return explicitLabelText
+  }
+
+  const wrappingLabel = field.closest('label')
+  if (wrappingLabel) {
+    const wrappingLabelText = getVisibleText(wrappingLabel as HTMLElement).trim()
+    if (wrappingLabelText) return wrappingLabelText
+  }
+
+  const contextualContainer = field.closest<HTMLElement>(
+    'fieldset, .ant-form-item, .form-field, .form-group, .field, .input-group, td, th',
+  )
+  if (!contextualContainer) return ''
+
+  return Array.from(
+    contextualContainer.querySelectorAll<HTMLElement>(
+      'legend, label, .ant-form-item-label, .form-label, [data-field-label]',
+    ),
+  )
+    .map((element) => getVisibleText(element).trim())
+    .filter(Boolean)
+    .join(' ')
+    .trim()
+}
+
 export const fieldLabelRule: Rule = {
   id: 'field-label',
   nbrReference: '5.9.1',
@@ -29,8 +67,8 @@ export const fieldLabelRule: Rule = {
       .forEach((field) => {
         if (!isElementVisible(field as unknown as HTMLElement)) return
 
-        const label = getAssociatedLabelText(field)
-        if (!label.trim()) {
+        const visibleLabel = getVisibleFieldLabelText(field)
+        if (!visibleLabel.trim()) {
           violations.push(
             createViolation(fieldLabelRule, {
               element: field as unknown as HTMLElement,
@@ -65,12 +103,10 @@ export const associatedFieldLabelRule: Rule = {
       .forEach((field) => {
         if (!isElementVisible(field as unknown as HTMLElement)) return
 
-        const hasProgrammaticLabel =
-          Boolean(getAssociatedLabelText(field).trim()) ||
-          Boolean(field.getAttribute('aria-label')?.trim()) ||
-          Boolean(field.getAttribute('aria-labelledby')?.trim())
+        const visibleLabel = getVisibleFieldLabelText(field)
+        const hasProgrammaticLabel = Boolean(getAssociatedLabelText(field).trim())
 
-        if (!hasProgrammaticLabel) {
+        if (visibleLabel && !hasProgrammaticLabel) {
           violations.push(
             createViolation(associatedFieldLabelRule, {
               element: field as unknown as HTMLElement,

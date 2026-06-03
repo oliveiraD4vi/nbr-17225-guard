@@ -827,25 +827,6 @@ export const readingOrderRule: Rule = {
       )
     })
 
-    document.querySelectorAll<HTMLElement>(interactiveSelector).forEach((element) => {
-      if (!isElementVisible(element)) return
-      const style = window.getComputedStyle(element)
-      if (
-        (style.display.includes('flex') || style.display.includes('grid')) &&
-        style.order !== '0'
-      ) {
-        violations.push(
-          createViolation(readingOrderRule, {
-            element,
-            message: t('rules.documentalCompletenessB.readingOrder.cssOrderMessage'),
-            suggestion: t('rules.documentalCompletenessB.readingOrder.cssOrderSuggestion'),
-            remediationAdvice: t('rules.documentalCompletenessB.readingOrder.cssOrderRemediation'),
-            customIdPrefix: 'reading-order',
-          }),
-        )
-      }
-    })
-
     return violations
   },
 }
