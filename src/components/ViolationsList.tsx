@@ -33,7 +33,7 @@ import {
 import { t } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { getRuleTopicCategory, type RuleTopicCategory } from '@/rules'
-import type { HumanReviewStatus, Violation } from '@/types'
+import { AUTOMATION_CATEGORIES, type HumanReviewStatus, type Violation } from '@/types'
 import { getContrastRatio } from '@/utils'
 import '../styles/violations-list.css'
 
@@ -155,6 +155,39 @@ function getReviewTransitionDescription(targetStatus: HumanReviewStatus): string
   if (targetStatus === 'confirmed') return t('violations.reviewConfirmConfirmedDescription')
   if (targetStatus === 'dismissed') return t('violations.reviewConfirmDismissedDescription')
   return t('violations.reviewConfirmPendingDescription')
+}
+
+function getAutomationCategoryLabel(category: Violation['automationCategory']): string {
+  if (category === AUTOMATION_CATEGORIES.fully) return t('shared.automationCategory.fully')
+  if (category === AUTOMATION_CATEGORIES.semi) return t('shared.automationCategory.semi')
+  return t('shared.automationCategory.none')
+}
+
+function getNormativeExplanation(violation: Violation): string {
+  return isNormativeRequirement(violation.nbrReference)
+    ? t('violations.extraExplanationNormativeRequirement')
+    : t('violations.extraExplanationNormativeRecommendation')
+}
+
+function getAutomationExplanation(violation: Violation): string {
+  if (violation.automationCategory === AUTOMATION_CATEGORIES.fully) {
+    return t('violations.extraExplanationAutomationFully')
+  }
+  if (violation.automationCategory === AUTOMATION_CATEGORIES.semi) {
+    return t('violations.extraExplanationAutomationSemi')
+  }
+  return t('violations.extraExplanationAutomationManual')
+}
+
+function getHumanReviewExplanation(violation: Violation): string | null {
+  if (!violation.requiresHumanReview) return null
+  if (violation.humanReviewStatus === 'confirmed') {
+    return t('violations.extraExplanationHumanReviewConfirmed')
+  }
+  if (violation.humanReviewStatus === 'dismissed') {
+    return t('violations.extraExplanationHumanReviewDismissed')
+  }
+  return t('violations.extraExplanationHumanReviewPending')
 }
 
 function isVisibleInMainLists(violation: Violation): boolean {
@@ -478,6 +511,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
   }) => {
     const [isNotesOpen, setIsNotesOpen] = React.useState(false)
     const [isContrastModalOpen, setIsContrastModalOpen] = React.useState(false)
+    const [isExtraExplanationOpen, setIsExtraExplanationOpen] = React.useState(false)
     const [pendingReviewStatus, setPendingReviewStatus] = React.useState<HumanReviewStatus | null>(
       null,
     )
@@ -581,10 +615,59 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       setBackgroundHex(violation.contrastDetails.backgroundHex)
       onViolationContrastOverrideChange?.(violation, undefined)
     }, [onViolationContrastOverrideChange, violation])
+    const evidenceItems = React.useMemo(
+      () =>
+        [
+          {
+            key: 'element',
+            label: t('shared.labels.affectedElement'),
+            value: getElementTitle(violation),
+            monospace: true,
+          },
+          violation.elementAccessibleName
+            ? {
+                key: 'accessibleName',
+                label: t('shared.labels.accessibleName'),
+                value: violation.elementAccessibleName,
+                monospace: false,
+              }
+            : null,
+          violation.elementVisibleText
+            ? {
+                key: 'visibleText',
+                label: t('shared.labels.visibleText'),
+                value: violation.elementVisibleText,
+                monospace: false,
+              }
+            : null,
+          violation.elementSelector
+            ? {
+                key: 'selector',
+                label: t('shared.labels.selector'),
+                value: violation.elementSelector,
+                monospace: true,
+              }
+            : null,
+        ].filter(
+          (
+            item,
+          ): item is {
+            key: string
+            label: string
+            value: string
+            monospace: boolean
+          } => item !== null,
+        ),
+      [violation],
+    )
 
     const reviewActions = React.useMemo(
       () => getHumanReviewActionOptions(violation.humanReviewStatus),
       [violation.humanReviewStatus],
+    )
+    const humanReviewExplanation = React.useMemo(
+      () => getHumanReviewExplanation(violation),
+      [violation],
     )
     const reviewTransitionTargetStatus = pendingReviewStatus ?? violation.humanReviewStatus
     const isReviewDecisionPending =
@@ -823,6 +906,16 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
           )}
 
           <Space className="violation-actions">
+            <Button
+              size="small"
+              icon={<InfoCircleOutlined />}
+              onClick={(event) => {
+                event.stopPropagation()
+                setIsExtraExplanationOpen(true)
+              }}
+            >
+              {t('shared.actions.extraExplanation')}
+            </Button>
             {violation.contrastDetails && (
               <Tooltip title={t('violations.contrastBoard')}>
                 <Button
@@ -959,6 +1052,89 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
               )}
             </div>
           )}
+
+          <Modal
+            open={isExtraExplanationOpen}
+            title={t('violations.extraExplanationTitle')}
+            footer={null}
+            onCancel={() => setIsExtraExplanationOpen(false)}
+            width={560}
+            className="extra-explanation-modal"
+            destroyOnHidden
+            centered
+          >
+            <div className="violation-explanation">
+              <div className="violation-explanation-header">
+                <Space wrap size={[8, 8]}>
+                  <Tag color={isNormativeRequirement(violation.nbrReference) ? 'red' : 'blue'}>
+                    {getNormativeTypeLabel(violation)}
+                  </Tag>
+                  <Tag color={getSeverityColor(violation.severity)}>
+                    {getSeverityLabel(violation.severity)}
+                  </Tag>
+                  <Tag>{getAutomationCategoryLabel(violation.automationCategory)}</Tag>
+                  {violation.requiresHumanReview && (
+                    <Tag color={getReviewStatusTagColor(violation.humanReviewStatus)}>
+                      {getReviewLabel(violation)}
+                    </Tag>
+                  )}
+                </Space>
+                <div className="violation-explanation-title-block">
+                  <strong>{violation.ruleName}</strong>
+                  <span>
+                    {t('violations.extraExplanationSubtitle', {
+                      reference: violation.nbrReference,
+                    })}
+                  </span>
+                </div>
+              </div>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationNormativeExpectation')}</h3>
+                <p>{violation.description}</p>
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationDetectedSignal')}</h3>
+                <p>{violation.message}</p>
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationInterpretation')}</h3>
+                <p>{getNormativeExplanation(violation)}</p>
+                <p>{getAutomationExplanation(violation)}</p>
+                {humanReviewExplanation && <p>{humanReviewExplanation}</p>}
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationEvidence')}</h3>
+                {evidenceItems.length > 0 ? (
+                  <dl className="violation-explanation-evidence-list">
+                    {evidenceItems.map((item) => (
+                      <div key={item.key} className="violation-explanation-evidence-item">
+                        <dt>{item.label}</dt>
+                        <dd className={item.monospace ? 'is-monospace' : ''}>{item.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p>{t('violations.extraExplanationEvidenceFallback')}</p>
+                )}
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationNextStep')}</h3>
+                <p>{violation.suggestion}</p>
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationPracticalFix')}</h3>
+                <pre className="violation-explanation-code">
+                  <code>{violation.remediationAdvice}</code>
+                </pre>
+              </section>
+            </div>
+          </Modal>
 
           {violation.contrastDetails && (
             <Modal

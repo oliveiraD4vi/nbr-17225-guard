@@ -18,6 +18,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 - destaque visual dos itens na página, limpeza de destaques e navegação por prioridades;
 - grupos de violações por regra, severidade e categoria natural do motor, como `cores`, `formulários`, `cabeçalhos` e `teclado`;
 - filtro por categoria na listagem de violações;
+- botão de explicação extra por achado, com leitura contextual de regra, sinal detectado, interpretação e próximo passo;
 - board auxiliar para regras de contraste, com ajuste em tempo real de cores, persistência da correção do usuário e restauração para os valores originais da página.
 
 ### Revisão humana
@@ -45,6 +46,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 ### Apoio à decisão
 
 - nota geral baseada em requisitos, recomendações do escopo atual e conclusão da revisão humana;
+- controles de escopo com linguagem orientada à ação, deixando explícito o que será incluído ou removido da leitura atual;
 - feedback visual para a nota, com leitura rápida de risco;
 - contadores do resumo baseados no estado atual da revisão humana, evitando inflar pendências já descartadas;
 - relatório detalhado em página dedicada.

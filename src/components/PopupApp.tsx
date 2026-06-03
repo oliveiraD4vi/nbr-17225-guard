@@ -1192,12 +1192,23 @@ export const PopupApp: React.FC = () => {
                     }}
                   />
                   <div className="recommendations-toggle-copy">
+                    <span className="recommendations-toggle-status">
+                      {t('popup.scope.currentScope')}:{' '}
+                      {includeRecommendations
+                        ? t('popup.scope.currentScopeWithRecommendations')
+                        : t('popup.scope.currentScopeRequirementsOnly')}
+                    </span>
                     <strong>
                       {includeRecommendations
-                        ? t('popup.scope.withRecommendations')
-                        : t('popup.scope.requirementsOnly')}
+                        ? t('popup.scope.disableAction')
+                        : t('popup.scope.enableAction')}
                     </strong>
-                    <span>{t('popup.scope.description')}</span>
+                    <span>
+                      {includeRecommendations
+                        ? t('popup.scope.disableDescription')
+                        : t('popup.scope.enableDescription')}
+                    </span>
+                    <small>{t('popup.scope.normativeNote')}</small>
                   </div>
                 </div>
               </div>

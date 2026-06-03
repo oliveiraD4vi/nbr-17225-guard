@@ -150,6 +150,13 @@
   gap: 3px;
 }
 
+.recommendations-toggle-status {
+  color: var(--guard-color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 .recommendations-toggle-copy strong {
   color: var(--guard-color-text-primary);
   font-size: 13px;
@@ -160,6 +167,12 @@
   color: var(--guard-color-text-muted);
   font-size: 11px;
   line-height: 1.4;
+}
+
+.recommendations-toggle-copy small {
+  color: var(--guard-color-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .quota-resume-button {

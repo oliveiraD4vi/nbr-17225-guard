@@ -31,8 +31,9 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - links para landing page, página de regras, política de privacidade e GitHub público na tela Sobre;
 - exportação de resumo simples da auditoria direto pela aba de resumo;
 - classificação normativa canônica em `src/normative.ts`, baseada na própria ABNT NBR 17225;
-- importação de relatórios JSON exportados pela própria extensão para retomar contexto e comparação em outro navegador ou computador.
-- classificação documental da força heurística em `docs/RULES_HEURISTIC_CLASSIFICATION.md`, com priorização explícita das heurísticas mais fracas.
+- importação de relatórios JSON exportados pela própria extensão para retomar contexto e comparação em outro navegador ou computador;
+- classificação documental da força heurística em `docs/RULES_HEURISTIC_CLASSIFICATION.md`, com priorização explícita das heurísticas mais fracas;
+- modal de explicação extra por achado, com leitura complementar da regra, do sinal detectado e do próximo passo.
 
 ### Changed
 
@@ -47,14 +48,15 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - superfícies do Ant Design alinhadas ao tema do produto, incluindo CTAs, tags, modais, drawers, tooltips e popovers;
 - matriz normativa atualizada após nova revisão técnica das heurísticas mais sensíveis;
 - documentação de cobertura atualizada para refletir 112 regras implementadas e nenhum requisito obrigatório pendente;
-- filtros, score e resumo passam a usar classificação normativa real, sem inferir requisito ou recomendação por severidade ou nível WCAG.
-- nota do resumo passa a considerar requisitos, recomendações do escopo atual e conclusão da revisão humana.
-- resumo da auditoria passa a mostrar um único próximo passo, reduzindo redundância visual.
-- histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local.
+- filtros, score e resumo passam a usar classificação normativa real, sem inferir requisito ou recomendação por severidade ou nível WCAG;
+- nota do resumo passa a considerar requisitos, recomendações do escopo atual e conclusão da revisão humana;
+- resumo da auditoria passa a mostrar um único próximo passo, reduzindo redundância visual;
+- histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local;
 - fluxo de revisão humana passa a exigir confirmação antes da mudança de estado e a reorganizar visualmente o item entre pendentes, confirmados e descartados;
 - cards de violação passam a truncar conteúdos longos com tooltip, reduzindo ruído sem ocultar contexto;
 - V1 Farol passa a ser comunicada como Beta funcional, com textos alinhados ao estágio real do produto;
-- interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225.
+- interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225;
+- toggle de recomendações passa a comunicar estado atual e ação esperada com mais clareza.
 
 ### Fixed
 
@@ -63,8 +65,8 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - múltiplos pontos de texto degradado e inconsistências de PT-BR UTF-8, inclusive no `content.ts`;
 - fundos pretos indevidos em botões, tags e overlays após a centralização do tema;
 - contraste das tooltips do Ant Design corrigido no tema para evitar fundo e texto brancos;
-- falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página.
-- ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários.
-- título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto.
+- falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página;
+- ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários;
+- título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto;
 - sobreposição de ruído entre `5.9.1` e `5.9.3`, separando rótulo visível de associação programática;
 - duplicidade de sinal entre `5.10.2` e `5.13.6`, removendo repetição do mesmo indício de `order` em CSS.
