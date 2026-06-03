@@ -26,6 +26,21 @@ interface RunAuditOptions {
   includeRecommendations?: boolean
 }
 
+export interface AuditStorageDiagnostics {
+  currentUrlEntryCount: number
+  historyEntryCount: number
+  level: 'ok' | 'warning' | 'critical'
+  quotaBytes: number
+  tabSnapshotCount: number
+  urlCount: number
+  usageRatio: number
+  usedBytes: number
+}
+
+const STORAGE_WARNING_RATIO = 0.7
+const STORAGE_CRITICAL_RATIO = 0.85
+const FALLBACK_STORAGE_QUOTA_BYTES = 10 * 1024 * 1024
+
 export async function getActiveTab(): Promise<chrome.tabs.Tab & { id: number }> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
   const activeTab = tabs[0]
@@ -145,6 +160,13 @@ function throwIfQuotaExceeded(error: unknown): never {
   }
 
   throw error
+}
+
+function getStorageQuotaBytes(): number {
+  const configuredQuota = chrome.storage.local.QUOTA_BYTES
+  return typeof configuredQuota === 'number' && configuredQuota > 0
+    ? configuredQuota
+    : FALLBACK_STORAGE_QUOTA_BYTES
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -497,4 +519,44 @@ export async function deleteOldestAuditHistoryEntry(): Promise<boolean> {
 
   await chrome.storage.local.set({ auditHistoryByUrl })
   return true
+}
+
+export async function getAuditStorageDiagnostics(
+  currentUrl?: string,
+): Promise<AuditStorageDiagnostics> {
+  const [data, usedBytes] = await Promise.all([
+    chrome.storage.local.get(['auditResultsByTab', 'auditHistoryByUrl']),
+    chrome.storage.local.getBytesInUse(null),
+  ])
+
+  const auditResultsByTab = (data.auditResultsByTab as Record<string, AuditResult> | undefined) ?? {}
+  const auditHistoryByUrl =
+    (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}
+  const urlCount = Object.keys(auditHistoryByUrl).length
+  const historyEntryCount = Object.values(auditHistoryByUrl).reduce(
+    (total, entries) => total + entries.length,
+    0,
+  )
+  const currentUrlEntryCount = currentUrl
+    ? (auditHistoryByUrl[getAuditUrlStorageKey(currentUrl)] ?? []).length
+    : 0
+  const quotaBytes = getStorageQuotaBytes()
+  const usageRatio = quotaBytes > 0 ? usedBytes / quotaBytes : 0
+  const level =
+    usageRatio >= STORAGE_CRITICAL_RATIO
+      ? 'critical'
+      : usageRatio >= STORAGE_WARNING_RATIO
+        ? 'warning'
+        : 'ok'
+
+  return {
+    currentUrlEntryCount,
+    historyEntryCount,
+    level,
+    quotaBytes,
+    tabSnapshotCount: Object.keys(auditResultsByTab).length,
+    urlCount,
+    usageRatio,
+    usedBytes,
+  }
 }

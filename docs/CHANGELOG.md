@@ -34,6 +34,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - importação de relatórios JSON exportados pela própria extensão para retomar contexto e comparação em outro navegador ou computador;
 - classificação documental da força heurística em `docs/RULES_HEURISTIC_CLASSIFICATION.md`, com priorização explícita das heurísticas mais fracas;
 - modal de explicação extra por achado, com leitura complementar da regra, do sinal detectado e do próximo passo.
+- alerta preventivo de pressão no armazenamento local, com leitura de uso e ação de compactação no próprio popup.
 
 ### Changed
 
@@ -57,6 +58,8 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - V1 Farol passa a ser comunicada como Beta funcional, com textos alinhados ao estágio real do produto;
 - interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225;
 - toggle de recomendações passa a comunicar estado atual e ação esperada com mais clareza.
+- cards de violação passam a abrir com leitura curta mais clara e modal de explicação enriquecido por família de regra;
+- fluxo do popup passa a tornar visível que a retenção do histórico é local ao navegador e que exportação JSON é a continuidade recomendada para retenção longa.
 
 ### Fixed
 
@@ -70,3 +73,4 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto;
 - sobreposição de ruído entre `5.9.1` e `5.9.3`, separando rótulo visível de associação programática;
 - duplicidade de sinal entre `5.10.2` e `5.13.6`, removendo repetição do mesmo indício de `order` em CSS.
+- clique e foco inesperados em elementos atrás do modal de explicação extra e da board de contraste.

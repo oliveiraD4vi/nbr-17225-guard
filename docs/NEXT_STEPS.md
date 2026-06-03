@@ -26,18 +26,18 @@ Benefício:
 - reduz risco de inconsistência silenciosa;
 - protege o fluxo mais sensível do produto hoje.
 
-### 2. Tornar o limite de armazenamento previsível antes do erro
+### 2. Automatizar melhor a retenção preventiva do storage
 
 Objetivo:
 
-- reduzir surpresa operacional quando o histórico local começar a ficar grande.
+- reduzir ainda mais intervenção manual quando o histórico local crescer.
 
 Sugestões:
 
-- indicar visualmente quando o volume salvo estiver se aproximando do limite local;
-- considerar compactação preventiva antes do primeiro `QuotaExceeded`;
-- tornar explícita a política de retenção por URL e a retenção global;
-- orientar o usuário sobre quando exportar e reimportar relatórios para continuidade entre ambientes.
+- integrar testes automatizados para o alerta preventivo e a compactação manual do popup;
+- avaliar compactação preventiva antes do primeiro `QuotaExceeded`, especialmente no nível crítico de uso;
+- definir se haverá política configurável de retenção por URL no futuro ou se a estratégia continuará totalmente guiada por exportação e importação;
+- validar melhor a permanência da auditoria atual e da comparação aberta após compactações sucessivas.
 
 Benefício:
 
@@ -223,16 +223,15 @@ Benefício:
 - reduz retrabalho de revisão textual;
 - dificulta reintrodução de mojibake e strings dispersas.
 
-### 13. Formalizar a estratégia de limites de storage
+### 13. Consolidar a estratégia final de limites de storage
 
 Objetivo:
 
-- tornar previsível o comportamento da extensão quando o `chrome.storage.local` atingir o limite.
+- fechar a política definitiva de retenção local agora que o alerta preventivo já existe no produto.
 
 Sugestões:
 
 - registrar política de retenção para histórico por URL e retenção global;
-- indicar ao usuário, com antecedência, quando o volume salvo estiver alto;
 - avaliar compactação preventiva antes de chegar ao erro;
 - documentar o critério de exclusão da auditoria mais antiga;
 - orientar o uso de exportação e importação como extensão natural da retenção local.

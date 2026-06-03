@@ -36,6 +36,8 @@ import {
   getActiveTab,
   getAuditHistoryForUrl,
   getAuditResult,
+  getAuditStorageDiagnostics,
+  type AuditStorageDiagnostics,
   importAuditReportToHistory,
   isAuditStorageQuotaError,
   parseImportedAuditReport,
@@ -151,6 +153,14 @@ function getQuotaModalAlertDescriptionKey(scope: 'audit' | 'history' | 'review')
   return 'popup.quota.modalAlertDescriptionReview'
 }
 
+function formatStorageSize(bytes: number): string {
+  const megabytes = bytes / (1024 * 1024)
+  return `${megabytes.toLocaleString('pt-BR', {
+    minimumFractionDigits: megabytes >= 9.95 ? 0 : 1,
+    maximumFractionDigits: 1,
+  })} MB`
+}
+
 export const PopupApp: React.FC = () => {
   const quotaRetryRef = useRef<(() => Promise<unknown>) | null>(null)
   const importInputRef = useRef<HTMLInputElement | null>(null)
@@ -175,6 +185,8 @@ export const PopupApp: React.FC = () => {
   } | null>(null)
   const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false)
   const [quotaRecoveryLoading, setQuotaRecoveryLoading] = useState(false)
+  const [storageDiagnostics, setStorageDiagnostics] = useState<AuditStorageDiagnostics | null>(null)
+  const [storageMaintenanceLoading, setStorageMaintenanceLoading] = useState(false)
   const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon-white.png'), [])
 
   const syncAuditResultUpdate = useCallback((updatedResult: AuditResult) => {
@@ -188,20 +200,32 @@ export const PopupApp: React.FC = () => {
     )
   }, [])
 
+  const refreshStorageDiagnostics = useCallback(async (url?: string) => {
+    try {
+      const diagnostics = await getAuditStorageDiagnostics(url)
+      setStorageDiagnostics(diagnostics)
+    } catch (error) {
+      console.error('Erro ao calcular uso do armazenamento local:', error)
+      setStorageDiagnostics(null)
+    }
+  }, [])
+
   const loadAuditForCurrentTab = useCallback(async () => {
     try {
       const tab = await getActiveTab()
       setActiveTab(tab)
-      const [result, preferences] = await Promise.all([
+      const [result, preferences, history, diagnostics] = await Promise.all([
         getAuditResult(tab.id),
         chrome.storage.local.get('includeRecommendationsPreference'),
+        getAuditHistoryForUrl(tab.url),
+        getAuditStorageDiagnostics(tab.url),
       ])
-      const history = await getAuditHistoryForUrl(tab.url)
       const resolvedPreference =
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
       setAuditResult(result)
       setAuditHistory(history)
       setIncludeRecommendations(resolvedPreference)
+      setStorageDiagnostics(diagnostics)
       setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null)
       setShowAboutView(false)
       setPriorityIndex(0)
@@ -216,6 +240,7 @@ export const PopupApp: React.FC = () => {
       setPriorityIndex(0)
       setComparisonBaselineId(undefined)
       setComparisonTargetId(undefined)
+      setStorageDiagnostics(null)
     } finally {
       setInitialLoading(false)
     }
@@ -232,12 +257,14 @@ export const PopupApp: React.FC = () => {
     ): Promise<T | null> => {
       try {
         const result = await operation()
+        await refreshStorageDiagnostics(issue.url)
         setQuotaIssue(null)
         setIsQuotaModalOpen(false)
         quotaRetryRef.current = null
         return result
       } catch (error) {
         if (isAuditStorageQuotaError(error)) {
+          await refreshStorageDiagnostics(issue.url)
           quotaRetryRef.current = operation
           setQuotaIssue(issue)
           setIsQuotaModalOpen(true)
@@ -247,7 +274,7 @@ export const PopupApp: React.FC = () => {
         throw error
       }
     },
-    [],
+    [refreshStorageDiagnostics],
   )
 
   useEffect(() => {
@@ -375,6 +402,7 @@ export const PopupApp: React.FC = () => {
     try {
       await clearHighlightsOnPage(false)
       await resetAuditCache()
+      await refreshStorageDiagnostics(activeTab?.url || auditResult?.url)
       setAuditResult(null)
       setSelectedHistoryId(auditHistory[0]?.id || null)
       setShowAboutView(false)
@@ -388,7 +416,7 @@ export const PopupApp: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [auditHistory, clearHighlightsOnPage])
+  }, [activeTab?.url, auditHistory, auditResult?.url, clearHighlightsOnPage, refreshStorageDiagnostics])
 
   const handleRecommendationsToggle = useCallback(
     async (checked: boolean) => {
@@ -640,6 +668,56 @@ export const PopupApp: React.FC = () => {
   }, [comparisonBaselineId, comparisonEntries, comparisonTargetId])
 
   const comparisonTrend = useMemo(() => getComparisonTrend(comparisonSummary), [comparisonSummary])
+  const storageWarning = useMemo(() => {
+    if (!storageDiagnostics || storageDiagnostics.level === 'ok') return null
+
+    const descriptionKey =
+      storageDiagnostics.level === 'critical'
+        ? 'popup.storage.criticalDescription'
+        : 'popup.storage.warningDescription'
+    const titleKey =
+      storageDiagnostics.level === 'critical'
+        ? 'popup.storage.criticalTitle'
+        : 'popup.storage.warningTitle'
+
+    return {
+      descriptionKey,
+      titleKey,
+      type: storageDiagnostics.level === 'critical' ? ('error' as const) : ('warning' as const),
+    }
+  }, [storageDiagnostics])
+
+  const handleCompactStorageNow = useCallback(async () => {
+    setStorageMaintenanceLoading(true)
+    try {
+      await compactAuditStorage(activeTab?.id)
+      const historyUrl = activeTab?.url || viewedAuditResult?.url
+      const refreshedHistory = historyUrl ? await getAuditHistoryForUrl(historyUrl) : []
+
+      if (historyUrl) {
+        setAuditHistory(refreshedHistory)
+        if (selectedHistoryId && !refreshedHistory.some((entry) => entry.id === selectedHistoryId)) {
+          setSelectedHistoryId(null)
+        }
+        setComparisonTargetId(refreshedHistory[0]?.id)
+        setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
+      }
+
+      await refreshStorageDiagnostics(historyUrl)
+      message.success(t('popup.messages.storageCompacted'))
+    } catch (error) {
+      console.error('Erro ao compactar armazenamento local:', error)
+      message.error(t('popup.messages.storageCompactError'))
+    } finally {
+      setStorageMaintenanceLoading(false)
+    }
+  }, [
+    activeTab?.id,
+    activeTab?.url,
+    refreshStorageDiagnostics,
+    selectedHistoryId,
+    viewedAuditResult?.url,
+  ])
 
   const handleExportComparisonReport = useCallback(() => {
     if (!comparisonSummary || !comparisonTrend) {
@@ -917,6 +995,7 @@ export const PopupApp: React.FC = () => {
         setAuditHistory(refreshedHistory)
         setComparisonTargetId(refreshedHistory[0]?.id)
         setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
+        await refreshStorageDiagnostics(quotaIssue.url)
         setQuotaIssue(null)
         setIsQuotaModalOpen(false)
         quotaRetryRef.current = null
@@ -934,7 +1013,7 @@ export const PopupApp: React.FC = () => {
         setQuotaRecoveryLoading(false)
       }
     },
-    [activeTab?.id, quotaIssue],
+    [activeTab?.id, quotaIssue, refreshStorageDiagnostics],
   )
 
   const handleNextPriorityIssue = useCallback(async () => {
@@ -1253,6 +1332,46 @@ export const PopupApp: React.FC = () => {
               />
             )}
 
+            {storageWarning && storageDiagnostics && (
+              <Alert
+                className="storage-warning-alert"
+                type={storageWarning.type}
+                showIcon
+                message={t(storageWarning.titleKey)}
+                description={
+                  <div className="storage-warning-copy">
+                    <p>
+                      {t(storageWarning.descriptionKey, {
+                        audits: storageDiagnostics.historyEntryCount,
+                        total: formatStorageSize(storageDiagnostics.quotaBytes),
+                        urls: storageDiagnostics.urlCount,
+                        used: formatStorageSize(storageDiagnostics.usedBytes),
+                      })}
+                    </p>
+                    {storageDiagnostics.currentUrlEntryCount > 0 && (
+                      <p>
+                        {t('popup.storage.currentUrlDescription', {
+                          count: storageDiagnostics.currentUrlEntryCount,
+                        })}
+                      </p>
+                    )}
+                    <p>{t('popup.storage.retentionNote')}</p>
+                  </div>
+                }
+                action={
+                  <Button
+                    size="small"
+                    loading={storageMaintenanceLoading}
+                    onClick={() => {
+                      void handleCompactStorageNow()
+                    }}
+                  >
+                    {t('popup.storage.actions.compactNow')}
+                  </Button>
+                }
+              />
+            )}
+
             <Suspense fallback={<PopupPanelSkeleton />}>
               <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} items={tabItems} />
             </Suspense>
@@ -1273,6 +1392,7 @@ export const PopupApp: React.FC = () => {
             historyEntryPendingDeletion.url,
             historyEntryPendingDeletion.id,
           )
+          await refreshStorageDiagnostics(historyEntryPendingDeletion.url)
           setAuditHistory(updatedHistory)
           if (selectedHistoryId === historyEntryPendingDeletion.id) {
             setSelectedHistoryId(null)

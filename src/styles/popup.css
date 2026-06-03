@@ -322,6 +322,20 @@
   margin-bottom: 12px;
 }
 
+.storage-warning-alert {
+  margin-bottom: 12px;
+}
+
+.storage-warning-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.storage-warning-copy p {
+  margin: 0;
+}
+
 .history-tab {
   display: flex;
   flex-direction: column;

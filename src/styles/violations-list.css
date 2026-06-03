@@ -253,6 +253,12 @@
   line-height: 1.45;
 }
 
+.violation-item-summary {
+  color: var(--guard-color-text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
 .violation-item-reference {
   color: var(--guard-color-text-muted);
   font-size: 12px;
@@ -265,6 +271,7 @@
 }
 
 .violation-element-card,
+.violation-detected-signal,
 .violation-human-review-card,
 .violation-contrast-helper,
 .violation-suggestion,
@@ -281,6 +288,11 @@
 .violation-human-review-card {
   background: var(--guard-color-warning-soft);
   border-color: var(--guard-color-warning-accent);
+}
+
+.violation-detected-signal {
+  background: var(--guard-color-info-soft);
+  border-color: var(--guard-color-info-border);
 }
 
 .violation-human-review-card p {
@@ -343,6 +355,7 @@
 }
 
 .violation-element-card strong,
+.violation-detected-signal strong,
 .violation-suggestion strong,
 .violation-remediation strong {
   display: block;
@@ -437,6 +450,13 @@
 
 .violation-suggestion {
   background: var(--guard-color-warning-bg);
+}
+
+.violation-detected-signal-copy {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1e40af;
 }
 
 .violation-suggestion-copy {

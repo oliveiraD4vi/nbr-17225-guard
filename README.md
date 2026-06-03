@@ -18,7 +18,9 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 - destaque visual dos itens na página, limpeza de destaques e navegação por prioridades;
 - grupos de violações por regra, severidade e categoria natural do motor, como `cores`, `formulários`, `cabeçalhos` e `teclado`;
 - filtro por categoria na listagem de violações;
+- leitura curta mais clara nos cards de violação, com resumo orientado por família de regra antes do detalhe técnico;
 - botão de explicação extra por achado, com leitura contextual de regra, sinal detectado, interpretação e próximo passo;
+- explicação extra enriquecida por família de regra, ajudando a entender impacto de uso e foco de revisão para cada tipo de achado;
 - board auxiliar para regras de contraste, com ajuste em tempo real de cores, persistência da correção do usuário e restauração para os valores originais da página.
 
 ### Revisão humana
@@ -75,6 +77,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 - tratamento orientado para `QuotaExceeded` no `chrome.storage.local`;
 - persistência enxuta do histórico, removendo dados derivados e reconstruindo agrupamentos na leitura sem descartar revisão humana, anotações ou correções de contraste;
+- aviso preventivo quando o armazenamento local se aproxima do limite, com leitura de uso atual, ação de compactação e orientação sobre retenção local;
 - importação de relatórios como caminho de continuidade quando o armazenamento local não for suficiente para reter todo o histórico indefinidamente;
 - opções de recuperação no popup:
   - limpar o histórico da URL atual;
@@ -140,6 +143,8 @@ Use:
 - os grupos por regra;
 - o filtro por categoria;
 - a navegação por itens prioritários;
+- os resumos curtos dos cards para leitura rápida do achado;
+- a explicação extra para entender impacto de uso e foco de revisão daquele tipo de regra;
 - a board de contraste, quando aplicável.
 
 ### 3. Fechar a revisão humana
@@ -153,6 +158,8 @@ Ative o escopo `Requisitos e recomendações` quando a base obrigatória já est
 ### 5. Exportar ou importar contexto quando necessário
 
 Quando a auditoria precisar continuar em outro ambiente, exporte o relatório em JSON e depois use a importação pela aba de histórico ou pela tela inicial. Se a URL importada for a mesma da aba atual, o relatório volta pronto para comparação.
+
+Se o popup avisar que o armazenamento local está em atenção, compacte o histórico e exporte os relatórios que precisarem de retenção de longo prazo.
 
 ### 6. Usar o simulador de visão
 

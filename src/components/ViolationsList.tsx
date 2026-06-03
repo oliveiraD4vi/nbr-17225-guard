@@ -65,6 +65,18 @@ interface TruncatedTextProps {
   tooltipThreshold?: number
 }
 
+type RuleExplanationFamily =
+  | 'forms'
+  | 'colors'
+  | 'navigation'
+  | 'keyboard'
+  | 'controls'
+  | 'semantics'
+  | 'structure'
+  | 'media'
+  | 'content'
+  | 'time'
+
 const { TextArea } = Input
 const REVIEW_STATUS_TRANSITION_MS = 220
 
@@ -188,6 +200,74 @@ function getHumanReviewExplanation(violation: Violation): string | null {
     return t('violations.extraExplanationHumanReviewDismissed')
   }
   return t('violations.extraExplanationHumanReviewPending')
+}
+
+function getRuleExplanationFamily(topicCategory: RuleTopicCategory): RuleExplanationFamily {
+  switch (topicCategory) {
+    case 'forms':
+      return 'forms'
+    case 'colors':
+      return 'colors'
+    case 'navigation':
+      return 'navigation'
+    case 'keyboard':
+      return 'keyboard'
+    case 'controls':
+      return 'controls'
+    case 'semantics':
+      return 'semantics'
+    case 'headings':
+    case 'regions':
+    case 'lists':
+    case 'tables':
+      return 'structure'
+    case 'images':
+    case 'media':
+      return 'media'
+    case 'documentalA':
+    case 'documentalB':
+    case 'presentation':
+    case 'textContent':
+      return 'content'
+    case 'time':
+      return 'time'
+    default:
+      return 'semantics'
+  }
+}
+
+function getViolationTargetLabel(violation: Violation): string {
+  const preferredLabel =
+    violation.elementAccessibleName || violation.elementVisibleText || getElementTitle(violation)
+  const normalizedLabel = preferredLabel.trim()
+
+  if (normalizedLabel.length <= 80) return normalizedLabel
+  return `${normalizedLabel.slice(0, 77).trimEnd()}...`
+}
+
+function getReadableFindingCopy(
+  violation: Violation,
+  topicCategory: RuleTopicCategory,
+): {
+  headline: string
+  impact: string
+  reviewFocus: string
+  summary: string
+} {
+  const family = getRuleExplanationFamily(topicCategory)
+  const target = getViolationTargetLabel(violation)
+  const baseKey = `violations.families.${family}`
+
+  return {
+    headline: t(`${baseKey}.headline`),
+    summary: t(`${baseKey}.summary`, { target }),
+    impact: t(`${baseKey}.impact`),
+    reviewFocus: t(`${baseKey}.reviewFocus`),
+  }
+}
+
+function stopModalInteraction(event: React.MouseEvent<HTMLElement>): void {
+  event.stopPropagation()
 }
 
 function isVisibleInMainLists(violation: Violation): boolean {
@@ -563,8 +643,9 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
     )
 
     const handleCardClick = React.useCallback(() => {
+      if (isExtraExplanationOpen || isContrastModalOpen) return
       onSelectViolation?.(violation)
-    }, [onSelectViolation, violation])
+    }, [isContrastModalOpen, isExtraExplanationOpen, onSelectViolation, violation])
 
     const contrastRatio = React.useMemo(() => {
       if (!violation.contrastDetails) return null
@@ -615,6 +696,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       setBackgroundHex(violation.contrastDetails.backgroundHex)
       onViolationContrastOverrideChange?.(violation, undefined)
     }, [onViolationContrastOverrideChange, violation])
+    const topicCategory = React.useMemo(
+      () => getRuleTopicCategory(violation.ruleId),
+      [violation.ruleId],
+    )
+    const readableFindingCopy = React.useMemo(
+      () => getReadableFindingCopy(violation, topicCategory),
+      [topicCategory, violation],
+    )
     const evidenceItems = React.useMemo(
       () =>
         [
@@ -716,8 +805,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             <TruncatedText
               className="violation-item-message"
               lines={2}
-              text={violation.message}
-              tooltipThreshold={110}
+              text={readableFindingCopy.headline}
+              tooltipThreshold={120}
+            />
+            <TruncatedText
+              className="violation-item-summary"
+              lines={2}
+              text={readableFindingCopy.summary}
+              tooltipThreshold={140}
             />
             <span className="violation-item-reference">
               NBR {violation.nbrReference} - WCAG {violation.wcagLevel}
@@ -849,6 +944,17 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="violation-detected-signal">
+            <strong>{t('violations.extraExplanationDetectedSignal')}</strong>
+            <TruncatedText
+              as="p"
+              className="violation-detected-signal-copy"
+              lines={3}
+              text={violation.message}
+              tooltipThreshold={160}
+            />
           </div>
 
           <div className="violation-suggestion">
@@ -1061,6 +1167,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             width={560}
             className="extra-explanation-modal"
             destroyOnHidden
+            focusTriggerAfterClose={false}
+            getContainer={false}
+            maskClosable={false}
+            modalRender={(node) => (
+              <div onClick={stopModalInteraction} onMouseDown={stopModalInteraction}>
+                {node}
+              </div>
+            )}
             centered
           >
             <div className="violation-explanation">
@@ -1101,9 +1215,20 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
 
               <section className="violation-explanation-section">
                 <h3>{t('violations.extraExplanationInterpretation')}</h3>
+                <p>{readableFindingCopy.summary}</p>
                 <p>{getNormativeExplanation(violation)}</p>
                 <p>{getAutomationExplanation(violation)}</p>
                 {humanReviewExplanation && <p>{humanReviewExplanation}</p>}
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationImpact')}</h3>
+                <p>{readableFindingCopy.impact}</p>
+              </section>
+
+              <section className="violation-explanation-section">
+                <h3>{t('violations.extraExplanationReviewFocus')}</h3>
+                <p>{readableFindingCopy.reviewFocus}</p>
               </section>
 
               <section className="violation-explanation-section">
@@ -1145,6 +1270,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
               width={400}
               className="contrast-board-modal"
               destroyOnHidden
+              focusTriggerAfterClose={false}
+              getContainer={false}
+              maskClosable={false}
+              modalRender={(node) => (
+                <div onClick={stopModalInteraction} onMouseDown={stopModalInteraction}>
+                  {node}
+                </div>
+              )}
               centered
             >
               <div className="contrast-board">

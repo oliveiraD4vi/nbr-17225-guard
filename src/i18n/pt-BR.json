@@ -83,6 +83,7 @@
     },
     "counts": {
       "audits": "{{count}} auditoria(s)",
+      "urls": "{{count}} URL(s)",
       "items": "{{count}} item(ns)",
       "occurrences": "{{count}} ocorrência(s)",
       "priorityPoints": "{{count}} ponto(s) prioritário(s)",
@@ -166,7 +167,9 @@
       "quotaUnsavedReview": "A alteração foi aplicada na interface, mas ainda não foi salva localmente por falta de espaço.",
       "quotaUnsavedImport": "O relatório foi lido, mas não pôde ser salvo localmente por falta de espaço.",
       "quotaRecovered": "Espaço liberado e alteração salva com sucesso.",
-      "quotaRecoveryFailed": "Não foi possível liberar espaço suficiente no armazenamento local."
+      "quotaRecoveryFailed": "Não foi possível liberar espaço suficiente no armazenamento local.",
+      "storageCompacted": "Armazenamento local compactado com sucesso.",
+      "storageCompactError": "Não foi possível compactar o armazenamento local."
     },
     "scope": {
       "toggleLabel": "Escopo da auditoria",
@@ -277,6 +280,17 @@
         "reopen": "Resolver quota"
       },
       "resumeLabel": "Recuperar salvamento"
+    },
+    "storage": {
+      "warningTitle": "Armazenamento local em atenção",
+      "criticalTitle": "Armazenamento local perto do limite",
+      "warningDescription": "{{used}} de {{total}} já estão ocupados no navegador. Há {{audits}} relatório(s) salvo(s) em {{urls}} URL(s).",
+      "criticalDescription": "{{used}} de {{total}} já estão ocupados no navegador. Há {{audits}} relatório(s) salvo(s) em {{urls}} URL(s), então convém agir antes do próximo salvamento falhar.",
+      "currentUrlDescription": "A URL atual já acumula {{count}} relatório(s) no histórico local.",
+      "retentionNote": "O histórico do Guardião é local ao navegador. Se o espaço apertar, a compactação global preserva o registro mais recente por URL e a exportação JSON ajuda a arquivar contexto fora deste ambiente.",
+      "actions": {
+        "compactNow": "Compactar agora"
+      }
     }
   },
   "summary": {
@@ -376,6 +390,8 @@
     "extraExplanationEvidenceFallback": "Revise o elemento destacado e o contexto visual em torno dele na página auditada.",
     "extraExplanationNextStep": "Próximo passo sugerido",
     "extraExplanationPracticalFix": "Como corrigir na prática",
+    "extraExplanationImpact": "Por que isso afeta o uso",
+    "extraExplanationReviewFocus": "O que revisar neste tipo de regra",
     "extraExplanationNormativeRequirement": "Na norma, este item é classificado como requisito. Em geral, ele pede correção prioritária dentro do fluxo da auditoria.",
     "extraExplanationNormativeRecommendation": "Na norma, este item é classificado como recomendação. Ele amplia qualidade de uso e previsibilidade, mesmo quando não representa uma exigência obrigatória.",
     "extraExplanationAutomationFully": "Este achado veio de uma verificação objetiva do motor. O Guardião encontrou um sinal técnico observável no DOM, em atributos ou no CSS da página.",
@@ -384,6 +400,68 @@
     "extraExplanationHumanReviewPending": "Como o julgamento ainda depende de contexto real, este item continua pendente de confirmação humana nesta auditoria.",
     "extraExplanationHumanReviewConfirmed": "Nesta auditoria, o item já foi confirmado manualmente como problema e continua exigindo correção.",
     "extraExplanationHumanReviewDismissed": "Nesta auditoria, o item foi descartado manualmente neste contexto, mas permanece disponível para reavaliação futura.",
+    "families": {
+      "forms": {
+        "headline": "Revise a identificação e a orientação deste campo.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de rótulo, instrução, associação programática e contexto de preenchimento.",
+        "impact": "Problemas em formulários atrapalham preenchimento, revisão e envio. Quando o campo não deixa claro o que espera, pessoas que usam leitor de tela, ampliação, voz ou navegação rápida tendem a perder contexto e cometer mais erros.",
+        "reviewFocus": "Confira se o campo tem rótulo visível, nome acessível equivalente, instruções úteis quando necessário, agrupamento correto e mensagens de erro que expliquem como seguir."
+      },
+      "colors": {
+        "headline": "Revise contraste e dependência visual de cor neste ponto.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de contraste, estados visuais e sinais que não dependam só de percepção de cor.",
+        "impact": "Achados de cor e contraste afetam leitura, distinção de estados, foco e reconhecimento de componentes. Mesmo quando a interface parece legível para parte do público, ela pode ficar frágil para baixa visão, daltonismo ou uso em telas piores.",
+        "reviewFocus": "Confira a razão de contraste, a legibilidade do texto, a visibilidade do foco, a distinção entre estados e se a informação continua compreensível sem depender apenas de cor."
+      },
+      "navigation": {
+        "headline": "Revise a clareza de navegação e destino deste conteúdo.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de links, caminhos, agrupamentos e pistas de localização para a pessoa usuária.",
+        "impact": "Problemas de navegação fazem a interface parecer imprevisível. A pessoa pode não entender para onde um link leva, como voltar, como avançar no fluxo ou como chegar rápido ao conteúdo principal.",
+        "reviewFocus": "Confira texto de links, skip links, pistas de localização, agrupamento de navegação, repetição desnecessária e qualquer mudança de destino que possa surpreender quem está usando a página."
+      },
+      "keyboard": {
+        "headline": "Revise a operação por teclado deste elemento.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de foco, sequência de navegação e acionamento por teclado.",
+        "impact": "Quando o teclado não consegue alcançar, entender ou operar um elemento, a tarefa inteira pode travar. Esse tipo de achado costuma afetar pessoas que navegam sem mouse ou combinam teclado com tecnologia assistiva.",
+        "reviewFocus": "Confira se o foco chega ao elemento, se a ordem faz sentido, se o acionamento responde a teclado de forma previsível e se nada importante fica preso, escondido ou inacessível."
+      },
+      "controls": {
+        "headline": "Revise propósito, estado e resposta deste controle.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de nome, papel, estado e comportamento esperado do controle.",
+        "impact": "Controles com papel ou estado pouco claros aumentam hesitação e erro. A pessoa pode não entender se o item é clicável, qual função ele cumpre ou se a ação já foi aplicada.",
+        "reviewFocus": "Confira se o controle expõe nome acessível, papel coerente, estado atualizado, feedback após interação e qualquer instrução necessária para uso seguro."
+      },
+      "semantics": {
+        "headline": "Revise a semântica e o anúncio assistivo deste trecho.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de significado estrutural, papéis e informação anunciada por tecnologia assistiva.",
+        "impact": "Problemas semânticos enfraquecem a leitura da interface por leitor de tela e outras tecnologias assistivas. Mesmo com aparência correta, o conteúdo pode ser anunciado de forma vaga, fora de ordem ou sem a estrutura esperada.",
+        "reviewFocus": "Confira se a marcação transmite o papel correto, se atributos ARIA não conflitam com a semântica nativa e se a leitura assistiva conserva hierarquia, relação e propósito."
+      },
+      "structure": {
+        "headline": "Revise a estrutura deste bloco e a relação entre seus itens.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de hierarquia, agrupamento e associação estrutural entre os elementos envolvidos.",
+        "impact": "Problemas estruturais embaralham leitura, navegação por atalhos e entendimento do conjunto. A pessoa pode até encontrar o conteúdo, mas sem perceber claramente a relação entre título, região, lista, tabela ou bloco associado.",
+        "reviewFocus": "Confira hierarquia de cabeçalhos, delimitação de regiões, uso correto de listas e associação entre cabeçalhos e células quando houver tabelas ou estruturas compostas."
+      },
+      "media": {
+        "headline": "Revise o equivalente acessível desta mídia.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de texto alternativo, legenda, transcrição ou outro equivalente de acesso.",
+        "impact": "Quando a mídia não oferece equivalente acessível, parte do conteúdo simplesmente deixa de chegar a quem depende de leitura assistiva, legenda, transcrição ou descrição alternativa.",
+        "reviewFocus": "Confira se a imagem, áudio ou vídeo comunica o essencial por canais alternativos suficientes e se o equivalente escolhido realmente cobre a função daquela mídia no contexto da página."
+      },
+      "content": {
+        "headline": "Revise a clareza textual e o apoio contextual deste conteúdo.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de instruções, contexto, documentação de apoio e forma de apresentação do conteúdo.",
+        "impact": "Achados dessa família costumam afetar compreensão. Mesmo quando o componente existe, o conteúdo pode não explicar bem o que está acontecendo, o que se espera da pessoa ou como continuar com segurança.",
+        "reviewFocus": "Confira instruções visíveis, contexto antes da ação, apoio documental próximo da tarefa, consistência textual e qualquer detalhe que a pessoa precise para entender a interface sem adivinhação."
+      },
+      "time": {
+        "headline": "Revise a gestão de tempo e continuidade desta tarefa.",
+        "summary": "O indício apareceu em {{target}} e pede revisão de aviso prévio, extensão de tempo, retomada e previsibilidade do fluxo.",
+        "impact": "Limites de tempo sem apoio suficiente podem interromper tarefas, causar perda de progresso e impedir conclusão por pessoas que precisam de mais tempo para ler, decidir ou preencher informações.",
+        "reviewFocus": "Confira se há aviso antes do vencimento, possibilidade de estender ou pausar, preservação de contexto e explicações claras sobre o que acontece quando o tempo termina."
+      }
+    },
     "copySelector": "Copiar seletor do elemento",
     "goToElement": "Ir para elemento",
     "notesTooltip": "Anotações",
