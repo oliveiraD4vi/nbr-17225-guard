@@ -181,13 +181,31 @@
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    opacity 0.22s ease;
   border: 1px solid var(--guard-color-border);
   border-radius: 8px;
 }
 
 .review-section .violation-item-card {
   animation: review-card-enter 0.22s ease both;
+}
+
+.violation-item-card.is-review-transitioning {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.violation-item-card.is-review-transitioning-to-confirmed {
+  transform: translateY(-10px) scale(0.985);
+}
+
+.violation-item-card.is-review-transitioning-to-dismissed {
+  transform: translateX(-14px) scale(0.98);
+}
+
+.violation-item-card.is-review-transitioning-to-pending {
+  transform: translateX(14px) scale(0.985);
 }
 
 .violation-item-card.is-pinned {
@@ -287,6 +305,43 @@
   margin-top: 10px;
 }
 
+.violation-human-review-confirmation {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 251, 235, 0.9);
+}
+
+.violation-human-review-confirmation-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.violation-human-review-confirmation-copy strong {
+  color: #92400e;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.violation-human-review-confirmation-copy p {
+  margin: 0;
+  color: #9a3412;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.violation-human-review-transition-note {
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .violation-element-card strong,
 .violation-suggestion strong,
 .violation-remediation strong {
@@ -335,11 +390,56 @@
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
+.violation-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+}
+
+.violation-clamp.lines-1 {
+  -webkit-line-clamp: 1;
+}
+
+.violation-clamp.lines-2 {
+  -webkit-line-clamp: 2;
+}
+
+.violation-clamp.lines-3 {
+  -webkit-line-clamp: 3;
+}
+
+.violation-clamp.lines-4 {
+  -webkit-line-clamp: 4;
+}
+
+.violation-clamp.is-monospace {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.violation-clamp.is-preformatted {
+  white-space: pre-wrap;
+}
+
+.violation-tooltip-copy {
+  max-width: 420px;
+  white-space: normal;
+  line-height: 1.55;
+}
+
+.violation-tooltip-copy.is-monospace {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.violation-tooltip-copy.is-preformatted {
+  white-space: pre-wrap;
+}
+
 .violation-suggestion {
   background: var(--guard-color-warning-bg);
 }
 
-.violation-suggestion p {
+.violation-suggestion-copy {
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
@@ -387,6 +487,9 @@
 .violation-remediation pre {
   margin: 0;
   overflow-x: auto;
+}
+
+.violation-remediation-code {
   white-space: pre-wrap;
   word-break: break-word;
   font-size: 12px;
@@ -671,7 +774,8 @@
 
   .violation-group-header,
   .violation-section-header,
-  .violation-contrast-helper {
+  .violation-contrast-helper,
+  .violation-human-review-confirmation {
     flex-direction: column;
   }
 

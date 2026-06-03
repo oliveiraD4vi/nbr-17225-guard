@@ -61,7 +61,8 @@
       "regression": "Regressão",
       "stable": "Estável",
       "priority": "Prioridade",
-      "inherited": "Herdado de auditoria anterior"
+      "inherited": "Herdado de auditoria anterior",
+      "beta": "Beta"
     },
     "severity": {
       "error": "Erro",
@@ -117,8 +118,8 @@
       "eyebrow": "Sobre",
       "title": "Auditoria assistida da ABNT NBR 17225",
       "version": "{{version}}",
-      "descriptionA": "O Guardião avalia o escopo da versão 1 do catálogo normativo do projeto e separa automaticamente requisitos, recomendações e itens que ainda precisam de confirmação humana.",
-      "descriptionB": "Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página, manter um histórico local compacto e reimportar relatórios JSON quando precisar continuar o trabalho em outro ambiente.",
+      "descriptionA": "O Guardião avalia o escopo da V1 Farol Beta e organiza os achados usando a própria nomenclatura da ABNT NBR 17225: requisitos, recomendações e itens que ainda precisam de confirmação humana.",
+      "descriptionB": "Esta versão já é utilizável em fluxo assistido de auditoria, mas continua evoluindo em heurísticas, clareza de leitura e microinterações. Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página, manter um histórico local compacto e reimportar relatórios JSON quando precisar continuar o trabalho em outro ambiente.",
       "links": {
         "label": "Links do projeto",
         "landing": "Landing",
@@ -170,7 +171,7 @@
       "toggleLabel": "Escopo da auditoria",
       "requirementsOnly": "Somente requisitos",
       "withRecommendations": "Requisitos e recomendações",
-      "description": "Ative para incluir recomendações sem gerar um novo histórico."
+      "description": "“Requisitos” e “Recomendações” seguem a nomenclatura da ABNT NBR 17225. Ative para incluir recomendações sem gerar um novo histórico."
     },
     "tabs": {
       "summary": "Resumo",
@@ -283,6 +284,7 @@
     "scoreTooltip": "Cálculo: requisitos pesam 70%, recomendações pesam 20% quando auditadas e revisão humana pesa 10%. Sem recomendações, requisitos pesam 90% e revisão humana 10%. Depois disso, a nota recebe um teto por volume: 0 achados permite 100; 1 a 20 fica no máximo nos 90; 21 a 40 nos 80; 41 a 60 nos 70; 61 a 80 nos 60; 81 a 100 nos 50; acima disso fica abaixo de 50.",
     "downloadTooltip": "Baixar resumo simples da auditoria",
     "scoreOutOf": "{{score}}/100",
+    "normativeScopeNote": "“Requisitos” e “Recomendações” são categorias da própria ABNT NBR 17225, não rótulos internos do sistema.",
     "failingRequirements": "{{count}} regra(s) obrigatória(s) com falha",
     "failingRecommendations": "{{count}} recomendação(ões) com achado",
     "pendingHumanReviewScore": "{{count}} item(ns) aguardando revisão humana",
@@ -344,9 +346,19 @@
     "topIssues": "Itens prioritários",
     "otherOccurrences": "Demais ocorrências",
     "requiresHumanReviewTitle": "Confirmação necessária",
-    "requiresHumanReviewDescription": "Eu acho que pode haver um problema aqui, mas preciso que você confirme manualmente no contexto real da página.",
-    "checkboxProblem": "É um problema e precisa de correção",
-    "checkboxNotProblem": "Não é um problema neste contexto",
+    "requiresHumanReviewDescription": "Há um indício relevante aqui, mas a decisão final ainda depende do contexto real da página e da sua confirmação manual.",
+    "reviewActionConfirm": "Confirmar problema",
+    "reviewActionDismiss": "Descartar neste contexto",
+    "reviewActionReturnToPending": "Voltar para pendentes",
+    "reviewConfirmConfirmedTitle": "Confirmar este item como problema?",
+    "reviewConfirmConfirmedDescription": "Ele continuará visível nas listas principais e será movido para a seção de itens confirmados.",
+    "reviewConfirmDismissedTitle": "Descartar este item nesta revisão?",
+    "reviewConfirmDismissedDescription": "Ele sairá das listas principais, mas continuará disponível em “Descartados” para reavaliação posterior.",
+    "reviewConfirmPendingTitle": "Voltar este item para pendentes?",
+    "reviewConfirmPendingDescription": "Ele retornará para a fila de decisão manual e voltará a aparecer como pendente.",
+    "reviewConfirmCancel": "Cancelar",
+    "reviewConfirmApply": "Confirmar mudança",
+    "reviewTransitionApplying": "Aplicando decisão e reorganizando o item na lista...",
     "copySelector": "Copiar seletor do elemento",
     "goToElement": "Ir para elemento",
     "notesTooltip": "Anotações",

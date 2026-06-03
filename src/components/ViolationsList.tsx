@@ -2,7 +2,6 @@ import React from 'react'
 import {
   Button,
   Card,
-  Checkbox,
   Collapse,
   ColorPicker,
   Empty,
@@ -17,7 +16,9 @@ import {
 import {
   BoldOutlined,
   BgColorsOutlined,
+  CheckCircleOutlined,
   ClearOutlined,
+  CloseCircleOutlined,
   CopyOutlined,
   FileTextOutlined,
   InfoCircleOutlined,
@@ -26,6 +27,7 @@ import {
   PushpinFilled,
   SaveOutlined,
   SearchOutlined,
+  UndoOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
 import { t } from '@/i18n'
@@ -53,7 +55,18 @@ interface ViolationGroup {
   topicCategory: RuleTopicCategory
 }
 
+interface TruncatedTextProps {
+  as?: keyof React.JSX.IntrinsicElements
+  className?: string
+  lines?: 1 | 2 | 3 | 4
+  monospace?: boolean
+  preserveWhitespace?: boolean
+  text: string
+  tooltipThreshold?: number
+}
+
 const { TextArea } = Input
+const REVIEW_STATUS_TRANSITION_MS = 220
 
 const severityRank: Record<Violation['severity'], number> = {
   error: 0,
@@ -77,6 +90,71 @@ function getReviewLabel(violation: Violation): string {
   if (violation.humanReviewStatus === 'confirmed') return t('shared.review.confirmedNeedsFix')
   if (violation.humanReviewStatus === 'dismissed') return t('shared.review.dismissed')
   return t('shared.review.needsConfirmation')
+}
+
+function getReviewStatusTagColor(status: HumanReviewStatus): string {
+  if (status === 'confirmed') return 'red'
+  if (status === 'dismissed') return 'default'
+  return 'gold'
+}
+
+function getHumanReviewActionOptions(
+  currentStatus: HumanReviewStatus,
+): Array<{ icon: React.ReactNode; label: string; targetStatus: HumanReviewStatus }> {
+  if (currentStatus === 'confirmed') {
+    return [
+      {
+        icon: <UndoOutlined />,
+        label: t('violations.reviewActionReturnToPending'),
+        targetStatus: 'pending',
+      },
+      {
+        icon: <CloseCircleOutlined />,
+        label: t('violations.reviewActionDismiss'),
+        targetStatus: 'dismissed',
+      },
+    ]
+  }
+
+  if (currentStatus === 'dismissed') {
+    return [
+      {
+        icon: <UndoOutlined />,
+        label: t('violations.reviewActionReturnToPending'),
+        targetStatus: 'pending',
+      },
+      {
+        icon: <CheckCircleOutlined />,
+        label: t('violations.reviewActionConfirm'),
+        targetStatus: 'confirmed',
+      },
+    ]
+  }
+
+  return [
+    {
+      icon: <CheckCircleOutlined />,
+      label: t('violations.reviewActionConfirm'),
+      targetStatus: 'confirmed',
+    },
+    {
+      icon: <CloseCircleOutlined />,
+      label: t('violations.reviewActionDismiss'),
+      targetStatus: 'dismissed',
+    },
+  ]
+}
+
+function getReviewTransitionTitle(targetStatus: HumanReviewStatus): string {
+  if (targetStatus === 'confirmed') return t('violations.reviewConfirmConfirmedTitle')
+  if (targetStatus === 'dismissed') return t('violations.reviewConfirmDismissedTitle')
+  return t('violations.reviewConfirmPendingTitle')
+}
+
+function getReviewTransitionDescription(targetStatus: HumanReviewStatus): string {
+  if (targetStatus === 'confirmed') return t('violations.reviewConfirmConfirmedDescription')
+  if (targetStatus === 'dismissed') return t('violations.reviewConfirmDismissedDescription')
+  return t('violations.reviewConfirmPendingDescription')
 }
 
 function isVisibleInMainLists(violation: Violation): boolean {
@@ -144,6 +222,49 @@ function getElementTitle(violation: Violation): string {
   const selectorSuffix = selector.startsWith(tag) ? selector.slice(tag.length) : selector
   return `${tag}${selectorSuffix ? ` ${selectorSuffix}` : ''}`
 }
+
+const TruncatedText: React.FC<TruncatedTextProps> = React.memo(
+  ({
+    as = 'span',
+    className,
+    lines = 2,
+    monospace = false,
+    preserveWhitespace = false,
+    text,
+    tooltipThreshold = 120,
+  }) => {
+    const Component = as
+    const classes = [
+      className,
+      'violation-clamp',
+      `lines-${lines}`,
+      monospace ? 'is-monospace' : '',
+      preserveWhitespace ? 'is-preformatted' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+
+    const content = <Component className={classes}>{text}</Component>
+    const shouldShowTooltip = text.trim().length > tooltipThreshold
+
+    if (!shouldShowTooltip) return content
+
+    return (
+      <Tooltip
+        placement="topLeft"
+        title={
+          <div
+            className={`violation-tooltip-copy${preserveWhitespace ? ' is-preformatted' : ''}${monospace ? ' is-monospace' : ''}`}
+          >
+            {text}
+          </div>
+        }
+      >
+        {content}
+      </Tooltip>
+    )
+  },
+)
 
 function renderViolationGroups(
   violations: Violation[],
@@ -357,6 +478,10 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
   }) => {
     const [isNotesOpen, setIsNotesOpen] = React.useState(false)
     const [isContrastModalOpen, setIsContrastModalOpen] = React.useState(false)
+    const [pendingReviewStatus, setPendingReviewStatus] = React.useState<HumanReviewStatus | null>(
+      null,
+    )
+    const [isApplyingReviewDecision, setIsApplyingReviewDecision] = React.useState(false)
     const [noteDraft, setNoteDraft] = React.useState(violation.userNote || '')
     const [foregroundHex, setForegroundHex] = React.useState(
       violation.userContrastOverride?.foregroundHex ||
@@ -385,6 +510,11 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
           '#ffffff',
       )
     }, [violation.contrastDetails, violation.id, violation.userContrastOverride])
+
+    React.useEffect(() => {
+      setPendingReviewStatus(null)
+      setIsApplyingReviewDecision(false)
+    }, [violation.humanReviewStatus, violation.id])
 
     const insertAtEnd = React.useCallback((value: string) => {
       setNoteDraft((current) => `${current}${current ? '\n' : ''}${value}`)
@@ -452,16 +582,60 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       onViolationContrastOverrideChange?.(violation, undefined)
     }, [onViolationContrastOverrideChange, violation])
 
+    const reviewActions = React.useMemo(
+      () => getHumanReviewActionOptions(violation.humanReviewStatus),
+      [violation.humanReviewStatus],
+    )
+    const reviewTransitionTargetStatus = pendingReviewStatus ?? violation.humanReviewStatus
+    const isReviewDecisionPending =
+      pendingReviewStatus !== null && pendingReviewStatus !== violation.humanReviewStatus
+
+    const handleRequestReviewStatusChange = React.useCallback(
+      (event: React.MouseEvent<HTMLElement>, nextStatus: HumanReviewStatus) => {
+        event.stopPropagation()
+        if (isApplyingReviewDecision || nextStatus === violation.humanReviewStatus) return
+        setPendingReviewStatus(nextStatus)
+      },
+      [isApplyingReviewDecision, violation.humanReviewStatus],
+    )
+
+    const handleCancelReviewStatusChange = React.useCallback(
+      (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation()
+        if (isApplyingReviewDecision) return
+        setPendingReviewStatus(null)
+      },
+      [isApplyingReviewDecision],
+    )
+
+    const handleConfirmReviewStatusChange = React.useCallback(
+      async (event: React.MouseEvent<HTMLElement>) => {
+        event.stopPropagation()
+        if (!pendingReviewStatus || pendingReviewStatus === violation.humanReviewStatus) return
+
+        setIsApplyingReviewDecision(true)
+        window.setTimeout(() => {
+          void onHumanReviewStatusChange?.(violation, pendingReviewStatus)
+        }, REVIEW_STATUS_TRANSITION_MS)
+      },
+      [onHumanReviewStatusChange, pendingReviewStatus, violation],
+    )
+
     return (
       <Card
         size="small"
-        className={`violation-item-card${pinned ? ' is-pinned' : ''} review-state-${violation.humanReviewStatus}`}
+        className={`violation-item-card${pinned ? ' is-pinned' : ''} review-state-${violation.humanReviewStatus}${isApplyingReviewDecision ? ' is-review-transitioning' : ''}${isApplyingReviewDecision ? ` is-review-transitioning-to-${reviewTransitionTargetStatus}` : ''}`}
         onClick={handleCardClick}
       >
         <div className="violation-item-header">
           <span className="violation-item-number">#{index + 1}</span>
           <div className="violation-item-heading">
-            <span className="violation-item-message">{violation.message}</span>
+            <TruncatedText
+              className="violation-item-message"
+              lines={2}
+              text={violation.message}
+              tooltipThreshold={110}
+            />
             <span className="violation-item-reference">
               NBR {violation.nbrReference} - WCAG {violation.wcagLevel}
             </span>
@@ -476,15 +650,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
               {violation.inheritedFromHistory && (
                 <Tag color="blue">{t('shared.states.inherited')}</Tag>
               )}
-              <Tag
-                color={
-                  violation.humanReviewStatus === 'confirmed'
-                    ? 'red'
-                    : violation.humanReviewStatus === 'dismissed'
-                      ? 'default'
-                      : 'gold'
-                }
-              >
+              <Tag color={getReviewStatusTagColor(violation.humanReviewStatus)}>
                 {getReviewLabel(violation)}
               </Tag>
               <div
@@ -492,39 +658,69 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                 onClick={(event) => event.stopPropagation()}
                 onMouseDown={(event) => event.stopPropagation()}
               >
-                <Checkbox
-                  checked={violation.humanReviewStatus === 'confirmed'}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={(event) => {
-                    event.stopPropagation()
-                    onHumanReviewStatusChange?.(
-                      violation,
-                      event.target.checked ? 'confirmed' : 'pending',
-                    )
-                  }}
-                >
-                  {t('violations.checkboxProblem')}
-                </Checkbox>
-                <Checkbox
-                  checked={violation.humanReviewStatus === 'dismissed'}
-                  onClick={(event) => event.stopPropagation()}
-                  onChange={(event) => {
-                    event.stopPropagation()
-                    onHumanReviewStatusChange?.(
-                      violation,
-                      event.target.checked ? 'dismissed' : 'pending',
-                    )
-                  }}
-                >
-                  {t('violations.checkboxNotProblem')}
-                </Checkbox>
+                <Space wrap size={8}>
+                  {reviewActions.map((action) => (
+                    <Button
+                      key={action.targetStatus}
+                      icon={action.icon}
+                      loading={
+                        isApplyingReviewDecision &&
+                        reviewTransitionTargetStatus === action.targetStatus
+                      }
+                      size="small"
+                      type={
+                        pendingReviewStatus === action.targetStatus ||
+                        violation.humanReviewStatus === action.targetStatus
+                          ? 'primary'
+                          : 'default'
+                      }
+                      onClick={(event) =>
+                        handleRequestReviewStatusChange(event, action.targetStatus)
+                      }
+                    >
+                      {action.label}
+                    </Button>
+                  ))}
+                </Space>
+                {isReviewDecisionPending && (
+                  <div className="violation-human-review-confirmation" aria-live="polite">
+                    <div className="violation-human-review-confirmation-copy">
+                      <strong>{getReviewTransitionTitle(pendingReviewStatus)}</strong>
+                      <p>{getReviewTransitionDescription(pendingReviewStatus)}</p>
+                    </div>
+                    <Space wrap size={8}>
+                      <Button size="small" onClick={handleCancelReviewStatusChange}>
+                        {t('violations.reviewConfirmCancel')}
+                      </Button>
+                      <Button
+                        size="small"
+                        type="primary"
+                        onClick={handleConfirmReviewStatusChange}
+                      >
+                        {t('violations.reviewConfirmApply')}
+                      </Button>
+                    </Space>
+                  </div>
+                )}
+                {isApplyingReviewDecision && (
+                  <span className="violation-human-review-transition-note" aria-live="polite">
+                    {t('violations.reviewTransitionApplying')}
+                  </span>
+                )}
               </div>
             </div>
           )}
 
           <div className="violation-element-card">
             <strong>{t('shared.labels.affectedElement')}</strong>
-            <div className="violation-element-title">{getElementTitle(violation)}</div>
+            <TruncatedText
+              as="div"
+              className="violation-element-title"
+              lines={2}
+              monospace
+              text={getElementTitle(violation)}
+              tooltipThreshold={90}
+            />
 
             <div className="violation-element-fields">
               {violation.elementAccessibleName && (
@@ -532,9 +728,12 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                   <span className="violation-element-field-label">
                     {t('shared.labels.accessibleName')}
                   </span>
-                  <span className="violation-element-field-value">
-                    {violation.elementAccessibleName}
-                  </span>
+                  <TruncatedText
+                    className="violation-element-field-value"
+                    lines={2}
+                    text={violation.elementAccessibleName}
+                    tooltipThreshold={100}
+                  />
                 </div>
               )}
 
@@ -543,9 +742,12 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                   <span className="violation-element-field-label">
                     {t('shared.labels.visibleText')}
                   </span>
-                  <span className="violation-element-field-value">
-                    {violation.elementVisibleText}
-                  </span>
+                  <TruncatedText
+                    className="violation-element-field-value"
+                    lines={2}
+                    text={violation.elementVisibleText}
+                    tooltipThreshold={100}
+                  />
                 </div>
               )}
 
@@ -554,9 +756,13 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                   <span className="violation-element-field-label">
                     {t('shared.labels.selector')}
                   </span>
-                  <span className="violation-element-field-value is-monospace">
-                    {violation.elementSelector}
-                  </span>
+                  <TruncatedText
+                    className="violation-element-field-value"
+                    lines={2}
+                    monospace
+                    text={violation.elementSelector}
+                    tooltipThreshold={80}
+                  />
                 </div>
               )}
             </div>
@@ -564,13 +770,27 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
 
           <div className="violation-suggestion">
             <strong>{t('shared.labels.suggestion')}</strong>
-            <p>{violation.suggestion}</p>
+            <TruncatedText
+              as="p"
+              className="violation-suggestion-copy"
+              lines={3}
+              text={violation.suggestion}
+              tooltipThreshold={150}
+            />
           </div>
 
           <div className="violation-remediation">
             <strong>{t('shared.labels.howToFix')}</strong>
             <pre>
-              <code>{violation.remediationAdvice}</code>
+              <TruncatedText
+                as="code"
+                className="violation-remediation-code"
+                lines={4}
+                monospace
+                preserveWhitespace
+                text={violation.remediationAdvice}
+                tooltipThreshold={180}
+              />
             </pre>
           </div>
 

@@ -194,6 +194,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                 <small>{t('summary.itemsToConfirm')}</small>
               </div>
             </div>
+            <p className="summary-scope-note">{t('summary.normativeScopeNote')}</p>
           </div>
 
           <div className="summary-review-progress">

@@ -47,9 +47,14 @@
 .header-title {
   display: inline-flex;
   align-items: center;
-  flex-direction: row-reverse;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 10px;
-  justify-content: left;
+  justify-content: flex-start;
+}
+
+.header-stage-tag {
+  margin-inline-start: 2px;
 }
 
 .header-title-icon {

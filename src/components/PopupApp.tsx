@@ -1117,6 +1117,9 @@ export const PopupApp: React.FC = () => {
             <h1 className="header-title">
               <img src={appIconUrl} alt="" className="header-title-icon" aria-hidden="true" />
               <span>{t('shared.brand.name')}</span>
+              <Tag className="header-stage-tag" color="gold">
+                {t('shared.states.beta')}
+              </Tag>
             </h1>
             <p>
               {activeTab?.title

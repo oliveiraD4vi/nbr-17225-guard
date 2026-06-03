@@ -212,6 +212,13 @@
   gap: 12px;
 }
 
+.summary-scope-note {
+  margin: 0;
+  color: var(--guard-color-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .summary-stat-card {
   display: flex;
   flex-direction: column;
