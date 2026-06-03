@@ -68,6 +68,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - múltiplos pontos de texto degradado e inconsistências de PT-BR UTF-8, inclusive no `content.ts`;
 - fundos pretos indevidos em botões, tags e overlays após a centralização do tema;
 - contraste das tooltips do Ant Design corrigido no tema para evitar fundo e texto brancos;
+- renderização quebrada do modal de explicação extra e da board de contraste dentro do popup, preservando bloqueio de propagação sem quebrar layout e hover.
 - falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página;
 - ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários;
 - título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto;

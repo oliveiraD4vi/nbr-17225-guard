@@ -266,10 +266,6 @@ function getReadableFindingCopy(
   }
 }
 
-function stopModalInteraction(event: React.MouseEvent<HTMLElement>): void {
-  event.stopPropagation()
-}
-
 function isVisibleInMainLists(violation: Violation): boolean {
   return !(violation.requiresHumanReview && violation.humanReviewStatus === 'dismissed')
 }
@@ -1168,16 +1164,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             className="extra-explanation-modal"
             destroyOnHidden
             focusTriggerAfterClose={false}
-            getContainer={false}
             maskClosable={false}
-            modalRender={(node) => (
-              <div onClick={stopModalInteraction} onMouseDown={stopModalInteraction}>
-                {node}
-              </div>
-            )}
             centered
           >
-            <div className="violation-explanation">
+            <div
+              className="violation-explanation"
+              onClick={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
               <div className="violation-explanation-header">
                 <Space wrap size={[8, 8]}>
                   <Tag color={isNormativeRequirement(violation.nbrReference) ? 'red' : 'blue'}>
@@ -1271,16 +1265,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
               className="contrast-board-modal"
               destroyOnHidden
               focusTriggerAfterClose={false}
-              getContainer={false}
               maskClosable={false}
-              modalRender={(node) => (
-                <div onClick={stopModalInteraction} onMouseDown={stopModalInteraction}>
-                  {node}
-                </div>
-              )}
               centered
             >
-              <div className="contrast-board">
+              <div
+                className="contrast-board"
+                onClick={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+              >
                 <p className="contrast-board-description">
                   {t('violations.contrastBoardDescription')}
                 </p>
