@@ -198,9 +198,9 @@ O Guardião NBR 17225 nasceu como projeto acadêmico e mantém a extensão como 
 
 - Espelho público da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror>
 - Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror/issues>
-- Domínio recomendado para a landing page: `guardiaonbr17225.com.br`
-- Página pública de regras: `https://guardiaonbr17225.com.br/rules.html`
-- Política de privacidade: `https://guardiaonbr17225.com.br/privacy.html`
+- Domínio: `guardiaonbr.com.br`
+- Página pública de regras: `https://guardiaonbr.com.br/rules.html`
+- Política de privacidade: `https://guardiaonbr.com.br/privacy.html`
 
 A landing page é a vitrine oficial do projeto e não faz parte do código open-source da extensão. Bugs, pedidos de ajuste visual, problemas de conteúdo e solicitações de atualização da página de regras devem ser abertos como issue no GitHub público da extensão.
 
