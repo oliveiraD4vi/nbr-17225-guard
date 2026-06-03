@@ -1,6 +1,6 @@
 # Guardião NBR 17225
 
-Verificador de acessibilidade para navegadores Chromium, alinhado à V1 Farol do catálogo documental da ABNT NBR 17225:2025.
+Verificador de acessibilidade para navegadores Chromium, alinhado à V1 Farol Beta do catálogo documental da ABNT NBR 17225:2025.
 
 ## Visão geral
 
@@ -23,6 +23,7 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 ### Revisão humana
 
 - distinção explícita entre detecção automática e itens que exigem confirmação humana;
+- confirmação explícita antes da mudança de estado, com reorganização visual do item entre pendentes, confirmados e descartados;
 - estados persistidos por item:
   - pendente;
   - confirmado;
@@ -104,6 +105,7 @@ Consulte também:
 
 - [docs/README.md](docs/README.md)
 - [RULES_ANALYSIS.md](docs/RULES_ANALYSIS.md)
+- [RULES_HEURISTIC_CLASSIFICATION.md](docs/RULES_HEURISTIC_CLASSIFICATION.md)
 - [RULES_CODE_MAPPING.md](docs/RULES_CODE_MAPPING.md)
 - [RULES_NORMATIVE_MATRIX.md](docs/RULES_NORMATIVE_MATRIX.md)
 - [FUTURE_RULES_PLAN.md](docs/FUTURE_RULES_PLAN.md)
@@ -140,7 +142,7 @@ Use:
 
 ### 3. Fechar a revisão humana
 
-Na aba `Verificação humana`, confirme ou descarte os itens pendentes. Esse passo é importante para estabilizar o diagnóstico e melhorar a utilidade do histórico.
+Na aba `Verificação humana`, confirme ou descarte os itens pendentes. O fluxo agora pede confirmação antes da mudança de estado e reorganiza visualmente o card para reduzir perda de contexto. Esse passo é importante para estabilizar o diagnóstico e melhorar a utilidade do histórico.
 
 ### 4. Incluir recomendações
 
@@ -208,7 +210,7 @@ Quando um PR alterar, remover ou criar uma função de verificação de regra, o
 
 ## Versionamento
 
-A versão atual é `1.0.0`, nomeada como **V1 Farol**. A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
+A versão atual é `1.0.0-beta.1`, nomeada como **V1 Farol Beta**. É uma versão funcional, já utilizável em fluxo assistido, mas ainda em evolução contínua de heurísticas, UX e documentação. A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
 
 ## Instalação
 

@@ -67,6 +67,13 @@ As regras semi-automatizáveis possuem heurísticas para encontrar indícios de 
 
 5.1.1, 5.1.2, 5.1.3, 5.1.4, 5.1.6, 5.1.8, 5.1.9, 5.1.11, 5.1.16, 5.2.3, 5.2.4, 5.2.5, 5.3.2, 5.3.3, 5.4.2, 5.4.3, 5.5.2, 5.6.2, 5.7.2, 5.7.4, 5.7.6, 5.7.7, 5.7.8, 5.7.13, 5.7.15, 5.7.16, 5.8.2, 5.8.3, 5.8.5, 5.8.9, 5.8.10, 5.8.11, 5.8.12, 5.8.13, 5.8.14, 5.9.2, 5.9.4, 5.9.5, 5.9.9, 5.9.10, 5.9.12, 5.9.13, 5.9.14, 5.9.15, 5.9.16, 5.9.18, 5.10.1, 5.10.2, 5.11.1, 5.12.7, 5.12.11, 5.13.6, 5.13.7, 5.13.9, 5.13.11, 5.13.12, 5.14.1, 5.14.2, 5.14.3, 5.14.4, 5.14.9, 5.15.1, 5.16.1, 5.16.2, 5.16.3.
 
+Nesta revisão, duas sobreposições de ruído foram tratadas explicitamente:
+
+- `5.9.1` passou a focar a presença de rótulo visível, enquanto `5.9.3` ficou restrita à associação programática quando já existe indício visual de rótulo;
+- `5.13.6` deixou de repetir o mesmo sinal de `order` em CSS já coberto por `5.10.2`.
+
+Para a classificação ordenada das heurísticas mais frágeis e a priorização futura de endurecimento, consulte `RULES_HEURISTIC_CLASSIFICATION.md`.
+
 ## Regra Não Automatizável
 
 `5.12.9 Uso de texto especial` exige avaliação semântica do conteúdo textual. O motor registra a regra e sinaliza candidatos à revisão manual quando encontra texto especial.

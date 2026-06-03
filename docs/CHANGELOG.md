@@ -30,8 +30,9 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - estratégia de nomes de versão com tema de navegação, orientação e sinalização;
 - links para landing page, página de regras, política de privacidade e GitHub público na tela Sobre;
 - exportação de resumo simples da auditoria direto pela aba de resumo;
-- classificação normativa canônica em `src/normative.ts`, baseada na própria ABNT NBR 17225.
+- classificação normativa canônica em `src/normative.ts`, baseada na própria ABNT NBR 17225;
 - importação de relatórios JSON exportados pela própria extensão para retomar contexto e comparação em outro navegador ou computador.
+- classificação documental da força heurística em `docs/RULES_HEURISTIC_CLASSIFICATION.md`, com priorização explícita das heurísticas mais fracas.
 
 ### Changed
 
@@ -50,6 +51,10 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - nota do resumo passa a considerar requisitos, recomendações do escopo atual e conclusão da revisão humana.
 - resumo da auditoria passa a mostrar um único próximo passo, reduzindo redundância visual.
 - histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local.
+- fluxo de revisão humana passa a exigir confirmação antes da mudança de estado e a reorganizar visualmente o item entre pendentes, confirmados e descartados;
+- cards de violação passam a truncar conteúdos longos com tooltip, reduzindo ruído sem ocultar contexto;
+- V1 Farol passa a ser comunicada como Beta funcional, com textos alinhados ao estágio real do produto;
+- interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225.
 
 ### Fixed
 
@@ -61,3 +66,5 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página.
 - ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários.
 - título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto.
+- sobreposição de ruído entre `5.9.1` e `5.9.3`, separando rótulo visível de associação programática;
+- duplicidade de sinal entre `5.10.2` e `5.13.6`, removendo repetição do mesmo indício de `order` em CSS.

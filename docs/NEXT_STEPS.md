@@ -17,6 +17,7 @@ Sugestões:
 - integrar ao fluxo automatizado os testes já criados para compactação e reidratação do histórico persistido;
 - testar comparação entre auditorias com itens novos, resolvidos e persistentes;
 - testar exclusão visual de itens descartados na revisão humana;
+- testar confirmação inline e reorganização visual dos cards na revisão humana;
 - ampliar a cobertura automatizada e a execução recorrente dos testes de importação de relatórios JSON válidos e rejeição de arquivos inválidos;
 - testar os fluxos de recuperação após `QuotaExceeded`.
 
@@ -54,12 +55,13 @@ Objetivo:
 Sugestões:
 
 - revisar continuamente regras como:
-  - `5.13.3`
-  - `5.13.8`
-  - `5.15.4`
+  - `5.7.15`
+  - `5.8.10`
+  - `5.13.12`
   - `5.16.2`
 - quando a automação não puder provar a falha, preferir classificação explícita de confirmação humana;
 - documentar em comentários curtos o limite observável de cada heurística mais frágil.
+- usar `RULES_HEURISTIC_CLASSIFICATION.md` como base para priorização de endurecimento por regra.
 
 Benefício:
 
@@ -70,7 +72,7 @@ Benefício:
 
 Objetivo:
 
-- preparar a implementação futura das 49 recomendações da ABNT NBR 17225 que ainda não fazem parte do escopo implementado.
+- preparar a implementação futura das 34 recomendações da ABNT NBR 17225 que ainda não fazem parte do escopo implementado.
 
 Sugestões:
 
@@ -171,7 +173,24 @@ Sugestões:
   - exportação;
 - incluir exemplos de contribuição para novas regras dentro do escopo v1.
 
-### 10. Revisar logs e telemetria de depuração local
+### 10. Substituir placeholders da landing por capturas reais do produto
+
+Objetivo:
+
+- alinhar a página pública à experiência real da extensão sem inflar a narrativa institucional.
+
+Sugestões:
+
+- capturar fluxos reais de resumo, revisão humana, histórico, comparação e simulador;
+- manter o recorte enxuto, com uma captura por momento essencial da jornada;
+- revisar legibilidade das capturas em desktop e mobile.
+
+Benefício:
+
+- reduz abstração na apresentação pública;
+- aumenta coerência entre produto e landing.
+
+### 11. Revisar logs e telemetria de depuração local
 
 Objetivo:
 
@@ -186,7 +205,7 @@ Sugestões:
   - falha de mensagem;
   - falha de regra.
 
-### 11. Formalizar a política de catálogo de textos
+### 12. Formalizar a política de catálogo de textos
 
 Objetivo:
 
@@ -204,7 +223,7 @@ Benefício:
 - reduz retrabalho de revisão textual;
 - dificulta reintrodução de mojibake e strings dispersas.
 
-### 12. Formalizar a estratégia de limites de storage
+### 13. Formalizar a estratégia de limites de storage
 
 Objetivo:
 
@@ -225,6 +244,6 @@ Benefício:
 
 ## Backlog futuro fora do escopo implementado
 
-A lista completa das 49 recomendações fora do escopo implementado está em `FUTURE_RULES_PLAN.md`.
+A lista completa das 34 recomendações fora do escopo implementado está em `FUTURE_RULES_PLAN.md`.
 
 Esses itens devem ser tratados como evolução futura do catálogo, não como falha da implementação atual da v1.
