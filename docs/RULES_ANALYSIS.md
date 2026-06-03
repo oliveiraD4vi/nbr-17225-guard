@@ -73,7 +73,7 @@ As regras semi-automatizáveis possuem heurísticas para encontrar indícios de 
 
 ## Funcionalidades Agregadas
 
-As funcionalidades de `docs/Funcionalidades Propostas.docx` também estão cobertas:
+As funcionalidades agregadas do produto já estão cobertas e distribuídas na documentação deste diretório:
 
 | Funcionalidade                                  | Status       | Implementação                                                                |
 | ----------------------------------------------- | ------------ | ---------------------------------------------------------------------------- |

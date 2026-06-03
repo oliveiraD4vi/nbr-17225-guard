@@ -145,7 +145,7 @@ Esses itens devem ser tratados como backlog para contribuições futuras, e não
 | 5.16.2 Limite de tempo ajustável                                    | Heurística assistida | `src/rules/documental-completeness-b.ts` `adjustableTimeLimitRule`     |
 | 5.16.3 Controle de atualização                                      | Heurística assistida | `src/rules/time.ts` `refreshControlRule`                               |
 
-## Funcionalidades Propostas
+## Funcionalidades Agregadas
 
 | Funcionalidade                                  | Status       | Código                                                                      |
 | ----------------------------------------------- | ------------ | --------------------------------------------------------------------------- |
