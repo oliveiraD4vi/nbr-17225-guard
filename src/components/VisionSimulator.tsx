@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Button, Card, Divider, Select, Slider, Space, Tooltip } from 'antd';
-import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
-import { t } from '@/i18n';
-import type { VisionSimulationFilter } from '@/types';
-import '../styles/vision-simulator.css';
+import React, { useState } from 'react'
+import { Button, Divider, Select, Slider, Space, Tooltip } from 'antd'
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons'
+import { t } from '@/i18n'
+import type { VisionSimulationFilter } from '@/types'
+import '../styles/vision-simulator.css'
 
 interface VisionSimulatorProps {
-  onFilterChange?: (filter: VisionSimulationFilter) => void;
+  onFilterChange?: (filter: VisionSimulationFilter) => void
 }
 
 const filterOptions = [
@@ -15,42 +15,42 @@ const filterOptions = [
   { label: t('vision.deuteranopia'), value: 'deuteranopia' },
   { label: t('vision.tritanopia'), value: 'tritanopia' },
   { label: t('vision.blur'), value: 'blur' },
-];
+]
 
 export const VisionSimulator: React.FC<VisionSimulatorProps> = React.memo(({ onFilterChange }) => {
-  const [filterType, setFilterType] = useState<VisionSimulationFilter['type']>('none');
-  const [intensity, setIntensity] = useState(50);
-  const [isActive, setIsActive] = useState(false);
+  const [filterType, setFilterType] = useState<VisionSimulationFilter['type']>('none')
+  const [intensity, setIntensity] = useState(50)
+  const [isActive, setIsActive] = useState(false)
 
   const handleFilterChange = (newType: VisionSimulationFilter['type']) => {
-    setFilterType(newType);
+    setFilterType(newType)
     onFilterChange?.({
       type: newType,
       intensity,
-    });
-  };
+    })
+  }
 
   const handleIntensityChange = (value: number) => {
-    setIntensity(value);
+    setIntensity(value)
     onFilterChange?.({
       type: filterType,
       intensity: value,
-    });
-  };
+    })
+  }
 
   const toggleSimulation = () => {
-    const newActive = !isActive;
-    setIsActive(newActive);
+    const newActive = !isActive
+    setIsActive(newActive)
 
     onFilterChange?.({
       type: newActive ? filterType : 'none',
       intensity,
-    });
-  };
+    })
+  }
 
   return (
-    <Card className="vision-simulator" title={t('vision.title')}>
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
+    <div className="vision-simulator">
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
         <Tooltip title={t('vision.toggleTooltip')}>
           <Button
             type={isActive ? 'primary' : 'default'}
@@ -86,21 +86,24 @@ export const VisionSimulator: React.FC<VisionSimulatorProps> = React.memo(({ onF
           />
         </div>
 
-        <div className="simulator-info">
-          <p>
-            <strong>Protanopia:</strong> {t('vision.infoProtanopia')}
-          </p>
-          <p>
-            <strong>Deuteranopia:</strong> {t('vision.infoDeuteranopia')}
-          </p>
-          <p>
-            <strong>Tritanopia:</strong> {t('vision.infoTritanopia')}
-          </p>
-          <p>
-            <strong>Desfoque:</strong> {t('vision.infoBlur')}
-          </p>
-        </div>
+        <details className="simulator-info">
+          <summary>{t('vision.infoSummary')}</summary>
+          <div className="simulator-info-content">
+            <p>
+              <strong>Protanopia:</strong> {t('vision.infoProtanopia')}
+            </p>
+            <p>
+              <strong>Deuteranopia:</strong> {t('vision.infoDeuteranopia')}
+            </p>
+            <p>
+              <strong>Tritanopia:</strong> {t('vision.infoTritanopia')}
+            </p>
+            <p>
+              <strong>Desfoque:</strong> {t('vision.infoBlur')}
+            </p>
+          </div>
+        </details>
       </Space>
-    </Card>
-  );
-});
+    </div>
+  )
+})

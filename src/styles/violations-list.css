@@ -79,8 +79,13 @@
   line-height: 1.5;
 }
 
-.violations-filter-tabs .ant-tabs-nav {
-  margin-bottom: 16px;
+.violations-mode-segmented {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.violations-mode-content {
+  min-width: 0;
 }
 
 .violation-group-header {
@@ -566,101 +571,6 @@
 .violation-notes-meta {
   display: block;
   margin-top: 8px;
-}
-
-.violation-explanation {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.violation-explanation-header {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.violation-explanation-title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.violation-explanation-title-block strong {
-  color: var(--guard-color-text-primary);
-  font-size: 16px;
-  line-height: 1.35;
-}
-
-.violation-explanation-title-block span {
-  color: var(--guard-color-text-muted);
-  font-size: 12px;
-}
-
-.violation-explanation-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--guard-color-border);
-  border-radius: 8px;
-  background: var(--guard-color-surface-muted);
-}
-
-.violation-explanation-section h3 {
-  margin: 0;
-  color: var(--guard-color-text-primary);
-  font-size: 13px;
-}
-
-.violation-explanation-section p {
-  margin: 0;
-  color: var(--guard-color-text-secondary);
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.violation-explanation-evidence-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-}
-
-.violation-explanation-evidence-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.violation-explanation-evidence-item dt {
-  color: var(--guard-color-text-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.violation-explanation-evidence-item dd {
-  margin: 0;
-  color: var(--guard-color-text-primary);
-  font-size: 13px;
-  line-height: 1.55;
-  word-break: break-word;
-}
-
-.violation-explanation-evidence-item dd.is-monospace,
-.violation-explanation-code code {
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-}
-
-.violation-explanation-code {
-  margin: 0;
-  padding: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: #1d4ed8;
-  font-size: 12px;
-  line-height: 1.6;
 }
 
 .contrast-board {

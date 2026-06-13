@@ -1,38 +1,35 @@
 /**
  * Background Service Worker
  */
-import { t } from '@/i18n';
+import { t } from '@/i18n'
 
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    console.log(`[${t('shared.brand.name')}] ${t('background.installed')}`);
+    console.log(`[${t('shared.brand.name')}] ${t('background.installed')}`)
   } else if (details.reason === 'update') {
-    console.log(`[${t('shared.brand.name')}] ${t('background.updated')}`);
+    console.log(`[${t('shared.brand.name')}] ${t('background.updated')}`)
   }
-});
+})
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(`[${t('shared.brand.name')}] ${t('background.message')}`, request.action);
+  console.log(`[${t('shared.brand.name')}] ${t('background.message')}`, request.action)
 
   switch (request.action) {
     case 'OPEN_REPORT':
-      openDetailedReport();
-      sendResponse({ status: 'OK' });
-      break;
+      openDetailedReport()
+      sendResponse({ status: 'OK' })
+      break
     default:
-      sendResponse({ status: 'UNKNOWN_ACTION' });
+      sendResponse({ status: 'UNKNOWN_ACTION' })
   }
 
-  return true;
-});
+  return true
+})
 
 function openDetailedReport() {
-  chrome.windows.create({
+  chrome.tabs.create({
     url: chrome.runtime.getURL('src/report.html'),
-    type: 'popup',
-    width: 900,
-    height: 800,
-  });
+  })
 }
 
-console.log(`[${t('shared.brand.name')}] ${t('background.loaded')}`);
+console.log(`[${t('shared.brand.name')}] ${t('background.loaded')}`)

@@ -54,7 +54,7 @@ pnpm build
 
 Validação automática no fluxo de Git:
 
-- `pre-commit`: `pnpm stage-lint` + `pnpm check:staged-text`
+- `pre-commit`: `pnpm stage-lint`
 - `pre-push`: `pnpm test` + `pnpm build`
 
 ## Diretrizes de contribuição

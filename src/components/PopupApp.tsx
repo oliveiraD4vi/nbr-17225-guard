@@ -1,9 +1,11 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Button, Layout, message, Modal, Space, Switch, Tabs, Tag } from 'antd'
+import { Alert, Button, Layout, message, Modal, Space, Switch, Tabs, Tag, Tooltip } from 'antd'
 import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
+  CloseOutlined,
   DeleteOutlined,
+  DownOutlined,
   DownloadOutlined,
   EyeOutlined,
   FallOutlined,
@@ -13,6 +15,7 @@ import {
   ReloadOutlined,
   RiseOutlined,
   StopOutlined,
+  UpOutlined,
 } from '@ant-design/icons'
 import { PopupPanelSkeleton } from './LoadingSkeletons'
 import { t } from '@/i18n'
@@ -136,6 +139,43 @@ function getComparisonQuickReadingLabel(label: string): string {
   return t('popup.history.quickReadingStable')
 }
 
+function getExportDateSegment(timestamp = Date.now()): string {
+  return new Date(timestamp).toISOString().split('T')[0]
+}
+
+function downloadTextFile(content: string, type: string, filename: string): void {
+  const blob = new Blob([content], { type })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+function buildAuditCsv(result: AuditResult): string {
+  const headers = [
+    t('shared.exports.csvHeaders.id'),
+    t('shared.exports.csvHeaders.rule'),
+    t('shared.exports.csvHeaders.nbrReference'),
+    t('shared.exports.csvHeaders.severity'),
+    t('shared.exports.csvHeaders.message'),
+    t('shared.exports.csvHeaders.suggestion'),
+  ]
+  const rows = result.violations.map((violation) => [
+    violation.id,
+    violation.ruleName,
+    violation.nbrReference,
+    violation.severity,
+    violation.message,
+    violation.suggestion,
+  ])
+
+  return [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+}
+
 function getQuotaAlertDescriptionKey(
   scope: 'audit' | 'history' | 'review',
   hasUnsavedChanges: boolean,
@@ -172,6 +212,9 @@ export const PopupApp: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null)
   const [activeTabKey, setActiveTabKey] = useState('summary')
+  const [isAuditMetaCollapsed, setIsAuditMetaCollapsed] = useState(false)
+  const [isVisionSimulatorOpen, setIsVisionSimulatorOpen] = useState(false)
+  const [hasVisionSimulatorMounted, setHasVisionSimulatorMounted] = useState(false)
   const [priorityIndex, setPriorityIndex] = useState(0)
   const [showAboutView, setShowAboutView] = useState(false)
   const [historyEntryPendingDeletion, setHistoryEntryPendingDeletion] =
@@ -416,7 +459,13 @@ export const PopupApp: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [activeTab?.url, auditHistory, auditResult?.url, clearHighlightsOnPage, refreshStorageDiagnostics])
+  }, [
+    activeTab?.url,
+    auditHistory,
+    auditResult?.url,
+    clearHighlightsOnPage,
+    refreshStorageDiagnostics,
+  ])
 
   const handleRecommendationsToggle = useCallback(
     async (checked: boolean) => {
@@ -480,14 +529,11 @@ export const PopupApp: React.FC = () => {
       return
     }
 
-    const dataStr = JSON.stringify(buildExportableAuditResult(displayedAuditResult), null, 2)
-    const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${t('shared.exports.auditFilePrefix')}-${new Date().toISOString().split('T')[0]}.json`
-    link.click()
-    URL.revokeObjectURL(url)
+    downloadTextFile(
+      JSON.stringify(buildExportableAuditResult(displayedAuditResult), null, 2),
+      'application/json;charset=utf-8',
+      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.json`,
+    )
     message.success(t('popup.messages.exportJsonSuccess'))
   }, [displayedAuditResult])
 
@@ -497,34 +543,11 @@ export const PopupApp: React.FC = () => {
       return
     }
 
-    const headers = [
-      t('shared.exports.csvHeaders.id'),
-      t('shared.exports.csvHeaders.rule'),
-      t('shared.exports.csvHeaders.nbrReference'),
-      t('shared.exports.csvHeaders.severity'),
-      t('shared.exports.csvHeaders.message'),
-      t('shared.exports.csvHeaders.suggestion'),
-    ]
-    const rows = displayedAuditResult.violations.map((violation) => [
-      violation.id,
-      violation.ruleName,
-      violation.nbrReference,
-      violation.severity,
-      violation.message,
-      violation.suggestion,
-    ])
-
-    const csv = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n')
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${t('shared.exports.auditFilePrefix')}-${new Date().toISOString().split('T')[0]}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
+    downloadTextFile(
+      buildAuditCsv(displayedAuditResult),
+      'text/csv;charset=utf-8',
+      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.csv`,
+    )
     message.success(t('popup.messages.exportCsvSuccess'))
   }, [displayedAuditResult])
 
@@ -535,15 +558,45 @@ export const PopupApp: React.FC = () => {
     }
 
     const markdown = buildAuditSummaryMarkdown(displayedAuditResult)
-    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${t('shared.exports.summaryFilePrefix')}-${new Date().toISOString().split('T')[0]}.md`
-    link.click()
-    URL.revokeObjectURL(url)
+    downloadTextFile(
+      markdown,
+      'text/markdown;charset=utf-8',
+      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.md`,
+    )
     message.success(t('popup.messages.exportSummarySuccess'))
   }, [displayedAuditResult])
+
+  const handleExportHistoryJSON = useCallback((entry: AuditHistoryEntry) => {
+    downloadTextFile(
+      JSON.stringify(buildExportableAuditResult(entry), null, 2),
+      'application/json;charset=utf-8',
+      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(entry.timestamp)}.json`,
+    )
+    message.success(t('popup.messages.exportJsonSuccess'))
+  }, [])
+
+  const handleExportHistoryCSV = useCallback((entry: AuditHistoryEntry) => {
+    if (entry.violations.length === 0) {
+      message.warning(t('popup.messages.noViolationsToExport'))
+      return
+    }
+
+    downloadTextFile(
+      buildAuditCsv(entry),
+      'text/csv;charset=utf-8',
+      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(entry.timestamp)}.csv`,
+    )
+    message.success(t('popup.messages.exportCsvSuccess'))
+  }, [])
+
+  const handleExportHistorySummary = useCallback((entry: AuditHistoryEntry) => {
+    downloadTextFile(
+      buildAuditSummaryMarkdown(entry),
+      'text/markdown;charset=utf-8',
+      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(entry.timestamp)}.md`,
+    )
+    message.success(t('popup.messages.exportSummarySuccess'))
+  }, [])
 
   const handleOpenImportPicker = useCallback(() => {
     importInputRef.current?.click()
@@ -597,9 +650,7 @@ export const PopupApp: React.FC = () => {
         }
       } catch (error) {
         console.error('Erro ao importar relatório:', error)
-        message.error(
-          error instanceof Error ? error.message : t('popup.messages.importAuditError'),
-        )
+        message.error(error instanceof Error ? error.message : t('popup.messages.importAuditError'))
       } finally {
         setLoading(false)
       }
@@ -611,7 +662,12 @@ export const PopupApp: React.FC = () => {
     async (filter: VisionSimulationFilter) => {
       await chrome.storage.local.set({ visionFilter: filter })
       if (!activeTab?.id) return
-      void chrome.tabs.sendMessage(activeTab.id, { action: 'APPLY_VISION_FILTER', filter })
+      try {
+        await ensureContentScriptReady(activeTab.id)
+        await chrome.tabs.sendMessage(activeTab.id, { action: 'APPLY_VISION_FILTER', filter })
+      } catch (error) {
+        console.error('Erro ao aplicar simulador de visão:', error)
+      }
     },
     [activeTab?.id],
   )
@@ -696,7 +752,10 @@ export const PopupApp: React.FC = () => {
 
       if (historyUrl) {
         setAuditHistory(refreshedHistory)
-        if (selectedHistoryId && !refreshedHistory.some((entry) => entry.id === selectedHistoryId)) {
+        if (
+          selectedHistoryId &&
+          !refreshedHistory.some((entry) => entry.id === selectedHistoryId)
+        ) {
           setSelectedHistoryId(null)
         }
         setComparisonTargetId(refreshedHistory[0]?.id)
@@ -1152,14 +1211,12 @@ export const PopupApp: React.FC = () => {
             onExportMarkdown={handleExportComparisonReport}
             onExportJson={handleExportComparisonJson}
             onExportCsv={handleExportComparisonCsv}
+            onExportHistoryJson={handleExportHistoryJSON}
+            onExportHistoryCsv={handleExportHistoryCSV}
+            onExportHistorySummary={handleExportHistorySummary}
             onImportJson={handleOpenImportPicker}
           />
         ),
-      },
-      {
-        key: 'simulator',
-        label: t('popup.tabs.simulator'),
-        children: <VisionSimulator onFilterChange={handleFilterChange} />,
       },
     ]
   }, [
@@ -1184,9 +1241,14 @@ export const PopupApp: React.FC = () => {
     handleExportComparisonReport,
     handleExportComparisonJson,
     handleExportComparisonCsv,
+    handleExportHistoryJSON,
+    handleExportHistoryCSV,
+    handleExportHistorySummary,
     handleOpenImportPicker,
-    handleFilterChange,
   ])
+
+  const canReturnFromAbout = showAboutView && Boolean(displayedAuditResult)
+  const canOpenAbout = !showAboutView && Boolean(displayedAuditResult)
 
   return (
     <Layout className="popup-app">
@@ -1207,15 +1269,15 @@ export const PopupApp: React.FC = () => {
             </p>
           </div>
           <Space>
-            {showAboutView ? (
+            {canReturnFromAbout ? (
               <Button icon={<ArrowLeftOutlined />} onClick={() => setShowAboutView(false)}>
                 {t('shared.actions.back')}
               </Button>
-            ) : (
+            ) : canOpenAbout ? (
               <Button icon={<InfoCircleOutlined />} onClick={() => setShowAboutView(true)}>
                 {t('shared.actions.about')}
               </Button>
-            )}
+            ) : null}
           </Space>
         </div>
       </Header>
@@ -1246,69 +1308,86 @@ export const PopupApp: React.FC = () => {
           </Suspense>
         ) : (
           <>
-            <div className="tab-status-strip">
-              <div className="tab-status-item">
-                <span className="tab-status-label">{t('shared.labels.currentTab')}</span>
-                <strong>{activeTab?.title || activeTab?.url || t('shared.labels.untitled')}</strong>
-              </div>
-              <div className="tab-status-item">
-                <span className="tab-status-label">
-                  {isHistoricalView ? t('shared.labels.historyOf') : t('shared.labels.auditedAt')}
+            <section className="audit-meta-panel">
+              <button
+                className="audit-meta-toggle"
+                type="button"
+                aria-expanded={!isAuditMetaCollapsed}
+                onClick={() => setIsAuditMetaCollapsed((current) => !current)}
+              >
+                <span>
+                  <span className="tab-status-label">
+                    {isHistoricalView ? t('shared.labels.historyOf') : t('shared.labels.auditedAt')}
+                  </span>
+                  <strong>
+                    <ClockCircleOutlined />{' '}
+                    {new Date(displayedAuditResult.timestamp).toLocaleString('pt-BR')}
+                  </strong>
                 </span>
-                <strong>
-                  <ClockCircleOutlined />{' '}
-                  {new Date(displayedAuditResult.timestamp).toLocaleString('pt-BR')}
-                </strong>
-              </div>
-              <div className="tab-status-item tab-status-item-toggle">
-                <span className="tab-status-label">{t('popup.scope.toggleLabel')}</span>
-                <div className="recommendations-toggle-row">
-                  <Switch
-                    checked={includeRecommendations}
-                    loading={loading}
-                    onChange={(checked) => {
-                      void handleRecommendationsToggle(checked)
-                    }}
-                  />
-                  <div className="recommendations-toggle-copy">
-                    <span className="recommendations-toggle-status">
-                      {t('popup.scope.currentScope')}:{' '}
-                      {includeRecommendations
-                        ? t('popup.scope.currentScopeWithRecommendations')
-                        : t('popup.scope.currentScopeRequirementsOnly')}
-                    </span>
+                <span className="audit-meta-toggle-icon" aria-hidden="true">
+                  {isAuditMetaCollapsed ? <DownOutlined /> : <UpOutlined />}
+                </span>
+              </button>
+
+              {!isAuditMetaCollapsed && (
+                <div className="tab-status-strip">
+                  <div className="tab-status-item">
+                    <span className="tab-status-label">{t('shared.labels.currentTab')}</span>
                     <strong>
-                      {includeRecommendations
-                        ? t('popup.scope.disableAction')
-                        : t('popup.scope.enableAction')}
+                      {activeTab?.title || activeTab?.url || t('shared.labels.untitled')}
                     </strong>
-                    <span>
-                      {includeRecommendations
-                        ? t('popup.scope.disableDescription')
-                        : t('popup.scope.enableDescription')}
-                    </span>
-                    <small>{t('popup.scope.normativeNote')}</small>
                   </div>
-                </div>
-              </div>
-              {quotaIssue && !isQuotaModalOpen && (
-                <div className="tab-status-item tab-status-item-toggle">
-                  <span className="tab-status-label">{t('popup.quota.resumeLabel')}</span>
-                  <Button
-                    danger
-                    className="quota-resume-button"
-                    onClick={() => setIsQuotaModalOpen(true)}
-                  >
-                    {t('popup.quota.actions.reopen')}
-                  </Button>
+                  <div className="tab-status-item tab-status-item-toggle">
+                    <span className="tab-status-label">{t('popup.scope.toggleLabel')}</span>
+                    <div className="recommendations-toggle-row">
+                      <Switch
+                        checked={includeRecommendations}
+                        loading={loading}
+                        onChange={(checked) => {
+                          void handleRecommendationsToggle(checked)
+                        }}
+                      />
+                      <div className="recommendations-toggle-copy">
+                        <span className="recommendations-toggle-status">
+                          {t('popup.scope.currentScope')}:{' '}
+                          {includeRecommendations
+                            ? t('popup.scope.currentScopeWithRecommendations')
+                            : t('popup.scope.currentScopeRequirementsOnly')}
+                        </span>
+                        <strong>
+                          {includeRecommendations
+                            ? t('popup.scope.disableAction')
+                            : t('popup.scope.enableAction')}
+                        </strong>
+                        <span>
+                          {includeRecommendations
+                            ? t('popup.scope.disableDescription')
+                            : t('popup.scope.enableDescription')}
+                        </span>
+                        <small>{t('popup.scope.normativeNote')}</small>
+                      </div>
+                    </div>
+                  </div>
+                  {quotaIssue && !isQuotaModalOpen && (
+                    <div className="tab-status-item tab-status-item-toggle">
+                      <span className="tab-status-label">{t('popup.quota.resumeLabel')}</span>
+                      <Button
+                        danger
+                        className="quota-resume-button"
+                        onClick={() => setIsQuotaModalOpen(true)}
+                      >
+                        {t('popup.quota.actions.reopen')}
+                      </Button>
+                    </div>
+                  )}
+                  <Tag color={isHistoricalView ? 'gold' : 'blue'}>
+                    {isHistoricalView
+                      ? t('shared.labels.historyByUrl')
+                      : t('shared.labels.currentAudit')}
+                  </Tag>
                 </div>
               )}
-              <Tag color={isHistoricalView ? 'gold' : 'blue'}>
-                {isHistoricalView
-                  ? t('shared.labels.historyByUrl')
-                  : t('shared.labels.currentAudit')}
-              </Tag>
-            </div>
+            </section>
 
             {isHistoricalView && (
               <Alert
@@ -1375,6 +1454,49 @@ export const PopupApp: React.FC = () => {
             <Suspense fallback={<PopupPanelSkeleton />}>
               <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} items={tabItems} />
             </Suspense>
+
+            <div className="vision-floating-shell">
+              {hasVisionSimulatorMounted && (
+                <section
+                  className="vision-floating-panel"
+                  aria-label={t('vision.title')}
+                  hidden={!isVisionSimulatorOpen}
+                >
+                  <div className="vision-floating-panel-header">
+                    <div>
+                      <span className="vision-floating-eyebrow">{t('vision.floatingHint')}</span>
+                      <strong>{t('vision.title')}</strong>
+                    </div>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<CloseOutlined />}
+                      aria-label={t('shared.actions.close')}
+                      onClick={() => setIsVisionSimulatorOpen(false)}
+                    />
+                  </div>
+                  <Suspense fallback={<PopupPanelSkeleton />}>
+                    <VisionSimulator onFilterChange={handleFilterChange} />
+                  </Suspense>
+                </section>
+              )}
+              <Tooltip placement="topLeft" title={t('vision.openFloatingPanel')}>
+                <Button
+                  className="vision-floating-button"
+                  type={isVisionSimulatorOpen ? 'default' : 'primary'}
+                  shape="circle"
+                  icon={<EyeOutlined />}
+                  aria-label={t('vision.openFloatingPanel')}
+                  aria-expanded={isVisionSimulatorOpen}
+                  onClick={() => {
+                    if (!isVisionSimulatorOpen) {
+                      setHasVisionSimulatorMounted(true)
+                    }
+                    setIsVisionSimulatorOpen((current) => !current)
+                  }}
+                />
+              </Tooltip>
+            </div>
           </>
         )}
       </Content>
@@ -1429,9 +1551,7 @@ export const PopupApp: React.FC = () => {
             type="warning"
             showIcon
             message={t('popup.quota.modalAlertTitle')}
-            description={t(
-              getQuotaModalAlertDescriptionKey(quotaIssue?.scope ?? 'audit'),
-            )}
+            description={t(getQuotaModalAlertDescriptionKey(quotaIssue?.scope ?? 'audit'))}
           />
           <p>{t('popup.quota.modalDescription')}</p>
           <ul className="quota-modal-options">

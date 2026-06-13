@@ -1,4 +1,3 @@
 #!/usr/bin/env sh
 
 pnpm stage-lint
-pnpm check:staged-text

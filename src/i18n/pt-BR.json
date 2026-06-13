@@ -21,10 +21,12 @@
       "nextPriority": "Próximo prioritário",
       "clearHighlights": "Limpar destaques",
       "clearAudit": "Limpar auditoria",
-      "extraExplanation": "Explicação extra",
+      "download": "Baixar",
+      "ruleDetails": "Ver regra",
       "delete": "Excluir",
       "json": "JSON",
-      "csv": "CSV"
+      "csv": "CSV",
+      "close": "Fechar"
     },
     "labels": {
       "currentTab": "Aba atual",
@@ -127,7 +129,7 @@
         "landing": "Landing",
         "rules": "Regras",
         "privacy": "Privacidade",
-        "github": "GitHub"
+        "github": "Código da extensão"
       },
       "backToAudit": "Voltar à auditoria"
     },
@@ -187,8 +189,7 @@
     "tabs": {
       "summary": "Resumo",
       "violations": "Violações ({{count}})",
-      "history": "Histórico ({{count}})",
-      "simulator": "Simulador de visão"
+      "history": "Histórico ({{count}})"
     },
     "history": {
       "warningTitle": "Você está visualizando uma auditoria do histórico",
@@ -381,25 +382,7 @@
     "reviewConfirmCancel": "Cancelar",
     "reviewConfirmApply": "Confirmar mudança",
     "reviewTransitionApplying": "Aplicando decisão e reorganizando o item na lista...",
-    "extraExplanationTitle": "Explicação extra do achado",
-    "extraExplanationSubtitle": "Referência NBR {{reference}}",
-    "extraExplanationNormativeExpectation": "O que a norma espera",
-    "extraExplanationDetectedSignal": "O que o Guardião encontrou",
-    "extraExplanationInterpretation": "Como interpretar este achado",
-    "extraExplanationEvidence": "Onde revisar na página",
-    "extraExplanationEvidenceFallback": "Revise o elemento destacado e o contexto visual em torno dele na página auditada.",
-    "extraExplanationNextStep": "Próximo passo sugerido",
-    "extraExplanationPracticalFix": "Como corrigir na prática",
-    "extraExplanationImpact": "Por que isso afeta o uso",
-    "extraExplanationReviewFocus": "O que revisar neste tipo de regra",
-    "extraExplanationNormativeRequirement": "Na norma, este item é classificado como requisito. Em geral, ele pede correção prioritária dentro do fluxo da auditoria.",
-    "extraExplanationNormativeRecommendation": "Na norma, este item é classificado como recomendação. Ele amplia qualidade de uso e previsibilidade, mesmo quando não representa uma exigência obrigatória.",
-    "extraExplanationAutomationFully": "Este achado veio de uma verificação objetiva do motor. O Guardião encontrou um sinal técnico observável no DOM, em atributos ou no CSS da página.",
-    "extraExplanationAutomationSemi": "Este achado veio de uma heurística assistida. O Guardião encontrou um indício técnico relevante, mas a interpretação final ainda pode depender do contexto real da interface.",
-    "extraExplanationAutomationManual": "Este item é tratado como apoio de revisão manual. O Guardião registra candidatos úteis para revisão, mas não conclui sozinho a conformidade.",
-    "extraExplanationHumanReviewPending": "Como o julgamento ainda depende de contexto real, este item continua pendente de confirmação humana nesta auditoria.",
-    "extraExplanationHumanReviewConfirmed": "Nesta auditoria, o item já foi confirmado manualmente como problema e continua exigindo correção.",
-    "extraExplanationHumanReviewDismissed": "Nesta auditoria, o item foi descartado manualmente neste contexto, mas permanece disponível para reavaliação futura.",
+    "detectedSignal": "O que o Guardião encontrou",
     "families": {
       "forms": {
         "headline": "Revise a identificação e a orientação deste campo.",
@@ -530,8 +513,8 @@
     "navigation": "Navegação",
     "controls": "Controles",
     "forms": "Formulários",
-    "documentalA": "Completude documental A",
-    "documentalB": "Completude documental B",
+    "documentalA": "Estrutura, navegação e controles",
+    "documentalB": "Conteúdo, formulários e mídia",
     "presentation": "Apresentação",
     "colors": "Cores",
     "textContent": "Conteúdo textual",
@@ -541,6 +524,8 @@
   },
   "vision": {
     "title": "Simulador de visão",
+    "openFloatingPanel": "Abrir simulador de visão",
+    "floatingHint": "Use durante a revisão",
     "toggleTooltip": "Ativa ou desativa o simulador de visão",
     "active": "Simulador ativo",
     "inactive": "Ativar simulador",
@@ -551,6 +536,7 @@
     "deuteranopia": "Deuteranopia (daltonismo verde-vermelho)",
     "tritanopia": "Tritanopia (daltonismo azul-amarelo)",
     "blur": "Desfoque (baixa visão)",
+    "infoSummary": "Resumo dos filtros",
     "infoProtanopia": "Dificuldade em distinguir vermelho e verde.",
     "infoDeuteranopia": "Forma mais comum de daltonismo, afeta a percepção de verde.",
     "infoTritanopia": "Rara, afeta a percepção de azul e amarelo.",

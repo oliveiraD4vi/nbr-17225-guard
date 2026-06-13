@@ -20,6 +20,8 @@
   justify-content: space-between;
   gap: 16px;
   align-items: flex-start;
+  position: relative;
+  padding-right: 48px;
   margin-bottom: 18px;
 }
 
@@ -73,6 +75,9 @@
 }
 
 .summary-download-button {
+  position: absolute;
+  top: 0;
+  right: 0;
   flex: 0 0 auto;
   border: 1px solid var(--guard-color-border);
   color: var(--guard-color-text-primary);

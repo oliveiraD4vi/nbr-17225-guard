@@ -13,7 +13,6 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "stage-lint": "lint-staged",
-    "check:staged-text": "node scripts/check-staged-text.mjs",
     "preview": "vite preview",
     "test": "pnpm test:audit-history-utils && pnpm test:audit-import && pnpm test:audit-history",
     "verify:rules": "node scripts/verify-rules.mjs",

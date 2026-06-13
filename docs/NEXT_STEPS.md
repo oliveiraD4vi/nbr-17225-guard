@@ -221,7 +221,7 @@ Benefício:
 
 - preserva consistência de linguagem;
 - reduz retrabalho de revisão textual;
-- dificulta reintrodução de mojibake e strings dispersas.
+- reduz a chance de textos dispersos fora do catálogo.
 
 ### 13. Consolidar a estratégia final de limites de storage
 

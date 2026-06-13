@@ -7,9 +7,9 @@ import {
   Empty,
   Input,
   Modal,
+  Segmented,
   Select,
   Space,
-  Tabs,
   Tag,
   Tooltip,
 } from 'antd'
@@ -30,10 +30,11 @@ import {
   UndoOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
+import { LANDING_RULES_URL } from '@/config/links'
 import { t } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { getRuleTopicCategory, type RuleTopicCategory } from '@/rules'
-import { AUTOMATION_CATEGORIES, type HumanReviewStatus, type Violation } from '@/types'
+import type { HumanReviewStatus, Violation } from '@/types'
 import { getContrastRatio } from '@/utils'
 import '../styles/violations-list.css'
 
@@ -169,39 +170,6 @@ function getReviewTransitionDescription(targetStatus: HumanReviewStatus): string
   return t('violations.reviewConfirmPendingDescription')
 }
 
-function getAutomationCategoryLabel(category: Violation['automationCategory']): string {
-  if (category === AUTOMATION_CATEGORIES.fully) return t('shared.automationCategory.fully')
-  if (category === AUTOMATION_CATEGORIES.semi) return t('shared.automationCategory.semi')
-  return t('shared.automationCategory.none')
-}
-
-function getNormativeExplanation(violation: Violation): string {
-  return isNormativeRequirement(violation.nbrReference)
-    ? t('violations.extraExplanationNormativeRequirement')
-    : t('violations.extraExplanationNormativeRecommendation')
-}
-
-function getAutomationExplanation(violation: Violation): string {
-  if (violation.automationCategory === AUTOMATION_CATEGORIES.fully) {
-    return t('violations.extraExplanationAutomationFully')
-  }
-  if (violation.automationCategory === AUTOMATION_CATEGORIES.semi) {
-    return t('violations.extraExplanationAutomationSemi')
-  }
-  return t('violations.extraExplanationAutomationManual')
-}
-
-function getHumanReviewExplanation(violation: Violation): string | null {
-  if (!violation.requiresHumanReview) return null
-  if (violation.humanReviewStatus === 'confirmed') {
-    return t('violations.extraExplanationHumanReviewConfirmed')
-  }
-  if (violation.humanReviewStatus === 'dismissed') {
-    return t('violations.extraExplanationHumanReviewDismissed')
-  }
-  return t('violations.extraExplanationHumanReviewPending')
-}
-
 function getRuleExplanationFamily(topicCategory: RuleTopicCategory): RuleExplanationFamily {
   switch (topicCategory) {
     case 'forms':
@@ -250,8 +218,6 @@ function getReadableFindingCopy(
   topicCategory: RuleTopicCategory,
 ): {
   headline: string
-  impact: string
-  reviewFocus: string
   summary: string
 } {
   const family = getRuleExplanationFamily(topicCategory)
@@ -261,8 +227,6 @@ function getReadableFindingCopy(
   return {
     headline: t(`${baseKey}.headline`),
     summary: t(`${baseKey}.summary`, { target }),
-    impact: t(`${baseKey}.impact`),
-    reviewFocus: t(`${baseKey}.reviewFocus`),
   }
 }
 
@@ -317,6 +281,21 @@ function buildGroups(violations: Violation[]): ViolationGroup[] {
 
 function getRuleTopicLabel(topicCategory: RuleTopicCategory): string {
   return t(`ruleTopics.${topicCategory}`)
+}
+
+function getRuleAnchorId(reference: string): string {
+  const normalizedReference = reference
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  return `rule-${normalizedReference}`
+}
+
+function getRuleDocumentationUrl(reference: string): string {
+  return `${LANDING_RULES_URL}#${getRuleAnchorId(reference)}`
 }
 
 function getContrastPreviewText(
@@ -587,7 +566,6 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
   }) => {
     const [isNotesOpen, setIsNotesOpen] = React.useState(false)
     const [isContrastModalOpen, setIsContrastModalOpen] = React.useState(false)
-    const [isExtraExplanationOpen, setIsExtraExplanationOpen] = React.useState(false)
     const [pendingReviewStatus, setPendingReviewStatus] = React.useState<HumanReviewStatus | null>(
       null,
     )
@@ -639,9 +617,9 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
     )
 
     const handleCardClick = React.useCallback(() => {
-      if (isExtraExplanationOpen || isContrastModalOpen) return
+      if (isContrastModalOpen) return
       onSelectViolation?.(violation)
-    }, [isContrastModalOpen, isExtraExplanationOpen, onSelectViolation, violation])
+    }, [isContrastModalOpen, onSelectViolation, violation])
 
     const contrastRatio = React.useMemo(() => {
       if (!violation.contrastDetails) return null
@@ -700,59 +678,9 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       () => getReadableFindingCopy(violation, topicCategory),
       [topicCategory, violation],
     )
-    const evidenceItems = React.useMemo(
-      () =>
-        [
-          {
-            key: 'element',
-            label: t('shared.labels.affectedElement'),
-            value: getElementTitle(violation),
-            monospace: true,
-          },
-          violation.elementAccessibleName
-            ? {
-                key: 'accessibleName',
-                label: t('shared.labels.accessibleName'),
-                value: violation.elementAccessibleName,
-                monospace: false,
-              }
-            : null,
-          violation.elementVisibleText
-            ? {
-                key: 'visibleText',
-                label: t('shared.labels.visibleText'),
-                value: violation.elementVisibleText,
-                monospace: false,
-              }
-            : null,
-          violation.elementSelector
-            ? {
-                key: 'selector',
-                label: t('shared.labels.selector'),
-                value: violation.elementSelector,
-                monospace: true,
-              }
-            : null,
-        ].filter(
-          (
-            item,
-          ): item is {
-            key: string
-            label: string
-            value: string
-            monospace: boolean
-          } => item !== null,
-        ),
-      [violation],
-    )
-
     const reviewActions = React.useMemo(
       () => getHumanReviewActionOptions(violation.humanReviewStatus),
       [violation.humanReviewStatus],
-    )
-    const humanReviewExplanation = React.useMemo(
-      () => getHumanReviewExplanation(violation),
-      [violation],
     )
     const reviewTransitionTargetStatus = pendingReviewStatus ?? violation.humanReviewStatus
     const isReviewDecisionPending =
@@ -866,11 +794,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                       <Button size="small" onClick={handleCancelReviewStatusChange}>
                         {t('violations.reviewConfirmCancel')}
                       </Button>
-                      <Button
-                        size="small"
-                        type="primary"
-                        onClick={handleConfirmReviewStatusChange}
-                      >
+                      <Button size="small" type="primary" onClick={handleConfirmReviewStatusChange}>
                         {t('violations.reviewConfirmApply')}
                       </Button>
                     </Space>
@@ -943,7 +867,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
           </div>
 
           <div className="violation-detected-signal">
-            <strong>{t('violations.extraExplanationDetectedSignal')}</strong>
+            <strong>{t('violations.detectedSignal')}</strong>
             <TruncatedText
               as="p"
               className="violation-detected-signal-copy"
@@ -1011,12 +935,14 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             <Button
               size="small"
               icon={<InfoCircleOutlined />}
+              href={getRuleDocumentationUrl(violation.nbrReference)}
+              target="_blank"
+              rel="noreferrer"
               onClick={(event) => {
                 event.stopPropagation()
-                setIsExtraExplanationOpen(true)
               }}
             >
-              {t('shared.actions.extraExplanation')}
+              {t('shared.actions.ruleDetails')}
             </Button>
             {violation.contrastDetails && (
               <Tooltip title={t('violations.contrastBoard')}>
@@ -1154,106 +1080,6 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
               )}
             </div>
           )}
-
-          <Modal
-            open={isExtraExplanationOpen}
-            title={t('violations.extraExplanationTitle')}
-            footer={null}
-            onCancel={() => setIsExtraExplanationOpen(false)}
-            width={560}
-            className="extra-explanation-modal"
-            destroyOnHidden
-            focusTriggerAfterClose={false}
-            maskClosable={false}
-            centered
-          >
-            <div
-              className="violation-explanation"
-              onClick={(event) => event.stopPropagation()}
-              onMouseDown={(event) => event.stopPropagation()}
-            >
-              <div className="violation-explanation-header">
-                <Space wrap size={[8, 8]}>
-                  <Tag color={isNormativeRequirement(violation.nbrReference) ? 'red' : 'blue'}>
-                    {getNormativeTypeLabel(violation)}
-                  </Tag>
-                  <Tag color={getSeverityColor(violation.severity)}>
-                    {getSeverityLabel(violation.severity)}
-                  </Tag>
-                  <Tag>{getAutomationCategoryLabel(violation.automationCategory)}</Tag>
-                  {violation.requiresHumanReview && (
-                    <Tag color={getReviewStatusTagColor(violation.humanReviewStatus)}>
-                      {getReviewLabel(violation)}
-                    </Tag>
-                  )}
-                </Space>
-                <div className="violation-explanation-title-block">
-                  <strong>{violation.ruleName}</strong>
-                  <span>
-                    {t('violations.extraExplanationSubtitle', {
-                      reference: violation.nbrReference,
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationNormativeExpectation')}</h3>
-                <p>{violation.description}</p>
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationDetectedSignal')}</h3>
-                <p>{violation.message}</p>
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationInterpretation')}</h3>
-                <p>{readableFindingCopy.summary}</p>
-                <p>{getNormativeExplanation(violation)}</p>
-                <p>{getAutomationExplanation(violation)}</p>
-                {humanReviewExplanation && <p>{humanReviewExplanation}</p>}
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationImpact')}</h3>
-                <p>{readableFindingCopy.impact}</p>
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationReviewFocus')}</h3>
-                <p>{readableFindingCopy.reviewFocus}</p>
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationEvidence')}</h3>
-                {evidenceItems.length > 0 ? (
-                  <dl className="violation-explanation-evidence-list">
-                    {evidenceItems.map((item) => (
-                      <div key={item.key} className="violation-explanation-evidence-item">
-                        <dt>{item.label}</dt>
-                        <dd className={item.monospace ? 'is-monospace' : ''}>{item.value}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p>{t('violations.extraExplanationEvidenceFallback')}</p>
-                )}
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationNextStep')}</h3>
-                <p>{violation.suggestion}</p>
-              </section>
-
-              <section className="violation-explanation-section">
-                <h3>{t('violations.extraExplanationPracticalFix')}</h3>
-                <pre className="violation-explanation-code">
-                  <code>{violation.remediationAdvice}</code>
-                </pre>
-              </section>
-            </div>
-          </Modal>
 
           {violation.contrastDetails && (
             <Modal
@@ -1414,6 +1240,9 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
     onViolationContrastOverrideChange,
   }) => {
     const [selectedCategory, setSelectedCategory] = React.useState<'all' | RuleTopicCategory>('all')
+    const [selectedListMode, setSelectedListMode] = React.useState<
+      'requirements' | 'recommendations' | 'review'
+    >('requirements')
     const sortedViolations = React.useMemo(() => sortViolations(violations), [violations])
     const visibleViolations = React.useMemo(
       () => sortedViolations.filter(isVisibleInMainLists),
@@ -1464,6 +1293,69 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
       () => filterByCategory(reviewViolations),
       [filterByCategory, reviewViolations],
     )
+    const modeOptions = React.useMemo(
+      () => [
+        {
+          label: t('violations.tabRequirements', {
+            count: filteredRequirementViolations.length,
+          }),
+          value: 'requirements',
+        },
+        {
+          label: t('violations.tabRecommendations', {
+            count: filteredRecommendationViolations.length,
+          }),
+          value: 'recommendations',
+        },
+        {
+          label: t('violations.tabReview', { count: filteredReviewViolations.length }),
+          value: 'review',
+        },
+      ],
+      [
+        filteredRecommendationViolations.length,
+        filteredRequirementViolations.length,
+        filteredReviewViolations.length,
+      ],
+    )
+    const listContent = React.useMemo(() => {
+      if (selectedListMode === 'recommendations') {
+        return renderViolationGroups(
+          filteredRecommendationViolations,
+          onSelectViolation,
+          onHumanReviewStatusChange,
+          onViolationNoteChange,
+          onViolationContrastOverrideChange,
+        )
+      }
+
+      if (selectedListMode === 'review') {
+        return renderReviewSections(
+          filteredReviewViolations,
+          onSelectViolation,
+          onHumanReviewStatusChange,
+          onViolationNoteChange,
+          onViolationContrastOverrideChange,
+        )
+      }
+
+      return renderViolationGroups(
+        filteredRequirementViolations,
+        onSelectViolation,
+        onHumanReviewStatusChange,
+        onViolationNoteChange,
+        onViolationContrastOverrideChange,
+      )
+    }, [
+      filteredRecommendationViolations,
+      filteredRequirementViolations,
+      filteredReviewViolations,
+      onHumanReviewStatusChange,
+      onSelectViolation,
+      onViolationContrastOverrideChange,
+      onViolationNoteChange,
+      selectedListMode,
+    ])
 
     if (!violations || violations.length === 0) {
       return <Empty description={t('violations.emptyAll')} />
@@ -1489,48 +1381,16 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
             ]}
           />
         </div>
-        <Tabs
-          className="violations-filter-tabs"
-          items={[
-            {
-              key: 'requirements',
-              label: t('violations.tabRequirements', {
-                count: filteredRequirementViolations.length,
-              }),
-              children: renderViolationGroups(
-                filteredRequirementViolations,
-                onSelectViolation,
-                onHumanReviewStatusChange,
-                onViolationNoteChange,
-                onViolationContrastOverrideChange,
-              ),
-            },
-            {
-              key: 'recommendations',
-              label: t('violations.tabRecommendations', {
-                count: filteredRecommendationViolations.length,
-              }),
-              children: renderViolationGroups(
-                filteredRecommendationViolations,
-                onSelectViolation,
-                onHumanReviewStatusChange,
-                onViolationNoteChange,
-                onViolationContrastOverrideChange,
-              ),
-            },
-            {
-              key: 'review',
-              label: t('violations.tabReview', { count: filteredReviewViolations.length }),
-              children: renderReviewSections(
-                filteredReviewViolations,
-                onSelectViolation,
-                onHumanReviewStatusChange,
-                onViolationNoteChange,
-                onViolationContrastOverrideChange,
-              ),
-            },
-          ]}
+        <Segmented
+          className="violations-mode-segmented"
+          block
+          options={modeOptions}
+          value={selectedListMode}
+          onChange={(value) =>
+            setSelectedListMode(value as 'requirements' | 'recommendations' | 'review')
+          }
         />
+        <div className="violations-mode-content">{listContent}</div>
       </div>
     )
   },

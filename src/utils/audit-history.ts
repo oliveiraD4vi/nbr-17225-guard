@@ -44,11 +44,21 @@ export function hydrateAuditResult<T extends AuditResult>(result: T): T {
 }
 
 export function compactAuditResultForStorage<T extends AuditResult>(result: T): T {
-  const { violationsByRule, violationsBySeverity, summary, ...compactResult } = result as T & {
-    summary?: unknown
+  const compactResult = {
+    ...(result as T & {
+      summary?: unknown
+      violationsByRule?: unknown
+      violationsBySeverity?: unknown
+    }),
   }
+  Reflect.deleteProperty(compactResult, 'violationsByRule')
+  Reflect.deleteProperty(compactResult, 'violationsBySeverity')
+  Reflect.deleteProperty(compactResult, 'summary')
+
   const violations = result.violations.map((violation) => {
-    const { element, inheritedFromHistory, ...persistableViolation } = violation
+    const persistableViolation: Partial<Violation> = { ...violation }
+    Reflect.deleteProperty(persistableViolation, 'element')
+    Reflect.deleteProperty(persistableViolation, 'inheritedFromHistory')
     return persistableViolation as Violation
   })
 

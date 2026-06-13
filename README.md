@@ -248,7 +248,6 @@ pnpm lint:fix
 pnpm format
 pnpm format:check
 pnpm stage-lint
-pnpm check:staged-text
 pnpm type-check
 pnpm verify:rules
 pnpm test:audit-history
@@ -261,8 +260,7 @@ pnpm test
 Após `pnpm install`, o Husky passa a controlar os hooks locais do repositório.
 
 - `pre-commit`:
-  - roda `pnpm stage-lint` para aplicar `prettier` e `eslint --fix` apenas nos arquivos staged;
-  - roda `pnpm check:staged-text` para bloquear mojibake em arquivos alterados.
+  - roda `pnpm stage-lint` para aplicar `prettier` e `eslint --fix` apenas nos arquivos staged.
 - `pre-push`:
   - roda `pnpm test`;
   - roda `pnpm build`.
