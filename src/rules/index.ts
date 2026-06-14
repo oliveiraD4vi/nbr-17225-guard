@@ -4,10 +4,11 @@
  */
 
 import { AUTOMATION_CATEGORIES, type Rule } from '@/types';
+import { isNormativeRequirement } from '@/normative';
 import { colorRules } from './colors';
 import { controlRules } from './controls';
-import { documentalCompletenessRulesA } from './documental-completeness-a';
-import { documentalCompletenessRulesB } from './documental-completeness-b';
+import { contentFormsMediaRules } from './content-forms-media';
+import { structuralNavigationControlRules } from './structural-navigation-controls';
 import { formRules } from './forms';
 import { headingRules } from './headings';
 import { imageRules } from './images';
@@ -32,8 +33,8 @@ export const RULE_TOPIC_GROUPS = {
   navigation: navigationRules,
   controls: controlRules,
   forms: formRules,
-  documentalA: documentalCompletenessRulesA,
-  documentalB: documentalCompletenessRulesB,
+  structureNavigationControls: structuralNavigationControlRules,
+  contentFormsMedia: contentFormsMediaRules,
   presentation: presentationRules,
   colors: colorRules,
   textContent: textContentRules,
@@ -42,7 +43,25 @@ export const RULE_TOPIC_GROUPS = {
   time: timeRules,
 } as const;
 
-export type RuleTopicCategory = keyof typeof RULE_TOPIC_GROUPS;
+export const RULE_TOPIC_CATEGORIES = [
+  'keyboard',
+  'images',
+  'headings',
+  'regions',
+  'lists',
+  'tables',
+  'navigation',
+  'controls',
+  'forms',
+  'presentation',
+  'colors',
+  'textContent',
+  'semantics',
+  'media',
+  'time',
+] as const;
+
+export type RuleTopicCategory = (typeof RULE_TOPIC_CATEGORIES)[number];
 
 /**
  * Todas as regras de acessibilidade disponiveis
@@ -57,8 +76,8 @@ export const allRules: Rule[] = [
   ...RULE_TOPIC_GROUPS.navigation,
   ...RULE_TOPIC_GROUPS.controls,
   ...RULE_TOPIC_GROUPS.forms,
-  ...RULE_TOPIC_GROUPS.documentalA,
-  ...RULE_TOPIC_GROUPS.documentalB,
+  ...RULE_TOPIC_GROUPS.structureNavigationControls,
+  ...RULE_TOPIC_GROUPS.contentFormsMedia,
   ...RULE_TOPIC_GROUPS.presentation,
   ...RULE_TOPIC_GROUPS.colors,
   ...RULE_TOPIC_GROUPS.textContent,
@@ -67,11 +86,18 @@ export const allRules: Rule[] = [
   ...RULE_TOPIC_GROUPS.time,
 ];
 
-const ruleTopicEntries = Object.entries(RULE_TOPIC_GROUPS).flatMap(([topic, rules]) =>
-  rules.map((rule) => [rule.id, topic as RuleTopicCategory] as const)
-);
+export function isRuleReady(rule: Rule): boolean {
+  return rule.readiness !== 'not_ready';
+}
 
-const ruleTopicById = new Map<string, RuleTopicCategory>(ruleTopicEntries);
+export function getRunnableRules(includeRecommendations: boolean): Rule[] {
+  return allRules.filter(
+    (rule) =>
+      isRuleReady(rule) && (includeRecommendations || isNormativeRequirement(rule.nbrReference)),
+  );
+}
+
+const ruleById = new Map(allRules.map((rule) => [rule.id, rule] as const));
 
 /**
  * Regras por nivel WCAG
@@ -92,7 +118,25 @@ export const rulesByAutomation = {
 };
 
 export function getRuleTopicCategory(ruleId: string): RuleTopicCategory {
-  return ruleTopicById.get(ruleId) ?? 'semantics';
+  const reference = ruleById.get(ruleId)?.nbrReference ?? '';
+
+  if (reference.startsWith('5.1.')) return 'keyboard';
+  if (reference.startsWith('5.2.')) return 'images';
+  if (reference.startsWith('5.3.')) return 'headings';
+  if (reference.startsWith('5.4.')) return 'regions';
+  if (reference.startsWith('5.5.')) return 'lists';
+  if (reference.startsWith('5.6.')) return 'tables';
+  if (reference.startsWith('5.7.')) return 'navigation';
+  if (reference.startsWith('5.8.')) return 'controls';
+  if (reference.startsWith('5.9.')) return 'forms';
+  if (reference.startsWith('5.10.')) return 'presentation';
+  if (reference.startsWith('5.11.')) return 'colors';
+  if (reference.startsWith('5.12.')) return 'textContent';
+  if (reference.startsWith('5.13.')) return 'semantics';
+  if (reference.startsWith('5.14.') || reference.startsWith('5.15.')) return 'media';
+  if (reference.startsWith('5.16.')) return 'time';
+
+  return 'semantics';
 }
 
 export {
@@ -104,8 +148,8 @@ export {
   tableRules,
   navigationRules,
   controlRules,
-  documentalCompletenessRulesA,
-  documentalCompletenessRulesB,
+  structuralNavigationControlRules,
+  contentFormsMediaRules,
   formRules,
   presentationRules,
   colorRules,

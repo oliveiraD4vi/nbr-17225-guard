@@ -11,9 +11,9 @@ import {
 } from '@ant-design/icons'
 import {
   EXTENSION_PUBLIC_REPOSITORY_URL,
-  LANDING_PAGE_URL,
-  LANDING_PRIVACY_URL,
-  LANDING_RULES_URL,
+  PROJECT_PAGE_URL,
+  PROJECT_PRIVACY_URL,
+  PROJECT_RULES_URL,
 } from '@/config/links'
 import { t } from '@/i18n'
 import { APP_VERSION_LABEL } from '@/version'
@@ -39,15 +39,15 @@ export const AboutPanel: React.FC<AboutPanelProps> = React.memo(
         <p>{t('popup.about.descriptionB')}</p>
         <div className="about-links-grid" aria-label={t('popup.about.links.label')}>
           <Button
-            href={LANDING_PAGE_URL}
+            href={PROJECT_PAGE_URL}
             icon={<GlobalOutlined />}
             rel="noreferrer"
             target="_blank"
           >
-            {t('popup.about.links.landing')}
+            {t('popup.about.links.projectPage')}
           </Button>
           <Button
-            href={LANDING_RULES_URL}
+            href={PROJECT_RULES_URL}
             icon={<FileSearchOutlined />}
             rel="noreferrer"
             target="_blank"
@@ -55,7 +55,7 @@ export const AboutPanel: React.FC<AboutPanelProps> = React.memo(
             {t('popup.about.links.rules')}
           </Button>
           <Button
-            href={LANDING_PRIVACY_URL}
+            href={PROJECT_PRIVACY_URL}
             icon={<SafetyCertificateOutlined />}
             rel="noreferrer"
             target="_blank"

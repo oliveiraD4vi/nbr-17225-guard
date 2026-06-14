@@ -1,13 +1,15 @@
-import { allRules } from '@/rules'
+import { getRunnableRules } from '@/rules'
 import { isNormativeRecommendation, isNormativeRequirement } from '@/normative'
 import type { AuditResult, Violation } from '@/types'
 
 const requirementRuleIds = new Set(
-  allRules.filter((rule) => isNormativeRequirement(rule.nbrReference)).map((rule) => rule.id),
+  getRunnableRules(false).map((rule) => rule.id),
 )
 
 const recommendationRuleIds = new Set(
-  allRules.filter((rule) => isNormativeRecommendation(rule.nbrReference)).map((rule) => rule.id),
+  getRunnableRules(true)
+    .filter((rule) => isNormativeRecommendation(rule.nbrReference))
+    .map((rule) => rule.id),
 )
 
 function shouldCountViolation(violation: Violation): boolean {

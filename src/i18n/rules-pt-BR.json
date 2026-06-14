@@ -48,7 +48,7 @@
       "remediation": "Use padding, min-width e min-height para ampliar a área de interação sem depender apenas do ícone."
     }
   },
-  "documentalCompletenessA": {
+  "structureNavigationControls": {
     "regionUsage": {
       "name": "Uso de regiões",
       "description": "Regiões devem organizar logicamente a página",
@@ -162,7 +162,7 @@
       "remediation": "Adicione botão ou alternador para a mesma operação."
     }
   },
-  "documentalCompletenessB": {
+  "contentFormsMedia": {
     "predictableFieldLabel": {
       "name": "Rótulo de campo previsível",
       "description": "Campos equivalentes devem manter identificação previsível",

@@ -160,15 +160,47 @@ export function getContrastRatio(hex1: string, hex2: string): number {
  * Obtém a cor de fundo efetiva de um elemento
  */
 export function getEffectiveBackgroundColor(element: HTMLElement): string {
-  let el = element
+  const parseRgbColor = (color: string) => {
+    const match = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/)
+    if (!match) return null
+
+    return {
+      r: Number(match[1]),
+      g: Number(match[2]),
+      b: Number(match[3]),
+      a: match[4] === undefined ? 1 : Number(match[4]),
+    }
+  }
+
+  const blend = (
+    foreground: { r: number; g: number; b: number; a: number },
+    background: { r: number; g: number; b: number; a: number },
+  ) => {
+    const alpha = foreground.a + background.a * (1 - foreground.a)
+    if (alpha === 0) return { r: 255, g: 255, b: 255, a: 1 }
+
+    return {
+      r: Math.round((foreground.r * foreground.a + background.r * background.a * (1 - foreground.a)) / alpha),
+      g: Math.round((foreground.g * foreground.a + background.g * background.a * (1 - foreground.a)) / alpha),
+      b: Math.round((foreground.b * foreground.a + background.b * background.a * (1 - foreground.a)) / alpha),
+      a: alpha,
+    }
+  }
+
+  let el: HTMLElement | null = element
+  let effectiveColor = { r: 255, g: 255, b: 255, a: 1 }
+
   while (el) {
     const bgColor = window.getComputedStyle(el).backgroundColor
-    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-      return bgColor
+    const parsedColor = parseRgbColor(bgColor)
+    if (parsedColor && parsedColor.a > 0) {
+      effectiveColor = blend(parsedColor, effectiveColor)
+      if (effectiveColor.a >= 1) break
     }
-    el = el.parentElement as HTMLElement
+    el = el.parentElement
   }
-  return '#ffffff'
+
+  return `rgb(${effectiveColor.r}, ${effectiveColor.g}, ${effectiveColor.b})`
 }
 
 /**

@@ -33,6 +33,9 @@ function getVisibleFieldLabelText(
     if (wrappingLabelText) return wrappingLabelText
   }
 
+  const programmaticLabel = getAssociatedLabelText(field)
+  if (programmaticLabel) return programmaticLabel
+
   const contextualContainer = field.closest<HTMLElement>(
     'fieldset, .ant-form-item, .form-field, .form-group, .field, .input-group, td, th',
   )

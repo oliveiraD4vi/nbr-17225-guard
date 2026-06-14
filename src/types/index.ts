@@ -6,6 +6,7 @@ import type { NormativeRuleType } from '@/normative'
 
 export type SeverityLevel = 'error' | 'warning'
 export type WCAGLevel = 'A' | 'AA' | 'AAA'
+export type RuleReadiness = 'ready' | 'not_ready'
 export const AUTOMATION_CATEGORIES = {
   fully: 'Totalmente Automatizável',
   semi: 'Semi-Automatizável',
@@ -28,6 +29,8 @@ export interface Rule {
   severity: SeverityLevel
   wcagLevel: WCAGLevel
   category: AutomationCategory
+  readiness?: RuleReadiness
+  readinessReason?: string
   check: () => Promise<Violation[]>
 }
 

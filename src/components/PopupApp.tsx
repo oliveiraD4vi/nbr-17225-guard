@@ -37,6 +37,7 @@ import {
   ensureContentScriptReady,
   getDisplayResultForScope,
   getActiveTab,
+  getAuditHistoryForSite,
   getAuditHistoryForUrl,
   getAuditResult,
   getAuditStorageDiagnostics,
@@ -206,6 +207,7 @@ export const PopupApp: React.FC = () => {
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([])
+  const [siteAuditHistory, setSiteAuditHistory] = useState<AuditHistoryEntry[]>([])
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [includeRecommendations, setIncludeRecommendations] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
@@ -238,6 +240,11 @@ export const PopupApp: React.FC = () => {
         entry.id === updatedResult.id ? (updatedResult as AuditHistoryEntry) : entry,
       ),
     )
+    setSiteAuditHistory((currentHistory) =>
+      currentHistory.map((entry) =>
+        entry.id === updatedResult.id ? (updatedResult as AuditHistoryEntry) : entry,
+      ),
+    )
     setAuditResult((currentResult) =>
       currentResult?.id === updatedResult.id ? updatedResult : currentResult,
     )
@@ -257,16 +264,18 @@ export const PopupApp: React.FC = () => {
     try {
       const tab = await getActiveTab()
       setActiveTab(tab)
-      const [result, preferences, history, diagnostics] = await Promise.all([
-        getAuditResult(tab.id),
+      const [result, preferences, history, siteHistory, diagnostics] = await Promise.all([
+        getAuditResult(tab.id, tab.url),
         chrome.storage.local.get('includeRecommendationsPreference'),
         getAuditHistoryForUrl(tab.url),
+        getAuditHistoryForSite(tab.url),
         getAuditStorageDiagnostics(tab.url),
       ])
       const resolvedPreference =
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
       setAuditResult(result)
       setAuditHistory(history)
+      setSiteAuditHistory(siteHistory)
       setIncludeRecommendations(resolvedPreference)
       setStorageDiagnostics(diagnostics)
       setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null)
@@ -278,6 +287,7 @@ export const PopupApp: React.FC = () => {
       console.error('Erro ao carregar resultado da aba ativa:', error)
       setAuditResult(null)
       setAuditHistory([])
+      setSiteAuditHistory([])
       setSelectedHistoryId(null)
       setShowAboutView(false)
       setPriorityIndex(0)
@@ -354,8 +364,12 @@ export const PopupApp: React.FC = () => {
 
   const viewedAuditResult = useMemo(() => {
     if (!selectedHistoryId) return auditResult
-    return auditHistory.find((entry) => entry.id === selectedHistoryId) || auditResult
-  }, [auditHistory, auditResult, selectedHistoryId])
+    return (
+      auditHistory.find((entry) => entry.id === selectedHistoryId) ||
+      siteAuditHistory.find((entry) => entry.id === selectedHistoryId) ||
+      auditResult
+    )
+  }, [auditHistory, auditResult, selectedHistoryId, siteAuditHistory])
 
   const isHistoricalView = Boolean(selectedHistoryId)
   const displayedAuditResult = useMemo(
@@ -402,9 +416,13 @@ export const PopupApp: React.FC = () => {
       setActiveTab(tab)
       const persistAudit = async () => {
         const persistedResult = await saveAuditResult(result, tab.id)
-        const history = await getAuditHistoryForUrl(tab.url)
+        const [history, siteHistory] = await Promise.all([
+          getAuditHistoryForUrl(tab.url),
+          getAuditHistoryForSite(tab.url),
+        ])
         setAuditResult(persistedResult)
         setAuditHistory(history)
+        setSiteAuditHistory(siteHistory)
         setSelectedHistoryId(null)
         setShowAboutView(false)
         setPriorityIndex(0)
@@ -445,13 +463,20 @@ export const PopupApp: React.FC = () => {
     try {
       await clearHighlightsOnPage(false)
       await resetAuditCache()
-      await refreshStorageDiagnostics(activeTab?.url || auditResult?.url)
+      const currentUrl = activeTab?.url || auditResult?.url
+      const [history, siteHistory] = await Promise.all([
+        getAuditHistoryForUrl(currentUrl),
+        getAuditHistoryForSite(currentUrl),
+      ])
+      await refreshStorageDiagnostics(currentUrl)
       setAuditResult(null)
-      setSelectedHistoryId(auditHistory[0]?.id || null)
+      setAuditHistory(history)
+      setSiteAuditHistory(siteHistory)
+      setSelectedHistoryId(history[0]?.id || null)
       setShowAboutView(false)
       setPriorityIndex(0)
-      setComparisonTargetId(auditHistory[0]?.id)
-      setComparisonBaselineId(auditHistory[1]?.id || auditHistory[0]?.id)
+      setComparisonTargetId(history[0]?.id)
+      setComparisonBaselineId(history[1]?.id || history[0]?.id)
       message.success(t('popup.messages.auditClearSuccess'))
     } catch (error) {
       console.error('Erro ao resetar:', error)
@@ -461,7 +486,6 @@ export const PopupApp: React.FC = () => {
     }
   }, [
     activeTab?.url,
-    auditHistory,
     auditResult?.url,
     clearHighlightsOnPage,
     refreshStorageDiagnostics,
@@ -1194,6 +1218,7 @@ export const PopupApp: React.FC = () => {
           <HistoryTabPanel
             activeTabTitle={activeTab?.title}
             auditHistory={auditHistory}
+            siteAuditHistory={siteAuditHistory}
             auditResultId={auditResult?.id}
             selectedHistoryId={selectedHistoryId}
             comparisonEntries={comparisonEntries}
@@ -1231,6 +1256,7 @@ export const PopupApp: React.FC = () => {
     handleViolationContrastOverrideChange,
     activeTab?.title,
     auditHistory,
+    siteAuditHistory,
     auditResult?.id,
     selectedHistoryId,
     comparisonEntries,
@@ -1510,12 +1536,18 @@ export const PopupApp: React.FC = () => {
         onCancel={() => setHistoryEntryPendingDeletion(null)}
         onOk={async () => {
           if (!historyEntryPendingDeletion) return
-          const updatedHistory = await deleteAuditHistoryEntry(
+          await deleteAuditHistoryEntry(
             historyEntryPendingDeletion.url,
             historyEntryPendingDeletion.id,
           )
-          await refreshStorageDiagnostics(historyEntryPendingDeletion.url)
+          const currentUrl = activeTab?.url || auditResult?.url || historyEntryPendingDeletion.url
+          const [updatedHistory, updatedSiteHistory] = await Promise.all([
+            getAuditHistoryForUrl(currentUrl),
+            getAuditHistoryForSite(currentUrl),
+          ])
+          await refreshStorageDiagnostics(currentUrl)
           setAuditHistory(updatedHistory)
+          setSiteAuditHistory(updatedSiteHistory)
           if (selectedHistoryId === historyEntryPendingDeletion.id) {
             setSelectedHistoryId(null)
           }

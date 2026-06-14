@@ -45,6 +45,7 @@ const auditHistoryModule = await loadAuditHistoryModule()
 const {
   compactAuditResultForStorage,
   dedupeAndSortAuditHistory,
+  getAuditSiteStorageKey,
   getAuditUrlStorageKey,
   getVisibleAuditViolations,
   hydrateAuditResult,
@@ -94,6 +95,14 @@ function createAuditEntry(overrides = {}) {
 }
 
 assert.equal(getAuditUrlStorageKey('https://example.com/path#section'), 'https://example.com/path')
+assert.equal(getAuditUrlStorageKey('https://example.com/path?debug=1'), 'https://example.com/path')
+assert.equal(
+  getAuditUrlStorageKey('https://example.com/path/?debug=1#section'),
+  'https://example.com/path',
+)
+assert.equal(getAuditUrlStorageKey('https://example.com/path/a'), 'https://example.com/path/a')
+assert.equal(getAuditUrlStorageKey('https://example.com/path/b'), 'https://example.com/path/b')
+assert.equal(getAuditSiteStorageKey('https://example.com/path/b?debug=1'), 'https://example.com')
 
 const dedupedHistory = dedupeAndSortAuditHistory(
   [

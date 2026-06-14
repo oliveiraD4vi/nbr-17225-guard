@@ -126,10 +126,10 @@
       "descriptionB": "Esta versão já é utilizável em fluxo assistido de auditoria, mas continua evoluindo em heurísticas, clareza de leitura e microinterações. Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página, manter um histórico local compacto e reimportar relatórios JSON quando precisar continuar o trabalho em outro ambiente.",
       "links": {
         "label": "Links do projeto",
-        "landing": "Landing",
+        "projectPage": "Página do Projeto",
         "rules": "Regras",
         "privacy": "Privacidade",
-        "github": "Código da extensão"
+        "github": "Repositório da extensão"
       },
       "backToAudit": "Voltar à auditoria"
     },
@@ -222,6 +222,8 @@
       "emptyCurrentUrl": "Nenhuma auditoria anterior encontrada para esta URL",
       "emptyPending": "Nenhuma auditoria com revisão humana pendente",
       "emptyCompleted": "Nenhuma auditoria com revisão humana concluída",
+      "otherPagesTitle": "Outras páginas neste site",
+      "otherPagesEmpty": "Nenhuma outra página auditada neste site",
       "sectionPending": "Revisão pendente",
       "sectionCompleted": "Revisão concluída",
       "deleteModalTitle": "Excluir auditoria do histórico",
@@ -304,7 +306,7 @@
     "descriptionWithoutIssues": "A página auditada não apresentou violações nas regras atualmente verificadas pelo motor.",
     "scoreLabel": "Nota geral",
     "scoreDescription": "Combina requisitos, recomendações do escopo atual e conclusão da revisão humana.",
-    "scoreTooltip": "Cálculo: requisitos pesam 70%, recomendações pesam 20% quando auditadas e revisão humana pesa 10%. Sem recomendações, requisitos pesam 90% e revisão humana 10%. Depois disso, a nota recebe um teto por volume: 0 achados permite 100; 1 a 20 fica no máximo nos 90; 21 a 40 nos 80; 41 a 60 nos 70; 61 a 80 nos 60; 81 a 100 nos 50; acima disso fica abaixo de 50.",
+    "scoreExplanationLink": "Entender a nota",
     "downloadTooltip": "Baixar resumo simples da auditoria",
     "scoreOutOf": "{{score}}/100",
     "normativeScopeNote": "“Requisitos” e “Recomendações” são categorias da própria ABNT NBR 17225, não rótulos internos do sistema.",
@@ -513,8 +515,6 @@
     "navigation": "Navegação",
     "controls": "Controles",
     "forms": "Formulários",
-    "documentalA": "Estrutura, navegação e controles",
-    "documentalB": "Conteúdo, formulários e mídia",
     "presentation": "Apresentação",
     "colors": "Cores",
     "textContent": "Conteúdo textual",

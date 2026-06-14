@@ -120,8 +120,8 @@ function looksLikeForeignLanguageBlock(text: string): boolean {
 export const predictableFieldLabelRule: Rule = {
   id: 'predictable-field-label',
   nbrReference: '5.9.2',
-  name: t('rules.documentalCompletenessB.predictableFieldLabel.name'),
-  description: t('rules.documentalCompletenessB.predictableFieldLabel.description'),
+  name: t('rules.contentFormsMedia.predictableFieldLabel.name'),
+  description: t('rules.contentFormsMedia.predictableFieldLabel.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -149,11 +149,11 @@ export const predictableFieldLabelRule: Rule = {
       ? [
           createViolation(predictableFieldLabelRule, {
             element: document.body,
-            message: t('rules.documentalCompletenessB.predictableFieldLabel.message', {
+            message: t('rules.contentFormsMedia.predictableFieldLabel.message', {
               field: inconsistent[0],
             }),
-            suggestion: t('rules.documentalCompletenessB.predictableFieldLabel.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessB.predictableFieldLabel.remediation'),
+            suggestion: t('rules.contentFormsMedia.predictableFieldLabel.suggestion'),
+            remediationAdvice: t('rules.contentFormsMedia.predictableFieldLabel.remediation'),
             customIdPrefix: 'predictable-label',
           }),
         ]
@@ -164,8 +164,8 @@ export const predictableFieldLabelRule: Rule = {
 export const descriptiveFieldLabelRule: Rule = {
   id: 'descriptive-field-label',
   nbrReference: '5.9.4',
-  name: t('rules.documentalCompletenessB.descriptiveFieldLabel.name'),
-  description: t('rules.documentalCompletenessB.descriptiveFieldLabel.description'),
+  name: t('rules.contentFormsMedia.descriptiveFieldLabel.name'),
+  description: t('rules.contentFormsMedia.descriptiveFieldLabel.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -185,8 +185,8 @@ export const descriptiveFieldLabelRule: Rule = {
         .map((field) => field as unknown as HTMLElement),
       (field) =>
         `Campo com rótulo potencialmente genérico: "${getAssociatedLabelText(field as HTMLInputElement).trim()}".`,
-      t('rules.documentalCompletenessB.descriptiveFieldLabel.suggestion'),
-      t('rules.documentalCompletenessB.descriptiveFieldLabel.remediation'),
+      t('rules.contentFormsMedia.descriptiveFieldLabel.suggestion'),
+      t('rules.contentFormsMedia.descriptiveFieldLabel.remediation'),
       'descriptive-label',
     ),
 }
@@ -194,8 +194,8 @@ export const descriptiveFieldLabelRule: Rule = {
 export const predictableHelpTextRule: Rule = {
   id: 'predictable-help-text',
   nbrReference: '5.9.5',
-  name: t('rules.documentalCompletenessB.predictableHelpText.name'),
-  description: t('rules.documentalCompletenessB.predictableHelpText.description'),
+  name: t('rules.contentFormsMedia.predictableHelpText.name'),
+  description: t('rules.contentFormsMedia.predictableHelpText.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -220,8 +220,8 @@ export const predictableHelpTextRule: Rule = {
         .map((field) => field as unknown as HTMLElement),
       (field) =>
         `Campo "${getAssociatedLabelText(field as HTMLInputElement) || field.getAttribute('name') || field.id}" sem texto de ajuda associado.`,
-      t('rules.documentalCompletenessB.predictableHelpText.suggestion'),
-      t('rules.documentalCompletenessB.predictableHelpText.remediation'),
+      t('rules.contentFormsMedia.predictableHelpText.suggestion'),
+      t('rules.contentFormsMedia.predictableHelpText.remediation'),
       'predictable-help',
     )
   },
@@ -230,8 +230,8 @@ export const predictableHelpTextRule: Rule = {
 export const descriptiveErrorRule: Rule = {
   id: 'descriptive-error',
   nbrReference: '5.9.9',
-  name: t('rules.documentalCompletenessB.descriptiveError.name'),
-  description: t('rules.documentalCompletenessB.descriptiveError.description'),
+  name: t('rules.contentFormsMedia.descriptiveError.name'),
+  description: t('rules.contentFormsMedia.descriptiveError.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -248,8 +248,8 @@ export const descriptiveErrorRule: Rule = {
         return !!text && vagueErrors.some((message) => text === message || text.endsWith(message))
       }),
       (element) => `Mensagem de erro pouco descritiva: "${getVisibleText(element)}".`,
-      t('rules.documentalCompletenessB.descriptiveError.suggestion'),
-      t('rules.documentalCompletenessB.descriptiveError.remediation'),
+      t('rules.contentFormsMedia.descriptiveError.suggestion'),
+      t('rules.contentFormsMedia.descriptiveError.remediation'),
       'descriptive-error',
     )
   },
@@ -258,8 +258,8 @@ export const descriptiveErrorRule: Rule = {
 export const correctionSuggestionRule: Rule = {
   id: 'correction-suggestion',
   nbrReference: '5.9.10',
-  name: t('rules.documentalCompletenessB.correctionSuggestion.name'),
-  description: t('rules.documentalCompletenessB.correctionSuggestion.description'),
+  name: t('rules.contentFormsMedia.correctionSuggestion.name'),
+  description: t('rules.contentFormsMedia.correctionSuggestion.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -275,9 +275,9 @@ export const correctionSuggestionRule: Rule = {
         const text = getVisibleText(element).trim().toLowerCase()
         return !!text && !guidanceTerms.some((term) => text.includes(term))
       }),
-      () => t('rules.documentalCompletenessB.correctionSuggestion.message'),
-      t('rules.documentalCompletenessB.correctionSuggestion.suggestion'),
-      t('rules.documentalCompletenessB.correctionSuggestion.remediation'),
+      () => t('rules.contentFormsMedia.correctionSuggestion.message'),
+      t('rules.contentFormsMedia.correctionSuggestion.suggestion'),
+      t('rules.contentFormsMedia.correctionSuggestion.remediation'),
       'correction-suggestion',
     )
   },
@@ -286,10 +286,13 @@ export const correctionSuggestionRule: Rule = {
 export const criticalFormPreventionRule: Rule = {
   id: 'critical-form-prevention',
   nbrReference: '5.9.12',
-  name: t('rules.documentalCompletenessB.criticalFormPrevention.name'),
-  description: t('rules.documentalCompletenessB.criticalFormPrevention.description'),
+  name: t('rules.contentFormsMedia.criticalFormPrevention.name'),
+  description: t('rules.contentFormsMedia.criticalFormPrevention.description'),
   severity: 'warning',
   wcagLevel: 'AA',
+  readiness: 'not_ready',
+  readinessReason:
+    'Depende da jornada critica completa e de confirmacao de fluxo; a Beta ainda nao interage com formularios.',
   category: 'Semi-Automatizável',
   check: async () => {
     const criticalControls = Array.from(
@@ -310,8 +313,8 @@ export const criticalFormPreventionRule: Rule = {
       }),
       (element) =>
         `Ação crítica "${getAccessibleName(element)}" sem indício de revisão ou confirmação.`,
-      t('rules.documentalCompletenessB.criticalFormPrevention.suggestion'),
-      t('rules.documentalCompletenessB.criticalFormPrevention.remediation'),
+      t('rules.contentFormsMedia.criticalFormPrevention.suggestion'),
+      t('rules.contentFormsMedia.criticalFormPrevention.remediation'),
       'critical-form',
     )
   },
@@ -320,10 +323,13 @@ export const criticalFormPreventionRule: Rule = {
 export const dataReentryRule: Rule = {
   id: 'data-reentry',
   nbrReference: '5.9.15',
-  name: t('rules.documentalCompletenessB.dataReentry.name'),
-  description: t('rules.documentalCompletenessB.dataReentry.description'),
+  name: t('rules.contentFormsMedia.dataReentry.name'),
+  description: t('rules.contentFormsMedia.dataReentry.description'),
   severity: 'warning',
   wcagLevel: 'A',
+  readiness: 'not_ready',
+  readinessReason:
+    'Campo repetido na mesma pagina nao prova reentrada indevida de dados entre etapas ou sessoes.',
   category: 'Semi-Automatizável',
   check: async () => {
     const repeatedFields = new Map<string, HTMLElement[]>()
@@ -342,11 +348,11 @@ export const dataReentryRule: Rule = {
       ? [
           createViolation(dataReentryRule, {
             element: duplicate[1][0],
-            message: t('rules.documentalCompletenessB.dataReentry.message', {
+            message: t('rules.contentFormsMedia.dataReentry.message', {
               field: duplicate[0],
             }),
-            suggestion: t('rules.documentalCompletenessB.dataReentry.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessB.dataReentry.remediation'),
+            suggestion: t('rules.contentFormsMedia.dataReentry.suggestion'),
+            remediationAdvice: t('rules.contentFormsMedia.dataReentry.remediation'),
             customIdPrefix: 'data-reentry',
           }),
         ]
@@ -357,8 +363,8 @@ export const dataReentryRule: Rule = {
 export const sensoryValidationRule: Rule = {
   id: 'sensory-validation',
   nbrReference: '5.9.16',
-  name: t('rules.documentalCompletenessB.sensoryValidation.name'),
-  description: t('rules.documentalCompletenessB.sensoryValidation.description'),
+  name: t('rules.contentFormsMedia.sensoryValidation.name'),
+  description: t('rules.contentFormsMedia.sensoryValidation.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -367,14 +373,10 @@ export const sensoryValidationRule: Rule = {
       sensoryValidationRule,
       Array.from(
         document.querySelectorAll<HTMLElement>('label, legend, p, span, small, .help, .hint'),
-      ).filter((element) =>
-        /vermelh|azul|direita|esquerda|acima|abaixo|agite|balance|mova o dispositivo/.test(
-          getVisibleText(element).toLowerCase(),
-        ),
-      ),
+      ).filter((element) => hasActionableSensoryInstruction(getVisibleText(element))),
       (element) => `Instrução com dependência sensorial detectada: "${getVisibleText(element)}".`,
-      t('rules.documentalCompletenessB.sensoryValidation.suggestion'),
-      t('rules.documentalCompletenessB.sensoryValidation.remediation'),
+      t('rules.contentFormsMedia.sensoryValidation.suggestion'),
+      t('rules.contentFormsMedia.sensoryValidation.remediation'),
       'sensory-validation',
     ),
 }
@@ -382,8 +384,8 @@ export const sensoryValidationRule: Rule = {
 export const sensoryCharacteristicsRule: Rule = {
   id: 'sensory-characteristics',
   nbrReference: '5.10.1',
-  name: t('rules.documentalCompletenessB.sensoryCharacteristics.name'),
-  description: t('rules.documentalCompletenessB.sensoryCharacteristics.description'),
+  name: t('rules.contentFormsMedia.sensoryCharacteristics.name'),
+  description: t('rules.contentFormsMedia.sensoryCharacteristics.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -399,8 +401,8 @@ export const sensoryCharacteristicsRule: Rule = {
       ),
       (element) =>
         `Instrução dependente de característica sensorial: "${getVisibleText(element)}".`,
-      t('rules.documentalCompletenessB.sensoryCharacteristics.suggestion'),
-      t('rules.documentalCompletenessB.sensoryCharacteristics.remediation'),
+      t('rules.contentFormsMedia.sensoryCharacteristics.suggestion'),
+      t('rules.contentFormsMedia.sensoryCharacteristics.remediation'),
       'sensory-characteristics',
     ),
 }
@@ -408,8 +410,8 @@ export const sensoryCharacteristicsRule: Rule = {
 export const presentationOrderRule: Rule = {
   id: 'presentation-order',
   nbrReference: '5.10.2',
-  name: t('rules.documentalCompletenessB.presentationOrder.name'),
-  description: t('rules.documentalCompletenessB.presentationOrder.description'),
+  name: t('rules.contentFormsMedia.presentationOrder.name'),
+  description: t('rules.contentFormsMedia.presentationOrder.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -422,14 +424,14 @@ export const presentationOrderRule: Rule = {
         violations.push(
           createViolation(presentationOrderRule, {
             element,
-            message: t('rules.documentalCompletenessB.presentationOrder.positiveTabindexMessage', {
+            message: t('rules.contentFormsMedia.presentationOrder.positiveTabindexMessage', {
               value: tabIndex,
             }),
             suggestion: t(
-              'rules.documentalCompletenessB.presentationOrder.positiveTabindexSuggestion',
+              'rules.contentFormsMedia.presentationOrder.positiveTabindexSuggestion',
             ),
             remediationAdvice: t(
-              'rules.documentalCompletenessB.presentationOrder.positiveTabindexRemediation',
+              'rules.contentFormsMedia.presentationOrder.positiveTabindexRemediation',
             ),
             customIdPrefix: 'presentation-order',
           }),
@@ -447,10 +449,10 @@ export const presentationOrderRule: Rule = {
         violations.push(
           createViolation(presentationOrderRule, {
             element,
-            message: t('rules.documentalCompletenessB.presentationOrder.cssOrderMessage'),
-            suggestion: t('rules.documentalCompletenessB.presentationOrder.cssOrderSuggestion'),
+            message: t('rules.contentFormsMedia.presentationOrder.cssOrderMessage'),
+            suggestion: t('rules.contentFormsMedia.presentationOrder.cssOrderSuggestion'),
             remediationAdvice: t(
-              'rules.documentalCompletenessB.presentationOrder.cssOrderRemediation',
+              'rules.contentFormsMedia.presentationOrder.cssOrderRemediation',
             ),
             customIdPrefix: 'presentation-order',
           }),
@@ -465,8 +467,8 @@ export const presentationOrderRule: Rule = {
 export const orientationRule: Rule = {
   id: 'orientation',
   nbrReference: '5.10.3',
-  name: t('rules.documentalCompletenessB.orientation.name'),
-  description: t('rules.documentalCompletenessB.orientation.description'),
+  name: t('rules.contentFormsMedia.orientation.name'),
+  description: t('rules.contentFormsMedia.orientation.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -478,9 +480,9 @@ export const orientationRule: Rule = {
     return [
       createViolation(orientationRule, {
         element: document.body,
-        message: t('rules.documentalCompletenessB.orientation.message'),
-        suggestion: t('rules.documentalCompletenessB.orientation.suggestion'),
-        remediationAdvice: t('rules.documentalCompletenessB.orientation.remediation'),
+        message: t('rules.contentFormsMedia.orientation.message'),
+        suggestion: t('rules.contentFormsMedia.orientation.suggestion'),
+        remediationAdvice: t('rules.contentFormsMedia.orientation.remediation'),
         customIdPrefix: 'orientation',
         requiresHumanReview: true,
       }),
@@ -491,8 +493,8 @@ export const orientationRule: Rule = {
 export const colorUsageRule: Rule = {
   id: 'color-usage',
   nbrReference: '5.11.1',
-  name: t('rules.documentalCompletenessB.colorUsage.name'),
-  description: t('rules.documentalCompletenessB.colorUsage.description'),
+  name: t('rules.contentFormsMedia.colorUsage.name'),
+  description: t('rules.contentFormsMedia.colorUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -508,8 +510,8 @@ export const colorUsageRule: Rule = {
       ),
       (element) =>
         `Indício de informação transmitida apenas por cor: "${getVisibleText(element)}".`,
-      t('rules.documentalCompletenessB.colorUsage.suggestion'),
-      t('rules.documentalCompletenessB.colorUsage.remediation'),
+      t('rules.contentFormsMedia.colorUsage.suggestion'),
+      t('rules.contentFormsMedia.colorUsage.remediation'),
       'color-usage',
     ),
 }
@@ -517,8 +519,8 @@ export const colorUsageRule: Rule = {
 export const graphicContrastRule: Rule = {
   id: 'graphic-contrast',
   nbrReference: '5.11.5',
-  name: t('rules.documentalCompletenessB.graphicContrast.name'),
-  description: t('rules.documentalCompletenessB.graphicContrast.description'),
+  name: t('rules.contentFormsMedia.graphicContrast.name'),
+  description: t('rules.contentFormsMedia.graphicContrast.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -538,11 +540,11 @@ export const graphicContrastRule: Rule = {
         violations.push(
           createViolation(graphicContrastRule, {
             element,
-            message: t('rules.documentalCompletenessB.graphicContrast.message', {
+            message: t('rules.contentFormsMedia.graphicContrast.message', {
               ratio: ratio.toFixed(2),
             }),
-            suggestion: t('rules.documentalCompletenessB.graphicContrast.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessB.graphicContrast.remediation'),
+            suggestion: t('rules.contentFormsMedia.graphicContrast.suggestion'),
+            remediationAdvice: t('rules.contentFormsMedia.graphicContrast.remediation'),
             contrastDetails: {
               context: 'graphic',
               foregroundHex: foreground,
@@ -566,8 +568,8 @@ export const graphicContrastRule: Rule = {
 export const focusIndicatorContrastRule: Rule = {
   id: 'focus-indicator-contrast',
   nbrReference: '5.11.6',
-  name: t('rules.documentalCompletenessB.focusIndicatorContrast.name'),
-  description: t('rules.documentalCompletenessB.focusIndicatorContrast.description'),
+  name: t('rules.contentFormsMedia.focusIndicatorContrast.name'),
+  description: t('rules.contentFormsMedia.focusIndicatorContrast.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -591,11 +593,11 @@ export const focusIndicatorContrastRule: Rule = {
       violations.push(
         createViolation(focusIndicatorContrastRule, {
           element: activeElement,
-          message: t('rules.documentalCompletenessB.focusIndicatorContrast.message', {
+          message: t('rules.contentFormsMedia.focusIndicatorContrast.message', {
             ratio: ratio.toFixed(2),
           }),
-          suggestion: t('rules.documentalCompletenessB.focusIndicatorContrast.suggestion'),
-          remediationAdvice: t('rules.documentalCompletenessB.focusIndicatorContrast.remediation'),
+          suggestion: t('rules.contentFormsMedia.focusIndicatorContrast.suggestion'),
+          remediationAdvice: t('rules.contentFormsMedia.focusIndicatorContrast.remediation'),
           contrastDetails: {
             context: 'focus',
             foregroundHex: outlineColor,
@@ -621,11 +623,61 @@ function getTextBlocks(): HTMLElement[] {
   ).filter((element) => isElementVisible(element) && getVisibleText(element).length >= 80)
 }
 
+function getReadableTextBlocks(): HTMLElement[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>('p, li, blockquote, td, th, dd, dt'),
+  ).filter((element) => isElementVisible(element) && getVisibleText(element).length >= 80)
+}
+
+function hasActionableSensoryInstruction(text: string): boolean {
+  const normalized = text.toLowerCase()
+  const sensoryPattern =
+    /vermelh|azul|verde|direita|esquerda|acima|abaixo|agite|balance|mova o dispositivo/
+  const actionPattern =
+    /clique|toque|pressione|selecione|escolha|arraste|mova|digite|preencha|marque|ative|use|confirme|siga|verifique|identifique/
+
+  return sensoryPattern.test(normalized) && actionPattern.test(normalized)
+}
+
+function hasClippedTextRisk(element: HTMLElement): boolean {
+  const style = window.getComputedStyle(element)
+  const hasConstrainedHeight =
+    style.maxHeight !== 'none' ||
+    style.webkitLineClamp !== 'none' ||
+    Boolean(element.style.height || element.style.maxHeight)
+
+  return (
+    hasConstrainedHeight &&
+    (style.overflow === 'hidden' || style.overflowY === 'hidden') &&
+    element.scrollHeight > element.clientHeight
+  )
+}
+
+function hasHorizontalTextOverflowRisk(element: HTMLElement): boolean {
+  const style = window.getComputedStyle(element)
+  return (
+    style.whiteSpace === 'nowrap' ||
+    ((style.overflowX === 'hidden' || style.textOverflow === 'ellipsis') &&
+      element.scrollWidth > element.clientWidth)
+  )
+}
+
+function hasWideReadableLine(element: HTMLElement): boolean {
+  const text = getVisibleText(element)
+  if (text.length < 140) return false
+
+  const style = window.getComputedStyle(element)
+  const fontSize = parseFloat(style.fontSize || '16') || 16
+  const readableWidth = fontSize * 0.56 * 90
+
+  return element.getBoundingClientRect().width > readableWidth
+}
+
 export const lineSpacingRule: Rule = {
   id: 'line-spacing',
   nbrReference: '5.12.1',
-  name: t('rules.documentalCompletenessB.lineSpacing.name'),
-  description: t('rules.documentalCompletenessB.lineSpacing.description'),
+  name: t('rules.contentFormsMedia.lineSpacing.name'),
+  description: t('rules.contentFormsMedia.lineSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -635,14 +687,14 @@ export const lineSpacingRule: Rule = {
       getTextBlocks().filter((element) => {
         const style = window.getComputedStyle(element)
         return (
-          style.overflow === 'hidden' &&
+          hasClippedTextRisk(element) &&
           parseFloat(style.lineHeight || '0') > 0 &&
           parseFloat(style.lineHeight || '0') < parseFloat(style.fontSize) * 1.5
         )
       }),
-      () => t('rules.documentalCompletenessB.lineSpacing.message'),
-      t('rules.documentalCompletenessB.lineSpacing.suggestion'),
-      t('rules.documentalCompletenessB.lineSpacing.remediation'),
+      () => t('rules.contentFormsMedia.lineSpacing.message'),
+      t('rules.contentFormsMedia.lineSpacing.suggestion'),
+      t('rules.contentFormsMedia.lineSpacing.remediation'),
       'line-spacing',
       true,
     ),
@@ -651,8 +703,8 @@ export const lineSpacingRule: Rule = {
 export const paragraphSpacingRule: Rule = {
   id: 'paragraph-spacing',
   nbrReference: '5.12.2',
-  name: t('rules.documentalCompletenessB.paragraphSpacing.name'),
-  description: t('rules.documentalCompletenessB.paragraphSpacing.description'),
+  name: t('rules.contentFormsMedia.paragraphSpacing.name'),
+  description: t('rules.contentFormsMedia.paragraphSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -662,17 +714,12 @@ export const paragraphSpacingRule: Rule = {
       Array.from(document.querySelectorAll<HTMLElement>('article, section, main, div')).filter(
         (element) => {
           const paragraphs = element.querySelectorAll('p')
-          const style = window.getComputedStyle(element)
-          return (
-            paragraphs.length >= 2 &&
-            style.overflow === 'hidden' &&
-            element.getBoundingClientRect().height > 0
-          )
+          return paragraphs.length >= 2 && hasClippedTextRisk(element)
         },
       ),
-      () => t('rules.documentalCompletenessB.paragraphSpacing.message'),
-      t('rules.documentalCompletenessB.paragraphSpacing.suggestion'),
-      t('rules.documentalCompletenessB.paragraphSpacing.remediation'),
+      () => t('rules.contentFormsMedia.paragraphSpacing.message'),
+      t('rules.contentFormsMedia.paragraphSpacing.suggestion'),
+      t('rules.contentFormsMedia.paragraphSpacing.remediation'),
       'paragraph-spacing',
       true,
     ),
@@ -681,8 +728,8 @@ export const paragraphSpacingRule: Rule = {
 export const letterSpacingRule: Rule = {
   id: 'letter-spacing',
   nbrReference: '5.12.3',
-  name: t('rules.documentalCompletenessB.letterSpacing.name'),
-  description: t('rules.documentalCompletenessB.letterSpacing.description'),
+  name: t('rules.contentFormsMedia.letterSpacing.name'),
+  description: t('rules.contentFormsMedia.letterSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -693,9 +740,9 @@ export const letterSpacingRule: Rule = {
         const style = window.getComputedStyle(element)
         return style.whiteSpace === 'nowrap' || style.textOverflow === 'ellipsis'
       }),
-      () => t('rules.documentalCompletenessB.letterSpacing.message'),
-      t('rules.documentalCompletenessB.letterSpacing.suggestion'),
-      t('rules.documentalCompletenessB.letterSpacing.remediation'),
+      () => t('rules.contentFormsMedia.letterSpacing.message'),
+      t('rules.contentFormsMedia.letterSpacing.suggestion'),
+      t('rules.contentFormsMedia.letterSpacing.remediation'),
       'letter-spacing',
       true,
     ),
@@ -704,21 +751,18 @@ export const letterSpacingRule: Rule = {
 export const wordSpacingRule: Rule = {
   id: 'word-spacing',
   nbrReference: '5.12.4',
-  name: t('rules.documentalCompletenessB.wordSpacing.name'),
-  description: t('rules.documentalCompletenessB.wordSpacing.description'),
+  name: t('rules.contentFormsMedia.wordSpacing.name'),
+  description: t('rules.contentFormsMedia.wordSpacing.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async () =>
     createWarnings(
       wordSpacingRule,
-      getTextBlocks().filter((element) => {
-        const style = window.getComputedStyle(element)
-        return style.overflowX === 'hidden' || style.whiteSpace === 'nowrap'
-      }),
-      () => t('rules.documentalCompletenessB.wordSpacing.message'),
-      t('rules.documentalCompletenessB.wordSpacing.suggestion'),
-      t('rules.documentalCompletenessB.wordSpacing.remediation'),
+      getTextBlocks().filter((element) => hasHorizontalTextOverflowRisk(element)),
+      () => t('rules.contentFormsMedia.wordSpacing.message'),
+      t('rules.contentFormsMedia.wordSpacing.suggestion'),
+      t('rules.contentFormsMedia.wordSpacing.remediation'),
       'word-spacing',
       true,
     ),
@@ -727,20 +771,18 @@ export const wordSpacingRule: Rule = {
 export const textWidthRule: Rule = {
   id: 'text-width',
   nbrReference: '5.12.6',
-  name: t('rules.documentalCompletenessB.textWidth.name'),
-  description: t('rules.documentalCompletenessB.textWidth.description'),
+  name: t('rules.contentFormsMedia.textWidth.name'),
+  description: t('rules.contentFormsMedia.textWidth.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
   check: async () =>
     createWarnings(
       textWidthRule,
-      getTextBlocks().filter(
-        (element) => parseFloat(window.getComputedStyle(element).width || '0') > 1000,
-      ),
-      () => t('rules.documentalCompletenessB.textWidth.message'),
-      t('rules.documentalCompletenessB.textWidth.suggestion'),
-      t('rules.documentalCompletenessB.textWidth.remediation'),
+      getReadableTextBlocks().filter((element) => hasWideReadableLine(element)),
+      () => t('rules.contentFormsMedia.textWidth.message'),
+      t('rules.contentFormsMedia.textWidth.suggestion'),
+      t('rules.contentFormsMedia.textWidth.remediation'),
       'text-width',
       true,
     ),
@@ -749,8 +791,8 @@ export const textWidthRule: Rule = {
 export const resizedTextRule: Rule = {
   id: 'resized-text',
   nbrReference: '5.12.7',
-  name: t('rules.documentalCompletenessB.resizedText.name'),
-  description: t('rules.documentalCompletenessB.resizedText.description'),
+  name: t('rules.contentFormsMedia.resizedText.name'),
+  description: t('rules.contentFormsMedia.resizedText.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -767,9 +809,9 @@ export const resizedTextRule: Rule = {
         const fixedHeight = parseFloat(style.height || '0') > 0 && style.height !== 'auto'
         return fixedHeight && style.overflow === 'hidden' && style.whiteSpace !== 'normal'
       }),
-      () => t('rules.documentalCompletenessB.resizedText.message'),
-      t('rules.documentalCompletenessB.resizedText.suggestion'),
-      t('rules.documentalCompletenessB.resizedText.remediation'),
+      () => t('rules.contentFormsMedia.resizedText.message'),
+      t('rules.contentFormsMedia.resizedText.suggestion'),
+      t('rules.contentFormsMedia.resizedText.remediation'),
       'resized-text',
     ),
 }
@@ -777,8 +819,8 @@ export const resizedTextRule: Rule = {
 export const pagePartLanguageRule: Rule = {
   id: 'page-part-language',
   nbrReference: '5.13.3',
-  name: t('rules.documentalCompletenessB.pagePartLanguage.name'),
-  description: t('rules.documentalCompletenessB.pagePartLanguage.description'),
+  name: t('rules.contentFormsMedia.pagePartLanguage.name'),
+  description: t('rules.contentFormsMedia.pagePartLanguage.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -796,8 +838,8 @@ export const pagePartLanguageRule: Rule = {
       }),
       (element) =>
         `Trecho com possível conteúdo em idioma diferente sem marcação de lang: "${getVisibleText(element).slice(0, 80)}".`,
-      t('rules.documentalCompletenessB.pagePartLanguage.suggestion'),
-      t('rules.documentalCompletenessB.pagePartLanguage.remediation'),
+      t('rules.contentFormsMedia.pagePartLanguage.suggestion'),
+      t('rules.contentFormsMedia.pagePartLanguage.remediation'),
       'page-part-language',
       true,
     )
@@ -807,8 +849,8 @@ export const pagePartLanguageRule: Rule = {
 export const readingOrderRule: Rule = {
   id: 'reading-order',
   nbrReference: '5.13.6',
-  name: t('rules.documentalCompletenessB.readingOrder.name'),
-  description: t('rules.documentalCompletenessB.readingOrder.description'),
+  name: t('rules.contentFormsMedia.readingOrder.name'),
+  description: t('rules.contentFormsMedia.readingOrder.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -819,9 +861,9 @@ export const readingOrderRule: Rule = {
       violations.push(
         createViolation(readingOrderRule, {
           element,
-          message: t('rules.documentalCompletenessB.readingOrder.ariaFlowtoMessage'),
-          suggestion: t('rules.documentalCompletenessB.readingOrder.ariaFlowtoSuggestion'),
-          remediationAdvice: t('rules.documentalCompletenessB.readingOrder.ariaFlowtoRemediation'),
+          message: t('rules.contentFormsMedia.readingOrder.ariaFlowtoMessage'),
+          suggestion: t('rules.contentFormsMedia.readingOrder.ariaFlowtoSuggestion'),
+          remediationAdvice: t('rules.contentFormsMedia.readingOrder.ariaFlowtoRemediation'),
           customIdPrefix: 'reading-order',
         }),
       )
@@ -834,8 +876,8 @@ export const readingOrderRule: Rule = {
 export const visibleTextInNameRule: Rule = {
   id: 'visible-text-in-name',
   nbrReference: '5.13.7',
-  name: t('rules.documentalCompletenessB.visibleTextInName.name'),
-  description: t('rules.documentalCompletenessB.visibleTextInName.description'),
+  name: t('rules.contentFormsMedia.visibleTextInName.name'),
+  description: t('rules.contentFormsMedia.visibleTextInName.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -850,8 +892,8 @@ export const visibleTextInNameRule: Rule = {
       }),
       (element) =>
         `Nome acessível não contém o texto visível do controle "${getVisibleText(element)}".`,
-      t('rules.documentalCompletenessB.visibleTextInName.suggestion'),
-      t('rules.documentalCompletenessB.visibleTextInName.remediation'),
+      t('rules.contentFormsMedia.visibleTextInName.suggestion'),
+      t('rules.contentFormsMedia.visibleTextInName.remediation'),
       'visible-text-name',
     ),
 }
@@ -859,8 +901,8 @@ export const visibleTextInNameRule: Rule = {
 export const statusMessageRule: Rule = {
   id: 'status-message',
   nbrReference: '5.13.8',
-  name: t('rules.documentalCompletenessB.statusMessage.name'),
-  description: t('rules.documentalCompletenessB.statusMessage.description'),
+  name: t('rules.contentFormsMedia.statusMessage.name'),
+  description: t('rules.contentFormsMedia.statusMessage.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Totalmente Automatizável',
@@ -880,9 +922,9 @@ export const statusMessageRule: Rule = {
           text,
         )
       }),
-      () => t('rules.documentalCompletenessB.statusMessage.message'),
-      t('rules.documentalCompletenessB.statusMessage.suggestion'),
-      t('rules.documentalCompletenessB.statusMessage.remediation'),
+      () => t('rules.contentFormsMedia.statusMessage.message'),
+      t('rules.contentFormsMedia.statusMessage.suggestion'),
+      t('rules.contentFormsMedia.statusMessage.remediation'),
       'status-message',
       true,
     ),
@@ -891,10 +933,13 @@ export const statusMessageRule: Rule = {
 export const customComponentSemanticRule: Rule = {
   id: 'custom-component-semantics',
   nbrReference: '5.13.12',
-  name: t('rules.documentalCompletenessB.customComponentSemantic.name'),
-  description: t('rules.documentalCompletenessB.customComponentSemantic.description'),
+  name: t('rules.contentFormsMedia.customComponentSemantic.name'),
+  description: t('rules.contentFormsMedia.customComponentSemantic.description'),
   severity: 'warning',
   wcagLevel: 'A',
+  readiness: 'not_ready',
+  readinessReason:
+    'A deteccao por tabindex/evento inferiu intencao interativa demais e gerou falso positivo em cards narrativos.',
   category: 'Semi-Automatizável',
   check: async () =>
     createWarnings(
@@ -909,8 +954,8 @@ export const customComponentSemanticRule: Rule = {
       }),
       (element) =>
         `Componente customizado interativo sem role semântica: <${element.tagName.toLowerCase()}>.`,
-      t('rules.documentalCompletenessB.customComponentSemantic.suggestion'),
-      t('rules.documentalCompletenessB.customComponentSemantic.remediation'),
+      t('rules.contentFormsMedia.customComponentSemantic.suggestion'),
+      t('rules.contentFormsMedia.customComponentSemantic.remediation'),
       'custom-component-semantics',
     ),
 }
@@ -918,8 +963,8 @@ export const customComponentSemanticRule: Rule = {
 export const audioTranscriptRule: Rule = {
   id: 'audio-transcript',
   nbrReference: '5.14.1',
-  name: t('rules.documentalCompletenessB.audioTranscript.name'),
-  description: t('rules.documentalCompletenessB.audioTranscript.description'),
+  name: t('rules.contentFormsMedia.audioTranscript.name'),
+  description: t('rules.contentFormsMedia.audioTranscript.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -937,9 +982,9 @@ export const audioTranscriptRule: Rule = {
           getVisibleText(container).toLowerCase(),
         )
       }),
-      () => t('rules.documentalCompletenessB.audioTranscript.message'),
-      t('rules.documentalCompletenessB.audioTranscript.suggestion'),
-      t('rules.documentalCompletenessB.audioTranscript.remediation'),
+      () => t('rules.contentFormsMedia.audioTranscript.message'),
+      t('rules.contentFormsMedia.audioTranscript.suggestion'),
+      t('rules.contentFormsMedia.audioTranscript.remediation'),
       'audio-transcript',
     ),
 }
@@ -947,8 +992,8 @@ export const audioTranscriptRule: Rule = {
 export const videoTranscriptRule: Rule = {
   id: 'video-transcript',
   nbrReference: '5.14.3',
-  name: t('rules.documentalCompletenessB.videoTranscript.name'),
-  description: t('rules.documentalCompletenessB.videoTranscript.description'),
+  name: t('rules.contentFormsMedia.videoTranscript.name'),
+  description: t('rules.contentFormsMedia.videoTranscript.description'),
   severity: 'warning',
   wcagLevel: 'AAA',
   category: 'Semi-Automatizável',
@@ -961,9 +1006,9 @@ export const videoTranscriptRule: Rule = {
         const text = getVisibleText(container).toLowerCase()
         return !/transcri|transcript|descri[cç][aã]o textual|vers[aã]o em texto/.test(text)
       }) as unknown as HTMLElement[],
-      () => t('rules.documentalCompletenessB.videoTranscript.message'),
-      t('rules.documentalCompletenessB.videoTranscript.suggestion'),
-      t('rules.documentalCompletenessB.videoTranscript.remediation'),
+      () => t('rules.contentFormsMedia.videoTranscript.message'),
+      t('rules.contentFormsMedia.videoTranscript.suggestion'),
+      t('rules.contentFormsMedia.videoTranscript.remediation'),
       'video-transcript',
     ),
 }
@@ -971,8 +1016,8 @@ export const videoTranscriptRule: Rule = {
 export const videoCaptionsRule: Rule = {
   id: 'video-captions',
   nbrReference: '5.14.2',
-  name: t('rules.documentalCompletenessB.videoCaptions.name'),
-  description: t('rules.documentalCompletenessB.videoCaptions.description'),
+  name: t('rules.contentFormsMedia.videoCaptions.name'),
+  description: t('rules.contentFormsMedia.videoCaptions.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -982,9 +1027,9 @@ export const videoCaptionsRule: Rule = {
       Array.from(document.querySelectorAll<HTMLVideoElement>('video'))
         .filter((video) => !video.querySelector('track[kind="captions"], track[kind="subtitles"]'))
         .map((video) => video as unknown as HTMLElement),
-      () => t('rules.documentalCompletenessB.videoCaptions.message'),
-      t('rules.documentalCompletenessB.videoCaptions.suggestion'),
-      t('rules.documentalCompletenessB.videoCaptions.remediation'),
+      () => t('rules.contentFormsMedia.videoCaptions.message'),
+      t('rules.contentFormsMedia.videoCaptions.suggestion'),
+      t('rules.contentFormsMedia.videoCaptions.remediation'),
       'video-captions',
     ),
 }
@@ -992,8 +1037,8 @@ export const videoCaptionsRule: Rule = {
 export const audioDescriptionRule: Rule = {
   id: 'audio-description',
   nbrReference: '5.14.4',
-  name: t('rules.documentalCompletenessB.audioDescription.name'),
-  description: t('rules.documentalCompletenessB.audioDescription.description'),
+  name: t('rules.contentFormsMedia.audioDescription.name'),
+  description: t('rules.contentFormsMedia.audioDescription.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -1003,9 +1048,9 @@ export const audioDescriptionRule: Rule = {
       Array.from(document.querySelectorAll<HTMLVideoElement>('video'))
         .filter((video) => !video.querySelector('track[kind="descriptions"]'))
         .map((video) => video as unknown as HTMLElement),
-      () => t('rules.documentalCompletenessB.audioDescription.message'),
-      t('rules.documentalCompletenessB.audioDescription.suggestion'),
-      t('rules.documentalCompletenessB.audioDescription.remediation'),
+      () => t('rules.contentFormsMedia.audioDescription.message'),
+      t('rules.contentFormsMedia.audioDescription.suggestion'),
+      t('rules.contentFormsMedia.audioDescription.remediation'),
       'audio-description',
     ),
 }
@@ -1013,8 +1058,8 @@ export const audioDescriptionRule: Rule = {
 export const liveCaptionsRule: Rule = {
   id: 'live-captions',
   nbrReference: '5.14.9',
-  name: t('rules.documentalCompletenessB.liveCaptions.name'),
-  description: t('rules.documentalCompletenessB.liveCaptions.description'),
+  name: t('rules.contentFormsMedia.liveCaptions.name'),
+  description: t('rules.contentFormsMedia.liveCaptions.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -1028,9 +1073,9 @@ export const liveCaptionsRule: Rule = {
           /ao vivo|live|transmiss[aã]o/.test(getVisibleText(element).toLowerCase()) &&
           !/legenda|caption/.test(getVisibleText(element).toLowerCase()),
       ),
-      () => t('rules.documentalCompletenessB.liveCaptions.message'),
-      t('rules.documentalCompletenessB.liveCaptions.suggestion'),
-      t('rules.documentalCompletenessB.liveCaptions.remediation'),
+      () => t('rules.contentFormsMedia.liveCaptions.message'),
+      t('rules.contentFormsMedia.liveCaptions.suggestion'),
+      t('rules.contentFormsMedia.liveCaptions.remediation'),
       'live-captions',
     ),
 }
@@ -1038,8 +1083,8 @@ export const liveCaptionsRule: Rule = {
 export const animationControlRule: Rule = {
   id: 'animation-control',
   nbrReference: '5.15.1',
-  name: t('rules.documentalCompletenessB.animationControl.name'),
-  description: t('rules.documentalCompletenessB.animationControl.description'),
+  name: t('rules.contentFormsMedia.animationControl.name'),
+  description: t('rules.contentFormsMedia.animationControl.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -1056,10 +1101,10 @@ export const animationControlRule: Rule = {
           violations.push(
             createViolation(animationControlRule, {
               element,
-              message: t('rules.documentalCompletenessB.animationControl.carouselMessage'),
-              suggestion: t('rules.documentalCompletenessB.animationControl.carouselSuggestion'),
+              message: t('rules.contentFormsMedia.animationControl.carouselMessage'),
+              suggestion: t('rules.contentFormsMedia.animationControl.carouselSuggestion'),
               remediationAdvice: t(
-                'rules.documentalCompletenessB.animationControl.carouselRemediation',
+                'rules.contentFormsMedia.animationControl.carouselRemediation',
               ),
               customIdPrefix: 'animation-control',
             }),
@@ -1074,10 +1119,10 @@ export const animationControlRule: Rule = {
           violations.push(
             createViolation(animationControlRule, {
               element: media as unknown as HTMLElement,
-              message: t('rules.documentalCompletenessB.animationControl.mediaMessage'),
-              suggestion: t('rules.documentalCompletenessB.animationControl.mediaSuggestion'),
+              message: t('rules.contentFormsMedia.animationControl.mediaMessage'),
+              suggestion: t('rules.contentFormsMedia.animationControl.mediaSuggestion'),
               remediationAdvice: t(
-                'rules.documentalCompletenessB.animationControl.mediaRemediation',
+                'rules.contentFormsMedia.animationControl.mediaRemediation',
               ),
               customIdPrefix: 'animation-control',
             }),
@@ -1092,8 +1137,8 @@ export const animationControlRule: Rule = {
 export const flashingContentRule: Rule = {
   id: 'flashing-content',
   nbrReference: '5.15.4',
-  name: t('rules.documentalCompletenessB.flashingContent.name'),
-  description: t('rules.documentalCompletenessB.flashingContent.description'),
+  name: t('rules.contentFormsMedia.flashingContent.name'),
+  description: t('rules.contentFormsMedia.flashingContent.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Totalmente Automatizável',
@@ -1122,9 +1167,9 @@ export const flashingContentRule: Rule = {
           !/pausar|parar animação|reduzir movimento/.test(nearbyControls)
         )
       }),
-      () => t('rules.documentalCompletenessB.flashingContent.message'),
-      t('rules.documentalCompletenessB.flashingContent.suggestion'),
-      t('rules.documentalCompletenessB.flashingContent.remediation'),
+      () => t('rules.contentFormsMedia.flashingContent.message'),
+      t('rules.contentFormsMedia.flashingContent.suggestion'),
+      t('rules.contentFormsMedia.flashingContent.remediation'),
       'flashing-content',
       true,
     ),
@@ -1133,8 +1178,8 @@ export const flashingContentRule: Rule = {
 export const adjustableTimeLimitRule: Rule = {
   id: 'adjustable-time-limit',
   nbrReference: '5.16.2',
-  name: t('rules.documentalCompletenessB.adjustableTimeLimit.name'),
-  description: t('rules.documentalCompletenessB.adjustableTimeLimit.description'),
+  name: t('rules.contentFormsMedia.adjustableTimeLimit.name'),
+  description: t('rules.contentFormsMedia.adjustableTimeLimit.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -1150,12 +1195,12 @@ export const adjustableTimeLimitRule: Rule = {
           element: refreshMeta as unknown as HTMLElement,
           message:
             Number.isFinite(refreshSeconds) && refreshSeconds > 0
-              ? t('rules.documentalCompletenessB.adjustableTimeLimit.metaMessageWithSeconds', {
+              ? t('rules.contentFormsMedia.adjustableTimeLimit.metaMessageWithSeconds', {
                   seconds: refreshSeconds,
                 })
-              : t('rules.documentalCompletenessB.adjustableTimeLimit.metaMessage'),
-          suggestion: t('rules.documentalCompletenessB.adjustableTimeLimit.metaSuggestion'),
-          remediationAdvice: t('rules.documentalCompletenessB.adjustableTimeLimit.metaRemediation'),
+              : t('rules.contentFormsMedia.adjustableTimeLimit.metaMessage'),
+          suggestion: t('rules.contentFormsMedia.adjustableTimeLimit.metaSuggestion'),
+          remediationAdvice: t('rules.contentFormsMedia.adjustableTimeLimit.metaRemediation'),
           customIdPrefix: 'adjustable-time',
         }),
       )
@@ -1179,12 +1224,12 @@ export const adjustableTimeLimitRule: Rule = {
           violations.push(
             createViolation(adjustableTimeLimitRule, {
               element,
-              message: t('rules.documentalCompletenessB.adjustableTimeLimit.countdownMessage'),
+              message: t('rules.contentFormsMedia.adjustableTimeLimit.countdownMessage'),
               suggestion: t(
-                'rules.documentalCompletenessB.adjustableTimeLimit.countdownSuggestion',
+                'rules.contentFormsMedia.adjustableTimeLimit.countdownSuggestion',
               ),
               remediationAdvice: t(
-                'rules.documentalCompletenessB.adjustableTimeLimit.countdownRemediation',
+                'rules.contentFormsMedia.adjustableTimeLimit.countdownRemediation',
               ),
               customIdPrefix: 'adjustable-time',
             }),
@@ -1196,7 +1241,7 @@ export const adjustableTimeLimitRule: Rule = {
   },
 }
 
-export const documentalCompletenessRulesB: Rule[] = [
+export const contentFormsMediaRules: Rule[] = [
   predictableFieldLabelRule,
   descriptiveFieldLabelRule,
   predictableHelpTextRule,

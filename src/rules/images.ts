@@ -7,6 +7,27 @@ import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
 import { createViolation, getAccessibleName, isElementVisible } from '@/utils'
 
+function normalizeImageText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+function hasNearbyDuplicateText(img: HTMLImageElement, alt: string): boolean {
+  const normalizedAlt = normalizeImageText(alt)
+  if (normalizedAlt.length < 4) return false
+
+  const nearbyText = normalizeImageText(
+    img.closest<HTMLElement>('a, button, header, footer, .brand-block, .logo, .brand')?.textContent ||
+      img.parentElement?.textContent ||
+      '',
+  )
+
+  return nearbyText.replace(normalizedAlt, '').length < nearbyText.length
+}
+
 export const imageAltTextRule: Rule = {
   id: 'image-alt-text',
   nbrReference: '5.2.1',
@@ -94,6 +115,7 @@ export const imageDecorativeRule: Rule = {
       const ariaHidden = img.getAttribute('aria-hidden')
       const className = img.className.toLowerCase()
       const isSmallAsset = img.width <= 48 && img.height <= 48
+      const isBrandAsset = /\b(brand|logo|marca)\b/.test(`${className} ${img.src}`.toLowerCase())
 
       const looksDecorative =
         isSmallAsset &&
@@ -102,6 +124,8 @@ export const imageDecorativeRule: Rule = {
         )
       if (
         looksDecorative &&
+        !isBrandAsset &&
+        !(alt && hasNearbyDuplicateText(img, alt)) &&
         !(alt === '' || role === 'presentation' || role === 'none' || ariaHidden === 'true')
       ) {
         violations.push(

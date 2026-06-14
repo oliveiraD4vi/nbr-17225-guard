@@ -161,6 +161,8 @@ for (const { file, content } of source) {
     const name = get('name')
     const wcagLevel = get('wcagLevel')
     const category = get('category')
+    const readiness = get('readiness') || 'ready'
+    const hasReadinessReason = /\breadinessReason\s*:/.test(body)
     rules.push({
       exportName,
       file,
@@ -169,6 +171,8 @@ for (const { file, content } of source) {
       name,
       wcagLevel,
       category: normalize(category || ''),
+      readiness,
+      hasReadinessReason,
     })
   }
 }
@@ -207,6 +211,16 @@ for (const rule of rules) {
   if (!requirements.some((requirement) => requirement.reference === rule.reference)) {
     failures.push(`EXTRA ${rule.reference || '<none>'} ${rule.file}:${rule.exportName}`)
   }
+  if (!['ready', 'not_ready'].includes(rule.readiness)) {
+    failures.push(
+      `READINESS ${rule.reference || '<none>'} has invalid readiness "${rule.readiness}" in ${rule.file}:${rule.exportName}`,
+    )
+  }
+  if (rule.readiness === 'not_ready' && !rule.hasReadinessReason) {
+    failures.push(
+      `READINESS ${rule.reference || '<none>'} is not_ready without readinessReason in ${rule.file}:${rule.exportName}`,
+    )
+  }
 }
 
 for (const [reference, matches] of byReference.entries()) {
@@ -232,6 +246,16 @@ const normativeTypeCounts = requirements.reduce(
 )
 const recommendationLabel =
   normativeTypeCounts.Recomendação === 1 ? 'recomendação' : 'recomendações'
+
+const readinessCounts = rules.reduce(
+  (acc, rule) => {
+    acc[rule.readiness] += 1
+    return acc
+  },
+  { ready: 0, not_ready: 0 },
+)
+
+console.log(`Ready Beta: ${readinessCounts.ready}; Not ready Beta: ${readinessCounts.not_ready}.`)
 
 console.log(
   `Verificação de regras concluída: ${requirements.length} itens documentados mapeados para ${rules.length} implementação(ões): ${normativeTypeCounts.Requisito} requisitos e ${normativeTypeCounts.Recomendação} ${recommendationLabel}.`,

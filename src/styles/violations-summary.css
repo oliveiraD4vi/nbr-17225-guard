@@ -143,11 +143,25 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
   color: var(--guard-color-text-secondary);
 }
 
 .summary-score-label-row .anticon {
   color: var(--guard-color-text-muted);
+}
+
+.summary-score-link.ant-btn {
+  height: auto;
+  padding: 0;
+  color: var(--guard-color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.summary-score-link.ant-btn .anticon {
+  color: currentColor;
 }
 
 .summary-score-copy strong {

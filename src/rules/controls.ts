@@ -10,6 +10,21 @@ function isInlineTextLink(control: HTMLElement): boolean {
   return display === 'inline' || display === 'inline-block'
 }
 
+function getTargetSizeElement(control: HTMLElement): HTMLElement {
+  if (
+    control instanceof HTMLInputElement &&
+    (control.classList.contains('ant-select-input') || control.getAttribute('role') === 'combobox')
+  ) {
+    return (
+      control.closest<HTMLElement>(
+        '.ant-select-selector, .ant-select, .ant-picker, .ant-cascader-picker, .ant-input-number, .ant-input-affix-wrapper',
+      ) ?? control
+    )
+  }
+
+  return control.closest<HTMLElement>('.ant-input-affix-wrapper') ?? control
+}
+
 export const buttonSemanticRule: Rule = {
   id: 'button-semantic',
   nbrReference: '5.8.1',
@@ -54,6 +69,7 @@ export const targetSizeRule: Rule = {
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = []
+    const measuredControls = new Set<HTMLElement>()
     const controls = document.querySelectorAll<HTMLElement>(
       'a, button, input, select, textarea, [role="button"], [role="link"]',
     )
@@ -63,11 +79,15 @@ export const targetSizeRule: Rule = {
       if ((control as HTMLInputElement).type === 'hidden') return
       if (isInlineTextLink(control)) return
 
-      const rect = control.getBoundingClientRect()
+      const targetElement = getTargetSizeElement(control)
+      if (measuredControls.has(targetElement) || !isElementVisible(targetElement)) return
+      measuredControls.add(targetElement)
+
+      const rect = targetElement.getBoundingClientRect()
       if (rect.width < 24 || rect.height < 24) {
         violations.push(
           createViolation(targetSizeRule, {
-            element: control,
+            element: targetElement,
             message: t('rules.controls.targetSize.message', {
               width: Math.round(rect.width),
               height: Math.round(rect.height),
@@ -94,6 +114,7 @@ export const enhancedTargetSizeRule: Rule = {
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = []
+    const measuredControls = new Set<HTMLElement>()
     const controls = document.querySelectorAll<HTMLElement>(
       'button, input, select, textarea, [role="button"], [role="link"], a[role="button"], a[class*="button" i], a[class*="btn" i]',
     )
@@ -103,11 +124,15 @@ export const enhancedTargetSizeRule: Rule = {
       if ((control as HTMLInputElement).type === 'hidden') return
       if (isInlineTextLink(control)) return
 
-      const rect = control.getBoundingClientRect()
+      const targetElement = getTargetSizeElement(control)
+      if (measuredControls.has(targetElement) || !isElementVisible(targetElement)) return
+      measuredControls.add(targetElement)
+
+      const rect = targetElement.getBoundingClientRect()
       if ((rect.width >= 24 && rect.width < 44) || (rect.height >= 24 && rect.height < 44)) {
         violations.push(
           createViolation(enhancedTargetSizeRule, {
-            element: control,
+            element: targetElement,
             message: t('rules.controls.enhancedTargetSize.message', {
               width: Math.round(rect.width),
               height: Math.round(rect.height),

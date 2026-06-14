@@ -30,7 +30,7 @@ import {
   UndoOutlined,
   UnorderedListOutlined,
 } from '@ant-design/icons'
-import { LANDING_RULES_URL } from '@/config/links'
+import { PROJECT_RULES_URL } from '@/config/links'
 import { t } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { getRuleTopicCategory, type RuleTopicCategory } from '@/rules'
@@ -192,8 +192,6 @@ function getRuleExplanationFamily(topicCategory: RuleTopicCategory): RuleExplana
     case 'images':
     case 'media':
       return 'media'
-    case 'documentalA':
-    case 'documentalB':
     case 'presentation':
     case 'textContent':
       return 'content'
@@ -295,7 +293,7 @@ function getRuleAnchorId(reference: string): string {
 }
 
 function getRuleDocumentationUrl(reference: string): string {
-  return `${LANDING_RULES_URL}#${getRuleAnchorId(reference)}`
+  return `${PROJECT_RULES_URL}#${getRuleAnchorId(reference)}`
 }
 
 function getContrastPreviewText(

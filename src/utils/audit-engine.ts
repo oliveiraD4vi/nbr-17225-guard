@@ -8,6 +8,7 @@ import {
   compactAuditResultForStorage,
   dedupeAndSortAuditHistory,
   getDisplayAuditResult,
+  getAuditSiteStorageKey,
   getAuditUrlStorageKey,
   hydrateAuditResult,
   inheritViolationStateFromHistory,
@@ -288,12 +289,23 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
 /**
  * Recupera resultado da auditoria do storage
  */
-export async function getAuditResult(tabId?: number): Promise<AuditResult | null> {
+export async function getAuditResult(
+  tabId?: number,
+  currentUrl?: string,
+): Promise<AuditResult | null> {
   try {
     const resolvedTabId = tabId ?? (await getActiveTab()).id
     const data = await chrome.storage.local.get('auditResultsByTab')
     const auditResultsByTab = data.auditResultsByTab as Record<string, AuditResult> | undefined
-    return normalizeAuditResult(auditResultsByTab?.[getTabStorageKey(resolvedTabId)] || null)
+    const result = normalizeAuditResult(auditResultsByTab?.[getTabStorageKey(resolvedTabId)] || null)
+    if (
+      result &&
+      currentUrl &&
+      getAuditUrlStorageKey(result.url) !== getAuditUrlStorageKey(currentUrl)
+    ) {
+      return null
+    }
+    return result
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao recuperar resultado:', error)
     return null
@@ -350,6 +362,36 @@ export async function getAuditHistoryForUrl(url?: string): Promise<AuditHistoryE
     )
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao recuperar histórico:', error)
+    return []
+  }
+}
+
+export async function getAuditHistoryForSite(url?: string): Promise<AuditHistoryEntry[]> {
+  try {
+    const resolvedUrl = url ?? (await getActiveTab()).url
+    if (!resolvedUrl) return []
+
+    const currentUrlKey = getAuditUrlStorageKey(resolvedUrl)
+    const siteKey = getAuditSiteStorageKey(resolvedUrl)
+    const data = await chrome.storage.local.get('auditHistoryByUrl')
+    const auditHistoryByUrl =
+      (data.auditHistoryByUrl as Record<string, AuditHistoryEntry[]> | undefined) ?? {}
+
+    const latestEntriesByUrl = Object.entries(auditHistoryByUrl)
+      .filter(([urlKey]) => urlKey !== currentUrlKey && getAuditSiteStorageKey(urlKey) === siteKey)
+      .map(([, entries]) =>
+        dedupeAndSortAuditHistory(
+          entries.map((entry) => normalizeAuditResult(entry) as AuditHistoryEntry),
+          1,
+        )[0],
+      )
+      .filter((entry): entry is AuditHistoryEntry => Boolean(entry))
+      .sort((left, right) => right.timestamp - left.timestamp)
+      .slice(0, 20)
+
+    return latestEntriesByUrl
+  } catch (error) {
+    console.error('[Guardião NBR 17225] Erro ao recuperar histórico do site:', error)
     return []
   }
 }

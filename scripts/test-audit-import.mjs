@@ -68,7 +68,8 @@ export function t(key) {
   }
 }
 
-const { parseImportedAuditReport } = await loadAuditEngineModule()
+const { getAuditHistoryForSite, getAuditResult, parseImportedAuditReport } =
+  await loadAuditEngineModule()
 
 function createViolation(overrides = {}) {
   return {
@@ -86,6 +87,26 @@ function createViolation(overrides = {}) {
     suggestion: 'Sugestão',
     remediationAdvice: 'Correção',
     customId: 'custom-id',
+    ...overrides,
+  }
+}
+
+function createAuditResult(overrides = {}) {
+  const violations = overrides.violations ?? []
+
+  return {
+    id: 'audit-id',
+    timestamp: 0,
+    url: 'https://example.com',
+    pageTitle: 'Pagina',
+    totalViolations: violations.length,
+    errors: violations.filter((violation) => violation.normativeType === 'Requisito').length,
+    warnings: violations.filter((violation) => violation.normativeType === 'Recomendacao').length,
+    humanReviewItems: violations.filter((violation) => violation.requiresHumanReview).length,
+    automatedFindings: violations.filter((violation) => !violation.requiresHumanReview).length,
+    violations,
+    violationsByRule: {},
+    violationsBySeverity: { error: [], warning: [] },
     ...overrides,
   }
 }
@@ -147,6 +168,70 @@ const importedRawAudit = parseImportedAuditReport(rawPayload)
 assert.equal(importedRawAudit.id, 'https://example.com/relatorio|1717351300000')
 assert.equal(importedRawAudit.violations[0].humanReviewStatus, 'not_applicable')
 assert.equal(importedRawAudit.totalViolations, 1)
+
+const storageData = {
+  auditResultsByTab: {
+    7: createAuditResult({
+      id: 'cached-a',
+      url: 'https://example.com/a?source=cache#old',
+    }),
+  },
+  auditHistoryByUrl: {
+    'https://example.com/a': [
+      createAuditResult({
+        id: 'current-page',
+        timestamp: 4000,
+        url: 'https://example.com/a',
+      }),
+    ],
+    'https://example.com/rules.html': [
+      createAuditResult({
+        id: 'rules-old',
+        timestamp: 1000,
+        url: 'https://example.com/rules.html',
+      }),
+      createAuditResult({
+        id: 'rules-new',
+        timestamp: 3000,
+        url: 'https://example.com/rules.html?debug=1',
+      }),
+    ],
+    'https://example.com/privacy.html': [
+      createAuditResult({
+        id: 'privacy',
+        timestamp: 2000,
+        url: 'https://example.com/privacy.html#top',
+      }),
+    ],
+    'https://other.example.com/rules.html': [
+      createAuditResult({
+        id: 'other-origin',
+        timestamp: 5000,
+        url: 'https://other.example.com/rules.html',
+      }),
+    ],
+  },
+}
+
+globalThis.chrome = {
+  storage: {
+    local: {
+      get: async () => storageData,
+    },
+  },
+}
+
+assert.equal(
+  (await getAuditResult(7, 'https://example.com/a?source=current#new'))?.id,
+  'cached-a',
+)
+assert.equal(await getAuditResult(7, 'https://example.com/b'), null)
+
+const siteHistory = await getAuditHistoryForSite('https://example.com/a?utm=1#hero')
+assert.deepEqual(
+  siteHistory.map((entry) => entry.id),
+  ['rules-new', 'privacy'],
+)
 
 assert.throws(
   () =>

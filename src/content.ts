@@ -1,6 +1,5 @@
 import { t } from './i18n'
-import { isNormativeRequirement } from './normative'
-import { allRules } from './rules'
+import { getRunnableRules } from './rules'
 import type { AuditResult, Violation, VisionSimulationFilter } from './types'
 
 const contentScope = globalThis as typeof globalThis & {
@@ -74,9 +73,7 @@ if (contentScope.__nbrGuardContentLoaded) {
     await waitForAuditStability()
 
     const violations: Violation[] = []
-    const rulesToRun = includeRecommendations
-      ? allRules
-      : allRules.filter((rule) => isNormativeRequirement(rule.nbrReference))
+    const rulesToRun = getRunnableRules(includeRecommendations)
 
     for (const rule of rulesToRun) {
       try {
@@ -105,11 +102,11 @@ if (contentScope.__nbrGuardContentLoaded) {
       },
       { error: [], warning: [] },
     )
-    const requirementViolations = dedupedViolations.filter((violation) =>
-      isNormativeRequirement(violation.nbrReference),
+    const requirementViolations = dedupedViolations.filter(
+      (violation) => violation.normativeType === 'Requisito',
     )
     const recommendationViolations = dedupedViolations.filter(
-      (violation) => !isNormativeRequirement(violation.nbrReference),
+      (violation) => violation.normativeType === 'Recomendação',
     )
     const humanReviewItems = dedupedViolations.filter(
       (violation) => violation.requiresHumanReview,

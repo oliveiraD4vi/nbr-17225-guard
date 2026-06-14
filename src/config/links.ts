@@ -3,8 +3,10 @@ export const EXTENSION_PUBLIC_REPOSITORY_URL =
 
 export const EXTENSION_ISSUES_URL = `${EXTENSION_PUBLIC_REPOSITORY_URL}/issues`
 
-export const LANDING_PAGE_URL = 'https://guardiaonbr.com.br'
+export const PROJECT_PAGE_URL = 'https://guardiaonbr.com.br'
 
-export const LANDING_RULES_URL = `${LANDING_PAGE_URL}/rules.html`
+export const PROJECT_RULES_URL = `${PROJECT_PAGE_URL}/rules.html`
 
-export const LANDING_PRIVACY_URL = `${LANDING_PAGE_URL}/privacy.html`
+export const PROJECT_PRIVACY_URL = `${PROJECT_PAGE_URL}/privacy.html`
+
+export const PROJECT_SCORE_URL = `${PROJECT_PAGE_URL}/score.html`

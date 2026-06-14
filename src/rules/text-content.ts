@@ -71,6 +71,9 @@ export const specialTextUsageRule: Rule = {
   description: t('rules.textContent.specialTextUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
+  readiness: 'not_ready',
+  readinessReason:
+    'Regra manual; a Beta ainda nao tem evidencias tecnicas suficientes para gerar candidatos confiaveis.',
   category: 'Não Automatizável',
   check: async (): Promise<Violation[]> => {
     const candidates = Array.from(

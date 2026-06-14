@@ -24,8 +24,8 @@ function createWarnings(
 export const regionUsageRule: Rule = {
   id: 'region-usage',
   nbrReference: '5.4.2',
-  name: t('rules.documentalCompletenessA.regionUsage.name'),
-  description: t('rules.documentalCompletenessA.regionUsage.description'),
+  name: t('rules.structureNavigationControls.regionUsage.name'),
+  description: t('rules.structureNavigationControls.regionUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -37,9 +37,9 @@ export const regionUsageRule: Rule = {
       return [
         createViolation(regionUsageRule, {
           element: document.body,
-          message: t('rules.documentalCompletenessA.regionUsage.message'),
-          suggestion: t('rules.documentalCompletenessA.regionUsage.suggestion'),
-          remediationAdvice: t('rules.documentalCompletenessA.regionUsage.remediation'),
+          message: t('rules.structureNavigationControls.regionUsage.message'),
+          suggestion: t('rules.structureNavigationControls.regionUsage.suggestion'),
+          remediationAdvice: t('rules.structureNavigationControls.regionUsage.remediation'),
           customIdPrefix: 'region-usage',
         }),
       ]
@@ -51,8 +51,8 @@ export const regionUsageRule: Rule = {
 export const listUsageRule: Rule = {
   id: 'list-usage',
   nbrReference: '5.5.2',
-  name: t('rules.documentalCompletenessA.listUsage.name'),
-  description: t('rules.documentalCompletenessA.listUsage.description'),
+  name: t('rules.structureNavigationControls.listUsage.name'),
+  description: t('rules.structureNavigationControls.listUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -64,15 +64,15 @@ export const listUsageRule: Rule = {
       )
       if (children.length >= 3 && !container.querySelector('ul, ol, dl')) {
         const bulletLike = children.filter((child) =>
-          /^[\u2022\-*0-9]/.test((child.textContent || '').trim()),
+          /^(\u2022|[-*]\s+|\d+[.)]\s+)/.test((child.textContent || '').trim()),
         )
         if (bulletLike.length >= 3) {
           violations.push(
             createViolation(listUsageRule, {
               element: container,
-              message: t('rules.documentalCompletenessA.listUsage.message'),
-              suggestion: t('rules.documentalCompletenessA.listUsage.suggestion'),
-              remediationAdvice: t('rules.documentalCompletenessA.listUsage.remediation'),
+              message: t('rules.structureNavigationControls.listUsage.message'),
+              suggestion: t('rules.structureNavigationControls.listUsage.suggestion'),
+              remediationAdvice: t('rules.structureNavigationControls.listUsage.remediation'),
               customIdPrefix: 'list-usage',
             }),
           )
@@ -86,8 +86,8 @@ export const listUsageRule: Rule = {
 export const tableUsageRule: Rule = {
   id: 'table-usage',
   nbrReference: '5.6.2',
-  name: t('rules.documentalCompletenessA.tableUsage.name'),
-  description: t('rules.documentalCompletenessA.tableUsage.description'),
+  name: t('rules.structureNavigationControls.tableUsage.name'),
+  description: t('rules.structureNavigationControls.tableUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -102,9 +102,9 @@ export const tableUsageRule: Rule = {
         violations.push(
           createViolation(tableUsageRule, {
             element: table,
-            message: t('rules.documentalCompletenessA.tableUsage.message'),
-            suggestion: t('rules.documentalCompletenessA.tableUsage.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessA.tableUsage.remediation'),
+            message: t('rules.structureNavigationControls.tableUsage.message'),
+            suggestion: t('rules.structureNavigationControls.tableUsage.suggestion'),
+            remediationAdvice: t('rules.structureNavigationControls.tableUsage.remediation'),
             customIdPrefix: 'table-usage',
           }),
         )
@@ -117,8 +117,8 @@ export const tableUsageRule: Rule = {
 export const linkUsageRule: Rule = {
   id: 'link-usage',
   nbrReference: '5.7.2',
-  name: t('rules.documentalCompletenessA.linkUsage.name'),
-  description: t('rules.documentalCompletenessA.linkUsage.description'),
+  name: t('rules.structureNavigationControls.linkUsage.name'),
+  description: t('rules.structureNavigationControls.linkUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -129,9 +129,9 @@ export const linkUsageRule: Rule = {
         const href = anchor.getAttribute('href') || ''
         return href === '#' || href.toLowerCase().startsWith('javascript:')
       }),
-      () => t('rules.documentalCompletenessA.linkUsage.message'),
-      t('rules.documentalCompletenessA.linkUsage.suggestion'),
-      t('rules.documentalCompletenessA.linkUsage.remediation'),
+      () => t('rules.structureNavigationControls.linkUsage.message'),
+      t('rules.structureNavigationControls.linkUsage.suggestion'),
+      t('rules.structureNavigationControls.linkUsage.remediation'),
       'link-usage',
     ),
 }
@@ -139,8 +139,8 @@ export const linkUsageRule: Rule = {
 export const linkPurposeRule: Rule = {
   id: 'link-purpose',
   nbrReference: '5.7.4',
-  name: t('rules.documentalCompletenessA.linkPurpose.name'),
-  description: t('rules.documentalCompletenessA.linkPurpose.description'),
+  name: t('rules.structureNavigationControls.linkPurpose.name'),
+  description: t('rules.structureNavigationControls.linkPurpose.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -152,9 +152,9 @@ export const linkPurposeRule: Rule = {
         vagueTexts.includes(getAccessibleName(anchor).trim().toLowerCase()),
       ),
       (anchor) =>
-        t('rules.documentalCompletenessA.linkPurpose.message', { name: getAccessibleName(anchor) }),
-      t('rules.documentalCompletenessA.linkPurpose.suggestion'),
-      t('rules.documentalCompletenessA.linkPurpose.remediation'),
+        t('rules.structureNavigationControls.linkPurpose.message', { name: getAccessibleName(anchor) }),
+      t('rules.structureNavigationControls.linkPurpose.suggestion'),
+      t('rules.structureNavigationControls.linkPurpose.remediation'),
       'link-purpose',
     )
   },
@@ -163,10 +163,13 @@ export const linkPurposeRule: Rule = {
 export const navigationConsistencyRule: Rule = {
   id: 'navigation-consistency',
   nbrReference: '5.7.15',
-  name: t('rules.documentalCompletenessA.navigationConsistency.name'),
-  description: t('rules.documentalCompletenessA.navigationConsistency.description'),
+  name: t('rules.structureNavigationControls.navigationConsistency.name'),
+  description: t('rules.structureNavigationControls.navigationConsistency.description'),
   severity: 'warning',
   wcagLevel: 'AA',
+  readiness: 'not_ready',
+  readinessReason:
+    'Depende de comparar navegacao em um conjunto real de paginas; a Beta ainda audita uma pagina por vez.',
   category: 'Semi-Automatizável',
   check: async () => {
     const navs = Array.from(document.querySelectorAll<HTMLElement>('nav, [role="navigation"]'))
@@ -181,9 +184,9 @@ export const navigationConsistencyRule: Rule = {
       ? [
           createViolation(navigationConsistencyRule, {
             element: navs[0],
-            message: t('rules.documentalCompletenessA.navigationConsistency.message'),
-            suggestion: t('rules.documentalCompletenessA.navigationConsistency.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessA.navigationConsistency.remediation'),
+            message: t('rules.structureNavigationControls.navigationConsistency.message'),
+            suggestion: t('rules.structureNavigationControls.navigationConsistency.suggestion'),
+            remediationAdvice: t('rules.structureNavigationControls.navigationConsistency.remediation'),
             customIdPrefix: 'nav-consistency',
           }),
         ]
@@ -194,10 +197,13 @@ export const navigationConsistencyRule: Rule = {
 export const helpConsistencyRule: Rule = {
   id: 'help-consistency',
   nbrReference: '5.7.16',
-  name: t('rules.documentalCompletenessA.helpConsistency.name'),
-  description: t('rules.documentalCompletenessA.helpConsistency.description'),
+  name: t('rules.structureNavigationControls.helpConsistency.name'),
+  description: t('rules.structureNavigationControls.helpConsistency.description'),
   severity: 'warning',
   wcagLevel: 'A',
+  readiness: 'not_ready',
+  readinessReason:
+    'Depende de recorrencia entre telas equivalentes; a Beta ainda nao compara ajuda entre paginas.',
   category: 'Semi-Automatizável',
   check: async () => {
     const helpLinks = Array.from(
@@ -218,9 +224,9 @@ export const helpConsistencyRule: Rule = {
         return [
           createViolation(helpConsistencyRule, {
             element: helpLinks[0] as unknown as HTMLElement,
-            message: t('rules.documentalCompletenessA.helpConsistency.message'),
-            suggestion: t('rules.documentalCompletenessA.helpConsistency.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessA.helpConsistency.remediation'),
+            message: t('rules.structureNavigationControls.helpConsistency.message'),
+            suggestion: t('rules.structureNavigationControls.helpConsistency.suggestion'),
+            remediationAdvice: t('rules.structureNavigationControls.helpConsistency.remediation'),
             customIdPrefix: 'help-consistency',
           }),
         ]
@@ -233,8 +239,8 @@ export const helpConsistencyRule: Rule = {
 export const buttonUsageRule: Rule = {
   id: 'button-usage',
   nbrReference: '5.8.2',
-  name: t('rules.documentalCompletenessA.buttonUsage.name'),
-  description: t('rules.documentalCompletenessA.buttonUsage.description'),
+  name: t('rules.structureNavigationControls.buttonUsage.name'),
+  description: t('rules.structureNavigationControls.buttonUsage.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -244,9 +250,9 @@ export const buttonUsageRule: Rule = {
       Array.from(
         document.querySelectorAll<HTMLElement>('a[onclick], a[href="#"], a[href^="javascript:" i]'),
       ),
-      () => t('rules.documentalCompletenessA.buttonUsage.message'),
-      t('rules.documentalCompletenessA.buttonUsage.suggestion'),
-      t('rules.documentalCompletenessA.buttonUsage.remediation'),
+      () => t('rules.structureNavigationControls.buttonUsage.message'),
+      t('rules.structureNavigationControls.buttonUsage.suggestion'),
+      t('rules.structureNavigationControls.buttonUsage.remediation'),
       'button-usage',
     ),
 }
@@ -254,8 +260,8 @@ export const buttonUsageRule: Rule = {
 export const buttonPurposeRule: Rule = {
   id: 'button-purpose',
   nbrReference: '5.8.3',
-  name: t('rules.documentalCompletenessA.buttonPurpose.name'),
-  description: t('rules.documentalCompletenessA.buttonPurpose.description'),
+  name: t('rules.structureNavigationControls.buttonPurpose.name'),
+  description: t('rules.structureNavigationControls.buttonPurpose.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -269,11 +275,11 @@ export const buttonPurposeRule: Rule = {
         ),
       ).filter((element) => vagueTexts.includes(getAccessibleName(element).trim().toLowerCase())),
       (element) =>
-        t('rules.documentalCompletenessA.buttonPurpose.message', {
+        t('rules.structureNavigationControls.buttonPurpose.message', {
           name: getAccessibleName(element),
         }),
-      t('rules.documentalCompletenessA.buttonPurpose.suggestion'),
-      t('rules.documentalCompletenessA.buttonPurpose.remediation'),
+      t('rules.structureNavigationControls.buttonPurpose.suggestion'),
+      t('rules.structureNavigationControls.buttonPurpose.remediation'),
       'button-purpose',
     )
   },
@@ -282,10 +288,13 @@ export const buttonPurposeRule: Rule = {
 export const buttonConsistencyRule: Rule = {
   id: 'button-consistency',
   nbrReference: '5.8.5',
-  name: t('rules.documentalCompletenessA.buttonConsistency.name'),
-  description: t('rules.documentalCompletenessA.buttonConsistency.description'),
+  name: t('rules.structureNavigationControls.buttonConsistency.name'),
+  description: t('rules.structureNavigationControls.buttonConsistency.description'),
   severity: 'warning',
   wcagLevel: 'AA',
+  readiness: 'not_ready',
+  readinessReason:
+    'Depende de equivalencia entre paginas e decisoes de produto; a checagem local gerou falso positivo amplo.',
   category: 'Semi-Automatizável',
   check: async () => {
     const buttons = Array.from(
@@ -304,11 +313,11 @@ export const buttonConsistencyRule: Rule = {
       ? [
           createViolation(buttonConsistencyRule, {
             element: document.body,
-            message: t('rules.documentalCompletenessA.buttonConsistency.message', {
+            message: t('rules.structureNavigationControls.buttonConsistency.message', {
               target: inconsistent[0],
             }),
-            suggestion: t('rules.documentalCompletenessA.buttonConsistency.suggestion'),
-            remediationAdvice: t('rules.documentalCompletenessA.buttonConsistency.remediation'),
+            suggestion: t('rules.structureNavigationControls.buttonConsistency.suggestion'),
+            remediationAdvice: t('rules.structureNavigationControls.buttonConsistency.remediation'),
             customIdPrefix: 'button-consistency',
           }),
         ]
@@ -319,8 +328,8 @@ export const buttonConsistencyRule: Rule = {
 export const contextChangeOnFocusRule: Rule = {
   id: 'context-change-focus',
   nbrReference: '5.8.9',
-  name: t('rules.documentalCompletenessA.contextChangeOnFocus.name'),
-  description: t('rules.documentalCompletenessA.contextChangeOnFocus.description'),
+  name: t('rules.structureNavigationControls.contextChangeOnFocus.name'),
+  description: t('rules.structureNavigationControls.contextChangeOnFocus.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -328,9 +337,9 @@ export const contextChangeOnFocusRule: Rule = {
     createWarnings(
       contextChangeOnFocusRule,
       Array.from(document.querySelectorAll<HTMLElement>('[onfocus], [autofocus]')),
-      () => t('rules.documentalCompletenessA.contextChangeOnFocus.message'),
-      t('rules.documentalCompletenessA.contextChangeOnFocus.suggestion'),
-      t('rules.documentalCompletenessA.contextChangeOnFocus.remediation'),
+      () => t('rules.structureNavigationControls.contextChangeOnFocus.message'),
+      t('rules.structureNavigationControls.contextChangeOnFocus.suggestion'),
+      t('rules.structureNavigationControls.contextChangeOnFocus.remediation'),
       'context-focus',
     ),
 }
@@ -338,8 +347,8 @@ export const contextChangeOnFocusRule: Rule = {
 export const contextChangeOnInputRule: Rule = {
   id: 'context-change-input',
   nbrReference: '5.8.10',
-  name: t('rules.documentalCompletenessA.contextChangeOnInput.name'),
-  description: t('rules.documentalCompletenessA.contextChangeOnInput.description'),
+  name: t('rules.structureNavigationControls.contextChangeOnInput.name'),
+  description: t('rules.structureNavigationControls.contextChangeOnInput.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -351,9 +360,9 @@ export const contextChangeOnInputRule: Rule = {
           'select[onchange], input[onchange], textarea[onchange]',
         ),
       ),
-      () => t('rules.documentalCompletenessA.contextChangeOnInput.message'),
-      t('rules.documentalCompletenessA.contextChangeOnInput.suggestion'),
-      t('rules.documentalCompletenessA.contextChangeOnInput.remediation'),
+      () => t('rules.structureNavigationControls.contextChangeOnInput.message'),
+      t('rules.structureNavigationControls.contextChangeOnInput.suggestion'),
+      t('rules.structureNavigationControls.contextChangeOnInput.remediation'),
       'context-input',
     ),
 }
@@ -361,8 +370,8 @@ export const contextChangeOnInputRule: Rule = {
 export const singlePointerRule: Rule = {
   id: 'single-pointer',
   nbrReference: '5.8.11',
-  name: t('rules.documentalCompletenessA.singlePointer.name'),
-  description: t('rules.documentalCompletenessA.singlePointer.description'),
+  name: t('rules.structureNavigationControls.singlePointer.name'),
+  description: t('rules.structureNavigationControls.singlePointer.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -372,9 +381,9 @@ export const singlePointerRule: Rule = {
       Array.from(
         document.querySelectorAll<HTMLElement>('[onmousedown], [onpointerdown], [ontouchstart]'),
       ),
-      () => t('rules.documentalCompletenessA.singlePointer.message'),
-      t('rules.documentalCompletenessA.singlePointer.suggestion'),
-      t('rules.documentalCompletenessA.singlePointer.remediation'),
+      () => t('rules.structureNavigationControls.singlePointer.message'),
+      t('rules.structureNavigationControls.singlePointer.suggestion'),
+      t('rules.structureNavigationControls.singlePointer.remediation'),
       'single-pointer',
     ),
 }
@@ -382,8 +391,8 @@ export const singlePointerRule: Rule = {
 export const pointerGestureRule: Rule = {
   id: 'pointer-gesture',
   nbrReference: '5.8.12',
-  name: t('rules.documentalCompletenessA.pointerGesture.name'),
-  description: t('rules.documentalCompletenessA.pointerGesture.description'),
+  name: t('rules.structureNavigationControls.pointerGesture.name'),
+  description: t('rules.structureNavigationControls.pointerGesture.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -395,9 +404,9 @@ export const pointerGestureRule: Rule = {
           '[ontouchstart], [ontouchmove], [ongesturestart], [ongesturechange]',
         ),
       ),
-      () => t('rules.documentalCompletenessA.pointerGesture.message'),
-      t('rules.documentalCompletenessA.pointerGesture.suggestion'),
-      t('rules.documentalCompletenessA.pointerGesture.remediation'),
+      () => t('rules.structureNavigationControls.pointerGesture.message'),
+      t('rules.structureNavigationControls.pointerGesture.suggestion'),
+      t('rules.structureNavigationControls.pointerGesture.remediation'),
       'pointer-gesture',
     ),
 }
@@ -405,8 +414,8 @@ export const pointerGestureRule: Rule = {
 export const dragMovementRule: Rule = {
   id: 'drag-movement',
   nbrReference: '5.8.13',
-  name: t('rules.documentalCompletenessA.dragMovement.name'),
-  description: t('rules.documentalCompletenessA.dragMovement.description'),
+  name: t('rules.structureNavigationControls.dragMovement.name'),
+  description: t('rules.structureNavigationControls.dragMovement.description'),
   severity: 'warning',
   wcagLevel: 'AA',
   category: 'Semi-Automatizável',
@@ -416,9 +425,9 @@ export const dragMovementRule: Rule = {
       Array.from(
         document.querySelectorAll<HTMLElement>('[draggable="true"], [ondragstart], [ondrop]'),
       ),
-      () => t('rules.documentalCompletenessA.dragMovement.message'),
-      t('rules.documentalCompletenessA.dragMovement.suggestion'),
-      t('rules.documentalCompletenessA.dragMovement.remediation'),
+      () => t('rules.structureNavigationControls.dragMovement.message'),
+      t('rules.structureNavigationControls.dragMovement.suggestion'),
+      t('rules.structureNavigationControls.dragMovement.remediation'),
       'drag-movement',
     ),
 }
@@ -426,8 +435,8 @@ export const dragMovementRule: Rule = {
 export const motionOperationRule: Rule = {
   id: 'motion-operation',
   nbrReference: '5.8.14',
-  name: t('rules.documentalCompletenessA.motionOperation.name'),
-  description: t('rules.documentalCompletenessA.motionOperation.description'),
+  name: t('rules.structureNavigationControls.motionOperation.name'),
+  description: t('rules.structureNavigationControls.motionOperation.description'),
   severity: 'warning',
   wcagLevel: 'A',
   category: 'Semi-Automatizável',
@@ -437,14 +446,14 @@ export const motionOperationRule: Rule = {
       Array.from(
         document.querySelectorAll<HTMLElement>('[data-motion], [data-shake], [data-tilt]'),
       ),
-      () => t('rules.documentalCompletenessA.motionOperation.message'),
-      t('rules.documentalCompletenessA.motionOperation.suggestion'),
-      t('rules.documentalCompletenessA.motionOperation.remediation'),
+      () => t('rules.structureNavigationControls.motionOperation.message'),
+      t('rules.structureNavigationControls.motionOperation.suggestion'),
+      t('rules.structureNavigationControls.motionOperation.remediation'),
       'motion-operation',
     ),
 }
 
-export const documentalCompletenessRulesA: Rule[] = [
+export const structuralNavigationControlRules: Rule[] = [
   regionUsageRule,
   listUsageRule,
   tableUsageRule,

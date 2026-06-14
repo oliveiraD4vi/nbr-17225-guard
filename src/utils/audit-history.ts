@@ -71,8 +71,21 @@ export function compactAuditResultForStorage<T extends AuditResult>(result: T): 
 export function getAuditUrlStorageKey(url: string): string {
   try {
     const parsed = new URL(url)
+    parsed.search = ''
     parsed.hash = ''
+    if (parsed.pathname !== '/') {
+      parsed.pathname = parsed.pathname.replace(/\/+$/, '') || '/'
+    }
     return parsed.toString()
+  } catch {
+    return url
+  }
+}
+
+export function getAuditSiteStorageKey(url: string): string {
+  try {
+    const parsed = new URL(url)
+    return parsed.origin && parsed.origin !== 'null' ? parsed.origin : getAuditUrlStorageKey(url)
   } catch {
     return url
   }

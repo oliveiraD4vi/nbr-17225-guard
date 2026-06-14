@@ -7,6 +7,55 @@ import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
 import { createViolation, getVisibleText } from '@/utils'
 
+function getHeadingLevel(heading: HTMLElement): number {
+  return Number(heading.tagName.replace(/^H/i, ''))
+}
+
+function hasMeaningfulContent(element: Element): boolean {
+  if (!(element instanceof HTMLElement)) return false
+  const text = getVisibleText(element).trim()
+  if (text.length >= 16) return true
+  return Boolean(element.querySelector('img, svg, canvas, ul, ol, dl, table, form, figure, video'))
+}
+
+function hasAssociatedHeadingContent(heading: HTMLElement): boolean {
+  const headingId = heading.id
+  if (headingId) {
+    const labelledRegion = heading.closest<HTMLElement>(
+      `[aria-labelledby~="${CSS.escape(headingId)}"]`,
+    )
+    if (labelledRegion) {
+      const regionText = getVisibleText(labelledRegion).replace(getVisibleText(heading), '').trim()
+      if (regionText.length >= 16) return true
+      if (labelledRegion.querySelector('img, svg, canvas, ul, ol, dl, table, form, figure, video')) {
+        return true
+      }
+    }
+  }
+
+  const level = getHeadingLevel(heading)
+  let next = heading.nextElementSibling
+  while (next) {
+    if (/^H[1-6]$/i.test(next.tagName) && getHeadingLevel(next as HTMLElement) <= level) {
+      return false
+    }
+    if (hasMeaningfulContent(next)) return true
+    next = next.nextElementSibling
+  }
+
+  const wrapper = heading.parentElement
+  if (!wrapper || wrapper === document.body) return false
+
+  next = wrapper.nextElementSibling
+  while (next) {
+    if (/^H[1-6]$/i.test(next.tagName)) return false
+    if (hasMeaningfulContent(next)) return true
+    next = next.nextElementSibling
+  }
+
+  return false
+}
+
 export const headingSemanticRule: Rule = {
   id: 'heading-semantic',
   nbrReference: '5.3.1',
@@ -46,9 +95,7 @@ export const headingUsageRule: Rule = {
     const violations: Violation[] = []
 
     document.querySelectorAll<HTMLElement>('h1, h2, h3, h4, h5, h6').forEach((heading) => {
-      const next = heading.nextElementSibling as HTMLElement | null
-      const nextText = next ? getVisibleText(next) : ''
-      if (!next || (!nextText && !next.querySelector('img, ul, ol, table, section, article'))) {
+      if (!hasAssociatedHeadingContent(heading)) {
         violations.push(
           createViolation(headingUsageRule, {
             element: heading,

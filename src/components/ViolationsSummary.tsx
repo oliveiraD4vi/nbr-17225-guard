@@ -8,6 +8,7 @@ import {
   LinkOutlined,
   WarningOutlined,
 } from '@ant-design/icons'
+import { PROJECT_SCORE_URL } from '@/config/links'
 import { t } from '@/i18n'
 import type { AuditResult } from '@/types'
 import {
@@ -125,9 +126,17 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
             <div className="summary-score-copy">
               <span className="summary-score-label-row">
                 <span className="summary-stat-label">{t('summary.scoreLabel')}</span>
-                <Tooltip title={t('summary.scoreTooltip')}>
-                  <InfoCircleOutlined aria-label={t('summary.scoreTooltip')} />
-                </Tooltip>
+                <Button
+                  className="summary-score-link"
+                  href={PROJECT_SCORE_URL}
+                  icon={<InfoCircleOutlined />}
+                  rel="noreferrer"
+                  size="small"
+                  target="_blank"
+                  type="link"
+                >
+                  {t('summary.scoreExplanationLink')}
+                </Button>
               </span>
               <strong>{t('summary.scoreOutOf', { score: auditScore.score })}</strong>
               <p>{t('summary.scoreDescription')}</p>

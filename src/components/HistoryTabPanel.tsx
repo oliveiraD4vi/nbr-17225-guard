@@ -25,6 +25,7 @@ interface ComparisonTrend {
 interface HistoryTabPanelProps {
   activeTabTitle?: string
   auditHistory: AuditHistoryEntry[]
+  siteAuditHistory: AuditHistoryEntry[]
   auditResultId?: string
   selectedHistoryId: string | null
   comparisonEntries: AuditHistoryEntry[]
@@ -52,6 +53,14 @@ function getHistoryOptionLabel(entry: AuditHistoryEntry): string {
   })
 }
 
+function getEntryPathLabel(url: string): string {
+  try {
+    return new URL(url).pathname || '/'
+  } catch {
+    return url
+  }
+}
+
 function HistoryListSection({
   entries,
   sectionTitle,
@@ -65,6 +74,8 @@ function HistoryListSection({
   onExportHistoryJson,
   onExportHistoryCsv,
   onExportHistorySummary,
+  showCurrentMarkers = true,
+  showEntryUrl = false,
 }: {
   entries: AuditHistoryEntry[]
   sectionTitle: string
@@ -78,6 +89,8 @@ function HistoryListSection({
   onExportHistoryJson: (entry: AuditHistoryEntry) => void
   onExportHistoryCsv: (entry: AuditHistoryEntry) => void
   onExportHistorySummary: (entry: AuditHistoryEntry) => void
+  showCurrentMarkers?: boolean
+  showEntryUrl?: boolean
 }) {
   return (
     <div className="history-section">
@@ -91,7 +104,7 @@ function HistoryListSection({
         <List
           dataSource={entries}
           renderItem={(entry) => {
-            const isCurrent = !selectedHistoryId
+            const isCurrent = showCurrentMarkers && !selectedHistoryId
               ? entry.id === auditHistory[0]?.id
               : entry.id === selectedHistoryId
             const pendingReviews = getPendingHumanReviewCount(entry)
@@ -132,7 +145,9 @@ function HistoryListSection({
                     type={entry.id === selectedHistoryId ? 'primary' : 'default'}
                     size="small"
                     icon={<HistoryOutlined />}
-                    disabled={entry.id === selectedHistoryId && !auditResultId}
+                    disabled={
+                      showCurrentMarkers && entry.id === selectedHistoryId && !auditResultId
+                    }
                     onClick={() =>
                       onSelectHistory(entry.id === selectedHistoryId ? null : entry.id)
                     }
@@ -159,9 +174,12 @@ function HistoryListSection({
                   title={
                     <div className="history-item-title">
                       <span>{entry.pageTitle || activeTabTitle || entry.url}</span>
-                      {!selectedHistoryId && entry.id === auditHistory[0]?.id && (
-                        <Tag color="blue">{t('shared.states.moreRecent')}</Tag>
-                      )}
+                      {showEntryUrl && <Tag>{getEntryPathLabel(entry.url)}</Tag>}
+                      {showCurrentMarkers &&
+                        !selectedHistoryId &&
+                        entry.id === auditHistory[0]?.id && (
+                          <Tag color="blue">{t('shared.states.moreRecent')}</Tag>
+                        )}
                       {entry.id === selectedHistoryId && (
                         <Tag color="gold">{t('shared.states.currentlyViewing')}</Tag>
                       )}
@@ -187,6 +205,7 @@ function HistoryListSection({
                         <span>{new Date(entry.timestamp).toLocaleString('pt-BR')}</span>
                         <span>{t('shared.counts.items', { count: entry.totalViolations })}</span>
                       </div>
+                      {showEntryUrl && <span className="history-item-url">{entry.url}</span>}
                       <div className="history-item-tag-row">
                         <Tag color="red">
                           {t('shared.counts.confirmed', { count: confirmedReviews })}
@@ -219,6 +238,7 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(
   ({
     activeTabTitle,
     auditHistory,
+    siteAuditHistory,
     auditResultId,
     selectedHistoryId,
     comparisonEntries,
@@ -418,6 +438,25 @@ export const HistoryTabPanel: React.FC<HistoryTabPanelProps> = React.memo(
               onExportHistorySummary={onExportHistorySummary}
             />
           </>
+        )}
+
+        {siteAuditHistory.length > 0 && (
+          <HistoryListSection
+            entries={siteAuditHistory}
+            sectionTitle={t('popup.history.otherPagesTitle')}
+            emptyDescription={t('popup.history.otherPagesEmpty')}
+            activeTabTitle={activeTabTitle}
+            auditHistory={auditHistory}
+            auditResultId={auditResultId}
+            selectedHistoryId={selectedHistoryId}
+            onSelectHistory={onSelectHistory}
+            onDeleteHistoryEntry={onDeleteHistoryEntry}
+            onExportHistoryJson={onExportHistoryJson}
+            onExportHistoryCsv={onExportHistoryCsv}
+            onExportHistorySummary={onExportHistorySummary}
+            showCurrentMarkers={false}
+            showEntryUrl
+          />
         )}
       </div>
     )
