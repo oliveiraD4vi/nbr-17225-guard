@@ -55,7 +55,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local;
 - fluxo de revisão humana passa a exigir confirmação antes da mudança de estado e a reorganizar visualmente o item entre pendentes, confirmados e descartados;
 - cards de violação passam a truncar conteúdos longos com tooltip, reduzindo ruído sem ocultar contexto;
-- V1 Farol passa a ser comunicada como Beta funcional, com textos alinhados ao estágio real do produto;
+- V1 Farol passa a comunicar o escopo definido da Beta, com regras `ready` executadas e regras `not_ready` documentadas fora da nota;
 - interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225;
 - toggle de recomendações passa a comunicar estado atual e ação esperada com mais clareza.
 - cards de violação passam a abrir com leitura curta mais clara e link para a explicação pública completa da regra;

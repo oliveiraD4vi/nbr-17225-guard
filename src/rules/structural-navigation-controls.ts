@@ -169,7 +169,7 @@ export const navigationConsistencyRule: Rule = {
   wcagLevel: 'AA',
   readiness: 'not_ready',
   readinessReason:
-    'Depende de comparar navegacao em um conjunto real de paginas; a Beta ainda audita uma pagina por vez.',
+    'Depende de comparar navegação em um conjunto real de páginas; a Beta ainda audita uma página por vez.',
   category: 'Semi-Automatizável',
   check: async () => {
     const navs = Array.from(document.querySelectorAll<HTMLElement>('nav, [role="navigation"]'))
@@ -203,7 +203,7 @@ export const helpConsistencyRule: Rule = {
   wcagLevel: 'A',
   readiness: 'not_ready',
   readinessReason:
-    'Depende de recorrencia entre telas equivalentes; a Beta ainda nao compara ajuda entre paginas.',
+    'Depende de recorrência entre telas equivalentes; a Beta ainda não compara ajuda entre páginas.',
   category: 'Semi-Automatizável',
   check: async () => {
     const helpLinks = Array.from(
@@ -294,7 +294,7 @@ export const buttonConsistencyRule: Rule = {
   wcagLevel: 'AA',
   readiness: 'not_ready',
   readinessReason:
-    'Depende de equivalencia entre paginas e decisoes de produto; a checagem local gerou falso positivo amplo.',
+    'Depende de equivalência entre páginas e decisões de produto; a checagem local gerou falso positivo amplo.',
   category: 'Semi-Automatizável',
   check: async () => {
     const buttons = Array.from(

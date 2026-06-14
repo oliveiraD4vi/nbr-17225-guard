@@ -89,4 +89,4 @@ Lista em ordem normativa, apenas para priorização técnica. Isso não remove n
 
 - `5.9.1` e `5.9.3` deixaram de denunciar exatamente o mesmo cenário: agora `5.9.1` cobre ausência de rótulo visível e `5.9.3` cobre ausência de associação programática quando já existe indício visual de rótulo.
 - `5.13.6` deixou de repetir o mesmo sinal de `order` em CSS já tratado por `5.10.2`.
-- Esta classificação é documental. Ela ainda não altera score, priorização nem visibilidade das regras na interface.
+- Esta classificação é documental. A execução da Beta é controlada pelo estado `ready` ou `not_ready` definido em cada regra e documentado em `RULE_READINESS.md`.

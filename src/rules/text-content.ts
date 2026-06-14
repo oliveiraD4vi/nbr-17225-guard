@@ -73,7 +73,7 @@ export const specialTextUsageRule: Rule = {
   wcagLevel: 'A',
   readiness: 'not_ready',
   readinessReason:
-    'Regra manual; a Beta ainda nao tem evidencias tecnicas suficientes para gerar candidatos confiaveis.',
+    'Regra manual; a Beta ainda não tem evidências técnicas suficientes para gerar candidatos confiáveis.',
   category: 'Não Automatizável',
   check: async (): Promise<Violation[]> => {
     const candidates = Array.from(

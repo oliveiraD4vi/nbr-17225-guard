@@ -4,11 +4,11 @@ O Guardião NBR 17225 usa versionamento semântico para a extensão e nomes curt
 
 ## Versão Atual
 
-| Versão  | Nome     | Escopo                                                                 |
-| ------- | -------- | ---------------------------------------------------------------------- |
-| `1.0.0-beta.1` | V1 Farol Beta | 96 requisitos normativos e 16 recomendações implementadas no motor v1, com UX e heurísticas ainda em evolução contínua. |
+| Versão | Nome | Escopo |
+| --- | --- | --- |
+| `1.0.0-beta.1` | V1 Farol Beta | 112 regras documentadas; 104 regras `ready` executadas na auditoria; 8 regras `not_ready` documentadas, mas fora da execução e da nota. |
 
-Esta versão deve ser comunicada como Beta funcional: utilizável em fluxo assistido de auditoria, sem ser apresentada como release final enquanto ajustes de regras, UX e documentação ainda estiverem em andamento.
+Esta versão deve ser comunicada como Beta assistida: pronta para auditorias orientadas por revisão humana, sem ser apresentada como release final enquanto regras `not_ready` ainda dependerem de evidência técnica adicional.
 
 ## Critérios
 

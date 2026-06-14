@@ -292,7 +292,7 @@ export const criticalFormPreventionRule: Rule = {
   wcagLevel: 'AA',
   readiness: 'not_ready',
   readinessReason:
-    'Depende da jornada critica completa e de confirmacao de fluxo; a Beta ainda nao interage com formularios.',
+    'Depende da jornada crítica completa e de confirmação de fluxo; a Beta ainda não interage com formulários.',
   category: 'Semi-Automatizável',
   check: async () => {
     const criticalControls = Array.from(
@@ -329,7 +329,7 @@ export const dataReentryRule: Rule = {
   wcagLevel: 'A',
   readiness: 'not_ready',
   readinessReason:
-    'Campo repetido na mesma pagina nao prova reentrada indevida de dados entre etapas ou sessoes.',
+    'Campo repetido na mesma página não prova reentrada indevida de dados entre etapas ou sessões.',
   category: 'Semi-Automatizável',
   check: async () => {
     const repeatedFields = new Map<string, HTMLElement[]>()
@@ -939,7 +939,7 @@ export const customComponentSemanticRule: Rule = {
   wcagLevel: 'A',
   readiness: 'not_ready',
   readinessReason:
-    'A deteccao por tabindex/evento inferiu intencao interativa demais e gerou falso positivo em cards narrativos.',
+    'A detecção por tabindex/evento inferiu intenção interativa demais e gerou falso positivo em cards narrativos.',
   category: 'Semi-Automatizável',
   check: async () =>
     createWarnings(
