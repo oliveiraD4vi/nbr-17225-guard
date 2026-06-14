@@ -85,8 +85,8 @@ Exemplos:
 ### V1.3 Carta Náutica
 
 - documentação pública mais completa de regras e limites;
-- links cruzados entre extensão, landing page, políticas e issues;
-- orientação formal para atualizar a landing quando regras mudarem;
+- links cruzados entre extensão, Página do Projeto, políticas e issues;
+- orientação formal para atualizar a Página do Projeto quando regras mudarem;
 - melhoria de navegação da página pública de regras.
 
 ### V1.4 Sextante
@@ -103,9 +103,9 @@ Exemplos:
 - leitura longitudinal de progresso;
 - integração mais forte entre histórico, revisão humana e relatórios.
 
-## Sincronização com a Landing Page
+## Sincronização com a Página do Projeto
 
-Quando uma versão alterar regra, função de verificação, texto normativo resumido ou limite residual, a página pública de regras deve ser atualizada. O PR da extensão deve referenciar a issue pública que solicita a atualização da landing page.
+Quando uma versão alterar regra, função de verificação, texto normativo resumido ou limite residual, a página pública de regras deve ser atualizada. O PR da extensão deve referenciar a issue pública que solicita a atualização da Página do Projeto.
 
 ## Referências Conceituais
 

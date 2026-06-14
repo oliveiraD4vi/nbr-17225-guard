@@ -19,8 +19,8 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 - grupos de violações por regra, severidade e categoria natural do motor, como `cores`, `formulários`, `cabeçalhos` e `teclado`;
 - filtro por categoria na listagem de violações;
 - leitura curta mais clara nos cards de violação, com resumo orientado por família de regra antes do detalhe técnico;
-- botão de explicação extra por achado, com leitura contextual de regra, sinal detectado, interpretação e próximo passo;
-- explicação extra enriquecida por família de regra, ajudando a entender impacto de uso e foco de revisão para cada tipo de achado;
+- link de regra por achado, abrindo a explicação completa e a rastreabilidade na Página do Projeto;
+- explicação pública por regra, ajudando a entender expectativa normativa, sinal verificado, limite residual e foco de revisão;
 - board auxiliar para regras de contraste, com ajuste em tempo real de cores, persistência da correção do usuário e restauração para os valores originais da página.
 
 ### Revisão humana
@@ -118,7 +118,7 @@ Consulte também:
 
 ## Rastreabilidade pública
 
-A landing page do projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 112 regras implementadas:
+A Página do Projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 112 regras implementadas:
 
 - referência da ABNT NBR 17225;
 - recorte normativo interpretativo com referência à fonte pública;
@@ -144,7 +144,7 @@ Use:
 - o filtro por categoria;
 - a navegação por itens prioritários;
 - os resumos curtos dos cards para leitura rápida do achado;
-- a explicação extra para entender impacto de uso e foco de revisão daquele tipo de regra;
+- o link da regra para abrir a explicação completa, os limites e a rastreabilidade em `https://guardiaonbr.com.br/rules.html`;
 - a board de contraste, quando aplicável.
 
 ### 3. Fechar a revisão humana
@@ -210,12 +210,14 @@ O Guardião NBR 17225 nasceu como projeto acadêmico e mantém a extensão como 
 - Espelho público da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror>
 - Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror/issues>
 - Domínio: `guardiaonbr.com.br`
+- Página do Projeto: `https://guardiaonbr.com.br`
 - Página pública de regras: `https://guardiaonbr.com.br/rules.html`
+- Explicação da nota: `https://guardiaonbr.com.br/score.html`
 - Política de privacidade: `https://guardiaonbr.com.br/privacy.html`
 
-A landing page é a vitrine oficial do projeto e não faz parte do código open-source da extensão. Bugs, pedidos de ajuste visual, problemas de conteúdo e solicitações de atualização da página de regras devem ser abertos como issue no GitHub público da extensão.
+A Página do Projeto é a vitrine oficial do projeto e não faz parte do código open-source da extensão. Bugs, pedidos de ajuste visual, problemas de conteúdo e solicitações de atualização da página de regras devem ser abertos como issue no GitHub público da extensão.
 
-Quando um PR alterar, remover ou criar uma função de verificação de regra, o PR deve referenciar a issue que solicita a atualização correspondente na landing page. A alteração da landing page é mantida separadamente.
+Quando um PR alterar, remover ou criar uma função de verificação de regra, o PR deve referenciar a issue que solicita a atualização correspondente na Página do Projeto. A alteração da Página do Projeto é mantida separadamente.
 
 ## Versionamento
 

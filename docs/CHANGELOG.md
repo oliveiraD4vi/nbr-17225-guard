@@ -28,12 +28,12 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - 15 recomendações priorizadas para fechar a V1 com 96 requisitos e 16 recomendações;
 - versionamento `1.0.0` como V1 Farol;
 - estratégia de nomes de versão com tema de navegação, orientação e sinalização;
-- links para landing page, página de regras, política de privacidade e GitHub público na tela Sobre;
+- links para Página do Projeto, página de regras, política de privacidade e GitHub público na tela Sobre;
 - exportação de resumo simples da auditoria direto pela aba de resumo;
 - classificação normativa canônica em `src/normative.ts`, baseada na própria ABNT NBR 17225;
 - importação de relatórios JSON exportados pela própria extensão para retomar contexto e comparação em outro navegador ou computador;
 - classificação documental da força heurística em `docs/RULES_HEURISTIC_CLASSIFICATION.md`, com priorização explícita das heurísticas mais fracas;
-- modal de explicação extra por achado, com leitura complementar da regra, do sinal detectado e do próximo passo.
+- links de regra por achado, abrindo a explicação completa e a rastreabilidade na Página do Projeto.
 - alerta preventivo de pressão no armazenamento local, com leitura de uso e ação de compactação no próprio popup.
 
 ### Changed
@@ -58,7 +58,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - V1 Farol passa a ser comunicada como Beta funcional, com textos alinhados ao estágio real do produto;
 - interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225;
 - toggle de recomendações passa a comunicar estado atual e ação esperada com mais clareza.
-- cards de violação passam a abrir com leitura curta mais clara e modal de explicação enriquecido por família de regra;
+- cards de violação passam a abrir com leitura curta mais clara e link para a explicação pública completa da regra;
 - fluxo do popup passa a tornar visível que a retenção do histórico é local ao navegador e que exportação JSON é a continuidade recomendada para retenção longa.
 
 ### Fixed
@@ -68,10 +68,10 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - múltiplos pontos de texto degradado e inconsistências de PT-BR UTF-8, inclusive no `content.ts`;
 - fundos pretos indevidos em botões, tags e overlays após a centralização do tema;
 - contraste das tooltips do Ant Design corrigido no tema para evitar fundo e texto brancos;
-- renderização quebrada do modal de explicação extra e da board de contraste dentro do popup, preservando bloqueio de propagação sem quebrar layout e hover.
+- renderização quebrada da board de contraste dentro do popup, preservando bloqueio de propagação sem quebrar layout e hover.
 - falsos positivos em imagens funcionais, links inline pequenos, botões usados como ação e idioma da página;
 - ruído em heurísticas de links externos, links em nova janela, abreviações e ajuda contextual em formulários;
 - título da aba ativa no cabeçalho agora é truncado em 300 caracteres sem reduzir o texto completo da seção de contexto;
 - sobreposição de ruído entre `5.9.1` e `5.9.3`, separando rótulo visível de associação programática;
 - duplicidade de sinal entre `5.10.2` e `5.13.6`, removendo repetição do mesmo indício de `order` em CSS.
-- clique e foco inesperados em elementos atrás do modal de explicação extra e da board de contraste.
+- clique e foco inesperados em elementos atrás da board de contraste.

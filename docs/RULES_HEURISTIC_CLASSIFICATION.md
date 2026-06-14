@@ -52,37 +52,37 @@ Lista em ordem normativa, apenas para priorização técnica. Isso não remove n
 | 5.2.3  | Imagens decorativas            | difícil distinguir função real vs. decoração apenas por DOM       | `src/rules/images.ts` `imageDecorativeRule` |
 | 5.2.4  | Descrição para imagens complexas | complexidade e suficiência descritiva dependem do conteúdo      | `src/rules/images.ts` `complexImageDescriptionRule` |
 | 5.2.5  | Imagens de texto               | depende de interpretação visual e semântica do ativo gráfico      | `src/rules/images.ts` `imageOfTextRule` |
-| 5.4.2  | Uso de regiões                 | exige julgamento editorial sobre estrutura informacional          | `src/rules/documental-completeness-a.ts` `regionUsageRule` |
-| 5.5.2  | Uso de listas                  | depende de leitura semântica do conteúdo e da intenção editorial  | `src/rules/documental-completeness-a.ts` `listUsageRule` |
-| 5.6.2  | Uso de tabelas                 | requer distinguir layout visual de estrutura tabular real         | `src/rules/documental-completeness-a.ts` `tableUsageRule` |
-| 5.7.4  | Propósito do link no contexto  | contexto semântico do texto e da vizinhança varia muito           | `src/rules/documental-completeness-a.ts` `linkPurposeRule` |
-| 5.7.15 | Navegação consistente          | depende de comparação entre páginas e jornadas equivalentes       | `src/rules/documental-completeness-a.ts` `navigationConsistencyRule` |
-| 5.7.16 | Ajuda consistente              | depende de recorrência entre telas, não de uma página isolada     | `src/rules/documental-completeness-a.ts` `helpConsistencyRule` |
-| 5.8.5  | Identificação consistente      | depende de equivalência entre páginas e decisões de produto       | `src/rules/documental-completeness-a.ts` `buttonConsistencyRule` |
-| 5.8.9  | Mudança de contexto no foco    | comportamento depende de script e fluxo interativo real           | `src/rules/documental-completeness-a.ts` `contextChangeOnFocusRule` |
-| 5.8.10 | Mudança de contexto na entrada | comportamento depende de script e fluxo interativo real           | `src/rules/documental-completeness-a.ts` `contextChangeOnInputRule` |
-| 5.8.11 | Acionamento por ponteiro único | difícil comprovar alternativa equivalente sem interação real      | `src/rules/documental-completeness-a.ts` `singlePointerRule` |
-| 5.8.12 | Operação por gestos            | gestos e alternativas não ficam totalmente explícitos no DOM      | `src/rules/documental-completeness-a.ts` `pointerGestureRule` |
-| 5.8.13 | Movimento de arrastar          | depende de comportamento gestual e alternativas disponíveis       | `src/rules/documental-completeness-a.ts` `dragMovementRule` |
-| 5.8.14 | Operação por movimento         | depende de sensores/eventos e de alternativas de uso              | `src/rules/documental-completeness-a.ts` `motionOperationRule` |
-| 5.9.12 | Prevenção de erro crítica      | suficiência da prevenção depende do risco real do formulário      | `src/rules/documental-completeness-b.ts` `criticalFormPreventionRule` |
-| 5.9.15 | Reentrada de dados             | exige memória de fluxo, conta e jornada entre etapas              | `src/rules/documental-completeness-b.ts` `dataReentryRule` |
-| 5.9.16 | Validação sensorial            | depende de interpretação funcional do mecanismo de validação      | `src/rules/documental-completeness-b.ts` `sensoryValidationRule` |
+| 5.4.2  | Uso de regiões                 | exige julgamento editorial sobre estrutura informacional          | `src/rules/structural-navigation-controls.ts` `regionUsageRule` |
+| 5.5.2  | Uso de listas                  | depende de leitura semântica do conteúdo e da intenção editorial  | `src/rules/structural-navigation-controls.ts` `listUsageRule` |
+| 5.6.2  | Uso de tabelas                 | requer distinguir layout visual de estrutura tabular real         | `src/rules/structural-navigation-controls.ts` `tableUsageRule` |
+| 5.7.4  | Propósito do link no contexto  | contexto semântico do texto e da vizinhança varia muito           | `src/rules/structural-navigation-controls.ts` `linkPurposeRule` |
+| 5.7.15 | Navegação consistente          | depende de comparação entre páginas e jornadas equivalentes       | `src/rules/structural-navigation-controls.ts` `navigationConsistencyRule` |
+| 5.7.16 | Ajuda consistente              | depende de recorrência entre telas, não de uma página isolada     | `src/rules/structural-navigation-controls.ts` `helpConsistencyRule` |
+| 5.8.5  | Identificação consistente      | depende de equivalência entre páginas e decisões de produto       | `src/rules/structural-navigation-controls.ts` `buttonConsistencyRule` |
+| 5.8.9  | Mudança de contexto no foco    | comportamento depende de script e fluxo interativo real           | `src/rules/structural-navigation-controls.ts` `contextChangeOnFocusRule` |
+| 5.8.10 | Mudança de contexto na entrada | comportamento depende de script e fluxo interativo real           | `src/rules/structural-navigation-controls.ts` `contextChangeOnInputRule` |
+| 5.8.11 | Acionamento por ponteiro único | difícil comprovar alternativa equivalente sem interação real      | `src/rules/structural-navigation-controls.ts` `singlePointerRule` |
+| 5.8.12 | Operação por gestos            | gestos e alternativas não ficam totalmente explícitos no DOM      | `src/rules/structural-navigation-controls.ts` `pointerGestureRule` |
+| 5.8.13 | Movimento de arrastar          | depende de comportamento gestual e alternativas disponíveis       | `src/rules/structural-navigation-controls.ts` `dragMovementRule` |
+| 5.8.14 | Operação por movimento         | depende de sensores/eventos e de alternativas de uso              | `src/rules/structural-navigation-controls.ts` `motionOperationRule` |
+| 5.9.12 | Prevenção de erro crítica      | suficiência da prevenção depende do risco real do formulário      | `src/rules/content-forms-media.ts` `criticalFormPreventionRule` |
+| 5.9.15 | Reentrada de dados             | exige memória de fluxo, conta e jornada entre etapas              | `src/rules/content-forms-media.ts` `dataReentryRule` |
+| 5.9.16 | Validação sensorial            | depende de interpretação funcional do mecanismo de validação      | `src/rules/content-forms-media.ts` `sensoryValidationRule` |
 | 5.9.18 | Autenticação acessível mínima  | heurística baseada em indícios como captcha e integrações comuns  | `src/rules/forms.ts` `accessibleAuthenticationRule` |
-| 5.10.1 | Características sensoriais     | linguagem natural e referência espacial variam bastante           | `src/rules/documental-completeness-b.ts` `sensoryCharacteristicsRule` |
-| 5.11.1 | Uso de cores                   | texto pode descrever cor sem realmente depender só dela           | `src/rules/documental-completeness-b.ts` `colorUsageRule` |
+| 5.10.1 | Características sensoriais     | linguagem natural e referência espacial variam bastante           | `src/rules/content-forms-media.ts` `sensoryCharacteristicsRule` |
+| 5.11.1 | Uso de cores                   | texto pode descrever cor sem realmente depender só dela           | `src/rules/content-forms-media.ts` `colorUsageRule` |
 | 5.12.11 | Siglas e abreviaturas         | nem toda sigla precisa expansão explícita no mesmo contexto       | `src/rules/text-content.ts` `abbreviationMeaningRule` |
 | 5.13.9 | Propósito identificável        | a intenção do controle varia com o fluxo e o domínio da página    | `src/rules/semantics.ts` `identifiablePurposeRule` |
 | 5.13.11 | Elementos nativos             | exige julgamento sobre custo-benefício de abstrações customizadas | `src/rules/semantics.ts` `nativeElementsRule` |
-| 5.13.12 | Semântica de componentes customizados | depende do contrato funcional do componente                 | `src/rules/documental-completeness-b.ts` `customComponentSemanticRule` |
-| 5.14.1 | Alternativa em texto para áudio | presença e suficiência da alternativa dependem do conteúdo       | `src/rules/documental-completeness-b.ts` `audioTranscriptRule` |
-| 5.14.2 | Legendas descritivas para vídeo | depende de mídia, player e disponibilidade fora do DOM principal | `src/rules/documental-completeness-b.ts` `videoCaptionsRule` |
-| 5.14.3 | Transcrição para vídeo         | depende de mídia, player e disponibilidade fora do DOM principal  | `src/rules/documental-completeness-b.ts` `videoTranscriptRule` |
-| 5.14.4 | Audiodescrição para vídeo      | depende de conteúdo audiovisual e recursos externos               | `src/rules/documental-completeness-b.ts` `audioDescriptionRule` |
-| 5.14.9 | Legendas ao vivo               | depende de transmissão, player e contexto operacional             | `src/rules/documental-completeness-b.ts` `liveCaptionsRule` |
-| 5.15.1 | Controle de animação           | requer observação temporal e resposta da interface                | `src/rules/documental-completeness-b.ts` `animationControlRule` |
+| 5.13.12 | Semântica de componentes customizados | depende do contrato funcional do componente                 | `src/rules/content-forms-media.ts` `customComponentSemanticRule` |
+| 5.14.1 | Alternativa em texto para áudio | presença e suficiência da alternativa dependem do conteúdo       | `src/rules/content-forms-media.ts` `audioTranscriptRule` |
+| 5.14.2 | Legendas descritivas para vídeo | depende de mídia, player e disponibilidade fora do DOM principal | `src/rules/content-forms-media.ts` `videoCaptionsRule` |
+| 5.14.3 | Transcrição para vídeo         | depende de mídia, player e disponibilidade fora do DOM principal  | `src/rules/content-forms-media.ts` `videoTranscriptRule` |
+| 5.14.4 | Audiodescrição para vídeo      | depende de conteúdo audiovisual e recursos externos               | `src/rules/content-forms-media.ts` `audioDescriptionRule` |
+| 5.14.9 | Legendas ao vivo               | depende de transmissão, player e contexto operacional             | `src/rules/content-forms-media.ts` `liveCaptionsRule` |
+| 5.15.1 | Controle de animação           | requer observação temporal e resposta da interface                | `src/rules/content-forms-media.ts` `animationControlRule` |
 | 5.16.1 | Limite de tempo                | depende de fluxo, sessão e comportamento do servidor              | `src/rules/time.ts` `timeLimitRule` |
-| 5.16.2 | Limite de tempo ajustável      | depende de affordance real de extensão, pausa ou ajuste           | `src/rules/documental-completeness-b.ts` `adjustableTimeLimitRule` |
+| 5.16.2 | Limite de tempo ajustável      | depende de affordance real de extensão, pausa ou ajuste           | `src/rules/content-forms-media.ts` `adjustableTimeLimitRule` |
 | 5.16.3 | Controle de atualização        | atualização automática nem sempre é observável no estado estático | `src/rules/time.ts` `refreshControlRule` |
 
 ## Observações Desta Revisão

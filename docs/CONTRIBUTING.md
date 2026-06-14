@@ -87,7 +87,7 @@ Checklist recomendado:
 5. use apenas chaves de catálogo no código, sem texto visível hardcoded;
 6. se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação;
 7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md`, `FUTURE_RULES_PLAN.md` e `../README.md`;
-8. quando a matriz normativa mudar, abra ou referencie uma issue pública solicitando a atualização correspondente da landing page;
+8. quando a matriz normativa mudar, abra ou referencie uma issue pública solicitando a atualização correspondente da Página do Projeto;
 9. se a alteração mudar, remover ou criar uma função de verificação, inclua no PR o link da issue relacionada à atualização da página pública de regras;
 10. valide a mudança com:
 

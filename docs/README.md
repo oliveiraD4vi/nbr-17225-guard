@@ -7,7 +7,6 @@ Este diretório concentra a documentação complementar da extensão Guardião N
 - `RULES_ANALYSIS.md`: análise de cobertura das regras implementadas.
 - `RULES_HEURISTIC_CLASSIFICATION.md`: classificação atual da força heurística e lista ordenada das heurísticas mais fracas.
 - `FUTURE_RULES_PLAN.md`: recomendações fora da V1 e plano de expansão.
-- `NEXT_STEPS.md`: próximos passos técnicos e de produto.
 - `VERSIONING.md`: política de versão e nomes de marcos.
 - `CONTRIBUTING.md`: guia de contribuição.
 - `CHANGELOG.md`: histórico de mudanças.
