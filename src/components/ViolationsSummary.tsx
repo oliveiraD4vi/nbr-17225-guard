@@ -1,11 +1,15 @@
 import React from 'react'
-import { Button, Card, Empty, Tag, Tooltip } from 'antd'
+import { Button, Card, Dropdown, Empty, Space, Tag } from 'antd'
 import {
+  ArrowRightOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
+  DownOutlined,
   DownloadOutlined,
+  FileTextOutlined,
   InfoCircleOutlined,
   LinkOutlined,
+  ReloadOutlined,
   WarningOutlined,
 } from '@ant-design/icons'
 import { PROJECT_SCORE_URL } from '@/config/links'
@@ -24,11 +28,22 @@ interface ViolationsSummaryProps {
   result: AuditResult | null
   reviewSourceResult?: AuditResult | null
   loading?: boolean
+  onDownloadFullReport?: () => void
   onDownloadSummary?: () => void
+  onOpenViolations?: () => void
+  onRerunAudit?: () => void
 }
 
 export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
-  ({ result, reviewSourceResult, loading = false, onDownloadSummary }) => {
+  ({
+    result,
+    reviewSourceResult,
+    loading = false,
+    onDownloadFullReport,
+    onDownloadSummary,
+    onOpenViolations,
+    onRerunAudit,
+  }) => {
     if (loading) {
       return <SummarySkeleton />
     }
@@ -74,6 +89,21 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                 description: t('summary.nextStepClearDescription'),
               }
 
+    const downloadItems = [
+      {
+        key: 'full',
+        icon: <DownloadOutlined />,
+        label: t('summary.downloadFullJson'),
+        onClick: onDownloadFullReport,
+      },
+      {
+        key: 'summary',
+        icon: <FileTextOutlined />,
+        label: t('summary.downloadSummaryJson'),
+        onClick: onDownloadSummary,
+      },
+    ].filter((item) => Boolean(item.onClick))
+
     return (
       <div className="violations-summary">
         <Card className="summary-card">
@@ -97,18 +127,20 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                   : t('shared.states.verifiedCompliant')}
               </span>
             </div>
-            {onDownloadSummary && (
-              <Tooltip title={t('summary.downloadTooltip')}>
-                <Button
-                  aria-label={t('summary.downloadTooltip')}
-                  className="summary-download-button"
-                  icon={<DownloadOutlined />}
-                  onClick={onDownloadSummary}
-                  shape="circle"
-                  type="text"
-                />
-              </Tooltip>
-            )}
+            <Space className="summary-actions" size={8}>
+              {downloadItems.length > 0 && (
+                <Dropdown menu={{ items: downloadItems }} trigger={['click']}>
+                  <Button icon={<DownloadOutlined />}>
+                    {t('shared.actions.download')} <DownOutlined />
+                  </Button>
+                </Dropdown>
+              )}
+              {onRerunAudit && (
+                <Button icon={<ReloadOutlined />} onClick={onRerunAudit}>
+                  {t('shared.actions.rerun')}
+                </Button>
+              )}
+            </Space>
           </div>
 
           <div className="summary-meta">
@@ -235,12 +267,19 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
           </div>
 
           <div className={`summary-next-step is-${nextStep.tone}`}>
-            <span className="summary-next-step-icon">{nextStep.icon}</span>
-            <div>
-              <span className="summary-stat-label">{t('summary.nextStepLabel')}</span>
-              <strong>{nextStep.title}</strong>
-              <p>{nextStep.description}</p>
-            </div>
+            <button
+              className="summary-next-step-button"
+              type="button"
+              onClick={onOpenViolations}
+            >
+              <span className="summary-next-step-icon">{nextStep.icon}</span>
+              <span>
+                <span className="summary-stat-label">{t('summary.nextStepLabel')}</span>
+                <strong>{nextStep.title}</strong>
+                <p>{nextStep.description}</p>
+              </span>
+              <ArrowRightOutlined className="summary-next-step-arrow" aria-hidden="true" />
+            </button>
           </div>
 
           {!hasViolations && (

@@ -21,7 +21,6 @@
   gap: 16px;
   align-items: flex-start;
   position: relative;
-  padding-right: 48px;
   margin-bottom: 18px;
 }
 
@@ -74,13 +73,13 @@
   color: var(--guard-color-success-text);
 }
 
-.summary-download-button {
-  position: absolute;
-  top: 0;
-  right: 0;
-  flex: 0 0 auto;
-  border: 1px solid var(--guard-color-border);
-  color: var(--guard-color-text-primary);
+.summary-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.summary-actions .ant-btn {
+  height: 34px;
 }
 
 .summary-meta {
@@ -137,14 +136,18 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .summary-score-label-row {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   flex-wrap: wrap;
   color: var(--guard-color-text-secondary);
+  width: 100%;
 }
 
 .summary-score-label-row .anticon {
@@ -342,14 +345,33 @@
 }
 
 .summary-next-step {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 14px 16px;
   border: 1px solid var(--guard-color-border);
   border-radius: 8px;
   background: var(--guard-color-surface-muted);
+  overflow: hidden;
+}
+
+.summary-next-step-button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.summary-next-step-button:focus-visible {
+  outline: 2px solid var(--guard-color-primary);
+  outline-offset: -2px;
+}
+
+.summary-next-step-arrow {
+  color: var(--guard-color-text-muted);
 }
 
 .summary-next-step-icon {

@@ -26,7 +26,8 @@
       "delete": "Excluir",
       "json": "JSON",
       "csv": "CSV",
-      "close": "Fechar"
+      "close": "Fechar",
+      "backToTop": "Voltar ao topo"
     },
     "labels": {
       "currentTab": "Aba atual",
@@ -144,7 +145,7 @@
       "noViolationsToExport": "Nenhuma violação para exportar",
       "exportJsonSuccess": "Relatório exportado como JSON",
       "exportCsvSuccess": "Relatório exportado como CSV",
-      "exportSummarySuccess": "Resumo da auditoria exportado",
+      "exportSummarySuccess": "Resumo da auditoria exportado como JSON",
       "highlightsApplied": "Destaques aplicados na página",
       "highlightError": "Não foi possível destacar os elementos",
       "comparisonSelectWarning": "Selecione duas auditorias diferentes para exportar a comparação",
@@ -177,13 +178,9 @@
       "toggleLabel": "Escopo da auditoria",
       "requirementsOnly": "Somente requisitos",
       "withRecommendations": "Requisitos e recomendações",
-      "currentScope": "Escopo atual",
       "currentScopeRequirementsOnly": "Somente requisitos",
       "currentScopeWithRecommendations": "Requisitos e recomendações",
       "enableAction": "Incluir recomendações nesta auditoria",
-      "disableAction": "Voltar para somente requisitos nesta visualização",
-      "enableDescription": "Amplia a análise atual com recomendações da norma, sem criar um novo histórico salvo.",
-      "disableDescription": "Enxuga a leitura para voltar aos requisitos. O histórico já salvo não é recriado só por essa troca de visualização.",
       "normativeNote": "“Requisitos” e “Recomendações” seguem a nomenclatura da ABNT NBR 17225."
     },
     "tabs": {
@@ -307,7 +304,8 @@
     "scoreLabel": "Nota geral",
     "scoreDescription": "Combina requisitos, recomendações do escopo atual e conclusão da revisão humana.",
     "scoreExplanationLink": "Entender a nota",
-    "downloadTooltip": "Baixar resumo simples da auditoria",
+    "downloadFullJson": "Baixar relatório completo (JSON)",
+    "downloadSummaryJson": "Baixar relatório simplificado (JSON)",
     "scoreOutOf": "{{score}}/100",
     "normativeScopeNote": "“Requisitos” e “Recomendações” são categorias da própria ABNT NBR 17225, não rótulos internos do sistema.",
     "failingRequirements": "{{count}} regra(s) obrigatória(s) com falha",

@@ -13,9 +13,24 @@ export function buildExportableAuditResult(result: AuditResult) {
   const pendingReviews = getPendingHumanReviewCount(result)
   const auditScore = getAuditScoreData(result)
   const requirementScore = getRequirementScoreData(result)
+  const compactAudit = {
+    ...result,
+    violations: result.violations.map((violation) => {
+      const compactViolation = { ...violation }
+      Reflect.deleteProperty(compactViolation, 'element')
+      Reflect.deleteProperty(compactViolation, 'inheritedFromHistory')
+      return compactViolation
+    }),
+  }
+
+  Reflect.deleteProperty(compactAudit, 'violationsByRule')
+  Reflect.deleteProperty(compactAudit, 'violationsBySeverity')
+  Reflect.deleteProperty(compactAudit, 'summary')
 
   return {
-    ...result,
+    schemaVersion: 2,
+    exportedAt: Date.now(),
+    audit: compactAudit,
     summary: {
       auditScore,
       requirementScore,
@@ -33,7 +48,7 @@ function formatDate(timestamp: number): string {
   return new Date(timestamp).toLocaleString('pt-BR')
 }
 
-export function buildAuditSummaryMarkdown(result: AuditResult): string {
+export function buildAuditSummaryJson(result: AuditResult) {
   const auditScore = getAuditScoreData(result)
   const confirmedReviews = getConfirmedHumanReviewCount(result)
   const dismissedReviews = getDismissedHumanReviewCount(result)
@@ -46,56 +61,44 @@ export function buildAuditSummaryMarkdown(result: AuditResult): string {
     })
     .slice(0, 12)
 
-  const lines = [
-    `# ${t('summaryExport.title')}`,
-    '',
-    `- ${t('summaryExport.url')}: ${result.url}`,
-    `- ${t('summaryExport.auditedAt')}: ${formatDate(result.timestamp)}`,
-    `- ${t('summaryExport.scope')}: ${
-      result.includeRecommendations
+  return {
+    title: t('summaryExport.title'),
+    generatedAt: Date.now(),
+    audit: {
+      url: result.url,
+      auditedAt: formatDate(result.timestamp),
+      timestamp: result.timestamp,
+      scope: result.includeRecommendations
         ? t('summaryExport.scopeWithRecommendations')
-        : t('summaryExport.scopeRequirementsOnly')
-    }`,
-    '',
-    `## ${t('summaryExport.scoreTitle')}`,
-    '',
-    `- ${t('summaryExport.generalScore')}: ${auditScore.score}/100`,
-    `- ${t('summaryExport.baseScore')}: ${auditScore.baseScore}/100`,
-    `- ${t('summaryExport.volumeScoreCap')}: ${auditScore.volumeScoreCap}/100`,
-    `- ${t('summaryExport.scoredViolationCount')}: ${auditScore.scoredViolationCount}`,
-    `- ${t('summaryExport.requirementScore')}: ${auditScore.requirementScore}/100`,
-    `- ${t('summaryExport.recommendationScore')}: ${
-      auditScore.includesRecommendations
-        ? `${auditScore.recommendationScore}/100`
-        : t('summaryExport.notAudited')
-    }`,
-    `- ${t('summaryExport.humanReviewScore')}: ${auditScore.humanReviewScore}/100`,
-    '',
-    `## ${t('summaryExport.countsTitle')}`,
-    '',
-    `- ${t('shared.labels.total')}: ${result.totalViolations}`,
-    `- ${t('shared.labels.requirements')}: ${result.errors}`,
-    `- ${t('shared.labels.recommendations')}: ${result.warnings}`,
-    `- ${t('shared.labels.humanReview')}: ${result.humanReviewItems}`,
-    `- ${t('summaryExport.confirmed')}: ${confirmedReviews}`,
-    `- ${t('summaryExport.dismissed')}: ${dismissedReviews}`,
-    `- ${t('summaryExport.pending')}: ${pendingReviews}`,
-    '',
-    `## ${t('summaryExport.mainFindingsTitle')}`,
-    '',
-  ]
-
-  if (topViolations.length === 0) {
-    lines.push(t('summaryExport.noFindings'))
-  } else {
-    topViolations.forEach((violation) => {
-      lines.push(
-        `- ${violation.nbrReference} - ${violation.ruleName}: ${violation.message} (${violation.normativeType})`,
-      )
-    })
+        : t('summaryExport.scopeRequirementsOnly'),
+    },
+    score: {
+      general: auditScore.score,
+      base: auditScore.baseScore,
+      volumeCap: auditScore.volumeScoreCap,
+      scoredViolationCount: auditScore.scoredViolationCount,
+      requirements: auditScore.requirementScore,
+      recommendations: auditScore.includesRecommendations
+        ? auditScore.recommendationScore
+        : null,
+      humanReview: auditScore.humanReviewScore,
+    },
+    counts: {
+      total: result.totalViolations,
+      requirements: result.errors,
+      recommendations: result.warnings,
+      humanReview: result.humanReviewItems,
+      confirmed: confirmedReviews,
+      dismissed: dismissedReviews,
+      pending: pendingReviews,
+    },
+    mainFindings: topViolations.map((violation) => ({
+      nbrReference: violation.nbrReference,
+      ruleName: violation.ruleName,
+      message: violation.message,
+      normativeType: violation.normativeType,
+      requiresHumanReview: violation.requiresHumanReview,
+      humanReviewStatus: violation.humanReviewStatus,
+    })),
   }
-
-  lines.push('', `_${t('summaryExport.footer')}_`)
-
-  return lines.join('\n')
 }

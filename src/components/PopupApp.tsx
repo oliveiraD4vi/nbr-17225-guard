@@ -4,7 +4,6 @@ import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
   CloseOutlined,
-  DeleteOutlined,
   DownOutlined,
   DownloadOutlined,
   EyeOutlined,
@@ -20,6 +19,7 @@ import {
 import { PopupPanelSkeleton } from './LoadingSkeletons'
 import { t } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
+import { APP_VERSION } from '@/version'
 import type {
   AuditHistoryEntry,
   AuditResult,
@@ -28,7 +28,7 @@ import type {
   VisionSimulationFilter,
 } from '@/types'
 import { compareAuditResults } from '@/utils/audit-comparison'
-import { buildAuditSummaryMarkdown, buildExportableAuditResult } from '@/utils/audit-export'
+import { buildAuditSummaryJson, buildExportableAuditResult } from '@/utils/audit-export'
 import {
   clearAuditHistoryForUrl,
   compactAuditStorage,
@@ -45,7 +45,6 @@ import {
   importAuditReportToHistory,
   isAuditStorageQuotaError,
   parseImportedAuditReport,
-  resetAuditCache,
   runAccessibilityAudit,
   saveAuditResult,
   updateStoredAuditResult,
@@ -205,6 +204,7 @@ function formatStorageSize(bytes: number): string {
 export const PopupApp: React.FC = () => {
   const quotaRetryRef = useRef<(() => Promise<unknown>) | null>(null)
   const importInputRef = useRef<HTMLInputElement | null>(null)
+  const popupContentRef = useRef<HTMLDivElement | null>(null)
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([])
   const [siteAuditHistory, setSiteAuditHistory] = useState<AuditHistoryEntry[]>([])
@@ -458,39 +458,6 @@ export const PopupApp: React.FC = () => {
     }
   }, [clearHighlightsOnPage, includeRecommendations, persistWithQuotaHandling])
 
-  const handleResetAudit = useCallback(async () => {
-    setLoading(true)
-    try {
-      await clearHighlightsOnPage(false)
-      await resetAuditCache()
-      const currentUrl = activeTab?.url || auditResult?.url
-      const [history, siteHistory] = await Promise.all([
-        getAuditHistoryForUrl(currentUrl),
-        getAuditHistoryForSite(currentUrl),
-      ])
-      await refreshStorageDiagnostics(currentUrl)
-      setAuditResult(null)
-      setAuditHistory(history)
-      setSiteAuditHistory(siteHistory)
-      setSelectedHistoryId(history[0]?.id || null)
-      setShowAboutView(false)
-      setPriorityIndex(0)
-      setComparisonTargetId(history[0]?.id)
-      setComparisonBaselineId(history[1]?.id || history[0]?.id)
-      message.success(t('popup.messages.auditClearSuccess'))
-    } catch (error) {
-      console.error('Erro ao resetar:', error)
-      message.error(t('popup.messages.auditClearError'))
-    } finally {
-      setLoading(false)
-    }
-  }, [
-    activeTab?.url,
-    auditResult?.url,
-    clearHighlightsOnPage,
-    refreshStorageDiagnostics,
-  ])
-
   const handleRecommendationsToggle = useCallback(
     async (checked: boolean) => {
       setIncludeRecommendations(checked)
@@ -581,11 +548,10 @@ export const PopupApp: React.FC = () => {
       return
     }
 
-    const markdown = buildAuditSummaryMarkdown(displayedAuditResult)
     downloadTextFile(
-      markdown,
-      'text/markdown;charset=utf-8',
-      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.md`,
+      JSON.stringify(buildAuditSummaryJson(displayedAuditResult), null, 2),
+      'application/json;charset=utf-8',
+      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.json`,
     )
     message.success(t('popup.messages.exportSummarySuccess'))
   }, [displayedAuditResult])
@@ -615,9 +581,9 @@ export const PopupApp: React.FC = () => {
 
   const handleExportHistorySummary = useCallback((entry: AuditHistoryEntry) => {
     downloadTextFile(
-      buildAuditSummaryMarkdown(entry),
-      'text/markdown;charset=utf-8',
-      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(entry.timestamp)}.md`,
+      JSON.stringify(buildAuditSummaryJson(entry), null, 2),
+      'application/json;charset=utf-8',
+      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(entry.timestamp)}.json`,
     )
     message.success(t('popup.messages.exportSummarySuccess'))
   }, [])
@@ -695,6 +661,10 @@ export const PopupApp: React.FC = () => {
     },
     [activeTab?.id],
   )
+
+  const handleScrollToTop = useCallback(() => {
+    popupContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
 
   const handleHighlightAll = useCallback(async () => {
     if (!displayedAuditResult || isHistoricalView) return
@@ -1162,13 +1132,6 @@ export const PopupApp: React.FC = () => {
         icon: <DownloadOutlined />,
         onClick: handleExportCSV,
       },
-      {
-        key: 'clear',
-        label: t('shared.actions.clearAudit'),
-        icon: <DeleteOutlined />,
-        onClick: handleResetAudit,
-        danger: true,
-      },
     ]
   }, [
     displayedAuditResult,
@@ -1180,7 +1143,6 @@ export const PopupApp: React.FC = () => {
     clearHighlightsOnPage,
     handleExportJSON,
     handleExportCSV,
-    handleResetAudit,
   ])
 
   const tabItems = useMemo(() => {
@@ -1194,7 +1156,10 @@ export const PopupApp: React.FC = () => {
           <ViolationsSummary
             result={displayedAuditResult}
             reviewSourceResult={reviewSourceResult}
+            onDownloadFullReport={handleExportJSON}
             onDownloadSummary={handleExportSummary}
+            onOpenViolations={() => setActiveTabKey('violations')}
+            onRerunAudit={isHistoricalView ? undefined : handleRunAudit}
           />
         ),
       },
@@ -1247,7 +1212,9 @@ export const PopupApp: React.FC = () => {
   }, [
     displayedAuditResult,
     reviewSourceResult,
+    handleExportJSON,
     handleExportSummary,
+    handleRunAudit,
     scopedRawViolations,
     isHistoricalView,
     handleHighlightViolation,
@@ -1287,6 +1254,7 @@ export const PopupApp: React.FC = () => {
               <Tag className="header-stage-tag" color="gold">
                 {t('shared.states.beta')}
               </Tag>
+              <span className="header-version-tag">v{APP_VERSION}</span>
             </h1>
             <p>
               {activeTab?.title
@@ -1308,7 +1276,7 @@ export const PopupApp: React.FC = () => {
         </div>
       </Header>
 
-      <Content className="popup-content">
+      <Content ref={popupContentRef} className="popup-content">
         <input
           ref={importInputRef}
           type="file"
@@ -1364,7 +1332,12 @@ export const PopupApp: React.FC = () => {
                     </strong>
                   </div>
                   <div className="tab-status-item tab-status-item-toggle">
-                    <span className="tab-status-label">{t('popup.scope.toggleLabel')}</span>
+                    <span className="tab-status-label">
+                      {t('popup.scope.toggleLabel')}:{' '}
+                      {includeRecommendations
+                        ? t('popup.scope.currentScopeWithRecommendations')
+                        : t('popup.scope.currentScopeRequirementsOnly')}
+                    </span>
                     <div className="recommendations-toggle-row">
                       <Switch
                         checked={includeRecommendations}
@@ -1374,22 +1347,7 @@ export const PopupApp: React.FC = () => {
                         }}
                       />
                       <div className="recommendations-toggle-copy">
-                        <span className="recommendations-toggle-status">
-                          {t('popup.scope.currentScope')}:{' '}
-                          {includeRecommendations
-                            ? t('popup.scope.currentScopeWithRecommendations')
-                            : t('popup.scope.currentScopeRequirementsOnly')}
-                        </span>
-                        <strong>
-                          {includeRecommendations
-                            ? t('popup.scope.disableAction')
-                            : t('popup.scope.enableAction')}
-                        </strong>
-                        <span>
-                          {includeRecommendations
-                            ? t('popup.scope.disableDescription')
-                            : t('popup.scope.enableDescription')}
-                        </span>
+                        <strong>{t('popup.scope.enableAction')}</strong>
                         <small>{t('popup.scope.normativeNote')}</small>
                       </div>
                     </div>
@@ -1522,6 +1480,15 @@ export const PopupApp: React.FC = () => {
                   }}
                 />
               </Tooltip>
+              <Tooltip placement="topLeft" title={t('shared.actions.backToTop')}>
+                <Button
+                  className="popup-back-to-top-button"
+                  shape="circle"
+                  icon={<UpOutlined />}
+                  aria-label={t('shared.actions.backToTop')}
+                  onClick={handleScrollToTop}
+                />
+              </Tooltip>
             </div>
           </>
         )}
@@ -1649,7 +1616,6 @@ export const PopupApp: React.FC = () => {
                     icon={action.icon}
                     onClick={action.onClick}
                     loading={action.loading}
-                    danger={action.danger}
                     disabled={action.disabled}
                   >
                     {action.label}
