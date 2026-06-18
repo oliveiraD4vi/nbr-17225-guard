@@ -14,7 +14,6 @@ import {
   ReloadOutlined,
   RiseOutlined,
   StopOutlined,
-  UpOutlined,
 } from '@ant-design/icons'
 import { PopupPanelSkeleton } from './LoadingSkeletons'
 import type { ViolationsListState } from './ViolationsList'
@@ -862,10 +861,6 @@ export const PopupApp: React.FC = () => {
     [activeTab?.id],
   )
 
-  const handleScrollToTop = useCallback(() => {
-    popupContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
-
   const handleHighlightAll = useCallback(async () => {
     if (!displayedAuditResult || isHistoricalView) return
 
@@ -1681,15 +1676,6 @@ export const PopupApp: React.FC = () => {
                     }
                     setIsVisionSimulatorOpen((current) => !current)
                   }}
-                />
-              </Tooltip>
-              <Tooltip placement="topLeft" title={t('shared.actions.backToTop')}>
-                <Button
-                  className="popup-back-to-top-button"
-                  shape="circle"
-                  icon={<UpOutlined />}
-                  aria-label={t('shared.actions.backToTop')}
-                  onClick={handleScrollToTop}
                 />
               </Tooltip>
             </div>

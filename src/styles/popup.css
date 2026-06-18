@@ -647,15 +647,6 @@
   pointer-events: auto;
 }
 
-.popup-back-to-top-button {
-  height: 32px;
-  border-color: var(--guard-color-border);
-  background: var(--guard-color-surface);
-  color: var(--guard-color-text-primary);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
-  pointer-events: auto;
-}
-
 @media (max-width: 640px) {
   .tab-status-strip {
     grid-template-columns: 1fr;
