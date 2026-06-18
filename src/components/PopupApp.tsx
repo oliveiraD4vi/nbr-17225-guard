@@ -14,6 +14,7 @@ import {
   ReloadOutlined,
   RiseOutlined,
   StopOutlined,
+  UpOutlined,
 } from '@ant-design/icons'
 import { PopupPanelSkeleton } from './LoadingSkeletons'
 import type { ViolationsListState } from './ViolationsList'
