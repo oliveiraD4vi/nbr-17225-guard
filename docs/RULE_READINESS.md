@@ -5,7 +5,7 @@ O catálogo completo continua documentado; a auditoria executa apenas regras mar
 
 ## Estado definido para a Beta atual
 
-A Beta atual mantém as 112 regras documentadas para rastreabilidade acadêmica e pública. A auditoria executa 104 regras `ready`; as 8 regras `not_ready` permanecem visíveis na Página do Projeto com a tag `Not ready Beta`, mas não entram na execução nem no cálculo da nota.
+A Beta atual mantém as 112 regras documentadas para rastreabilidade acadêmica e pública. A auditoria executa 104 regras prontas; as 8 regras fora da execução da Beta permanecem visíveis na Página do Projeto com justificativa, mas não entram na execução nem no cálculo da nota.
 
 ## Estados
 

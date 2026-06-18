@@ -35,6 +35,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - classificação documental da força heurística em `docs/RULES_HEURISTIC_CLASSIFICATION.md`, com priorização explícita das heurísticas mais fracas;
 - links de regra por achado, abrindo a explicação completa e a rastreabilidade na Página do Projeto.
 - alerta preventivo de pressão no armazenamento local, com leitura de uso e ação de compactação no próprio popup.
+- restauração do ponto de revisão do popup por URL, incluindo aba ativa, histórico selecionado, lista aberta, ocorrência aberta e rolagem.
 
 ### Changed
 
@@ -55,11 +56,13 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local;
 - fluxo de revisão humana passa a exigir confirmação antes da mudança de estado e a reorganizar visualmente o item entre pendentes, confirmados e descartados;
 - cards de violação passam a truncar conteúdos longos com tooltip, reduzindo ruído sem ocultar contexto;
-- V1 Farol passa a comunicar o escopo definido da Beta, com regras `ready` executadas e regras `not_ready` documentadas fora da nota;
+- V1 Farol passa a comunicar o escopo definido da Beta, com regras prontas executadas e regras documentadas fora da nota;
 - interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225;
 - toggle de recomendações passa a comunicar estado atual e ação esperada com mais clareza.
 - cards de violação passam a abrir com leitura curta mais clara e link para a explicação pública completa da regra;
 - fluxo do popup passa a tornar visível que a retenção do histórico é local ao navegador e que exportação JSON é a continuidade recomendada para retenção longa.
+- lista de ocorrências passa a abrir em accordion e carregar itens de 3 em 3 para reduzir rolagem em auditorias extensas;
+- resumo passa a exportar relatório completo e simplificado em JSON, com ação de reexecução também no topo;
 
 ### Fixed
 
@@ -75,3 +78,5 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - sobreposição de ruído entre `5.9.1` e `5.9.3`, separando rótulo visível de associação programática;
 - duplicidade de sinal entre `5.10.2` e `5.13.6`, removendo repetição do mesmo indício de `order` em CSS.
 - clique e foco inesperados em elementos atrás da board de contraste.
+- contraste textual deixa de avaliar texto apenas assistivo/visualmente oculto como texto visível;
+- área de acionamento passa a considerar espaçamento entre alvos e controle equivalente em carrosséis, reduzindo ruído sem ignorar controles pequenos únicos.

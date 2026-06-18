@@ -173,7 +173,7 @@ Direção técnica:
 - detectar sessão expirada, padrões de interrupção e fluxos de reautenticação;
 - manter como revisão humana quando depender de fluxo autenticado ou evento em tempo real.
 
-## Ordem sugerida de implementação
+## Critérios de priorização
 
 1. Implementar recomendações com baixa ambiguidade estrutural e baixo risco de duplicidade com requisitos.
 2. Avançar em recomendações que dependem de contexto de página atual, mantendo revisão humana explícita.

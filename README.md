@@ -87,18 +87,18 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ## Definição da Beta
 
-A versão `1.0.0-beta.1`, nomeada como **V1 Farol Beta**, fica definida assim:
+A versão de produto `1.0.0-beta.2`, nomeada como **V1 Farol Beta**, fica definida assim:
 
 - o catálogo público mantém 112 regras documentadas para rastreabilidade acadêmica e técnica;
-- a auditoria executa 104 regras `ready`;
-- 8 regras permanecem como `not_ready`, visíveis na Página do Projeto com justificativa, fora da execução e fora da nota;
+- a auditoria executa 104 regras prontas para a Beta;
+- 8 regras permanecem documentadas na Página do Projeto com justificativa, fora da execução e fora da nota;
 - o escopo padrão audita somente requisitos; recomendações entram quando o usuário ativa esse escopo;
 - o histórico é local, separado por página normalizada, preservando o caminho da URL e ignorando query string e hash;
 - explicações longas ficam na Página do Projeto, especialmente em `/rules.html` e `/score.html`.
 
 ## Cobertura de regras
 
-O escopo documentado atual contém a V1 Farol, com 112 regras revisadas contra a referência pública da ABNT NBR 17225. Para a Beta, apenas regras `ready` são executadas pelo motor.
+O escopo documentado atual contém a V1 Farol, com 112 regras revisadas contra a referência pública da ABNT NBR 17225. Para a Beta, apenas regras prontas são executadas pelo motor.
 
 | Situação                               | Quantidade |
 | -------------------------------------- | ---------: |
@@ -116,7 +116,7 @@ O escopo documentado atual contém a V1 Farol, com 112 regras revisadas contra a
 Importante:
 
 - `pnpm verify:rules` valida o motor contra o catálogo implementado atual;
-- regras `not_ready` continuam documentadas, mas não entram na execução nem na nota da Beta;
+- regras fora da execução da Beta continuam documentadas, mas não entram na execução nem na nota;
 - a classificação `Requisito` ou `Recomendação` segue a própria ABNT NBR 17225, não o nível WCAG nem a severidade técnica do achado;
 - recomendações fora do catálogo implementado seguem registradas como backlog público, sem aumentar o ruído da auditoria padrão.
 
@@ -235,7 +235,7 @@ Quando um PR alterar, remover ou criar uma função de verificação de regra, o
 
 ## Versionamento
 
-A versão atual é `1.0.0-beta.1`, nomeada como **V1 Farol Beta**. A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
+A versão de produto atual é `1.0.0-beta.2`, nomeada como **V1 Farol Beta**. O `manifest.json` usa `1.0.1` para manter a sequência numérica exigida pela Chrome Web Store. A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
 
 ## Instalação
 

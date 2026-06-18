@@ -386,62 +386,62 @@
     "detectedSignal": "O que o Guardião encontrou",
     "families": {
       "forms": {
-        "headline": "Revise a identificação e a orientação deste campo.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de rótulo, instrução, associação programática e contexto de preenchimento.",
+        "headline": "Confira rótulo e instrução do campo.",
+        "summary": "{{target}} pode estar sem identificação clara, ajuda suficiente ou associação correta.",
         "impact": "Problemas em formulários atrapalham preenchimento, revisão e envio. Quando o campo não deixa claro o que espera, pessoas que usam leitor de tela, ampliação, voz ou navegação rápida tendem a perder contexto e cometer mais erros.",
         "reviewFocus": "Confira se o campo tem rótulo visível, nome acessível equivalente, instruções úteis quando necessário, agrupamento correto e mensagens de erro que expliquem como seguir."
       },
       "colors": {
-        "headline": "Revise contraste e dependência visual de cor neste ponto.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de contraste, estados visuais e sinais que não dependam só de percepção de cor.",
+        "headline": "Confira contraste e uso de cor.",
+        "summary": "{{target}} pode ter contraste baixo ou depender apenas da percepção de cor.",
         "impact": "Achados de cor e contraste afetam leitura, distinção de estados, foco e reconhecimento de componentes. Mesmo quando a interface parece legível para parte do público, ela pode ficar frágil para baixa visão, daltonismo ou uso em telas piores.",
         "reviewFocus": "Confira a razão de contraste, a legibilidade do texto, a visibilidade do foco, a distinção entre estados e se a informação continua compreensível sem depender apenas de cor."
       },
       "navigation": {
-        "headline": "Revise a clareza de navegação e destino deste conteúdo.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de links, caminhos, agrupamentos e pistas de localização para a pessoa usuária.",
+        "headline": "Confira navegação e destino.",
+        "summary": "{{target}} pode não deixar claro para onde leva, onde está ou como seguir.",
         "impact": "Problemas de navegação fazem a interface parecer imprevisível. A pessoa pode não entender para onde um link leva, como voltar, como avançar no fluxo ou como chegar rápido ao conteúdo principal.",
         "reviewFocus": "Confira texto de links, skip links, pistas de localização, agrupamento de navegação, repetição desnecessária e qualquer mudança de destino que possa surpreender quem está usando a página."
       },
       "keyboard": {
-        "headline": "Revise a operação por teclado deste elemento.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de foco, sequência de navegação e acionamento por teclado.",
+        "headline": "Confira o uso por teclado.",
+        "summary": "{{target}} pode falhar no foco, na ordem de navegação ou no acionamento por teclado.",
         "impact": "Quando o teclado não consegue alcançar, entender ou operar um elemento, a tarefa inteira pode travar. Esse tipo de achado costuma afetar pessoas que navegam sem mouse ou combinam teclado com tecnologia assistiva.",
         "reviewFocus": "Confira se o foco chega ao elemento, se a ordem faz sentido, se o acionamento responde a teclado de forma previsível e se nada importante fica preso, escondido ou inacessível."
       },
       "controls": {
-        "headline": "Revise propósito, estado e resposta deste controle.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de nome, papel, estado e comportamento esperado do controle.",
+        "headline": "Confira nome, papel e estado.",
+        "summary": "{{target}} pode não comunicar bem sua função, estado atual ou resposta esperada.",
         "impact": "Controles com papel ou estado pouco claros aumentam hesitação e erro. A pessoa pode não entender se o item é clicável, qual função ele cumpre ou se a ação já foi aplicada.",
         "reviewFocus": "Confira se o controle expõe nome acessível, papel coerente, estado atualizado, feedback após interação e qualquer instrução necessária para uso seguro."
       },
       "semantics": {
-        "headline": "Revise a semântica e o anúncio assistivo deste trecho.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de significado estrutural, papéis e informação anunciada por tecnologia assistiva.",
+        "headline": "Confira a leitura assistiva.",
+        "summary": "{{target}} pode estar com papel, estrutura ou anúncio assistivo pouco claro.",
         "impact": "Problemas semânticos enfraquecem a leitura da interface por leitor de tela e outras tecnologias assistivas. Mesmo com aparência correta, o conteúdo pode ser anunciado de forma vaga, fora de ordem ou sem a estrutura esperada.",
         "reviewFocus": "Confira se a marcação transmite o papel correto, se atributos ARIA não conflitam com a semântica nativa e se a leitura assistiva conserva hierarquia, relação e propósito."
       },
       "structure": {
-        "headline": "Revise a estrutura deste bloco e a relação entre seus itens.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de hierarquia, agrupamento e associação estrutural entre os elementos envolvidos.",
+        "headline": "Confira estrutura e agrupamento.",
+        "summary": "{{target}} pode não indicar bem hierarquia, relação entre itens ou agrupamento.",
         "impact": "Problemas estruturais embaralham leitura, navegação por atalhos e entendimento do conjunto. A pessoa pode até encontrar o conteúdo, mas sem perceber claramente a relação entre título, região, lista, tabela ou bloco associado.",
         "reviewFocus": "Confira hierarquia de cabeçalhos, delimitação de regiões, uso correto de listas e associação entre cabeçalhos e células quando houver tabelas ou estruturas compostas."
       },
       "media": {
-        "headline": "Revise o equivalente acessível desta mídia.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de texto alternativo, legenda, transcrição ou outro equivalente de acesso.",
+        "headline": "Confira o equivalente acessível.",
+        "summary": "{{target}} pode precisar de texto alternativo, legenda, transcrição ou descrição.",
         "impact": "Quando a mídia não oferece equivalente acessível, parte do conteúdo simplesmente deixa de chegar a quem depende de leitura assistiva, legenda, transcrição ou descrição alternativa.",
         "reviewFocus": "Confira se a imagem, áudio ou vídeo comunica o essencial por canais alternativos suficientes e se o equivalente escolhido realmente cobre a função daquela mídia no contexto da página."
       },
       "content": {
-        "headline": "Revise a clareza textual e o apoio contextual deste conteúdo.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de instruções, contexto, documentação de apoio e forma de apresentação do conteúdo.",
+        "headline": "Confira clareza e contexto.",
+        "summary": "{{target}} pode precisar de instrução mais clara ou apoio próximo da tarefa.",
         "impact": "Achados dessa família costumam afetar compreensão. Mesmo quando o componente existe, o conteúdo pode não explicar bem o que está acontecendo, o que se espera da pessoa ou como continuar com segurança.",
         "reviewFocus": "Confira instruções visíveis, contexto antes da ação, apoio documental próximo da tarefa, consistência textual e qualquer detalhe que a pessoa precise para entender a interface sem adivinhação."
       },
       "time": {
-        "headline": "Revise a gestão de tempo e continuidade desta tarefa.",
-        "summary": "O indício apareceu em {{target}} e pede revisão de aviso prévio, extensão de tempo, retomada e previsibilidade do fluxo.",
+        "headline": "Confira tempo, pausa e retomada.",
+        "summary": "{{target}} pode precisar avisar, permitir pausa, estender tempo ou retomar com segurança.",
         "impact": "Limites de tempo sem apoio suficiente podem interromper tarefas, causar perda de progresso e impedir conclusão por pessoas que precisam de mais tempo para ler, decidir ou preencher informações.",
         "reviewFocus": "Confira se há aviso antes do vencimento, possibilidade de estender ou pausar, preservação de contexto e explicações claras sobre o que acontece quando o tempo termina."
       }
