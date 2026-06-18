@@ -9,6 +9,7 @@ import {
   createViolation,
   getContrastRatio,
   getEffectiveBackgroundColor,
+  isElementPerceptiblyVisible,
   isElementVisible,
   rgbToHex,
 } from '@/utils'
@@ -43,7 +44,7 @@ export const textContrastRule: Rule = {
       if (!text) continue
 
       const parent = textNode.parentElement
-      if (!parent || !isElementVisible(parent) || seenParents.has(parent)) continue
+      if (!parent || !isElementPerceptiblyVisible(parent) || seenParents.has(parent)) continue
       seenParents.add(parent)
 
       const textColor = window.getComputedStyle(parent).color
@@ -176,7 +177,7 @@ export const enhancedTextContrastRule: Rule = {
       if (!text || text.length < 3) continue
 
       const parent = textNode.parentElement
-      if (!parent || !isElementVisible(parent) || seenParents.has(parent)) continue
+      if (!parent || !isElementPerceptiblyVisible(parent) || seenParents.has(parent)) continue
       seenParents.add(parent)
 
       const styles = window.getComputedStyle(parent)

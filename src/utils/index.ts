@@ -10,6 +10,8 @@ export const VERIFIER_ID = 'NBR17225GUARD'
 export const VERIFIER_NAME = 'Guardião NBR 17225'
 const HIGHLIGHT_ID_PREFIX = 'nbr-highlight-'
 const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host'
+const visuallyHiddenClassPattern =
+  /\b(sr-only|screen-reader|screenreader|visually-hidden|hidden-visually|a11y-hidden)\b/i
 
 function hashString(value: string): string {
   let hash = 2166136261
@@ -242,6 +244,30 @@ export function isElementVisible(element: HTMLElement): boolean {
   return rect.width > 0 && rect.height > 0
 }
 
+export function isElementPerceptiblyVisible(element: HTMLElement): boolean {
+  if (!isElementVisible(element)) return false
+
+  const className =
+    typeof element.className === 'string'
+      ? element.className
+      : element.getAttribute('class') || ''
+  if (visuallyHiddenClassPattern.test(className)) return false
+
+  const style = window.getComputedStyle(element)
+  const rect = element.getBoundingClientRect()
+  const clipValue = style.clip || ''
+  const clipPathValue = style.clipPath || ''
+  const isClipped =
+    (!!clipValue && clipValue !== 'auto') ||
+    (!!clipPathValue && clipPathValue !== 'none') ||
+    (style.overflow === 'hidden' && rect.width <= 2 && rect.height <= 2)
+
+  if (isClipped && rect.width <= 2 && rect.height <= 2) return false
+  if (rect.width <= 1 || rect.height <= 1) return false
+
+  return true
+}
+
 /**
  * Obtém o texto visível de um elemento
  */
@@ -253,6 +279,7 @@ export function getVisibleText(element: HTMLElement): string {
 
   const style = window.getComputedStyle(element)
   if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return ''
+  if (!isElementPerceptiblyVisible(element)) return ''
 
   let text = ''
   for (const node of element.childNodes) {
@@ -286,7 +313,7 @@ export function getAccessibleName(element: HTMLElement): string {
   if (element instanceof HTMLInputElement) {
     if (element.labels?.length) {
       const text = Array.from(element.labels)
-        .map((label) => getVisibleText(label))
+        .map((label) => getVisibleText(label) || label.textContent?.trim() || '')
         .join(' ')
         .trim()
       if (text) return text
@@ -302,7 +329,7 @@ export function getAccessibleName(element: HTMLElement): string {
   if (element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
     if (element.labels?.length) {
       const text = Array.from(element.labels)
-        .map((label) => getVisibleText(label))
+        .map((label) => getVisibleText(label) || label.textContent?.trim() || '')
         .join(' ')
         .trim()
       if (text) return text
@@ -315,7 +342,15 @@ export function getAccessibleName(element: HTMLElement): string {
   const title = element.getAttribute('title')
   if (title?.trim()) return title.trim()
 
-  return getVisibleText(element)
+  const visibleText = getVisibleText(element)
+  if (visibleText) return visibleText
+
+  if (element.matches('button, a, [role="button"], [role="link"], [role="tab"]')) {
+    const textContent = element.textContent?.replace(/\s+/g, ' ').trim()
+    if (textContent) return textContent
+  }
+
+  return ''
 }
 
 export function getAssociatedLabelText(
@@ -323,7 +358,7 @@ export function getAssociatedLabelText(
 ): string {
   if (element.labels?.length) {
     return Array.from(element.labels)
-      .map((label) => getVisibleText(label))
+      .map((label) => getVisibleText(label) || label.textContent?.trim() || '')
       .join(' ')
       .trim()
   }

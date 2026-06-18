@@ -35,17 +35,17 @@
     },
     "targetSize": {
       "name": "Área de acionamento mínima",
-      "description": "Elementos acionáveis devem possuir área mínima para interação",
+      "description": "Elementos acionáveis devem ter tamanho, espaçamento ou controle equivalente suficiente para interação",
       "message": "Área acionável muito pequena ({{width}}x{{height}}px).",
-      "suggestion": "Aumente a área clicável para pelo menos 24x24 px.",
-      "remediation": "button { min-width: 24px; min-height: 24px; }"
+      "suggestion": "Aumente a área clicável, o espaçamento em relação a outros controles ou ofereça um controle equivalente maior.",
+      "remediation": "Garanta alvo de pelo menos 24x24 px ou espaçamento suficiente entre alvos adjacentes. Em carrosséis, mantenha também controles equivalentes com área adequada."
     },
     "enhancedTargetSize": {
       "name": "Área de acionamento aprimorada",
       "description": "Controles importantes devem buscar área de acionamento mais confortável",
       "message": "Área acionável abaixo do recomendado ({{width}}x{{height}}px).",
-      "suggestion": "Aumente a área clicável para aproximar o controle de 44x44 px.",
-      "remediation": "Use padding, min-width e min-height para ampliar a área de interação sem depender apenas do ícone."
+      "suggestion": "Aumente a área clicável ou o espaçamento para aproximar o controle de 44x44 px.",
+      "remediation": "Use padding, min-width, min-height e espaçamento consistente para ampliar a interação sem depender apenas do ícone."
     }
   },
   "structureNavigationControls": {
