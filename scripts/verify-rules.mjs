@@ -255,7 +255,9 @@ const readinessCounts = rules.reduce(
   { ready: 0, not_ready: 0 },
 )
 
-console.log(`Ready Beta: ${readinessCounts.ready}; Not ready Beta: ${readinessCounts.not_ready}.`)
+console.log(
+  `Regras prontas na Beta: ${readinessCounts.ready}; fora da execução da Beta: ${readinessCounts.not_ready}.`,
+)
 
 console.log(
   `Verificação de regras concluída: ${requirements.length} itens documentados mapeados para ${rules.length} implementação(ões): ${normativeTypeCounts.Requisito} requisitos e ${normativeTypeCounts.Recomendação} ${recommendationLabel}.`,
