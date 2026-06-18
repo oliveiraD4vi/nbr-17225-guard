@@ -20,6 +20,7 @@ import {
   ClearOutlined,
   CloseCircleOutlined,
   CopyOutlined,
+  DownOutlined,
   FileTextOutlined,
   InfoCircleOutlined,
   ItalicOutlined,
@@ -38,10 +39,22 @@ import type { HumanReviewStatus, Violation } from '@/types'
 import { getContrastRatio } from '@/utils'
 import '../styles/violations-list.css'
 
+export type ViolationsListMode = 'requirements' | 'recommendations' | 'review'
+
+export interface ViolationsListState {
+  openGroupKey?: string
+  openOccurrenceByGroup?: Record<string, string>
+  selectedCategory?: 'all' | RuleTopicCategory
+  selectedListMode?: ViolationsListMode
+  visibleCountByGroup?: Record<string, number>
+}
+
 interface ViolationsListProps {
   violations: Violation[]
+  state?: ViolationsListState
   onSelectViolation?: (violation: Violation) => void
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void
+  onStateChange?: (state: ViolationsListState) => void
   onViolationNoteChange?: (violation: Violation, note: string) => void
   onViolationContrastOverrideChange?: (
     violation: Violation,
@@ -354,6 +367,9 @@ const TruncatedText: React.FC<TruncatedTextProps> = React.memo(
 
 function renderViolationGroups(
   violations: Violation[],
+  state: ViolationsListState | undefined,
+  onStateChange: ((state: ViolationsListState) => void) | undefined,
+  groupScope: string,
   onSelectViolation?: (violation: Violation) => void,
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
   onViolationNoteChange?: (violation: Violation, note: string) => void,
@@ -368,14 +384,39 @@ function renderViolationGroups(
 
   const groups = buildGroups(violations)
   const topRuleIds = new Set(groups.slice(0, 3).map((group) => group.ruleId))
+  const updateListState = (patch: Partial<ViolationsListState>) => {
+    onStateChange?.({
+      ...state,
+      ...patch,
+      openOccurrenceByGroup: {
+        ...(state?.openOccurrenceByGroup ?? {}),
+        ...(patch.openOccurrenceByGroup ?? {}),
+      },
+      visibleCountByGroup: {
+        ...(state?.visibleCountByGroup ?? {}),
+        ...(patch.visibleCountByGroup ?? {}),
+      },
+    })
+  }
+  const firstGroupKey = groups[0] ? `${groupScope}:${groups[0].ruleId}` : undefined
+  const activeGroupKey = state?.openGroupKey?.startsWith(`${groupScope}:`)
+    ? state.openGroupKey
+    : firstGroupKey
 
   const items = groups.map((group) => {
     const firstViolation = group.violations[0]
-    const topIssues = group.violations.slice(0, 3)
-    const remainingIssues = group.violations.slice(3)
+    const groupStateKey = `${groupScope}:${group.ruleId}`
+    const visibleCount = Math.min(
+      group.violations.length,
+      Math.max(3, state?.visibleCountByGroup?.[groupStateKey] ?? 3),
+    )
+    const visibleIssues = group.violations.slice(0, visibleCount)
+    const remainingCount = group.violations.length - visibleIssues.length
+    const openOccurrenceId =
+      state?.openOccurrenceByGroup?.[groupStateKey] ?? visibleIssues[0]?.id
 
     return {
-      key: group.ruleId,
+      key: groupStateKey,
       label: (
         <div className="violation-group-header">
           <div className="violation-group-main">
@@ -410,14 +451,23 @@ function renderViolationGroups(
           <div className="violation-top-issues">
             <div className="violation-section-header">
               <strong>{t('violations.topIssues')}</strong>
-              <span>{t('shared.counts.priorityPoints', { count: group.topIssueCount })}</span>
+              <span>{t('shared.counts.occurrences', { count: group.violations.length })}</span>
             </div>
             <div className="violation-items">
-              {topIssues.map((violation, index) => (
+              {visibleIssues.map((violation, index) => (
                 <ViolationCard
                   key={violation.id}
                   violation={violation}
                   index={index}
+                  isOpen={openOccurrenceId === violation.id}
+                  onOpen={() => {
+                    updateListState({
+                      openGroupKey: groupStateKey,
+                      openOccurrenceByGroup: {
+                        [groupStateKey]: violation.id,
+                      },
+                    })
+                  }}
                   onSelectViolation={onSelectViolation}
                   onHumanReviewStatusChange={onHumanReviewStatusChange}
                   onViolationNoteChange={onViolationNoteChange}
@@ -426,39 +476,49 @@ function renderViolationGroups(
                 />
               ))}
             </div>
+            {remainingCount > 0 && (
+              <Button
+                className="violation-load-more"
+                type="text"
+                icon={<DownOutlined className="violation-load-more-icon" />}
+                onClick={() => {
+                  updateListState({
+                    openGroupKey: groupStateKey,
+                    visibleCountByGroup: {
+                      [groupStateKey]: Math.min(group.violations.length, visibleCount + 3),
+                    },
+                  })
+                }}
+              >
+                {t('violations.loadMoreOccurrences', {
+                  count: Math.min(3, remainingCount),
+                })}
+              </Button>
+            )}
           </div>
-
-          {remainingIssues.length > 0 && (
-            <div className="violation-more-issues">
-              <div className="violation-section-header">
-                <strong>{t('violations.otherOccurrences')}</strong>
-                <span>{t('shared.counts.items', { count: remainingIssues.length })}</span>
-              </div>
-              <div className="violation-items">
-                {remainingIssues.map((violation, index) => (
-                  <ViolationCard
-                    key={violation.id}
-                    violation={violation}
-                    index={topIssues.length + index}
-                    onSelectViolation={onSelectViolation}
-                    onHumanReviewStatusChange={onHumanReviewStatusChange}
-                    onViolationNoteChange={onViolationNoteChange}
-                    onViolationContrastOverrideChange={onViolationContrastOverrideChange}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       ),
     }
   })
 
-  return <Collapse items={items} />
+  return (
+    <Collapse
+      accordion
+      activeKey={activeGroupKey}
+      items={items}
+      onChange={(key) => {
+        const nextKey = Array.isArray(key) ? String(key[0] ?? '') : String(key)
+        if (!nextKey) return
+        updateListState({ openGroupKey: nextKey })
+      }}
+    />
+  )
 }
 
 function renderReviewSections(
   violations: Violation[],
+  state: ViolationsListState | undefined,
+  onStateChange: ((state: ViolationsListState) => void) | undefined,
   onSelectViolation?: (violation: Violation) => void,
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void,
   onViolationNoteChange?: (violation: Violation, note: string) => void,
@@ -522,6 +582,9 @@ function renderReviewSections(
           {section.count > 0 ? (
             renderViolationGroups(
               section.violations,
+              state,
+              onStateChange,
+              `review-${section.key}`,
               onSelectViolation,
               onHumanReviewStatusChange,
               onViolationNoteChange,
@@ -542,6 +605,8 @@ function renderReviewSections(
 interface ViolationCardProps {
   violation: Violation
   index: number
+  isOpen: boolean
+  onOpen: () => void
   onSelectViolation?: (violation: Violation) => void
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void
   onViolationNoteChange?: (violation: Violation, note: string) => void
@@ -556,6 +621,8 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
   ({
     violation,
     index,
+    isOpen,
+    onOpen,
     onSelectViolation,
     onHumanReviewStatusChange,
     onViolationNoteChange,
@@ -616,8 +683,9 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
 
     const handleCardClick = React.useCallback(() => {
       if (isContrastModalOpen) return
+      onOpen()
       onSelectViolation?.(violation)
-    }, [isContrastModalOpen, onSelectViolation, violation])
+    }, [isContrastModalOpen, onOpen, onSelectViolation, violation])
 
     const contrastRatio = React.useMemo(() => {
       if (!violation.contrastDetails) return null
@@ -742,7 +810,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
           </div>
         </div>
 
-        <div className="violation-item-content">
+        {isOpen && <div className="violation-item-content">
           {violation.requiresHumanReview && (
             <div className="violation-human-review-card">
               <strong>{t('violations.requiresHumanReviewTitle')}</strong>
@@ -1223,7 +1291,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
               </div>
             </Modal>
           )}
-        </div>
+        </div>}
       </Card>
     )
   },
@@ -1232,15 +1300,19 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
 export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
   ({
     violations,
+    state,
     onSelectViolation,
     onHumanReviewStatusChange,
+    onStateChange,
     onViolationNoteChange,
     onViolationContrastOverrideChange,
   }) => {
-    const [selectedCategory, setSelectedCategory] = React.useState<'all' | RuleTopicCategory>('all')
-    const [selectedListMode, setSelectedListMode] = React.useState<
-      'requirements' | 'recommendations' | 'review'
-    >('requirements')
+    const [selectedCategory, setSelectedCategory] = React.useState<'all' | RuleTopicCategory>(
+      state?.selectedCategory ?? 'all',
+    )
+    const [selectedListMode, setSelectedListMode] = React.useState<ViolationsListMode>(
+      state?.selectedListMode ?? 'requirements',
+    )
     const sortedViolations = React.useMemo(() => sortViolations(violations), [violations])
     const visibleViolations = React.useMemo(
       () => sortedViolations.filter(isVisibleInMainLists),
@@ -1316,10 +1388,44 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
         filteredReviewViolations.length,
       ],
     )
+    const listState = React.useMemo<ViolationsListState>(
+      () => ({
+        ...state,
+        selectedCategory,
+        selectedListMode,
+      }),
+      [selectedCategory, selectedListMode, state],
+    )
+    const updateListState = React.useCallback(
+      (patch: Partial<ViolationsListState>) => {
+        onStateChange?.({
+          ...listState,
+          ...patch,
+          openOccurrenceByGroup: {
+            ...(listState.openOccurrenceByGroup ?? {}),
+            ...(patch.openOccurrenceByGroup ?? {}),
+          },
+          visibleCountByGroup: {
+            ...(listState.visibleCountByGroup ?? {}),
+            ...(patch.visibleCountByGroup ?? {}),
+          },
+        })
+      },
+      [listState, onStateChange],
+    )
+
+    React.useEffect(() => {
+      setSelectedCategory(state?.selectedCategory ?? 'all')
+      setSelectedListMode(state?.selectedListMode ?? 'requirements')
+    }, [state?.selectedCategory, state?.selectedListMode])
+
     const listContent = React.useMemo(() => {
       if (selectedListMode === 'recommendations') {
         return renderViolationGroups(
           filteredRecommendationViolations,
+          listState,
+          updateListState,
+          'recommendations',
           onSelectViolation,
           onHumanReviewStatusChange,
           onViolationNoteChange,
@@ -1330,6 +1436,8 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
       if (selectedListMode === 'review') {
         return renderReviewSections(
           filteredReviewViolations,
+          listState,
+          updateListState,
           onSelectViolation,
           onHumanReviewStatusChange,
           onViolationNoteChange,
@@ -1339,6 +1447,9 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
 
       return renderViolationGroups(
         filteredRequirementViolations,
+        listState,
+        updateListState,
+        'requirements',
         onSelectViolation,
         onHumanReviewStatusChange,
         onViolationNoteChange,
@@ -1348,8 +1459,10 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
       filteredRecommendationViolations,
       filteredRequirementViolations,
       filteredReviewViolations,
+      listState,
       onHumanReviewStatusChange,
       onSelectViolation,
+      updateListState,
       onViolationContrastOverrideChange,
       onViolationNoteChange,
       selectedListMode,
@@ -1369,7 +1482,10 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
           <Select
             className="violations-category-select"
             value={selectedCategory}
-            onChange={(value) => setSelectedCategory(value)}
+            onChange={(value) => {
+              setSelectedCategory(value)
+              updateListState({ openGroupKey: undefined, selectedCategory: value })
+            }}
             options={[
               { value: 'all', label: t('violations.categoryAll') },
               ...availableCategories.map((category) => ({
@@ -1384,9 +1500,11 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
           block
           options={modeOptions}
           value={selectedListMode}
-          onChange={(value) =>
-            setSelectedListMode(value as 'requirements' | 'recommendations' | 'review')
-          }
+          onChange={(value) => {
+            const nextMode = value as ViolationsListMode
+            setSelectedListMode(nextMode)
+            updateListState({ openGroupKey: undefined, selectedListMode: nextMode })
+          }}
         />
         <div className="violations-mode-content">{listContent}</div>
       </div>

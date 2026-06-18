@@ -181,6 +181,16 @@
   gap: 12px;
 }
 
+.violation-load-more {
+  align-self: center;
+  color: var(--guard-color-primary);
+  font-weight: 600;
+}
+
+.violation-load-more-icon {
+  animation: violation-load-more-bounce 1.2s ease-in-out infinite;
+}
+
 .violation-item-card {
   cursor: pointer;
   transition:
@@ -753,6 +763,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes violation-load-more-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(3px);
   }
 }
 

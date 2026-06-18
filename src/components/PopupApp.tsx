@@ -17,6 +17,7 @@ import {
   UpOutlined,
 } from '@ant-design/icons'
 import { PopupPanelSkeleton } from './LoadingSkeletons'
+import type { ViolationsListState } from './ViolationsList'
 import { t } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { APP_VERSION } from '@/version'
@@ -49,6 +50,7 @@ import {
   saveAuditResult,
   updateStoredAuditResult,
 } from '@/utils/audit-engine'
+import { getAuditUrlStorageKey } from '@/utils/audit-history'
 import '../styles/popup.css'
 
 const { Header, Content, Footer } = Layout
@@ -84,10 +86,72 @@ const severityRank: Record<Violation['severity'], number> = {
 }
 
 const maxHeaderTabTitleLength = 300
+const popupStateStorageKey = 'popupStateByUrl'
+const maxStoredPopupStates = 50
+
+type PopupTabKey = 'summary' | 'violations' | 'history'
+
+interface PopupStoredState {
+  activeTabKey?: PopupTabKey
+  isAuditMetaCollapsed?: boolean
+  scrollTop?: number
+  selectedHistoryId?: string | null
+  updatedAt?: number
+  violationsListState?: ViolationsListState
+}
+
+type PopupStateByUrl = Record<string, PopupStoredState>
 
 function truncateHeaderTabTitle(value: string): string {
   if (value.length <= maxHeaderTabTitleLength) return value
   return `${value.slice(0, maxHeaderTabTitleLength - 3).trimEnd()}...`
+}
+
+function isPopupTabKey(value: unknown): value is PopupTabKey {
+  return value === 'summary' || value === 'violations' || value === 'history'
+}
+
+function getStoredPopupState(rawStateByUrl: unknown, url?: string): PopupStoredState | null {
+  if (!url || !rawStateByUrl || typeof rawStateByUrl !== 'object') return null
+  const stateByUrl = rawStateByUrl as PopupStateByUrl
+  const storedState = stateByUrl[getAuditUrlStorageKey(url)]
+  if (!storedState || typeof storedState !== 'object') return null
+
+  return {
+    ...storedState,
+    activeTabKey: isPopupTabKey(storedState.activeTabKey)
+      ? storedState.activeTabKey
+      : undefined,
+    selectedHistoryId:
+      typeof storedState.selectedHistoryId === 'string' || storedState.selectedHistoryId === null
+        ? storedState.selectedHistoryId
+        : undefined,
+  }
+}
+
+function mergePopupStoredState(
+  currentState: PopupStoredState | null,
+  patch: Partial<PopupStoredState>,
+): PopupStoredState {
+  const mergedState: PopupStoredState = {
+    ...(currentState ?? {}),
+    ...patch,
+    updatedAt: Date.now(),
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(patch, 'violationsListState')) {
+    mergedState.violationsListState = currentState?.violationsListState
+  }
+
+  return mergedState
+}
+
+function limitPopupStateByUrl(stateByUrl: PopupStateByUrl): PopupStateByUrl {
+  return Object.fromEntries(
+    Object.entries(stateByUrl)
+      .sort((left, right) => (right[1].updatedAt ?? 0) - (left[1].updatedAt ?? 0))
+      .slice(0, maxStoredPopupStates),
+  )
 }
 
 function getPriorityViolations(violations: Violation[]): Violation[] {
@@ -205,6 +269,7 @@ export const PopupApp: React.FC = () => {
   const quotaRetryRef = useRef<(() => Promise<unknown>) | null>(null)
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const popupContentRef = useRef<HTMLDivElement | null>(null)
+  const scrollPersistTimeoutRef = useRef<number | null>(null)
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null)
   const [auditHistory, setAuditHistory] = useState<AuditHistoryEntry[]>([])
   const [siteAuditHistory, setSiteAuditHistory] = useState<AuditHistoryEntry[]>([])
@@ -213,8 +278,9 @@ export const PopupApp: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null)
-  const [activeTabKey, setActiveTabKey] = useState('summary')
+  const [activeTabKey, setActiveTabKey] = useState<PopupTabKey>('summary')
   const [isAuditMetaCollapsed, setIsAuditMetaCollapsed] = useState(false)
+  const [popupStoredState, setPopupStoredState] = useState<PopupStoredState | null>(null)
   const [isVisionSimulatorOpen, setIsVisionSimulatorOpen] = useState(false)
   const [hasVisionSimulatorMounted, setHasVisionSimulatorMounted] = useState(false)
   const [priorityIndex, setPriorityIndex] = useState(0)
@@ -266,19 +332,33 @@ export const PopupApp: React.FC = () => {
       setActiveTab(tab)
       const [result, preferences, history, siteHistory, diagnostics] = await Promise.all([
         getAuditResult(tab.id, tab.url),
-        chrome.storage.local.get('includeRecommendationsPreference'),
+        chrome.storage.local.get(['includeRecommendationsPreference', popupStateStorageKey]),
         getAuditHistoryForUrl(tab.url),
         getAuditHistoryForSite(tab.url),
         getAuditStorageDiagnostics(tab.url),
       ])
       const resolvedPreference =
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
+      const savedState = getStoredPopupState(preferences[popupStateStorageKey], tab.url)
+      const availableAuditIds = new Set(
+        [result?.id, ...history.map((entry) => entry.id), ...siteHistory.map((entry) => entry.id)]
+          .filter(Boolean)
+          .map(String),
+      )
+      const savedHistoryId =
+        savedState?.selectedHistoryId && availableAuditIds.has(savedState.selectedHistoryId)
+          ? savedState.selectedHistoryId
+          : null
+      const restoredHistoryId = savedHistoryId ?? (!result && history.length > 0 ? history[0].id : null)
       setAuditResult(result)
       setAuditHistory(history)
       setSiteAuditHistory(siteHistory)
       setIncludeRecommendations(resolvedPreference)
       setStorageDiagnostics(diagnostics)
-      setSelectedHistoryId(!result && history.length > 0 ? history[0].id : null)
+      setPopupStoredState(savedState)
+      setSelectedHistoryId(restoredHistoryId)
+      setActiveTabKey(savedState?.activeTabKey ?? 'summary')
+      setIsAuditMetaCollapsed(Boolean(savedState?.isAuditMetaCollapsed))
       setShowAboutView(false)
       setPriorityIndex(0)
       setComparisonTargetId(history[0]?.id)
@@ -289,6 +369,9 @@ export const PopupApp: React.FC = () => {
       setAuditHistory([])
       setSiteAuditHistory([])
       setSelectedHistoryId(null)
+      setPopupStoredState(null)
+      setActiveTabKey('summary')
+      setIsAuditMetaCollapsed(false)
       setShowAboutView(false)
       setPriorityIndex(0)
       setComparisonBaselineId(undefined)
@@ -394,6 +477,109 @@ export const PopupApp: React.FC = () => {
     [scopedRawViolations, viewedAuditResult],
   )
 
+  const persistPopupState = useCallback(
+    async (patch: Partial<PopupStoredState>) => {
+      const stateUrl = viewedAuditResult?.url || activeTab?.url
+      if (!stateUrl) return
+
+      const stateKey = getAuditUrlStorageKey(stateUrl)
+      setPopupStoredState((currentState) => mergePopupStoredState(currentState, patch))
+
+      try {
+        const stored = await chrome.storage.local.get(popupStateStorageKey)
+        const currentStateByUrl =
+          stored[popupStateStorageKey] && typeof stored[popupStateStorageKey] === 'object'
+            ? ({ ...(stored[popupStateStorageKey] as PopupStateByUrl) } as PopupStateByUrl)
+            : {}
+
+        currentStateByUrl[stateKey] = mergePopupStoredState(
+          currentStateByUrl[stateKey] ?? null,
+          patch,
+        )
+
+        await chrome.storage.local.set({
+          [popupStateStorageKey]: limitPopupStateByUrl(currentStateByUrl),
+        })
+      } catch (error) {
+        console.error('Erro ao salvar estado do popup:', error)
+      }
+    },
+    [activeTab?.url, viewedAuditResult?.url],
+  )
+
+  const handleTabChange = useCallback(
+    (key: string) => {
+      const nextTabKey = isPopupTabKey(key) ? key : 'summary'
+      setActiveTabKey(nextTabKey)
+      void persistPopupState({ activeTabKey: nextTabKey })
+    },
+    [persistPopupState],
+  )
+
+  const handleAuditMetaToggle = useCallback(() => {
+    setIsAuditMetaCollapsed((currentValue) => {
+      const nextValue = !currentValue
+      void persistPopupState({ isAuditMetaCollapsed: nextValue })
+      return nextValue
+    })
+  }, [persistPopupState])
+
+  const handleSelectHistory = useCallback(
+    (historyId: string | null) => {
+      setSelectedHistoryId(historyId)
+      setPriorityIndex(0)
+      void persistPopupState({ selectedHistoryId: historyId })
+    },
+    [persistPopupState],
+  )
+
+  const handleViolationsListStateChange = useCallback(
+    (violationsListState: ViolationsListState) => {
+      void persistPopupState({ violationsListState })
+    },
+    [persistPopupState],
+  )
+
+  const handlePopupScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement>) => {
+      const scrollTop = event.currentTarget.scrollTop
+      if (scrollPersistTimeoutRef.current !== null) {
+        window.clearTimeout(scrollPersistTimeoutRef.current)
+      }
+      scrollPersistTimeoutRef.current = window.setTimeout(() => {
+        void persistPopupState({ scrollTop })
+      }, 220)
+    },
+    [persistPopupState],
+  )
+
+  useEffect(
+    () => () => {
+      if (scrollPersistTimeoutRef.current !== null) {
+        window.clearTimeout(scrollPersistTimeoutRef.current)
+      }
+    },
+    [],
+  )
+
+  useEffect(() => {
+    if (initialLoading || loading || showAboutView) return
+    if (typeof popupStoredState?.scrollTop !== 'number') return
+
+    const restoreTimeout = window.setTimeout(() => {
+      popupContentRef.current?.scrollTo({ top: popupStoredState.scrollTop })
+    }, 80)
+
+    return () => window.clearTimeout(restoreTimeout)
+  }, [
+    activeTabKey,
+    displayedAuditResult?.id,
+    initialLoading,
+    loading,
+    popupStoredState?.scrollTop,
+    showAboutView,
+  ])
+
   const clearHighlightsOnPage = useCallback(
     async (showFeedback = false) => {
       try {
@@ -424,8 +610,15 @@ export const PopupApp: React.FC = () => {
         setAuditHistory(history)
         setSiteAuditHistory(siteHistory)
         setSelectedHistoryId(null)
+        setActiveTabKey('summary')
         setShowAboutView(false)
         setPriorityIndex(0)
+        void persistPopupState({
+          activeTabKey: 'summary',
+          scrollTop: 0,
+          selectedHistoryId: null,
+          violationsListState: undefined,
+        })
         setComparisonTargetId(history[0]?.id)
         setComparisonBaselineId(history[1]?.id || history[0]?.id)
         message.success(
@@ -446,8 +639,15 @@ export const PopupApp: React.FC = () => {
       if (!persistedResult) {
         setAuditResult(result)
         setSelectedHistoryId(null)
+        setActiveTabKey('summary')
         setShowAboutView(false)
         setPriorityIndex(0)
+        void persistPopupState({
+          activeTabKey: 'summary',
+          scrollTop: 0,
+          selectedHistoryId: null,
+          violationsListState: undefined,
+        })
         message.warning(t('popup.messages.quotaUnsavedAudit'))
       }
     } catch (error) {
@@ -456,7 +656,7 @@ export const PopupApp: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [clearHighlightsOnPage, includeRecommendations, persistWithQuotaHandling])
+  }, [clearHighlightsOnPage, includeRecommendations, persistPopupState, persistWithQuotaHandling])
 
   const handleRecommendationsToggle = useCallback(
     async (checked: boolean) => {
@@ -615,10 +815,10 @@ export const PopupApp: React.FC = () => {
 
           if (importedInCurrentUrl) {
             setAuditHistory(refreshedHistory)
-            setSelectedHistoryId(persisted.entry.id)
+            handleSelectHistory(persisted.entry.id)
             setComparisonTargetId(refreshedHistory[0]?.id)
             setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
-            setActiveTabKey('history')
+            handleTabChange('history')
             setShowAboutView(false)
             message.success(t('popup.messages.importReadyForComparison'))
             return persisted
@@ -645,7 +845,7 @@ export const PopupApp: React.FC = () => {
         setLoading(false)
       }
     },
-    [activeTab, persistWithQuotaHandling],
+    [activeTab, handleSelectHistory, handleTabChange, persistWithQuotaHandling],
   )
 
   const handleFilterChange = useCallback(
@@ -1158,7 +1358,7 @@ export const PopupApp: React.FC = () => {
             reviewSourceResult={reviewSourceResult}
             onDownloadFullReport={handleExportJSON}
             onDownloadSummary={handleExportSummary}
-            onOpenViolations={() => setActiveTabKey('violations')}
+            onOpenViolations={() => handleTabChange('violations')}
             onRerunAudit={isHistoricalView ? undefined : handleRunAudit}
           />
         ),
@@ -1169,8 +1369,10 @@ export const PopupApp: React.FC = () => {
         children: (
           <ViolationsList
             violations={scopedRawViolations}
+            state={popupStoredState?.violationsListState}
             onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
             onHumanReviewStatusChange={handleHumanReviewStatusChange}
+            onStateChange={handleViolationsListStateChange}
             onViolationNoteChange={handleViolationNoteChange}
             onViolationContrastOverrideChange={handleViolationContrastOverrideChange}
           />
@@ -1191,10 +1393,7 @@ export const PopupApp: React.FC = () => {
             comparisonTargetId={comparisonTargetId}
             comparisonSummary={comparisonSummary}
             comparisonTrend={comparisonTrend}
-            onSelectHistory={(historyId) => {
-              setSelectedHistoryId(historyId)
-              setPriorityIndex(0)
-            }}
+            onSelectHistory={handleSelectHistory}
             onDeleteHistoryEntry={setHistoryEntryPendingDeletion}
             onComparisonBaselineChange={setComparisonBaselineId}
             onComparisonTargetChange={setComparisonTargetId}
@@ -1214,11 +1413,14 @@ export const PopupApp: React.FC = () => {
     reviewSourceResult,
     handleExportJSON,
     handleExportSummary,
+    handleTabChange,
     handleRunAudit,
     scopedRawViolations,
+    popupStoredState?.violationsListState,
     isHistoricalView,
     handleHighlightViolation,
     handleHumanReviewStatusChange,
+    handleViolationsListStateChange,
     handleViolationNoteChange,
     handleViolationContrastOverrideChange,
     activeTab?.title,
@@ -1226,6 +1428,7 @@ export const PopupApp: React.FC = () => {
     siteAuditHistory,
     auditResult?.id,
     selectedHistoryId,
+    handleSelectHistory,
     comparisonEntries,
     comparisonBaselineId,
     comparisonTargetId,
@@ -1276,7 +1479,7 @@ export const PopupApp: React.FC = () => {
         </div>
       </Header>
 
-      <Content ref={popupContentRef} className="popup-content">
+      <Content ref={popupContentRef} className="popup-content" onScroll={handlePopupScroll}>
         <input
           ref={importInputRef}
           type="file"
@@ -1307,7 +1510,7 @@ export const PopupApp: React.FC = () => {
                 className="audit-meta-toggle"
                 type="button"
                 aria-expanded={!isAuditMetaCollapsed}
-                onClick={() => setIsAuditMetaCollapsed((current) => !current)}
+                onClick={handleAuditMetaToggle}
               >
                 <span>
                   <span className="tab-status-label">
@@ -1436,7 +1639,7 @@ export const PopupApp: React.FC = () => {
             )}
 
             <Suspense fallback={<PopupPanelSkeleton />}>
-              <Tabs activeKey={activeTabKey} onChange={setActiveTabKey} items={tabItems} />
+              <Tabs activeKey={activeTabKey} onChange={handleTabChange} items={tabItems} />
             </Suspense>
 
             <div className="vision-floating-shell">
@@ -1516,7 +1719,7 @@ export const PopupApp: React.FC = () => {
           setAuditHistory(updatedHistory)
           setSiteAuditHistory(updatedSiteHistory)
           if (selectedHistoryId === historyEntryPendingDeletion.id) {
-            setSelectedHistoryId(null)
+            handleSelectHistory(null)
           }
           setComparisonTargetId(updatedHistory[0]?.id)
           setComparisonBaselineId(updatedHistory[1]?.id || updatedHistory[0]?.id)

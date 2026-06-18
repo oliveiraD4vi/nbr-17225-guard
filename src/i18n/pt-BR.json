@@ -367,6 +367,7 @@
     "categoryFilterDescription": "Refine a listagem usando a categoria natural das regras auditadas.",
     "categoryAll": "Todas as categorias",
     "topIssues": "Itens prioritários",
+    "loadMoreOccurrences": "Carregar mais {{count}} ocorrência(s)",
     "otherOccurrences": "Demais ocorrências",
     "requiresHumanReviewTitle": "Confirmação necessária",
     "requiresHumanReviewDescription": "Há um indício relevante aqui, mas a decisão final ainda depende do contexto real da página e da sua confirmação manual.",
