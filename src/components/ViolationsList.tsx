@@ -398,10 +398,9 @@ function renderViolationGroups(
       },
     })
   }
-  const firstGroupKey = groups[0] ? `${groupScope}:${groups[0].ruleId}` : undefined
   const activeGroupKey = state?.openGroupKey?.startsWith(`${groupScope}:`)
     ? state.openGroupKey
-    : firstGroupKey
+    : undefined
 
   const items = groups.map((group) => {
     const firstViolation = group.violations[0]
@@ -412,8 +411,7 @@ function renderViolationGroups(
     )
     const visibleIssues = group.violations.slice(0, visibleCount)
     const remainingCount = group.violations.length - visibleIssues.length
-    const openOccurrenceId =
-      state?.openOccurrenceByGroup?.[groupStateKey] ?? visibleIssues[0]?.id
+    const openOccurrenceId = state?.openOccurrenceByGroup?.[groupStateKey]
 
     return {
       key: groupStateKey,
@@ -460,11 +458,11 @@ function renderViolationGroups(
                   violation={violation}
                   index={index}
                   isOpen={openOccurrenceId === violation.id}
-                  onOpen={() => {
+                  onToggle={() => {
                     updateListState({
                       openGroupKey: groupStateKey,
                       openOccurrenceByGroup: {
-                        [groupStateKey]: violation.id,
+                        [groupStateKey]: openOccurrenceId === violation.id ? '' : violation.id,
                       },
                     })
                   }}
@@ -508,8 +506,7 @@ function renderViolationGroups(
       items={items}
       onChange={(key) => {
         const nextKey = Array.isArray(key) ? String(key[0] ?? '') : String(key)
-        if (!nextKey) return
-        updateListState({ openGroupKey: nextKey })
+        updateListState({ openGroupKey: nextKey || undefined })
       }}
     />
   )
@@ -606,7 +603,7 @@ interface ViolationCardProps {
   violation: Violation
   index: number
   isOpen: boolean
-  onOpen: () => void
+  onToggle: () => void
   onSelectViolation?: (violation: Violation) => void
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void
   onViolationNoteChange?: (violation: Violation, note: string) => void
@@ -622,7 +619,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
     violation,
     index,
     isOpen,
-    onOpen,
+    onToggle,
     onSelectViolation,
     onHumanReviewStatusChange,
     onViolationNoteChange,
@@ -681,11 +678,13 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       [noteDraft, onViolationNoteChange, violation],
     )
 
-    const handleCardClick = React.useCallback(() => {
+    const handleHeaderToggle = React.useCallback(() => {
       if (isContrastModalOpen) return
-      onOpen()
-      onSelectViolation?.(violation)
-    }, [isContrastModalOpen, onOpen, onSelectViolation, violation])
+      onToggle()
+      if (!isOpen) {
+        onSelectViolation?.(violation)
+      }
+    }, [isContrastModalOpen, isOpen, onSelectViolation, onToggle, violation])
 
     const contrastRatio = React.useMemo(() => {
       if (!violation.contrastDetails) return null
@@ -787,11 +786,15 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       <Card
         size="small"
         className={`violation-item-card${pinned ? ' is-pinned' : ''} review-state-${violation.humanReviewStatus}${isApplyingReviewDecision ? ' is-review-transitioning' : ''}${isApplyingReviewDecision ? ` is-review-transitioning-to-${reviewTransitionTargetStatus}` : ''}`}
-        onClick={handleCardClick}
       >
-        <div className="violation-item-header">
+        <button
+          className="violation-item-header"
+          type="button"
+          aria-expanded={isOpen}
+          onClick={handleHeaderToggle}
+        >
           <span className="violation-item-number">#{index + 1}</span>
-          <div className="violation-item-heading">
+          <span className="violation-item-heading">
             <TruncatedText
               className="violation-item-message"
               lines={2}
@@ -807,8 +810,12 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             <span className="violation-item-reference">
               NBR {violation.nbrReference} - WCAG {violation.wcagLevel}
             </span>
-          </div>
-        </div>
+          </span>
+          <DownOutlined
+            className={`violation-item-toggle-icon${isOpen ? ' is-open' : ''}`}
+            aria-hidden="true"
+          />
+        </button>
 
         {isOpen && <div className="violation-item-content">
           {violation.requiresHumanReview && (

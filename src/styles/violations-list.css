@@ -238,7 +238,21 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  width: 100%;
   margin-bottom: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.violation-item-header:focus-visible {
+  outline: 2px solid var(--guard-color-primary);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 .violation-item-number {
@@ -260,6 +274,18 @@
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  flex: 1;
+}
+
+.violation-item-toggle-icon {
+  margin-top: 6px;
+  color: var(--guard-color-text-muted);
+  font-size: 12px;
+  transition: transform 0.16s ease;
+}
+
+.violation-item-toggle-icon.is-open {
+  transform: rotate(180deg);
 }
 
 .violation-item-message {
