@@ -275,6 +275,7 @@ export const PopupApp: React.FC = () => {
   const [siteAuditHistory, setSiteAuditHistory] = useState<AuditHistoryEntry[]>([])
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [includeRecommendations, setIncludeRecommendations] = useState(false)
+  const [includeHumanReview, setIncludeHumanReview] = useState(true)
   const [initialLoading, setInitialLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null)
@@ -332,13 +333,19 @@ export const PopupApp: React.FC = () => {
       setActiveTab(tab)
       const [result, preferences, history, siteHistory, diagnostics] = await Promise.all([
         getAuditResult(tab.id, tab.url),
-        chrome.storage.local.get(['includeRecommendationsPreference', popupStateStorageKey]),
+        chrome.storage.local.get([
+          'includeRecommendationsPreference',
+          'includeHumanReviewPreference',
+          popupStateStorageKey,
+        ]),
         getAuditHistoryForUrl(tab.url),
         getAuditHistoryForSite(tab.url),
         getAuditStorageDiagnostics(tab.url),
       ])
       const resolvedPreference =
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
+      const resolvedHumanReviewPreference =
+        result?.includeHumanReview ?? preferences.includeHumanReviewPreference !== false
       const savedState = getStoredPopupState(preferences[popupStateStorageKey], tab.url)
       const availableAuditIds = new Set(
         [result?.id, ...history.map((entry) => entry.id), ...siteHistory.map((entry) => entry.id)]
@@ -354,6 +361,7 @@ export const PopupApp: React.FC = () => {
       setAuditHistory(history)
       setSiteAuditHistory(siteHistory)
       setIncludeRecommendations(resolvedPreference)
+      setIncludeHumanReview(resolvedHumanReviewPreference)
       setStorageDiagnostics(diagnostics)
       setPopupStoredState(savedState)
       setSelectedHistoryId(restoredHistoryId)
@@ -369,6 +377,7 @@ export const PopupApp: React.FC = () => {
       setAuditHistory([])
       setSiteAuditHistory([])
       setSelectedHistoryId(null)
+      setIncludeHumanReview(true)
       setPopupStoredState(null)
       setActiveTabKey('summary')
       setIsAuditMetaCollapsed(false)
@@ -456,26 +465,33 @@ export const PopupApp: React.FC = () => {
 
   const isHistoricalView = Boolean(selectedHistoryId)
   const displayedAuditResult = useMemo(
-    () => getDisplayResultForScope(viewedAuditResult, includeRecommendations),
-    [includeRecommendations, viewedAuditResult],
+    () => getDisplayResultForScope(viewedAuditResult, includeRecommendations, includeHumanReview),
+    [includeHumanReview, includeRecommendations, viewedAuditResult],
   )
   const scopedRawViolations = useMemo(
     () =>
       viewedAuditResult?.violations.filter(
-        (violation) => includeRecommendations || isNormativeRequirement(violation.nbrReference),
+        (violation) =>
+          (includeRecommendations || isNormativeRequirement(violation.nbrReference)) &&
+          (includeHumanReview || !violation.requiresHumanReview),
       ) ?? [],
-    [includeRecommendations, viewedAuditResult],
+    [includeHumanReview, includeRecommendations, viewedAuditResult],
   )
   const reviewSourceResult = useMemo(
     () =>
       viewedAuditResult
         ? {
             ...viewedAuditResult,
+            includeHumanReview,
             violations: scopedRawViolations,
           }
         : null,
-    [scopedRawViolations, viewedAuditResult],
+    [includeHumanReview, scopedRawViolations, viewedAuditResult],
   )
+  const canRerunViewedAudit = useMemo(() => {
+    if (!activeTab?.url || !viewedAuditResult?.url) return false
+    return getAuditUrlStorageKey(activeTab.url) === getAuditUrlStorageKey(viewedAuditResult.url)
+  }, [activeTab?.url, viewedAuditResult?.url])
 
   const persistPopupState = useCallback(
     async (patch: Partial<PopupStoredState>) => {
@@ -597,7 +613,7 @@ export const PopupApp: React.FC = () => {
     setLoading(true)
     try {
       await clearHighlightsOnPage(false)
-      const result = await runAccessibilityAudit({ includeRecommendations })
+      const result = await runAccessibilityAudit({ includeRecommendations, includeHumanReview })
       const tab = await getActiveTab()
       setActiveTab(tab)
       const persistAudit = async () => {
@@ -624,8 +640,11 @@ export const PopupApp: React.FC = () => {
         message.success(
           t('popup.messages.auditCompleted', {
             count:
-              getDisplayResultForScope(persistedResult, includeRecommendations)?.totalViolations ??
-              result.totalViolations,
+              getDisplayResultForScope(
+                persistedResult,
+                includeRecommendations,
+                includeHumanReview,
+              )?.totalViolations ?? result.totalViolations,
           }),
         )
         return persistedResult
@@ -656,7 +675,13 @@ export const PopupApp: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }, [clearHighlightsOnPage, includeRecommendations, persistPopupState, persistWithQuotaHandling])
+  }, [
+    clearHighlightsOnPage,
+    includeHumanReview,
+    includeRecommendations,
+    persistPopupState,
+    persistWithQuotaHandling,
+  ])
 
   const handleRecommendationsToggle = useCallback(
     async (checked: boolean) => {
@@ -670,12 +695,16 @@ export const PopupApp: React.FC = () => {
       setLoading(true)
       try {
         await clearHighlightsOnPage(false)
-        const upgradedResult = await runAccessibilityAudit({ includeRecommendations: true })
+        const upgradedResult = await runAccessibilityAudit({
+          includeRecommendations: true,
+          includeHumanReview,
+        })
         const preservedResult: AuditResult = {
           ...upgradedResult,
           id: auditResult.id,
           timestamp: auditResult.timestamp,
           includeRecommendations: true,
+          includeHumanReview,
         }
 
         syncAuditResultUpdate(preservedResult)
@@ -708,6 +737,62 @@ export const PopupApp: React.FC = () => {
       activeTab?.url,
       auditResult,
       clearHighlightsOnPage,
+      includeHumanReview,
+      isHistoricalView,
+      persistWithQuotaHandling,
+      syncAuditResultUpdate,
+    ],
+  )
+
+  const handleHumanReviewToggle = useCallback(
+    async (checked: boolean) => {
+      setIncludeHumanReview(checked)
+      await chrome.storage.local.set({ includeHumanReviewPreference: checked })
+
+      if (!checked || isHistoricalView || !auditResult || auditResult.includeHumanReview !== false) {
+        return
+      }
+
+      setLoading(true)
+      try {
+        await clearHighlightsOnPage(false)
+        const upgradedResult = await runAccessibilityAudit({
+          includeRecommendations,
+          includeHumanReview: true,
+        })
+        const preservedResult: AuditResult = {
+          ...upgradedResult,
+          id: auditResult.id,
+          timestamp: auditResult.timestamp,
+          includeRecommendations,
+          includeHumanReview: true,
+        }
+
+        syncAuditResultUpdate(preservedResult)
+        const persisted = await persistWithQuotaHandling(
+          async () => {
+            await updateStoredAuditResult(preservedResult, activeTab?.id)
+            return true
+          },
+          { url: preservedResult.url, scope: 'audit', hasUnsavedChanges: true },
+        )
+        if (persisted === null) {
+          message.warning(t('popup.messages.quotaUnsavedAudit'))
+        }
+      } catch (error) {
+        console.error('Erro ao incluir itens não automatizáveis:', error)
+        setIncludeHumanReview(false)
+        await chrome.storage.local.set({ includeHumanReviewPreference: false })
+        message.error(t('popup.messages.humanReviewLoadError'))
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      activeTab?.id,
+      auditResult,
+      clearHighlightsOnPage,
+      includeRecommendations,
       isHistoricalView,
       persistWithQuotaHandling,
       syncAuditResultUpdate,
@@ -1291,6 +1376,7 @@ export const PopupApp: React.FC = () => {
         icon: <ReloadOutlined />,
         onClick: handleRunAudit,
         loading,
+        disabled: !canRerunViewedAudit,
       },
       {
         key: 'highlight',
@@ -1332,6 +1418,7 @@ export const PopupApp: React.FC = () => {
   }, [
     displayedAuditResult,
     handleRunAudit,
+    canRerunViewedAudit,
     loading,
     handleHighlightAll,
     isHistoricalView,
@@ -1355,7 +1442,8 @@ export const PopupApp: React.FC = () => {
             onDownloadFullReport={handleExportJSON}
             onDownloadSummary={handleExportSummary}
             onOpenViolations={() => handleTabChange('violations')}
-            onRerunAudit={isHistoricalView ? undefined : handleRunAudit}
+            onRerunAudit={canRerunViewedAudit ? handleRunAudit : undefined}
+            showHumanReview={includeHumanReview}
           />
         ),
       },
@@ -1366,6 +1454,7 @@ export const PopupApp: React.FC = () => {
           <ViolationsList
             violations={scopedRawViolations}
             state={popupStoredState?.violationsListState}
+            showHumanReview={includeHumanReview}
             onSelectViolation={isHistoricalView ? undefined : handleHighlightViolation}
             onHumanReviewStatusChange={handleHumanReviewStatusChange}
             onStateChange={handleViolationsListStateChange}
@@ -1411,6 +1500,8 @@ export const PopupApp: React.FC = () => {
     handleExportSummary,
     handleTabChange,
     handleRunAudit,
+    canRerunViewedAudit,
+    includeHumanReview,
     scopedRawViolations,
     popupStoredState?.violationsListState,
     isHistoricalView,
@@ -1548,6 +1639,27 @@ export const PopupApp: React.FC = () => {
                       <div className="recommendations-toggle-copy">
                         <strong>{t('popup.scope.enableAction')}</strong>
                         <small>{t('popup.scope.normativeNote')}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="tab-status-item tab-status-item-toggle">
+                    <span className="tab-status-label">
+                      {t('popup.scope.humanReviewLabel')}:{' '}
+                      {includeHumanReview
+                        ? t('popup.scope.humanReviewIncluded')
+                        : t('popup.scope.humanReviewExcluded')}
+                    </span>
+                    <div className="recommendations-toggle-row">
+                      <Switch
+                        checked={includeHumanReview}
+                        loading={loading}
+                        onChange={(checked) => {
+                          void handleHumanReviewToggle(checked)
+                        }}
+                      />
+                      <div className="recommendations-toggle-copy">
+                        <strong>{t('popup.scope.humanReviewAction')}</strong>
+                        <small>{t('popup.scope.humanReviewNote')}</small>
                       </div>
                     </div>
                   </div>

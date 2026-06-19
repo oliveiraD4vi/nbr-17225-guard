@@ -2,15 +2,17 @@ import { getRunnableRules } from '@/rules'
 import { isNormativeRecommendation, isNormativeRequirement } from '@/normative'
 import type { AuditResult, Violation } from '@/types'
 
-const requirementRuleIds = new Set(
-  getRunnableRules(false).map((rule) => rule.id),
-)
+function getRequirementRuleIds(includeHumanReview: boolean): Set<string> {
+  return new Set(getRunnableRules(false, includeHumanReview).map((rule) => rule.id))
+}
 
-const recommendationRuleIds = new Set(
-  getRunnableRules(true)
+function getRecommendationRuleIds(includeHumanReview: boolean): Set<string> {
+  return new Set(
+    getRunnableRules(true, includeHumanReview)
     .filter((rule) => isNormativeRecommendation(rule.nbrReference))
     .map((rule) => rule.id),
-)
+  )
+}
 
 function shouldCountViolation(violation: Violation): boolean {
   if (!violation.requiresHumanReview) return true
@@ -87,6 +89,7 @@ export interface AuditScoreData {
   completedHumanReviewItems: number
   totalHumanReviewItems: number
   includesRecommendations: boolean
+  includesHumanReview: boolean
   weights: AuditScoreWeights
 }
 
@@ -99,6 +102,9 @@ export function getAuditScoreData(result: AuditResult): AuditScoreData {
   const includesRecommendations =
     result.includeRecommendations ??
     result.violations.some((violation) => isNormativeRecommendation(violation.nbrReference))
+  const includesHumanReview = result.includeHumanReview ?? true
+  const requirementRuleIds = getRequirementRuleIds(includesHumanReview)
+  const recommendationRuleIds = getRecommendationRuleIds(includesHumanReview)
   const totalRequirementRules = requirementRuleIds.size
   const totalRecommendationRules = includesRecommendations ? recommendationRuleIds.size : 0
   const violatedRequirementRules = getViolatedRuleCount(
@@ -135,8 +141,12 @@ export function getAuditScoreData(result: AuditResult): AuditScoreData {
       ? 100
       : Math.round((completedHumanReviewItems / totalHumanReviewItems) * 100)
   const weights: AuditScoreWeights = includesRecommendations
-    ? { requirements: 0.7, recommendations: 0.2, humanReview: 0.1 }
-    : { requirements: 0.9, recommendations: 0, humanReview: 0.1 }
+    ? includesHumanReview
+      ? { requirements: 0.7, recommendations: 0.2, humanReview: 0.1 }
+      : { requirements: 0.8, recommendations: 0.2, humanReview: 0 }
+    : includesHumanReview
+      ? { requirements: 0.9, recommendations: 0, humanReview: 0.1 }
+      : { requirements: 1, recommendations: 0, humanReview: 0 }
   const baseScore = Math.max(
     0,
     Math.round(
@@ -167,6 +177,7 @@ export function getAuditScoreData(result: AuditResult): AuditScoreData {
     completedHumanReviewItems,
     totalHumanReviewItems,
     includesRecommendations,
+    includesHumanReview,
     weights,
   }
 }

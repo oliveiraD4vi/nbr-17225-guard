@@ -52,6 +52,7 @@ export interface ViolationsListState {
 interface ViolationsListProps {
   violations: Violation[]
   state?: ViolationsListState
+  showHumanReview?: boolean
   onSelectViolation?: (violation: Violation) => void
   onHumanReviewStatusChange?: (violation: Violation, status: HumanReviewStatus) => void
   onStateChange?: (state: ViolationsListState) => void
@@ -1308,6 +1309,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
   ({
     violations,
     state,
+    showHumanReview = true,
     onSelectViolation,
     onHumanReviewStatusChange,
     onStateChange,
@@ -1371,30 +1373,36 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
       [filterByCategory, reviewViolations],
     )
     const modeOptions = React.useMemo(
-      () => [
-        {
-          label: t('violations.tabRequirements', {
-            count: filteredRequirementViolations.length,
-          }),
-          value: 'requirements',
-        },
-        {
-          label: t('violations.tabRecommendations', {
-            count: filteredRecommendationViolations.length,
-          }),
-          value: 'recommendations',
-        },
-        {
-          label: t('violations.tabReview', { count: filteredReviewViolations.length }),
-          value: 'review',
-        },
-      ],
+      () =>
+        [
+          {
+            label: t('violations.tabRequirements', {
+              count: filteredRequirementViolations.length,
+            }),
+            value: 'requirements',
+          },
+          {
+            label: t('violations.tabRecommendations', {
+              count: filteredRecommendationViolations.length,
+            }),
+            value: 'recommendations',
+          },
+          showHumanReview
+            ? {
+                label: t('violations.tabReview', { count: filteredReviewViolations.length }),
+                value: 'review',
+              }
+            : null,
+        ].filter(Boolean),
       [
         filteredRecommendationViolations.length,
         filteredRequirementViolations.length,
         filteredReviewViolations.length,
+        showHumanReview,
       ],
     )
+    const effectiveSelectedListMode =
+      !showHumanReview && selectedListMode === 'review' ? 'requirements' : selectedListMode
     const listState = React.useMemo<ViolationsListState>(
       () => ({
         ...state,
@@ -1423,11 +1431,15 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
 
     React.useEffect(() => {
       setSelectedCategory(state?.selectedCategory ?? 'all')
-      setSelectedListMode(state?.selectedListMode ?? 'requirements')
-    }, [state?.selectedCategory, state?.selectedListMode])
+      setSelectedListMode(
+        !showHumanReview && state?.selectedListMode === 'review'
+          ? 'requirements'
+          : (state?.selectedListMode ?? 'requirements'),
+      )
+    }, [showHumanReview, state?.selectedCategory, state?.selectedListMode])
 
     const listContent = React.useMemo(() => {
-      if (selectedListMode === 'recommendations') {
+      if (effectiveSelectedListMode === 'recommendations') {
         return renderViolationGroups(
           filteredRecommendationViolations,
           listState,
@@ -1440,7 +1452,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
         )
       }
 
-      if (selectedListMode === 'review') {
+      if (showHumanReview && effectiveSelectedListMode === 'review') {
         return renderReviewSections(
           filteredReviewViolations,
           listState,
@@ -1472,7 +1484,8 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
       updateListState,
       onViolationContrastOverrideChange,
       onViolationNoteChange,
-      selectedListMode,
+      effectiveSelectedListMode,
+      showHumanReview,
     ])
 
     if (!violations || violations.length === 0) {
@@ -1506,7 +1519,7 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
           className="violations-mode-segmented"
           block
           options={modeOptions}
-          value={selectedListMode}
+          value={effectiveSelectedListMode}
           onChange={(value) => {
             const nextMode = value as ViolationsListMode
             setSelectedListMode(nextMode)

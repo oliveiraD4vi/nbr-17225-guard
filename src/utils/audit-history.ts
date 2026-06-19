@@ -125,9 +125,12 @@ export function getVisibleAuditViolations(result: AuditResult): Violation[] {
 export function getDisplayAuditResult(
   result: AuditResult,
   includeRecommendations: boolean,
+  includeHumanReview = true,
 ): AuditResult {
   const visibleViolations = getVisibleAuditViolations(result).filter(
-    (violation) => includeRecommendations || isNormativeRequirement(violation.nbrReference),
+    (violation) =>
+      (includeRecommendations || isNormativeRequirement(violation.nbrReference)) &&
+      (includeHumanReview || !violation.requiresHumanReview),
   )
   const pendingHumanReviewItems = visibleViolations.filter(
     (violation) => violation.requiresHumanReview && violation.humanReviewStatus === 'pending',
@@ -135,6 +138,7 @@ export function getDisplayAuditResult(
 
   const hydratedResult = hydrateAuditResult({
     ...result,
+    includeHumanReview,
     violations: visibleViolations,
   })
 

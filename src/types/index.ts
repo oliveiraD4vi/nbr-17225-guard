@@ -83,6 +83,7 @@ export interface AuditResult {
   url: string
   pageTitle?: string
   includeRecommendations?: boolean
+  includeHumanReview?: boolean
   totalViolations: number
   errors: number
   warnings: number
@@ -119,4 +120,5 @@ export interface StorageData {
   highlightState?: HighlightState
   visionFilter?: VisionSimulationFilter
   includeRecommendationsPreference?: boolean
+  includeHumanReviewPreference?: boolean
 }

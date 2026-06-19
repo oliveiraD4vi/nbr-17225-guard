@@ -27,7 +27,7 @@ if (contentScope.__nbrGuardContentLoaded) {
         break
 
       case 'RUN_AUDIT':
-        runAuditInPage(Boolean(request.includeRecommendations))
+        runAuditInPage(Boolean(request.includeRecommendations), request.includeHumanReview !== false)
           .then((result) => sendResponse({ result }))
           .catch((error: unknown) => {
             const message = error instanceof Error ? error.message : t('content.unknownAuditError')
@@ -67,13 +67,16 @@ if (contentScope.__nbrGuardContentLoaded) {
     violations.forEach((violation) => renderViolationHighlight(violation))
   }
 
-  async function runAuditInPage(includeRecommendations: boolean): Promise<AuditResult> {
+  async function runAuditInPage(
+    includeRecommendations: boolean,
+    includeHumanReview: boolean,
+  ): Promise<AuditResult> {
     await ensureDocumentReady()
     clearHighlights()
     await waitForAuditStability()
 
     const violations: Violation[] = []
-    const rulesToRun = getRunnableRules(includeRecommendations)
+    const rulesToRun = getRunnableRules(includeRecommendations, includeHumanReview)
 
     for (const rule of rulesToRun) {
       try {
@@ -84,7 +87,9 @@ if (contentScope.__nbrGuardContentLoaded) {
       }
     }
 
-    const dedupedViolations = dedupeViolations(violations)
+    const dedupedViolations = dedupeViolations(violations).filter(
+      (violation) => includeHumanReview || !violation.requiresHumanReview,
+    )
 
     const violationsByRule = dedupedViolations.reduce<Record<string, Violation[]>>(
       (acc, violation) => {
@@ -124,6 +129,7 @@ if (contentScope.__nbrGuardContentLoaded) {
       url: window.location.href,
       pageTitle: document.title,
       includeRecommendations,
+      includeHumanReview,
       violationsByRule,
       violationsBySeverity,
     }

@@ -3,7 +3,7 @@
  * ABNT NBR 17225:2025
  */
 
-import { AUTOMATION_CATEGORIES, type Rule } from '@/types';
+import { AUTOMATION_CATEGORIES, isFullyAutomatedCategory, type Rule } from '@/types';
 import { isNormativeRequirement } from '@/normative';
 import { colorRules } from './colors';
 import { controlRules } from './controls';
@@ -90,10 +90,15 @@ export function isRuleReady(rule: Rule): boolean {
   return rule.readiness !== 'not_ready';
 }
 
-export function getRunnableRules(includeRecommendations: boolean): Rule[] {
+export function getRunnableRules(
+  includeRecommendations: boolean,
+  includeHumanReview = true,
+): Rule[] {
   return allRules.filter(
     (rule) =>
-      isRuleReady(rule) && (includeRecommendations || isNormativeRequirement(rule.nbrReference)),
+      isRuleReady(rule) &&
+      (includeRecommendations || isNormativeRequirement(rule.nbrReference)) &&
+      (includeHumanReview || isFullyAutomatedCategory(rule.category)),
   );
 }
 

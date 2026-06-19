@@ -32,6 +32,7 @@ interface ViolationsSummaryProps {
   onDownloadSummary?: () => void
   onOpenViolations?: () => void
   onRerunAudit?: () => void
+  showHumanReview?: boolean
 }
 
 export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
@@ -43,6 +44,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
     onDownloadSummary,
     onOpenViolations,
     onRerunAudit,
+    showHumanReview = true,
   }) => {
     if (loading) {
       return <SummarySkeleton />
@@ -55,9 +57,9 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
     const hasViolations = result.totalViolations > 0
     const auditScore = getAuditScoreData(result)
     const reviewBase = reviewSourceResult ?? result
-    const confirmedReviews = getConfirmedHumanReviewCount(reviewBase)
-    const dismissedReviews = getDismissedHumanReviewCount(reviewBase)
-    const pendingReviews = getPendingHumanReviewCount(reviewBase)
+    const confirmedReviews = showHumanReview ? getConfirmedHumanReviewCount(reviewBase) : 0
+    const dismissedReviews = showHumanReview ? getDismissedHumanReviewCount(reviewBase) : 0
+    const pendingReviews = showHumanReview ? getPendingHumanReviewCount(reviewBase) : 0
     const scoreTone =
       auditScore.score >= 90 ? 'good' : auditScore.score >= 70 ? 'medium' : 'critical'
     const nextStep =
@@ -68,7 +70,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
             title: t('summary.nextStepRequirementsTitle'),
             description: t('summary.nextStepRequirementsDescription'),
           }
-        : pendingReviews > 0
+        : showHumanReview && pendingReviews > 0
           ? {
               tone: 'review',
               icon: <WarningOutlined />,
@@ -194,7 +196,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                   })}
                 </Tag>
               )}
-              {auditScore.pendingHumanReviewItems > 0 && (
+              {showHumanReview && auditScore.pendingHumanReviewItems > 0 && (
                 <Tag color="gold">
                   {t('summary.pendingHumanReviewScore', {
                     count: auditScore.pendingHumanReviewItems,
@@ -229,42 +231,46 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                 <strong>{result.warnings}</strong>
                 <small>{t('summary.recommendationsReview')}</small>
               </div>
-              <div className="summary-stat-card is-review">
-                <span className="summary-stat-label">{t('shared.labels.humanReview')}</span>
-                <strong>{result.humanReviewItems}</strong>
-                <small>{t('summary.itemsToConfirm')}</small>
-              </div>
+              {showHumanReview && (
+                <div className="summary-stat-card is-review">
+                  <span className="summary-stat-label">{t('shared.labels.humanReview')}</span>
+                  <strong>{result.humanReviewItems}</strong>
+                  <small>{t('summary.itemsToConfirm')}</small>
+                </div>
+              )}
             </div>
             <p className="summary-scope-note">{t('summary.normativeScopeNote')}</p>
           </div>
 
-          <div className="summary-review-progress">
-            <div className="summary-review-progress-header">
-              <h3>{t('summary.humanReviewProgress')}</h3>
-              <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
-                {pendingReviews > 0
-                  ? t('summary.pendingReviewBadge')
-                  : t('summary.completedReviewBadge')}
-              </Tag>
+          {showHumanReview && (
+            <div className="summary-review-progress">
+              <div className="summary-review-progress-header">
+                <h3>{t('summary.humanReviewProgress')}</h3>
+                <Tag color={pendingReviews > 0 ? 'gold' : 'green'}>
+                  {pendingReviews > 0
+                    ? t('summary.pendingReviewBadge')
+                    : t('summary.completedReviewBadge')}
+                </Tag>
+              </div>
+              <div className="summary-review-progress-grid">
+                <div className="summary-review-card is-confirmed">
+                  <span className="summary-stat-label">{t('summary.confirmed')}</span>
+                  <strong>{confirmedReviews}</strong>
+                  <small>{t('summary.confirmedDescription')}</small>
+                </div>
+                <div className="summary-review-card is-dismissed">
+                  <span className="summary-stat-label">{t('summary.dismissed')}</span>
+                  <strong>{dismissedReviews}</strong>
+                  <small>{t('summary.dismissedDescription')}</small>
+                </div>
+                <div className="summary-review-card is-pending">
+                  <span className="summary-stat-label">{t('summary.pending')}</span>
+                  <strong>{pendingReviews}</strong>
+                  <small>{t('summary.pendingDescription')}</small>
+                </div>
+              </div>
             </div>
-            <div className="summary-review-progress-grid">
-              <div className="summary-review-card is-confirmed">
-                <span className="summary-stat-label">{t('summary.confirmed')}</span>
-                <strong>{confirmedReviews}</strong>
-                <small>{t('summary.confirmedDescription')}</small>
-              </div>
-              <div className="summary-review-card is-dismissed">
-                <span className="summary-stat-label">{t('summary.dismissed')}</span>
-                <strong>{dismissedReviews}</strong>
-                <small>{t('summary.dismissedDescription')}</small>
-              </div>
-              <div className="summary-review-card is-pending">
-                <span className="summary-stat-label">{t('summary.pending')}</span>
-                <strong>{pendingReviews}</strong>
-                <small>{t('summary.pendingDescription')}</small>
-              </div>
-            </div>
-          </div>
+          )}
 
           <div className={`summary-next-step is-${nextStep.tone}`}>
             <button

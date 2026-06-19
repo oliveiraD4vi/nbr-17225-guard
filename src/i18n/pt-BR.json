@@ -161,6 +161,7 @@
       "comparisonSelectInfo": "Selecione duas auditorias diferentes para comparar",
       "recommendationsIncluded": "Recomendações incluídas na auditoria atual",
       "recommendationsLoadError": "Não foi possível concluir a auditoria com recomendações",
+      "humanReviewLoadError": "Não foi possível concluir a auditoria com itens não automatizáveis",
       "importReadyForComparison": "Relatório importado e pronto para comparação nesta URL.",
       "importStoredForUrl": "Relatório importado para a URL {{url}}. Abra essa página para comparar ou continuar a revisão.",
       "importAuditError": "Não foi possível importar o relatório",
@@ -181,6 +182,11 @@
       "currentScopeRequirementsOnly": "Somente requisitos",
       "currentScopeWithRecommendations": "Requisitos e recomendações",
       "enableAction": "Incluir recomendações nesta auditoria",
+      "humanReviewLabel": "Itens não automatizáveis",
+      "humanReviewIncluded": "Incluídos",
+      "humanReviewExcluded": "Fora do escopo",
+      "humanReviewAction": "Incluir itens não automatizáveis",
+      "humanReviewNote": "Inclui regras que precisam de validação manual durante a revisão.",
       "normativeNote": "“Requisitos” e “Recomendações” seguem a nomenclatura da ABNT NBR 17225."
     },
     "tabs": {

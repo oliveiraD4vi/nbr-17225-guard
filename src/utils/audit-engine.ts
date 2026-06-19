@@ -25,6 +25,7 @@ export class AuditStorageQuotaError extends Error {
 
 interface RunAuditOptions {
   includeRecommendations?: boolean
+  includeHumanReview?: boolean
 }
 
 export interface AuditStorageDiagnostics {
@@ -72,6 +73,7 @@ function normalizeAuditResult<T extends AuditResult>(result: T | null): T | null
     ...result,
     id: auditId,
     includeRecommendations: result.includeRecommendations ?? true,
+    includeHumanReview: result.includeHumanReview ?? true,
     violations,
     pageTitle: result.pageTitle ?? '',
   })
@@ -93,6 +95,7 @@ export async function runAccessibilityAudit(options: RunAuditOptions = {}): Prom
     const response = await chrome.tabs.sendMessage(activeTab.id, {
       action: 'RUN_AUDIT',
       includeRecommendations: options.includeRecommendations ?? false,
+      includeHumanReview: options.includeHumanReview ?? true,
     })
 
     if (response?.error) {
@@ -107,6 +110,7 @@ export async function runAccessibilityAudit(options: RunAuditOptions = {}): Prom
     result.url = activeTab.url
     result.timestamp = Date.now()
     result.includeRecommendations = options.includeRecommendations ?? false
+    result.includeHumanReview = options.includeHumanReview ?? true
 
     return result
   } catch (error) {
@@ -342,8 +346,9 @@ export async function deleteAuditHistoryEntry(
 export function getDisplayResultForScope(
   result: AuditResult | null,
   includeRecommendations: boolean,
+  includeHumanReview = true,
 ): AuditResult | null {
-  return result ? getDisplayAuditResult(result, includeRecommendations) : null
+  return result ? getDisplayAuditResult(result, includeRecommendations, includeHumanReview) : null
 }
 
 export async function getAuditHistoryForUrl(url?: string): Promise<AuditHistoryEntry[]> {
