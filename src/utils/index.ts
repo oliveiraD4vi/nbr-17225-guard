@@ -12,6 +12,7 @@ const HIGHLIGHT_ID_PREFIX = 'nbr-highlight-'
 const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host'
 const visuallyHiddenClassPattern =
   /\b(sr-only|screen-reader|screenreader|visually-hidden|hidden-visually|a11y-hidden)\b/i
+const nonRenderableTags = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'HEAD'])
 
 function hashString(value: string): string {
   let hash = 2166136261
@@ -233,11 +234,23 @@ export function rgbToHex(rgb: string): string {
 export function isElementVisible(element: HTMLElement): boolean {
   if (!element) return false
   if (isGuardInjectedElement(element)) return false
-  if (element.hidden || element.getAttribute('aria-hidden') === 'true') return false
 
-  const style = window.getComputedStyle(element)
-  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-    return false
+  let current: HTMLElement | null = element
+  while (current && current !== document.documentElement) {
+    if (isGuardInjectedElement(current)) return false
+    if (current.hidden || current.getAttribute('aria-hidden') === 'true') return false
+    if (nonRenderableTags.has(current.tagName)) return false
+
+    const style = window.getComputedStyle(current)
+    if (
+      style.display === 'none' ||
+      style.visibility === 'hidden' ||
+      Number.parseFloat(style.opacity || '1') <= 0.01
+    ) {
+      return false
+    }
+
+    current = current.parentElement
   }
 
   const rect = element.getBoundingClientRect()
@@ -247,22 +260,29 @@ export function isElementVisible(element: HTMLElement): boolean {
 export function isElementPerceptiblyVisible(element: HTMLElement): boolean {
   if (!isElementVisible(element)) return false
 
-  const className =
-    typeof element.className === 'string'
-      ? element.className
-      : element.getAttribute('class') || ''
-  if (visuallyHiddenClassPattern.test(className)) return false
+  let current: HTMLElement | null = element
+  while (current && current !== document.documentElement) {
+    const className =
+      typeof current.className === 'string'
+        ? current.className
+        : current.getAttribute('class') || ''
+    if (visuallyHiddenClassPattern.test(className)) return false
 
-  const style = window.getComputedStyle(element)
+    const style = window.getComputedStyle(current)
+    const rect = current.getBoundingClientRect()
+    const clipValue = style.clip || ''
+    const clipPathValue = style.clipPath || ''
+    const isClipped =
+      (!!clipValue && clipValue !== 'auto') ||
+      (!!clipPathValue && clipPathValue !== 'none') ||
+      (style.overflow === 'hidden' && rect.width <= 2 && rect.height <= 2)
+
+    if (isClipped && rect.width <= 2 && rect.height <= 2) return false
+
+    current = current.parentElement
+  }
+
   const rect = element.getBoundingClientRect()
-  const clipValue = style.clip || ''
-  const clipPathValue = style.clipPath || ''
-  const isClipped =
-    (!!clipValue && clipValue !== 'auto') ||
-    (!!clipPathValue && clipPathValue !== 'none') ||
-    (style.overflow === 'hidden' && rect.width <= 2 && rect.height <= 2)
-
-  if (isClipped && rect.width <= 2 && rect.height <= 2) return false
   if (rect.width <= 1 || rect.height <= 1) return false
 
   return true
@@ -275,7 +295,7 @@ export function getVisibleText(element: HTMLElement): string {
   if (!element) return ''
   if (isGuardInjectedElement(element)) return ''
   if (element.hidden || element.getAttribute('aria-hidden') === 'true') return ''
-  if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE'].includes(element.tagName)) return ''
+  if (nonRenderableTags.has(element.tagName)) return ''
 
   const style = window.getComputedStyle(element)
   if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return ''
