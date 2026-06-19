@@ -679,7 +679,13 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       [noteDraft, onViolationNoteChange, violation],
     )
 
-    const handleHeaderToggle = React.useCallback(() => {
+    const handleCardClick = React.useCallback(() => {
+      if (isContrastModalOpen) return
+      onSelectViolation?.(violation)
+    }, [isContrastModalOpen, onSelectViolation, violation])
+
+    const handleHeaderToggle = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
       if (isContrastModalOpen) return
       onToggle()
       if (!isOpen) {
@@ -787,6 +793,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
       <Card
         size="small"
         className={`violation-item-card${pinned ? ' is-pinned' : ''} review-state-${violation.humanReviewStatus}${isApplyingReviewDecision ? ' is-review-transitioning' : ''}${isApplyingReviewDecision ? ` is-review-transitioning-to-${reviewTransitionTargetStatus}` : ''}`}
+        onClick={handleCardClick}
       >
         <button
           className="violation-item-header"
