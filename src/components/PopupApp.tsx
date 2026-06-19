@@ -203,8 +203,8 @@ function getComparisonQuickReadingLabel(label: string): string {
   return t('popup.history.quickReadingStable')
 }
 
-function getExportDateSegment(timestamp = Date.now()): string {
-  return new Date(timestamp).toISOString().split('T')[0]
+function getExportTimestampSegment(timestamp = Date.now()): string {
+  return new Date(timestamp).toISOString().replace(/\.\d{3}Z$/, 'Z').replace(/[:.]/g, '-')
 }
 
 function downloadTextFile(content: string, type: string, filename: string): void {
@@ -218,7 +218,11 @@ function downloadTextFile(content: string, type: string, filename: string): void
 }
 
 function buildAuditCsv(result: AuditResult): string {
+  const exportedAt = new Date().toISOString()
+  const auditedAt = new Date(result.timestamp).toISOString()
   const headers = [
+    t('shared.exports.csvHeaders.exportedAt'),
+    t('shared.exports.csvHeaders.auditedAt'),
     t('shared.exports.csvHeaders.id'),
     t('shared.exports.csvHeaders.rule'),
     t('shared.exports.csvHeaders.nbrReference'),
@@ -227,6 +231,8 @@ function buildAuditCsv(result: AuditResult): string {
     t('shared.exports.csvHeaders.suggestion'),
   ]
   const rows = result.violations.map((violation) => [
+    exportedAt,
+    auditedAt,
     violation.id,
     violation.ruleName,
     violation.nbrReference,
@@ -808,7 +814,7 @@ export const PopupApp: React.FC = () => {
     downloadTextFile(
       JSON.stringify(buildExportableAuditResult(displayedAuditResult), null, 2),
       'application/json;charset=utf-8',
-      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.json`,
+      `${t('shared.exports.auditFilePrefix')}-${getExportTimestampSegment(displayedAuditResult.timestamp)}.json`,
     )
     message.success(t('popup.messages.exportJsonSuccess'))
   }, [displayedAuditResult])
@@ -822,7 +828,7 @@ export const PopupApp: React.FC = () => {
     downloadTextFile(
       buildAuditCsv(displayedAuditResult),
       'text/csv;charset=utf-8',
-      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.csv`,
+      `${t('shared.exports.auditFilePrefix')}-${getExportTimestampSegment(displayedAuditResult.timestamp)}.csv`,
     )
     message.success(t('popup.messages.exportCsvSuccess'))
   }, [displayedAuditResult])
@@ -836,7 +842,7 @@ export const PopupApp: React.FC = () => {
     downloadTextFile(
       JSON.stringify(buildAuditSummaryJson(displayedAuditResult), null, 2),
       'application/json;charset=utf-8',
-      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(displayedAuditResult.timestamp)}.json`,
+      `${t('shared.exports.summaryFilePrefix')}-${getExportTimestampSegment(displayedAuditResult.timestamp)}.json`,
     )
     message.success(t('popup.messages.exportSummarySuccess'))
   }, [displayedAuditResult])
@@ -845,7 +851,7 @@ export const PopupApp: React.FC = () => {
     downloadTextFile(
       JSON.stringify(buildExportableAuditResult(entry), null, 2),
       'application/json;charset=utf-8',
-      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(entry.timestamp)}.json`,
+      `${t('shared.exports.auditFilePrefix')}-${getExportTimestampSegment(entry.timestamp)}.json`,
     )
     message.success(t('popup.messages.exportJsonSuccess'))
   }, [])
@@ -859,7 +865,7 @@ export const PopupApp: React.FC = () => {
     downloadTextFile(
       buildAuditCsv(entry),
       'text/csv;charset=utf-8',
-      `${t('shared.exports.auditFilePrefix')}-${getExportDateSegment(entry.timestamp)}.csv`,
+      `${t('shared.exports.auditFilePrefix')}-${getExportTimestampSegment(entry.timestamp)}.csv`,
     )
     message.success(t('popup.messages.exportCsvSuccess'))
   }, [])
@@ -868,7 +874,7 @@ export const PopupApp: React.FC = () => {
     downloadTextFile(
       JSON.stringify(buildAuditSummaryJson(entry), null, 2),
       'application/json;charset=utf-8',
-      `${t('shared.exports.summaryFilePrefix')}-${getExportDateSegment(entry.timestamp)}.json`,
+      `${t('shared.exports.summaryFilePrefix')}-${getExportTimestampSegment(entry.timestamp)}.json`,
     )
     message.success(t('popup.messages.exportSummarySuccess'))
   }, [])
@@ -1062,6 +1068,7 @@ export const PopupApp: React.FC = () => {
     const lines = [
       `# ${t('popup.history.exportTitle')}`,
       '',
+      `- ${t('popup.history.exportedAt')}: ${new Date().toISOString()}`,
       `- ${t('popup.history.exportUrl')}: ${activeTab?.url || viewedAuditResult?.url || ''}`,
       `- ${t('popup.history.exportBaseline')}: ${new Date(comparisonSummary.baselineTimestamp).toLocaleString('pt-BR')}`,
       `- ${t('popup.history.exportTarget')}: ${new Date(comparisonSummary.targetTimestamp).toLocaleString('pt-BR')}`,
@@ -1093,7 +1100,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${t('shared.exports.comparisonFilePrefix')}-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.md`
+    link.download = `${t('shared.exports.comparisonFilePrefix')}-${getExportTimestampSegment(comparisonSummary.targetTimestamp)}.md`
     link.click()
     URL.revokeObjectURL(url)
     message.success(t('popup.messages.comparisonExported'))
@@ -1105,12 +1112,12 @@ export const PopupApp: React.FC = () => {
       return
     }
 
-    const dataStr = JSON.stringify(comparisonSummary, null, 2)
+    const dataStr = JSON.stringify({ exportedAt: Date.now(), ...comparisonSummary }, null, 2)
     const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${t('shared.exports.comparisonFilePrefix')}-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.json`
+    link.download = `${t('shared.exports.comparisonFilePrefix')}-${getExportTimestampSegment(comparisonSummary.targetTimestamp)}.json`
     link.click()
     URL.revokeObjectURL(url)
     message.success(t('popup.messages.comparisonExportedJson'))
@@ -1123,6 +1130,7 @@ export const PopupApp: React.FC = () => {
     }
 
     const rows = [
+      [t('popup.history.exportedAt'), new Date().toISOString(), '', ''],
       [
         t('popup.history.comparisonCsv.indicator'),
         t('popup.history.comparisonCsv.baseline'),
@@ -1199,7 +1207,7 @@ export const PopupApp: React.FC = () => {
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `${t('shared.exports.comparisonFilePrefix')}-${new Date(comparisonSummary.targetTimestamp).toISOString().split('T')[0]}.csv`
+    link.download = `${t('shared.exports.comparisonFilePrefix')}-${getExportTimestampSegment(comparisonSummary.targetTimestamp)}.csv`
     link.click()
     URL.revokeObjectURL(url)
     message.success(t('popup.messages.comparisonExportedCsv'))

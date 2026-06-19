@@ -102,6 +102,8 @@
       "comparisonFilePrefix": "nbr-17225-comparacao",
       "reportFilePrefix": "nbr-17225-report",
       "csvHeaders": {
+        "exportedAt": "Exportado em",
+        "auditedAt": "Auditado em",
         "id": "ID",
         "rule": "Regra",
         "nbrReference": "Referência NBR",
@@ -202,6 +204,7 @@
       "importTitle": "Importar relatório salvo",
       "importDescription": "Traga um JSON exportado pelo Guardião para continuar a revisão em outro navegador ou comparar com a auditoria atual desta URL.",
       "exportTitle": "Relatório de comparação de auditorias",
+      "exportedAt": "Exportado em",
       "exportIndicatorsTitle": "Indicadores",
       "exportHumanReviewTitle": "Revisão humana",
       "exportQuickReadingTitle": "Leitura rápida",
