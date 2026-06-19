@@ -406,13 +406,6 @@
   color: var(--guard-color-text-secondary);
 }
 
-.violation-element-title {
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  font-size: 13px;
-  color: var(--guard-color-text-primary);
-  word-break: break-word;
-}
-
 .violation-element-fields {
   display: flex;
   flex-direction: column;
@@ -442,6 +435,46 @@
 
 .violation-element-field-value.is-monospace {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.violation-copyable-code {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #233044;
+  border-radius: 6px;
+  background: #07111d;
+  color: #dbeafe;
+  cursor: copy;
+  text-align: left;
+}
+
+.violation-copyable-code:hover,
+.violation-copyable-code:focus-visible {
+  border-color: #5ba6a0;
+  background: #0b1726;
+}
+
+.violation-copyable-code:focus-visible {
+  outline: 2px solid var(--guard-color-primary);
+  outline-offset: 2px;
+}
+
+.violation-copyable-code code {
+  min-width: 0;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: nowrap;
+}
+
+.violation-copyable-code .anticon {
+  color: #93c5fd;
+  font-size: 14px;
 }
 
 .violation-clamp {

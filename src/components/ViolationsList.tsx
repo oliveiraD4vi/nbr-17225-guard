@@ -80,6 +80,11 @@ interface TruncatedTextProps {
   tooltipThreshold?: number
 }
 
+interface CopyableCodeBlockProps {
+  value: string
+  copyLabel: string
+}
+
 type RuleExplanationFamily =
   | 'forms'
   | 'colors'
@@ -322,6 +327,29 @@ function getElementTitle(violation: Violation): string {
   const selectorSuffix = selector.startsWith(tag) ? selector.slice(tag.length) : selector
   return `${tag}${selectorSuffix ? ` ${selectorSuffix}` : ''}`
 }
+
+function getAffectedElementSnippet(violation: Violation): string {
+  const snippet = violation.snippet?.replace(/\s+/g, ' ').trim()
+  if (snippet) return snippet
+
+  return `<${getElementTitle(violation)}>`
+}
+
+const CopyableCodeBlock: React.FC<CopyableCodeBlockProps> = React.memo(({ value, copyLabel }) => (
+  <button
+    type="button"
+    className="violation-copyable-code"
+    aria-label={copyLabel}
+    title={copyLabel}
+    onClick={(event) => {
+      event.stopPropagation()
+      void navigator.clipboard.writeText(value)
+    }}
+  >
+    <code>{value}</code>
+    <CopyOutlined aria-hidden="true" />
+  </button>
+))
 
 const TruncatedText: React.FC<TruncatedTextProps> = React.memo(
   ({
@@ -892,13 +920,9 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
 
           <div className="violation-element-card">
             <strong>{t('shared.labels.affectedElement')}</strong>
-            <TruncatedText
-              as="div"
-              className="violation-element-title"
-              lines={2}
-              monospace
-              text={getElementTitle(violation)}
-              tooltipThreshold={90}
+            <CopyableCodeBlock
+              value={getAffectedElementSnippet(violation)}
+              copyLabel={t('violations.copyElementHtml')}
             />
 
             <div className="violation-element-fields">
@@ -935,12 +959,9 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                   <span className="violation-element-field-label">
                     {t('shared.labels.selector')}
                   </span>
-                  <TruncatedText
-                    className="violation-element-field-value"
-                    lines={2}
-                    monospace
-                    text={violation.elementSelector}
-                    tooltipThreshold={80}
+                  <CopyableCodeBlock
+                    value={violation.elementSelector}
+                    copyLabel={t('violations.copySelector')}
                   />
                 </div>
               )}
@@ -1046,17 +1067,6 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                 onClick={(event) => {
                   event.stopPropagation()
                   setIsNotesOpen((current) => !current)
-                }}
-              />
-            </Tooltip>
-            <Tooltip title={t('violations.copySelector')}>
-              <Button
-                type="text"
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  navigator.clipboard.writeText(violation.elementSelector || violation.snippet)
                 }}
               />
             </Tooltip>

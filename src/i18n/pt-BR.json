@@ -455,6 +455,7 @@
         "reviewFocus": "Confira se há aviso antes do vencimento, possibilidade de estender ou pausar, preservação de contexto e explicações claras sobre o que acontece quando o tempo termina."
       }
     },
+    "copyElementHtml": "Copiar HTML do elemento",
     "copySelector": "Copiar seletor do elemento",
     "goToElement": "Ir para elemento",
     "notesTooltip": "Anotações",
