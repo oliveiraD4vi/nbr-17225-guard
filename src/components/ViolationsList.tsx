@@ -1372,28 +1372,31 @@ export const ViolationsList: React.FC<ViolationsListProps> = React.memo(
       () => filterByCategory(reviewViolations),
       [filterByCategory, reviewViolations],
     )
-    const modeOptions = React.useMemo(
-      () =>
-        [
-          {
-            label: t('violations.tabRequirements', {
-              count: filteredRequirementViolations.length,
-            }),
-            value: 'requirements',
-          },
-          {
-            label: t('violations.tabRecommendations', {
-              count: filteredRecommendationViolations.length,
-            }),
-            value: 'recommendations',
-          },
-          showHumanReview
-            ? {
-                label: t('violations.tabReview', { count: filteredReviewViolations.length }),
-                value: 'review',
-              }
-            : null,
-        ].filter(Boolean),
+    const modeOptions = React.useMemo<Array<{ label: string; value: ViolationsListMode }>>(() => {
+      const options: Array<{ label: string; value: ViolationsListMode }> = [
+        {
+          label: t('violations.tabRequirements', {
+            count: filteredRequirementViolations.length,
+          }),
+          value: 'requirements',
+        },
+        {
+          label: t('violations.tabRecommendations', {
+            count: filteredRecommendationViolations.length,
+          }),
+          value: 'recommendations',
+        },
+      ]
+
+      if (showHumanReview) {
+        options.push({
+          label: t('violations.tabReview', { count: filteredReviewViolations.length }),
+          value: 'review',
+        })
+      }
+
+      return options
+    },
       [
         filteredRecommendationViolations.length,
         filteredRequirementViolations.length,
