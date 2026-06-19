@@ -456,7 +456,9 @@
       }
     },
     "copyElementHtml": "Copiar HTML do elemento",
+    "copyElementHtmlSuccess": "HTML do elemento copiado",
     "copySelector": "Copiar seletor do elemento",
+    "copySelectorSuccess": "Seletor do elemento copiado",
     "goToElement": "Ir para elemento",
     "notesTooltip": "Anotações",
     "notesLength": "{{count}}/600",

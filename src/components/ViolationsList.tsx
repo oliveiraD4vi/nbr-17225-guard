@@ -12,6 +12,7 @@ import {
   Space,
   Tag,
   Tooltip,
+  message,
 } from 'antd'
 import {
   BoldOutlined,
@@ -83,6 +84,7 @@ interface TruncatedTextProps {
 interface CopyableCodeBlockProps {
   value: string
   copyLabel: string
+  successLabel: string
 }
 
 type RuleExplanationFamily =
@@ -335,21 +337,25 @@ function getAffectedElementSnippet(violation: Violation): string {
   return `<${getElementTitle(violation)}>`
 }
 
-const CopyableCodeBlock: React.FC<CopyableCodeBlockProps> = React.memo(({ value, copyLabel }) => (
-  <button
-    type="button"
-    className="violation-copyable-code"
-    aria-label={copyLabel}
-    title={copyLabel}
-    onClick={(event) => {
-      event.stopPropagation()
-      void navigator.clipboard.writeText(value)
-    }}
-  >
-    <code>{value}</code>
-    <CopyOutlined aria-hidden="true" />
-  </button>
-))
+const CopyableCodeBlock: React.FC<CopyableCodeBlockProps> = React.memo(
+  ({ value, copyLabel, successLabel }) => (
+    <button
+      type="button"
+      className="violation-copyable-code"
+      aria-label={copyLabel}
+      title={copyLabel}
+      onClick={(event) => {
+        event.stopPropagation()
+        void navigator.clipboard.writeText(value).then(() => {
+          message.success(successLabel)
+        })
+      }}
+    >
+      <code>{value}</code>
+      <CopyOutlined aria-hidden="true" />
+    </button>
+  ),
+)
 
 const TruncatedText: React.FC<TruncatedTextProps> = React.memo(
   ({
@@ -923,6 +929,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             <CopyableCodeBlock
               value={getAffectedElementSnippet(violation)}
               copyLabel={t('violations.copyElementHtml')}
+              successLabel={t('violations.copyElementHtmlSuccess')}
             />
 
             <div className="violation-element-fields">
@@ -962,6 +969,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                   <CopyableCodeBlock
                     value={violation.elementSelector}
                     copyLabel={t('violations.copySelector')}
+                    successLabel={t('violations.copySelectorSuccess')}
                   />
                 </div>
               )}
