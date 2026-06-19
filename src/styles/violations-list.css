@@ -464,12 +464,18 @@
 }
 
 .violation-copyable-code code {
+  display: -webkit-box;
   min-width: 0;
-  overflow-x: auto;
+  overflow: hidden;
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 12px;
   line-height: 1.55;
-  white-space: nowrap;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
 }
 
 .violation-copyable-code .anticon {
