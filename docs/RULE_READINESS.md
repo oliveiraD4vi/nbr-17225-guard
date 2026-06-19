@@ -1,23 +1,23 @@
-# Processo de prontidão das regras
+# Processo de execução das regras na Beta
 
 Este documento define como uma regra do catálogo v1 entra ou sai da execução da Beta.
-O catálogo completo continua documentado; a auditoria executa apenas regras marcadas como prontas.
+O catálogo completo fica documentado. A auditoria roda apenas regras habilitadas para avaliação assistida.
 
 ## Estado definido para a Beta atual
 
-A Beta atual mantém as 112 regras documentadas para rastreabilidade acadêmica e pública. A auditoria executa 104 regras prontas; as 8 regras fora da execução da Beta permanecem visíveis na Página do Projeto com justificativa, mas não entram na execução nem no cálculo da nota.
+A Beta atual tem 112 regras documentadas. A auditoria executa 104 regras. Outras 8 regras ficam documentadas na Página do Projeto, fora da execução e fora da nota.
 
 ## Estados
 
-- `ready`: regra executada pela auditoria e considerada na nota.
+- `ready`: regra executada pela auditoria Beta e considerada na nota.
 - `not_ready`: regra documentada, mas fora da execução e fora da nota da Beta.
 
 Quando o campo `readiness` não aparece na definição da regra, o estado operacional é `ready`.
 Toda regra `not_ready` deve ter `readinessReason`.
 
-## Critério para `ready`
+## Critério para entrar na execução da Beta
 
-Uma regra só deve ser `ready` quando atender a todos os pontos abaixo:
+Uma regra só deve entrar na execução da Beta quando atender a todos os pontos abaixo:
 
 - possui sinal técnico observável no DOM, CSS, ARIA, metadados ou contexto visível;
 - tem falso positivo conhecido corrigido ou tratado como revisão humana;
@@ -26,7 +26,7 @@ Uma regra só deve ser `ready` quando atender a todos os pontos abaixo:
 - foi testada em `/`, `/rules.html` e `/privacy.html` da Page;
 - não depende de consistência entre páginas, a menos que o motor compare páginas de fato.
 
-## Promover de `not_ready` para `ready`
+## Incluir uma regra na execução
 
 1. Ajustar a heurística ou a implementação da regra.
 2. Rodar auditorias nas três páginas da Page: `/`, `/rules.html` e `/privacy.html`.
@@ -40,7 +40,7 @@ Uma regra só deve ser `ready` quando atender a todos os pontos abaixo:
 4. Remover `readiness: 'not_ready'` e `readinessReason` da regra.
 5. Rodar `verify-rules`, `type-check`, `lint`, testes e `build`.
 
-## Rebaixar para `not_ready`
+## Retirar uma regra da execução
 
 Uma regra deve ser rebaixada quando gerar falso positivo grave, inferir intenção demais ou depender de contexto que o motor ainda não observa.
 Nesse caso, marque `readiness: 'not_ready'` imediatamente e registre uma razão curta em `readinessReason`.

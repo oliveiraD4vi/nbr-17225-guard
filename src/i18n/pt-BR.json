@@ -125,8 +125,8 @@
       "eyebrow": "Sobre",
       "title": "Auditoria assistida da ABNT NBR 17225",
       "version": "{{version}}",
-      "descriptionA": "O Guardião avalia o escopo da V1 Farol Beta e organiza os achados usando a própria nomenclatura da ABNT NBR 17225: requisitos, recomendações e itens que ainda precisam de confirmação humana.",
-      "descriptionB": "Esta versão já é utilizável em fluxo assistido de auditoria, mas continua evoluindo em heurísticas, clareza de leitura e microinterações. Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página, manter um histórico local compacto e reimportar relatórios JSON quando precisar continuar o trabalho em outro ambiente.",
+      "descriptionA": "O Guardião executa uma Beta experimental da V1 Farol e organiza os achados pela nomenclatura da ABNT NBR 17225: requisitos, recomendações e itens de revisão humana.",
+      "descriptionB": "Use a verificação na aba atual para gerar um diagnóstico por URL, destacar elementos da página, manter histórico local e reimportar relatórios JSON quando precisar continuar a revisão em outro ambiente.",
       "links": {
         "label": "Links do projeto",
         "projectPage": "Página do Projeto",

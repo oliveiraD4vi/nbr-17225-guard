@@ -256,7 +256,7 @@ const readinessCounts = rules.reduce(
 )
 
 console.log(
-  `Regras prontas na Beta: ${readinessCounts.ready}; fora da execução da Beta: ${readinessCounts.not_ready}.`,
+  `Regras em execução experimental na Beta: ${readinessCounts.ready}; fora da execução da Beta: ${readinessCounts.not_ready}.`,
 )
 
 console.log(

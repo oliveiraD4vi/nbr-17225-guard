@@ -2,7 +2,7 @@
 
 Este documento lista as recomendações da ABNT NBR 17225:2025 que ainda não fazem parte da V1 Farol do Guardião NBR 17225.
 
-A V1 Farol possui 112 regras documentadas e implementadas no catálogo: todos os 96 requisitos normativos identificados na referência pública e 16 recomendações priorizadas por relevância operacional, baixo risco de ruído e possibilidade de verificação assistida. A Beta executa apenas as regras marcadas como `ready`.
+A V1 Farol possui 112 regras documentadas e implementadas no catálogo: todos os 96 requisitos normativos identificados na referência pública e 16 recomendações priorizadas por relevância operacional, baixo risco de ruído e possibilidade de verificação assistida. A Beta executa apenas as regras habilitadas no motor.
 
 Fontes usadas para esta lista:
 

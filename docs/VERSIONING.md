@@ -4,13 +4,14 @@ O Guardião NBR 17225 usa versionamento semântico para a extensão e nomes curt
 
 ## Versão Atual
 
+Produto: `1.0.2-beta.2`
+Manifest Chrome: `1.0.2`
+
 | Versão | Nome | Escopo |
 | --- | --- | --- |
-| `1.0.0-beta.2` | V1 Farol Beta | 112 regras documentadas; 104 regras prontas executadas na auditoria; 8 regras documentadas fora da execução e da nota. |
+| `1.0.2-beta.2` | V1 Farol Beta | 112 regras documentadas; 104 regras executadas na auditoria Beta; 8 regras documentadas fora da execução e da nota. |
 
-Esta versão é uma Beta assistida: pronta para auditorias orientadas por revisão humana, sem ser tratada como release final enquanto parte do catálogo ainda depende de evidência técnica adicional.
-
-No pacote da Chrome Web Store, `manifest.json` usa a versão numérica `1.0.1` para manter a sequência exigida pela plataforma.
+Regra executada na Beta significa regra habilitada para avaliação assistida. Não significa regra final.
 
 ## Critérios
 

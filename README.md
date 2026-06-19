@@ -87,18 +87,22 @@ O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e o
 
 ## Definição da Beta
 
-A versão de produto `1.0.0-beta.2`, nomeada como **V1 Farol Beta**, fica definida assim:
+Produto: `1.0.2-beta.2`
+Manifest Chrome: `1.0.2`
+Nome: **V1 Farol Beta**
 
-- o catálogo público mantém 112 regras documentadas para rastreabilidade acadêmica e técnica;
-- a auditoria executa 104 regras prontas para a Beta;
-- 8 regras permanecem documentadas na Página do Projeto com justificativa, fora da execução e fora da nota;
-- o escopo padrão audita somente requisitos; recomendações entram quando o usuário ativa esse escopo;
-- o histórico é local, separado por página normalizada, preservando o caminho da URL e ignorando query string e hash;
-- explicações longas ficam na Página do Projeto, especialmente em `/rules.html` e `/score.html`.
+Escopo da Beta:
+
+- 112 regras documentadas;
+- 104 regras executadas na auditoria Beta;
+- 8 regras documentadas, fora da execução e fora da nota;
+- escopo padrão com requisitos; recomendações entram por opção do usuário;
+- histórico local por página normalizada, preservando o caminho da URL e ignorando query string e hash;
+- explicações completas na Página do Projeto, principalmente em `/rules.html` e `/score.html`.
 
 ## Cobertura de regras
 
-O escopo documentado atual contém a V1 Farol, com 112 regras revisadas contra a referência pública da ABNT NBR 17225. Para a Beta, apenas regras prontas são executadas pelo motor.
+O escopo documentado atual contém a V1 Farol, com 112 regras revisadas contra a referência pública da ABNT NBR 17225. Na Beta, uma regra executada significa regra habilitada para avaliação assistida; não significa regra final.
 
 | Situação                               | Quantidade |
 | -------------------------------------- | ---------: |
@@ -235,7 +239,11 @@ Quando um PR alterar, remover ou criar uma função de verificação de regra, o
 
 ## Versionamento
 
-A versão de produto atual é `1.0.0-beta.2`, nomeada como **V1 Farol Beta**. O `manifest.json` usa `1.0.1` para manter a sequência numérica exigida pela Chrome Web Store. A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
+Produto: `1.0.2-beta.2`
+Manifest Chrome: `1.0.2`
+Nome: **V1 Farol Beta**
+
+A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
 
 ## Instalação
 

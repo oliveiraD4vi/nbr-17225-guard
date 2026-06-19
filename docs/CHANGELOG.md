@@ -6,6 +6,28 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 
 ## [Unreleased]
 
+## [1.0.2-beta.2] - 2026-06-19
+
+### Added
+
+- escopo opcional para itens não automatizáveis, com filtro no resumo, na lista de violações e no cálculo da nota;
+- estado do popup preservado por URL para retomar a revisão no mesmo contexto;
+- timestamp nos nomes e metadados das exportações JSON, CSV e comparações;
+- versão da Beta exibida na interface.
+
+### Changed
+
+- listas longas de ocorrências carregam 3 itens por vez e ficam colapsadas até abertura pelo usuário;
+- ocorrências passam a abrir e fechar apenas pelo cabeçalho do card;
+- textos da Beta deixam claro que as regras em execução são experimentais e dependem de validação assistida;
+- ações de download e reexecução ficam disponíveis no topo do resumo quando a auditoria visualizada pertence à URL atual.
+
+### Fixed
+
+- contraste textual deixa de avaliar texto apenas assistivo ou visualmente oculto como texto visível;
+- colapso das ocorrências deixa de forçar um item sempre aberto;
+- regra de área acionável reduz ruído em paginações de carrossel com controle equivalente.
+
 ### Added
 
 - catálogo centralizado de textos da interface e de parte relevante das regras;
@@ -56,7 +78,7 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 - histórico passa a ser persistido em formato compacto, sem duplicar agrupamentos derivados nem referências de DOM no armazenamento local;
 - fluxo de revisão humana passa a exigir confirmação antes da mudança de estado e a reorganizar visualmente o item entre pendentes, confirmados e descartados;
 - cards de violação passam a truncar conteúdos longos com tooltip, reduzindo ruído sem ocultar contexto;
-- V1 Farol passa a comunicar o escopo definido da Beta, com regras prontas executadas e regras documentadas fora da nota;
+- V1 Farol passa a comunicar o escopo da Beta: regras executadas e regras documentadas fora da nota;
 - interface passa a deixar explícito que “Requisitos” e “Recomendações” seguem a nomenclatura da própria ABNT NBR 17225;
 - toggle de recomendações passa a comunicar estado atual e ação esperada com mais clareza.
 - cards de violação passam a abrir com leitura curta mais clara e link para a explicação pública completa da regra;
