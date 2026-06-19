@@ -281,7 +281,7 @@ export const PopupApp: React.FC = () => {
   const [siteAuditHistory, setSiteAuditHistory] = useState<AuditHistoryEntry[]>([])
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [includeRecommendations, setIncludeRecommendations] = useState(false)
-  const [includeHumanReview, setIncludeHumanReview] = useState(true)
+  const [includeHumanReview, setIncludeHumanReview] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<(chrome.tabs.Tab & { id: number }) | null>(null)
@@ -351,7 +351,7 @@ export const PopupApp: React.FC = () => {
       const resolvedPreference =
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
       const resolvedHumanReviewPreference =
-        result?.includeHumanReview ?? preferences.includeHumanReviewPreference !== false
+        result?.includeHumanReview ?? Boolean(preferences.includeHumanReviewPreference)
       const savedState = getStoredPopupState(preferences[popupStateStorageKey], tab.url)
       const availableAuditIds = new Set(
         [result?.id, ...history.map((entry) => entry.id), ...siteHistory.map((entry) => entry.id)]
@@ -383,7 +383,7 @@ export const PopupApp: React.FC = () => {
       setAuditHistory([])
       setSiteAuditHistory([])
       setSelectedHistoryId(null)
-      setIncludeHumanReview(true)
+      setIncludeHumanReview(false)
       setPopupStoredState(null)
       setActiveTabKey('summary')
       setIsAuditMetaCollapsed(false)
