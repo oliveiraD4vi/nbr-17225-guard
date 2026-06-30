@@ -225,8 +225,9 @@ A norma possui recomendações adicionais fora do escopo implementado aqui. Elas
 
 O Guardião NBR 17225 nasceu como projeto acadêmico e mantém a extensão como software open-source hoje e sempre.
 
-- Espelho público da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror>
-- Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard-mirror/issues>
+- Repositório principal da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard>
+- Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard/issues>
+- Cópia secundária: GitLab privado do projeto
 - Domínio: `guardiaonbr.com.br`
 - Página do Projeto: `https://guardiaonbr.com.br`
 - Página pública de regras: `https://guardiaonbr.com.br/rules.html`
