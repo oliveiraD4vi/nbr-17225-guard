@@ -227,7 +227,6 @@ O Guardião NBR 17225 nasceu como projeto acadêmico e mantém a extensão como 
 
 - Repositório principal da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard>
 - Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard/issues>
-- Cópia secundária: GitLab privado do projeto
 - Domínio: `guardiaonbr.com.br`
 - Página do Projeto: `https://guardiaonbr.com.br`
 - Página pública de regras: `https://guardiaonbr.com.br/rules.html`
