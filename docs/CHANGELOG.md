@@ -6,6 +6,14 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 
 ## [Unreleased]
 
+## [1.0.3-beta.3] - 2026-07-01
+
+### Changed
+
+- versão do manifesto atualizada para permitir uma nova publicação na Chrome Web Store;
+- metadados de distribuição alinhados ao identificador `1.0.3-beta.3` e ao repositório principal no GitHub;
+- escopo funcional, regras executadas e cálculo da nota permanecem inalterados.
+
 ## [1.0.2-beta.2] - 2026-06-19
 
 ### Added

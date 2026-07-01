@@ -4,12 +4,12 @@ O Guardião NBR 17225 usa versionamento semântico para a extensão e nomes curt
 
 ## Versão Atual
 
-Produto: `1.0.2-beta.2`
-Manifest Chrome: `1.0.2`
+Produto: `1.0.3-beta.3`
+Manifest Chrome: `1.0.3`
 
-| Versão | Nome | Escopo |
-| --- | --- | --- |
-| `1.0.2-beta.2` | V1 Farol Beta | 112 regras documentadas; 104 regras executadas na auditoria Beta; 8 regras documentadas fora da execução e da nota. |
+| Versão         | Nome          | Escopo                                                                                                              |
+| -------------- | ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `1.0.3-beta.3` | V1 Farol Beta | 112 regras documentadas; 104 regras executadas na auditoria Beta; 8 regras documentadas fora da execução e da nota. |
 
 Regra executada na Beta significa regra habilitada para avaliação assistida. Não significa regra final.
 
