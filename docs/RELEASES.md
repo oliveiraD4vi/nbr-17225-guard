@@ -23,7 +23,7 @@ A versão é escrita apenas em `package.json`. O build a copia para o `version` 
 As versões são calculadas pelo [release-please](https://github.com/googleapis/release-please) a partir dos títulos dos PRs integrados em `main`: `feat` gera `MINOR`, `fix` e `perf` geram `PATCH`, e `!` ou `BREAKING CHANGE` geram `MAJOR`. A configuração fica em `release-please-config.json` e a última versão publicada, em `.release-please-manifest.json`.
 
 1. A cada push em `main`, o workflow `Release` mantém aberto o PR `chore(release): prepara <versão>`, com a nova versão em `package.json` e as entradas do [`CHANGELOG.md`](CHANGELOG.md).
-2. O PR de release é integrado ao fim de cada fase do roadmap, não a cada mudança.
+2. O mantenedor integra o PR de release quando decide fechar uma versão, não a cada mudança.
 3. Depois da integração, o workflow cria a tag `v<versão>`, publica a release no GitHub e anexa `guardiao-nbr-17225-v<versão>.zip`, com o conteúdo de `dist/` na raiz.
 4. Atualize o espelho no GitLab com `main` e as tags.
 5. Sincronize e publique a Página do Projeto quando a release alterar regras, textos públicos ou a versão.

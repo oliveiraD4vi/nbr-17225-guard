@@ -1,6 +1,6 @@
-# Every push to main updates the release PR (version bump and changelog). Merging that PR, which
-# happens at the end of a roadmap phase rather than after every change (docs/RELEASES.md), makes
-# this workflow tag the version, publish the GitHub release and attach the extension package.
+# Every push to main updates the release PR (version bump and changelog). The maintainer merges
+# that PR when a version is ready, not after every change (docs/RELEASES.md); the merge makes this
+# workflow tag the version, publish the GitHub release and attach the extension package.
 name: Release
 
 on:
