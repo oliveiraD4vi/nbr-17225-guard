@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
+import { version } from './package.json'
+import { APP_VERSION_STAGE } from './src/version'
 
 type OutputChunkLike = {
   type: string
@@ -59,8 +61,15 @@ export default defineConfig({
           const target = path.resolve(__dirname, 'dist/manifest.json')
 
           const manifest = JSON.parse(fs.readFileSync(source, 'utf8')) as {
+            version?: string
+            version_name?: string
             web_accessible_resources?: Array<{ resources: string[]; matches: string[] }>
           }
+
+          // package.json is the only place the version is written; the Chrome Web Store needs it
+          // numeric in `version` and shows `version_name` to users.
+          manifest.version = version
+          manifest.version_name = `${version} ${APP_VERSION_STAGE}`
 
           manifest.web_accessible_resources = [
             {

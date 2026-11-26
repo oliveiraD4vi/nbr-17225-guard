@@ -1,0 +1,57 @@
+# Every push to main updates the release PR (version bump and changelog). Merging that PR, which
+# happens at the end of a roadmap phase rather than after every change (docs/RELEASES.md), makes
+# this workflow tag the version, publish the GitHub release and attach the extension package.
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publicar release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - if: steps.release.outputs.release_created
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.release.outputs.release_created
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - if: steps.release.outputs.release_created
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - if: steps.release.outputs.release_created
+        run: pnpm install --frozen-lockfile
+      - if: steps.release.outputs.release_created
+        run: pnpm build
+      - name: Anexar pacote da extensão
+        if: steps.release.outputs.release_created
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          package="guardiao-nbr-17225-v$VERSION.zip"
+          (cd dist && zip -qr "../$package" .)
+          gh release upload "$TAG" "$package" --repo "$GITHUB_REPOSITORY"
