@@ -14,11 +14,7 @@ const isInternalLink = (anchor: HTMLAnchorElement): boolean => {
     return false
   }
 
-  try {
-    return new URL(href, window.location.href).origin === window.location.origin
-  } catch {
-    return false
-  }
+  return URL.parse(href, window.location.href)?.origin === window.location.origin
 }
 
 const getNavigableUrl = (anchor: HTMLAnchorElement): URL | null => {
@@ -27,11 +23,7 @@ const getNavigableUrl = (anchor: HTMLAnchorElement): URL | null => {
     return null
   }
 
-  try {
-    return new URL(href, window.location.href)
-  } catch {
-    return null
-  }
+  return URL.parse(href, window.location.href)
 }
 
 const isWebUrl = (url: URL): boolean => url.protocol === 'http:' || url.protocol === 'https:'

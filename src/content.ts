@@ -217,12 +217,8 @@ if (contentScope.__nbrGuardContentLoaded) {
           ''
         if (!name || !rawAction) return []
 
-        let action = rawAction
-        try {
-          action = new URL(rawAction, window.location.href).pathname
-        } catch {
-          // Ações que não são URLs permanecem identificadas pelo valor declarado.
-        }
+        // Actions that are not URLs (a button type or name) are kept as declared.
+        const action = URL.parse(rawAction, window.location.href)?.pathname ?? rawAction
         return [{ action: normalizeContextText(action), name }]
       })
     const criticalActions = controlActions
@@ -650,6 +646,7 @@ if (contentScope.__nbrGuardContentLoaded) {
       try {
         element = document.querySelector<HTMLElement>(preview.selector)
       } catch {
+        // Selectors can come from an imported report; one this page cannot parse matches nothing.
         result.missing += 1
         continue
       }
@@ -902,6 +899,7 @@ if (contentScope.__nbrGuardContentLoaded) {
 
         return [{ id, ...createManualFindingElementSnapshot(element) }]
       } catch {
+        // Selectors can come from an imported report; one this page cannot parse matches nothing.
         return []
       }
     })

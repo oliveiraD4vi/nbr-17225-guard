@@ -60,6 +60,10 @@ describe('readAuditReport', () => {
     )
   })
 
+  it('rejects a report whose page address is not a URL', () => {
+    expect(() => readAuditReport(report({ url: 'página de checkout' }))).toThrow('$.audit.url')
+  })
+
   it('rejects reports written by a newer version of the extension', () => {
     expect(() =>
       readAuditReport(report({ schemaVersion: CURRENT_AUDIT_SCHEMA_VERSION + 1 })),
