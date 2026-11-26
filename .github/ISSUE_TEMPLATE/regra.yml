@@ -1,0 +1,42 @@
+name: Resultado incorreto de regra
+description: Uma regra apontou uma violação que não existe ou deixou de apontar uma que existe
+labels: ['bug', 'regra']
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: Regra
+      description: Referência da NBR 17225 e nome, como aparecem no painel.
+      placeholder: 5.2.1 Texto alternativo em imagens
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Tipo
+      options:
+        - Falso positivo (violação apontada sem existir)
+        - Falso negativo (violação existente não apontada)
+        - Mensagem ou orientação de correção confusa
+    validations:
+      required: true
+  - type: textarea
+    id: markup
+    attributes:
+      label: Marcação mínima que reproduz
+      description: O menor trecho de HTML e CSS possível, ou a URL pública da página.
+      render: html
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado e por quê
+      description: Se possível, cite o trecho da norma ou do critério WCAG correspondente.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versão da extensão
+      description: Aparece no cabeçalho do painel DevTools.

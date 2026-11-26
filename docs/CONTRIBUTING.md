@@ -35,11 +35,11 @@ pnpm build
 
 ## Fluxo de trabalho
 
-Cada mudança tem um ticket, uma branch e um PR.
+Toda mudança começa por uma [issue](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/new/choose). Use o modelo que melhor descreve o caso: resultado incorreto de regra, bug ou tarefa. A issue é o ticket: ela registra o problema e os critérios de conclusão antes do código.
 
-- Branch: `<tipo>/<TICKET>/<descricao-curta>`, por exemplo `fix/SEC-001/escapa-tooltip`.
+- Branch: `<tipo>/<issue>/<descricao-curta>`, por exemplo `fix/12/escapa-tooltip`.
+- Um PR por issue, com `Closes #<issue>` na descrição. A descrição também traz um resumo do que mudou e por quê, e o que foi verificado manualmente. O que o CI já cobre não precisa ser repetido.
 - O PR é integrado com squash. O título do PR vira o commit em `main` e segue o padrão abaixo.
-- A descrição do PR traz o ticket, um resumo do que mudou e por quê, e o que foi verificado manualmente. O que o CI já cobre não precisa ser repetido.
 - Mantenha cada PR com um único assunto. Refatorações vão separadas de mudanças de comportamento.
 
 ### Mensagens de commit
@@ -54,7 +54,7 @@ tipo(escopo opcional): descrição curta
 - Descrição em PT-BR, no presente ou imperativo, começando em minúscula e sem ponto final.
 - Cabeçalho com até 100 caracteres.
 - Corpo para motivação ou impacto que não caibam na descrição.
-- Rodapé para o ticket (`Refs: SEC-001`) e para breaking changes.
+- Rodapé para a issue (`Refs #12`) e para breaking changes.
 
 Uma mudança que quebra compatibilidade leva `!` no cabeçalho e é detalhada no rodapé:
 
@@ -82,7 +82,7 @@ BREAKING CHANGE: relatórios antigos passam pela migração ao serem importados.
 6. Se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação.
 7. Cubra a regra com cenários positivo, negativo e limítrofe.
 8. Atualize a matriz normativa e, para heurísticas fracas, o registro de evidências.
-9. Mudanças na matriz exigem atualizar a Página do Projeto (`pnpm sync:rules` no repositório da página). Registre essa pendência no PR.
+9. Mudanças na matriz exigem atualizar a Página do Projeto (`pnpm sync:rules` no repositório da página). Registre essa pendência na issue e no PR.
 
 ### Retirar uma regra da execução
 
