@@ -4,6 +4,16 @@ Todas as mudanças relevantes deste projeto devem ser registradas neste arquivo.
 
 O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento semântico quando aplicável.
 
+## [2.0.1](https://github.com/oliveiraD4vi/nbr-17225-guard/compare/v2.0.0...v2.0.1) (2026-11-26)
+
+
+### Fixed
+
+* **conteudo:** mostra o texto da regra no destaque sem interpretar HTML ([f534406](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/f53440614f0ae3698c8ac13184264fdf429ad6d1)), closes [#11](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/11)
+* **erros:** deixa de silenciar falhas inesperadas ([729dac1](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/729dac13973b60c2bae32f5bf6ecb1f37ee38cd2)), closes [#11](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/11)
+* **importacao:** valida relatório importado em tipos precisos ([75ff65b](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/75ff65b0a1649d8bc6acd749dadb1cc44c944bab)), closes [#11](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/11)
+* **simulador:** nomeia o controle de intensidade ([2d03665](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/2d03665eac869d3ba152461d0f320b9a48f2ddfb)), closes [#8](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/8)
+
 ## [2.0.0-beta.1] - 2026-08-13
 
 V2 Polaris Beta.
