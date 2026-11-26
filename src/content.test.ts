@@ -158,3 +158,29 @@ describe('manual finding selection', () => {
     expect(response.resolved.map((item) => item.id)).toEqual(['finding-1'])
   })
 })
+
+describe('violation highlight', () => {
+  it('shows rule text from an imported report as text, never as markup', () => {
+    document.body.innerHTML = '<input id="email">'
+    const field = document.getElementById('email') as HTMLElement
+    field.getBoundingClientRect = () => new DOMRect(200, 200, 120, 32)
+    field.scrollIntoView = () => undefined
+    const injected = '<img src="x" onerror="window.__injected = true">'
+
+    send({
+      action: 'HIGHLIGHT_VIOLATION',
+      violation: {
+        customId: 'imported-1',
+        elementSelector: '#email',
+        severity: 'error',
+        ruleName: injected,
+        nbrReference: `5.9.1${injected}`,
+        normativeType: 'Requisito',
+      },
+    })
+
+    const highlight = document.getElementById('nbr-highlight-imported-1')?.shadowRoot
+    expect(highlight?.querySelector('.tooltip-title')?.textContent).toBe(injected)
+    expect(highlight?.querySelector('img')).toBeNull()
+  })
+})
