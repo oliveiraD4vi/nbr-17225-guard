@@ -39,7 +39,7 @@ Toda mudança começa por uma [issue](https://github.com/oliveiraD4vi/nbr-17225-
 
 - Branch: `<tipo>/<issue>/<descricao-curta>`, por exemplo `fix/12/escapa-tooltip`.
 - Um PR por issue, com `Closes #<issue>` na descrição. A descrição também traz um resumo do que mudou e por quê, e o que foi verificado manualmente. O que o CI já cobre não precisa ser repetido.
-- O PR é integrado com squash. O título do PR vira o commit em `main` e segue o padrão abaixo.
+- Um PR com um único assunto é integrado com squash, e seu título vira o commit em `main`. Um PR que agrupa várias tarefas, como as de uma fase do roadmap, é integrado com rebase: cada tarefa é um commit próprio, que chega a `main` e ao changelog. Em ambos os casos, título e commits seguem o padrão abaixo.
 - Mantenha cada PR com um único assunto. Refatorações vão separadas de mudanças de comportamento.
 
 ### Mensagens de commit
