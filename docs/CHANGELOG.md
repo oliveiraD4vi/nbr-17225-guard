@@ -4,7 +4,7 @@ Todas as mudanças relevantes deste projeto devem ser registradas neste arquivo.
 
 O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento semântico quando aplicável.
 
-## [2.0.1](https://github.com/oliveiraD4vi/nbr-17225-guard/compare/v2.0.0...v2.0.1) (2026-11-26)
+## [2.0.1](https://github.com/oliveiraD4vi/nbr-17225-guard/compare/v2.0.0-beta.1...v2.0.1) (2026-11-26)
 
 
 ### Fixed
