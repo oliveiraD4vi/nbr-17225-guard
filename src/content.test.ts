@@ -34,7 +34,6 @@ const fakeChrome = {
 
 function installChrome() {
   vi.stubGlobal('chrome', fakeChrome)
-  vi.stubGlobal('console', { ...console, log: () => undefined })
 }
 
 // The content script registers its listeners on import, so chrome has to exist first.

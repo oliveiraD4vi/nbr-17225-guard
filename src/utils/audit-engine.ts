@@ -534,8 +534,6 @@ export async function resetAuditCache(): Promise<void> {
     await extensionStorageSet({
       auditResultsByTab,
     })
-
-    console.log('[Guardião NBR 17225] Cache de auditoria limpo para a aba ativa')
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao limpar cache:', error)
   }
@@ -579,8 +577,6 @@ export async function saveAuditResult(result: AuditResult, tabId?: number): Prom
       auditResultsByTab,
       auditHistoryByUrl,
     })
-
-    console.log('[Guardião NBR 17225] Resultado da auditoria salvo')
     return normalizedResult
   } catch (error) {
     console.error('[Guardião NBR 17225] Erro ao salvar resultado:', error)

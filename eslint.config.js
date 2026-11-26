@@ -20,6 +20,10 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // The extension runs inside users' pages: only warnings and errors belong in their console.
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+    },
   },
   {
     // The DevTools panel has no chrome.storage; its screens go through src/utils/extension-storage.

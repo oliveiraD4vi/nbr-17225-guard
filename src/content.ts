@@ -32,9 +32,8 @@ const contentScope = globalThis as typeof globalThis & {
   __nbrGuardContentLoaded?: boolean
 }
 
-if (contentScope.__nbrGuardContentLoaded) {
-  console.log('[Guardião NBR 17225] Content script já carregado')
-} else {
+// The script is injected again on each audit; listeners must be registered only once per page.
+if (!contentScope.__nbrGuardContentLoaded) {
   contentScope.__nbrGuardContentLoaded = true
 
   const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host'
@@ -57,8 +56,6 @@ if (contentScope.__nbrGuardContentLoaded) {
   window.addEventListener('pagehide', clearContrastPreviews)
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('[Guardião NBR 17225] Mensagem recebida:', request.action)
-
     switch (request.action) {
       case 'PING':
         sendResponse({ status: 'OK' })
@@ -1001,6 +998,4 @@ if (contentScope.__nbrGuardContentLoaded) {
       })
     })
   }
-
-  console.log('[Guardião NBR 17225] Content script carregado')
 }
