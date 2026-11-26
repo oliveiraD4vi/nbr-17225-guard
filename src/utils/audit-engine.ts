@@ -13,6 +13,7 @@ import type {
   WCAGLevel,
 } from '@/types'
 import { getAuditScoreData } from '@/utils/audit-score'
+import { InvalidAuditReportError, readAuditReport } from '@/utils/audit-report-parser'
 import {
   compactAuditResultForStorage,
   dedupeAndSortAuditHistory,
@@ -427,24 +428,6 @@ async function getStorageQuotaBytes(): Promise<number> {
     : FALLBACK_STORAGE_QUOTA_BYTES
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-}
-
-function isImportedViolationCandidate(value: unknown): value is Record<string, unknown> {
-  return (
-    isRecord(value) &&
-    typeof value.id === 'string' &&
-    typeof value.ruleId === 'string' &&
-    typeof value.ruleName === 'string' &&
-    typeof value.nbrReference === 'string' &&
-    typeof value.description === 'string' &&
-    typeof value.message === 'string' &&
-    typeof value.suggestion === 'string' &&
-    typeof value.remediationAdvice === 'string'
-  )
-}
-
 export function getManualFindingReapplyCandidates(
   historyEntries: AuditHistoryEntry[],
 ): Violation[] {
@@ -538,33 +521,15 @@ async function reapplyManualFindingsFromHistory(
 }
 
 export function parseImportedAuditReport(payload: unknown): AuditHistoryEntry {
-  if (!isRecord(payload)) {
-    throw new Error(t('engine.invalidImportReport'))
+  let report: AuditResult
+  try {
+    report = readAuditReport(payload)
+  } catch (error) {
+    if (!(error instanceof InvalidAuditReportError)) throw error
+    throw new Error(t('engine.invalidImportReport'), { cause: error })
   }
 
-  const candidate = isRecord(payload.audit) ? payload.audit : payload
-  if (!isRecord(candidate)) {
-    throw new Error(t('engine.invalidImportReport'))
-  }
-
-  const timestamp =
-    typeof candidate.timestamp === 'number' ? candidate.timestamp : Number(candidate.timestamp)
-
-  if (
-    typeof candidate.url !== 'string' ||
-    candidate.url.trim().length === 0 ||
-    !Number.isFinite(timestamp) ||
-    !Array.isArray(candidate.violations) ||
-    candidate.violations.some((violation) => !isImportedViolationCandidate(violation))
-  ) {
-    throw new Error(t('engine.invalidImportReport'))
-  }
-
-  return normalizeAuditResult({
-    ...(candidate as unknown as AuditResult),
-    timestamp,
-    url: candidate.url,
-  }) as AuditHistoryEntry
+  return normalizeAuditResult(report) as AuditHistoryEntry
 }
 
 /**
