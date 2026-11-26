@@ -21,25 +21,12 @@
     "format:check": "prettier . --check",
     "stage-lint": "lint-staged",
     "preview": "vite preview",
-    "test": "pnpm test:dom-identifiers && pnpm test:extension-storage && pnpm test:devtools-refinements && pnpm test:accessible-ui && pnpm test:rule-fixtures && pnpm test:audit-sessions && pnpm test:audit-history-utils && pnpm test:audit-import && pnpm test:audit-history && pnpm test:audit-triage && pnpm test:audit-manual-findings && pnpm test:audit-bulk-actions && pnpm test:contrast-preview && pnpm test:audit-alt-report-devtools",
+    "test": "vitest run",
     "verify:rules": "node scripts/verify-rules.mjs",
     "type-check": "tsc -b",
-    "test:dom-identifiers": "node scripts/test-dom-identifiers.mjs",
-    "test:extension-storage": "node scripts/test-extension-storage.mjs",
-    "test:devtools-refinements": "node scripts/test-devtools-refinements.mjs",
-    "test:accessible-ui": "node scripts/test-accessible-ui.mjs",
     "fixtures:build": "node scripts/build-rule-fixtures.mjs",
-    "test:rule-fixtures": "node scripts/test-rule-fixtures.mjs",
-    "test:audit-sessions": "node scripts/test-audit-sessions.mjs",
     "test:a11y": "pnpm build && playwright test",
-    "test:audit-history": "node scripts/test-audit-history.mjs",
-    "test:audit-import": "node scripts/test-audit-import.mjs",
-    "test:audit-history-utils": "node scripts/test-audit-history-utils.mjs",
-    "test:audit-manual-findings": "node scripts/test-audit-manual-findings.mjs",
-    "test:audit-bulk-actions": "node scripts/test-audit-bulk-actions.mjs",
-    "test:contrast-preview": "node scripts/test-contrast-preview.mjs",
-    "test:audit-triage": "node scripts/test-audit-triage.mjs",
-    "test:audit-alt-report-devtools": "node scripts/test-audit-alt-report-devtools.mjs"
+    "test:watch": "vitest"
   },
   "lint-staged": {
     "*.{md,json,css,js,mjs,ts,tsx,html}": [
@@ -76,6 +63,7 @@
     "prettier": "^3.8.3",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.57.0",
-    "vite": "^8.0.1"
+    "vite": "^8.0.1",
+    "vitest": "^4.1.12"
   }
 }
