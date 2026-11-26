@@ -306,7 +306,7 @@ export async function runAccessibilityAudit(options: RunAuditOptions = {}): Prom
 }
 
 export async function ensureContentScriptReady(tabId: number, tabUrl?: string): Promise<void> {
-  const resolvedTabUrl = tabUrl ?? (await getTabUrl(tabId))
+  const resolvedTabUrl = tabUrl ?? (await chrome.tabs.get(tabId)).url
   if (resolvedTabUrl && !isSupportedTabUrl(resolvedTabUrl)) {
     throw new Error(t('engine.unsupportedUrl'))
   }
@@ -356,16 +356,8 @@ async function pingContentScript(tabId: number): Promise<boolean> {
     const response = await chrome.tabs.sendMessage(tabId, { action: 'PING' })
     return response?.status === 'OK'
   } catch {
+    // Until the content script is injected, the message has no receiver: that is the answer.
     return false
-  }
-}
-
-async function getTabUrl(tabId: number): Promise<string | undefined> {
-  try {
-    const tab = await chrome.tabs.get(tabId)
-    return tab.url
-  } catch {
-    return undefined
   }
 }
 
@@ -379,18 +371,10 @@ function isHostPermissionError(error: unknown): boolean {
 }
 
 function getOptionalHostPermissionPattern(url: string): string | null {
-  try {
-    const parsedUrl = new URL(url)
-    if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
-      return `${parsedUrl.origin}/*`
-    }
-    if (parsedUrl.protocol === 'file:') {
-      return 'file:///*'
-    }
-    return null
-  } catch {
-    return null
-  }
+  const { origin, protocol } = new URL(url)
+  if (protocol === 'http:' || protocol === 'https:') return `${origin}/*`
+  if (protocol === 'file:') return 'file:///*'
+  return null
 }
 
 async function requestOptionalHostPermission(url: string): Promise<boolean> {
@@ -400,8 +384,10 @@ async function requestOptionalHostPermission(url: string): Promise<boolean> {
   try {
     const permission = { origins: [origin] }
     if (await chrome.permissions.contains(permission)) return true
-    return chrome.permissions.request(permission)
-  } catch {
+    return await chrome.permissions.request(permission)
+  } catch (error) {
+    // The audit then reports that site access is required, which is what the user needs to know.
+    console.warn('[Guardião NBR 17225] Não foi possível solicitar acesso ao site:', error)
     return false
   }
 }

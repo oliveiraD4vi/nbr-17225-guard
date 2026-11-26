@@ -67,6 +67,7 @@ function hasRestrictiveOrientationStyles(): boolean {
     try {
       rules = sheet.cssRules
     } catch {
+      // Cross-origin stylesheets do not expose their rules; there is nothing to inspect in them.
       continue
     }
 

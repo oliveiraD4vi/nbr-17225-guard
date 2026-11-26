@@ -345,7 +345,7 @@ export function readAuditReport(payload: unknown): AuditResult {
   if (!isFiniteNumber(timestamp)) return field.fail('timestamp')
 
   const url = field.string('url')
-  if (!url.trim()) field.fail('url')
+  if (!URL.canParse(url)) field.fail('url')
 
   const siteSession = field.optionalRecord('siteSession')
   const journeySession = field.optionalRecord('journeySession')

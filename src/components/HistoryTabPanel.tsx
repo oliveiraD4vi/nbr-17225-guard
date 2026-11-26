@@ -57,11 +57,7 @@ function getHistoryOptionLabel(entry: AuditHistoryEntry): string {
 }
 
 function getEntryPathLabel(url: string): string {
-  try {
-    return new URL(url).pathname || '/'
-  } catch {
-    return url
-  }
+  return new URL(url).pathname || '/'
 }
 
 function getViolationElementLabel(violation: Violation): string {

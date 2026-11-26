@@ -94,27 +94,20 @@ export function compactAuditResultForStorage<T extends AuditResult>(result: T): 
   } as T
 }
 
+// Audit URLs come from the browser tab or from a validated report, so they always parse.
 export function getAuditUrlStorageKey(url: string): string {
-  try {
-    const parsed = new URL(url)
-    parsed.search = ''
-    parsed.hash = ''
-    if (parsed.pathname !== '/') {
-      parsed.pathname = parsed.pathname.replace(/\/+$/, '') || '/'
-    }
-    return parsed.toString()
-  } catch {
-    return url
+  const parsed = new URL(url)
+  parsed.search = ''
+  parsed.hash = ''
+  if (parsed.pathname !== '/') {
+    parsed.pathname = parsed.pathname.replace(/\/+$/, '') || '/'
   }
+  return parsed.toString()
 }
 
 export function getAuditSiteStorageKey(url: string): string {
-  try {
-    const parsed = new URL(url)
-    return parsed.origin && parsed.origin !== 'null' ? parsed.origin : getAuditUrlStorageKey(url)
-  } catch {
-    return url
-  }
+  const { origin } = new URL(url)
+  return origin !== 'null' ? origin : getAuditUrlStorageKey(url)
 }
 
 export function getViolationIdentityKey(violation: Violation): string {

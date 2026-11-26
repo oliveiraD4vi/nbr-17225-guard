@@ -24,11 +24,7 @@ function createSessionId(prefix: 'site' | 'journey'): string {
 }
 
 function getOrigin(url: string): string {
-  try {
-    return new URL(url).origin
-  } catch {
-    return url
-  }
+  return new URL(url).origin
 }
 
 function toSitePage(result: AuditResult, context: PageAuditContext): SiteAuditPage {
