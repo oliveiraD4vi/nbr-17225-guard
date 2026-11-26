@@ -1,60 +1,56 @@
-# Releases e Chrome Web Store
+# Versões e releases
 
-Este documento descreve a preparação de versões públicas do Guardião NBR 17225. A publicação deve manter o mesmo item da Chrome Web Store para preservar o identificador da extensão e o ciclo automático de atualização.
+## Política de versão
+
+O projeto segue versionamento semântico:
+
+- `MAJOR`: mudança de escopo normativo, do contrato de auditoria, do formato do histórico ou da experiência principal;
+- `MINOR`: nova regra, relatório, filtro ou funcionalidade compatível;
+- `PATCH`: correção de bug, ajuste visual, refinamento de texto, redução de falso positivo ou melhoria interna sem quebra de contrato.
+
+Versões Beta usam `MAJOR.MINOR.PATCH-beta.N`, em que `N` cresce a cada pacote publicado. Executar uma regra na Beta significa que ela está habilitada para avaliação assistida, não que seja definitiva.
+
+Cada versão `MAJOR` recebe um nome de navegação e orientação: V1 Farol, V2 Polaris, V3 Astrolábio, V4 Cartógrafo e V5 Horizonte. Versões `MINOR` e `PATCH` mantêm o nome da linha.
 
 ## Arquivos de versão
 
-Antes de gerar um pacote, atualize em conjunto:
+A versão aparece em três arquivos, que mudam juntos:
 
-- `package.json`, com a versão numérica do projeto;
-- `public/manifest.json`, com `version` numérico e `version_name` completo;
-- `src/version.ts`, usado pela interface;
-- `README.md`, `docs/VERSIONING.md` e `docs/CHANGELOG.md`.
+- `package.json`: versão do projeto;
+- `public/manifest.json`: `version` numérico e `version_name` completo, com o sufixo Beta;
+- `src/version.ts`: versão exibida na interface.
 
-A Chrome Web Store exige que cada novo `version` do manifesto seja maior que o publicado anteriormente. O sufixo Beta fica em `version_name`, pois o campo `version` aceita somente números e pontos.
+A Chrome Web Store exige que cada `version` do manifesto seja maior que a publicada anteriormente e aceita somente números e pontos nesse campo. Por isso o sufixo Beta fica em `version_name`.
 
-## Validação e pacote
+## Preparar uma release
 
-Execute antes da tag:
+1. Atualize os arquivos de versão e registre as mudanças em [`CHANGELOG.md`](CHANGELOG.md).
+2. Execute a validação completa descrita em [`CONTRIBUTING.md`](CONTRIBUTING.md).
+3. Crie uma tag anotada no commit da release:
 
-```bash
-pnpm lint
-pnpm type-check
-pnpm test
-pnpm verify:rules
-pnpm build
-```
+   ```bash
+   git tag -a v2.0.0-beta.1 -m "Release v2.0.0-beta.1"
+   ```
 
-O ZIP enviado à loja deve conter o conteúdo de `dist/` na raiz do pacote. Artefatos de distribuição ficam fora do repositório público.
+4. Gere o ZIP com o conteúdo de `dist/` na raiz do pacote. Pacotes não são versionados no repositório.
 
-Use uma tag anotada no commit de release:
+## Publicar na Chrome Web Store
 
-```bash
-git tag -a v1.1.0-beta.4 -m "Release v1.1.0-beta.4"
-```
+O pacote é enviado ao mesmo item da Chrome Web Store, preservando o identificador da extensão. Depois da aprovação, o Chrome distribui a atualização automaticamente quando a extensão está ociosa. Extensões carregadas em modo de desenvolvedor não recebem essas atualizações.
 
-Para a rodada atual da linha V1 Farol Beta, use:
-
-```bash
-git tag -a v1.2.0-beta.9 -m "Release v1.2.0-beta.9"
-```
-
-## Atualização dos usuários
-
-Depois que um pacote com versão superior é aprovado e publicado no mesmo item da Chrome Web Store, o Chrome distribui a atualização automaticamente. O navegador procura novas versões ao iniciar e em verificações periódicas, aplicando a atualização quando a extensão está ociosa. Uma extensão carregada manualmente em modo de desenvolvedor não participa desse fluxo da loja.
-
-Tags Git e arquivos ZIP locais não publicam a extensão. O pacote precisa ser enviado, revisado e publicado no painel da Chrome Web Store.
-
-Referências:
+Uma tag ou um ZIP local não publicam nada: o pacote precisa ser enviado, revisado e publicado no painel da loja.
 
 - [Ciclo de atualização de extensões](https://developer.chrome.com/docs/extensions/develop/concepts/extensions-update-lifecycle)
 - [Atualização de um item na Chrome Web Store](https://developer.chrome.com/docs/webstore/update/)
 
 ## Aviso da Navegação segura melhorada
 
-O Chrome pode avisar que uma extensão ainda não é considerada confiável pela Navegação segura melhorada. Segundo a documentação do navegador, desenvolvedores novos normalmente precisam de alguns meses de histórico em conformidade com as políticas da Chrome Web Store para adquirir esse estado de confiança.
+O Chrome pode avisar que a extensão ainda não é considerada confiável pela Navegação segura melhorada. Desenvolvedores novos costumam precisar de alguns meses de histórico em conformidade com as políticas da loja para remover esse aviso. Nenhuma configuração do manifesto o remove.
 
-Esse aviso não é removido por uma configuração do manifesto. O projeto deve manter finalidade única, descrição transparente, política de privacidade atualizada e apenas as permissões necessárias. Nesta versão, `storage`, `activeTab` e `scripting` continuam necessárias para salvar auditorias e executar a análise solicitada pelo usuário. A permissão opcional por site fica em `optional_host_permissions` e só é solicitada quando o painel DevTools precisa acessar explicitamente a origem auditada.
+Para reduzir o risco, o projeto mantém finalidade única, descrição transparente, política de privacidade atualizada e apenas as permissões necessárias:
+
+- `storage`, `activeTab` e `scripting` salvam auditorias e executam a análise pedida pelo usuário;
+- o acesso por site fica em `optional_host_permissions` e só é solicitado quando o painel DevTools precisa acessar a origem auditada.
 
 Referências:
 
