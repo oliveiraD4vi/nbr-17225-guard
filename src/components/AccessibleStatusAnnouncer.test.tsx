@@ -1,7 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { useAccessibleMessage } from './AccessibleStatusAnnouncer'
+
+// The visual toast is Ant Design's concern and keeps timers running after the test ends; only the
+// live region is under test here.
+vi.mock('antd', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('antd')>()),
+  message: { error: vi.fn(), info: vi.fn(), success: vi.fn(), warning: vi.fn() },
+}))
 
 function Announcer() {
   const { announcer, notify } = useAccessibleMessage()
