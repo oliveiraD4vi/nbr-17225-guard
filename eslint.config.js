@@ -21,5 +21,24 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // The DevTools panel has no chrome.storage; its screens go through src/utils/extension-storage.
+    files: [
+      'src/components/**/*.{ts,tsx}',
+      'src/devtools-panel.tsx',
+      'src/popup.tsx',
+      'src/report.tsx',
+    ],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'chrome',
+          property: 'storage',
+          message: 'Use extensionStorageGet/extensionStorageSet from @/utils/extension-storage.',
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
 ])
