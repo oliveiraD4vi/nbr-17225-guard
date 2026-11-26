@@ -20,7 +20,8 @@ function hasNearbyDuplicateText(img: HTMLImageElement, alt: string): boolean {
   if (normalizedAlt.length < 4) return false
 
   const nearbyText = normalizeImageText(
-    img.closest<HTMLElement>('a, button, header, footer, .brand-block, .logo, .brand')?.textContent ||
+    img.closest<HTMLElement>('a, button, header, footer, .brand-block, .logo, .brand')
+      ?.textContent ||
       img.parentElement?.textContent ||
       '',
   )

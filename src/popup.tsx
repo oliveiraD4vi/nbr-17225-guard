@@ -12,10 +12,7 @@ const antTheme = createGuardAntTheme()
 
 root.render(
   <React.StrictMode>
-    <ConfigProvider
-      locale={ptBR}
-      theme={antTheme}
-    >
+    <ConfigProvider locale={ptBR} theme={antTheme}>
       <PopupLandingApp />
     </ConfigProvider>
   </React.StrictMode>,

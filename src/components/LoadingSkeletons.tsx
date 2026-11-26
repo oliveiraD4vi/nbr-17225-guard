@@ -1,22 +1,36 @@
-import React from 'react';
-import { Card, Skeleton, Space } from 'antd';
+import React from 'react'
+import { Card, Skeleton, Space } from 'antd'
 
 export const SummarySkeleton: React.FC = React.memo(() => (
   <div className="violations-summary">
     <Card className="summary-card">
       <Skeleton active paragraph={{ rows: 2 }} title={{ width: '45%' }} />
-      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', marginTop: 16 }}>
+      <div
+        style={{
+          display: 'grid',
+          gap: 12,
+          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          marginTop: 16,
+        }}
+      >
         <Skeleton.Button active block style={{ width: '100%', height: 92 }} />
         <Skeleton.Button active block style={{ width: '100%', height: 92 }} />
         <Skeleton.Button active block style={{ width: '100%', height: 92 }} />
       </div>
-      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', marginTop: 16 }}>
+      <div
+        style={{
+          display: 'grid',
+          gap: 12,
+          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          marginTop: 16,
+        }}
+      >
         <Skeleton.Button active block style={{ width: '100%', height: 120 }} />
         <Skeleton.Button active block style={{ width: '100%', height: 120 }} />
       </div>
     </Card>
   </div>
-));
+))
 
 export const PopupPanelSkeleton: React.FC = React.memo(() => (
   <div className="popup-loading-state" aria-live="polite" aria-busy="true">
@@ -28,7 +42,7 @@ export const PopupPanelSkeleton: React.FC = React.memo(() => (
       <Skeleton.Button active block />
     </div>
   </div>
-));
+))
 
 export const ReportSkeleton: React.FC = React.memo(() => (
   <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -37,4 +51,4 @@ export const ReportSkeleton: React.FC = React.memo(() => (
     <Skeleton.Button active block style={{ width: '100%', height: 220 }} />
     <Skeleton.Button active block style={{ width: '100%', height: 280 }} />
   </Space>
-));
+))

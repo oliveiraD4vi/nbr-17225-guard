@@ -13,10 +13,7 @@ const antTheme = createGuardAntTheme()
 
 root.render(
   <React.StrictMode>
-    <ConfigProvider
-      locale={ptBR}
-      theme={antTheme}
-    >
+    <ConfigProvider locale={ptBR} theme={antTheme}>
       <DevToolsPanelApp />
     </ConfigProvider>
   </React.StrictMode>,

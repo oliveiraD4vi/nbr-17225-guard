@@ -24,9 +24,7 @@ function getVisibleFieldLabelText(
 
   const fieldId = getElementIdAttribute(field)
   if (fieldId) {
-    const explicitLabel = document.querySelector<HTMLElement>(
-      `label[for="${CSS.escape(fieldId)}"]`,
-    )
+    const explicitLabel = document.querySelector<HTMLElement>(`label[for="${CSS.escape(fieldId)}"]`)
     const explicitLabelText = explicitLabel ? getVisibleText(explicitLabel).trim() : ''
     if (explicitLabelText) return explicitLabelText
   }

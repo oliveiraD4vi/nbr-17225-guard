@@ -74,7 +74,9 @@ function findCarouselContext(control: HTMLElement): HTMLElement | null {
 
   while (current && current !== document.body) {
     const descriptor = [
-      typeof current.className === 'string' ? current.className : current.getAttribute('class') || '',
+      typeof current.className === 'string'
+        ? current.className
+        : current.getAttribute('class') || '',
       current.getAttribute('role') || '',
       current.getAttribute('aria-roledescription') || '',
       current.getAttribute('aria-label') || '',
@@ -239,7 +241,9 @@ export const targetSizeRule: Rule = {
   category: 'Totalmente Automatizável',
   check: async (): Promise<Violation[]> => {
     const violations: Violation[] = []
-    const measuredTargets = getMeasuredTargets(Array.from(document.querySelectorAll<HTMLElement>(interactiveControlSelector)))
+    const measuredTargets = getMeasuredTargets(
+      Array.from(document.querySelectorAll<HTMLElement>(interactiveControlSelector)),
+    )
 
     measuredTargets.forEach((target) => {
       if (!targetMeetsSize(target, measuredTargets, 24)) {
@@ -281,7 +285,10 @@ export const enhancedTargetSizeRule: Rule = {
     )
 
     measuredTargets.forEach((target) => {
-      if (targetMeetsSize(target, measuredTargets, 24) && !targetMeetsSize(target, measuredTargets, 44)) {
+      if (
+        targetMeetsSize(target, measuredTargets, 24) &&
+        !targetMeetsSize(target, measuredTargets, 44)
+      ) {
         violations.push(
           createViolation(enhancedTargetSizeRule, {
             element: target.element,
