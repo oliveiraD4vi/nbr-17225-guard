@@ -10,7 +10,7 @@ Antes de mexer em regras, leia [`RULES_NORMATIVE_MATRIX.md`](RULES_NORMATIVE_MAT
 
 ## Ambiente local
 
-Requisitos: Node.js `^20.19.0` ou `>=22.12.0`, pnpm e um navegador Chromium com Manifest V3.
+Requisitos: Node.js `^22.22.2` ou `>=24.15.0`, pnpm e um navegador Chromium com Manifest V3.
 
 ```bash
 pnpm install

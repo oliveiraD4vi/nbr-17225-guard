@@ -46,6 +46,19 @@ test('popup e superfícies estáticas não apresentam violações críticas ou s
 
     expect(new Set(keyboardFocusOrder.filter(Boolean)).size).toBeGreaterThanOrEqual(4)
     expect(keyboardFocusOrder.slice(0, 4).every((item) => !item.startsWith('BODY:'))).toBe(true)
+
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    const transitionDuration = await page.evaluate(
+      () => getComputedStyle(document.querySelector('button') as Element).transitionDuration,
+    )
+    expect(transitionDuration.split(',').every((value) => parseFloat(value) <= 0.00001)).toBe(true)
+
+    await page.emulateMedia({ reducedMotion: null, forcedColors: 'active' })
+    await page.keyboard.press('Tab')
+    const focusOutline = await page.evaluate(
+      () => getComputedStyle(document.activeElement as Element).outlineStyle,
+    )
+    expect(focusOutline).not.toBe('none')
   } finally {
     await context.close()
     await rm(userDataDir, { recursive: true, force: true })
