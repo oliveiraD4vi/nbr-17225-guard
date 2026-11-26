@@ -527,13 +527,17 @@ if (contentScope.__nbrGuardContentLoaded) {
 
       const tooltip = document.createElement('div')
       tooltip.className = `tooltip position-${verticalPosition} position-${horizontalPosition}`
-      tooltip.innerHTML = `
-        <span class="tooltip-title">${violation.ruleName}</span>
-        <span class="tooltip-meta">${t('content.highlightMeta', {
-          reference: violation.nbrReference,
-          severity: violation.normativeType,
-        })}</span>
-      `
+      // Violations can come from an imported report, so their text never goes through innerHTML.
+      const tooltipTitle = document.createElement('span')
+      tooltipTitle.className = 'tooltip-title'
+      tooltipTitle.textContent = violation.ruleName
+      const tooltipMeta = document.createElement('span')
+      tooltipMeta.className = 'tooltip-meta'
+      tooltipMeta.textContent = t('content.highlightMeta', {
+        reference: violation.nbrReference,
+        severity: violation.normativeType,
+      })
+      tooltip.append(tooltipTitle, tooltipMeta)
 
       let pinnedOpen = startOpen
 
