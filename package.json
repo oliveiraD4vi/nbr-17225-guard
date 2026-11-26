@@ -23,7 +23,7 @@
     "preview": "vite preview",
     "test": "pnpm test:dom-identifiers && pnpm test:extension-storage && pnpm test:devtools-refinements && pnpm test:accessible-ui && pnpm test:rule-fixtures && pnpm test:audit-sessions && pnpm test:audit-history-utils && pnpm test:audit-import && pnpm test:audit-history && pnpm test:audit-triage && pnpm test:audit-manual-findings && pnpm test:audit-bulk-actions && pnpm test:contrast-preview && pnpm test:audit-alt-report-devtools",
     "verify:rules": "node scripts/verify-rules.mjs",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc -b",
     "test:dom-identifiers": "node scripts/test-dom-identifiers.mjs",
     "test:extension-storage": "node scripts/test-extension-storage.mjs",
     "test:devtools-refinements": "node scripts/test-devtools-refinements.mjs",
