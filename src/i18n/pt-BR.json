@@ -791,10 +791,6 @@
     "invalidImportReport": "O arquivo selecionado não é um relatório JSON válido exportado pelo Guardião NBR 17225."
   },
   "background": {
-    "installed": "Extensão instalada com sucesso",
-    "updated": "Extensão atualizada",
-    "message": "Mensagem no background:",
-    "loaded": "Background service worker carregado",
     "manualFindingDraftError": "Não foi possível salvar o rascunho da violação manual.",
     "manualFindingDraftInvalid": "O rascunho da violação manual está incompleto.",
     "manualFindingDraftNoTab": "Não foi possível identificar a aba da violação manual.",

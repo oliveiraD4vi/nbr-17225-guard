@@ -10,17 +10,7 @@ import {
 } from '@/utils/manual-findings'
 import { saveReportSnapshot } from '@/utils/report-snapshots'
 
-chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === 'install') {
-    console.log(`[${t('shared.brand.name')}] ${t('background.installed')}`)
-  } else if (details.reason === 'update') {
-    console.log(`[${t('shared.brand.name')}] ${t('background.updated')}`)
-  }
-})
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(`[${t('shared.brand.name')}] ${t('background.message')}`, request.action)
-
   switch (request.action) {
     case 'STORAGE_LOCAL_GET':
       chrome.storage.local
@@ -141,5 +131,3 @@ async function clearManualFindingDraft(tabId?: number): Promise<void> {
   })
   notifyManualFindingDraftChanged(tabId)
 }
-
-console.log(`[${t('shared.brand.name')}] ${t('background.loaded')}`)

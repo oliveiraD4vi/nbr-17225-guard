@@ -13,7 +13,6 @@ let onMessage: Listener
 
 const fakeChrome = {
   runtime: {
-    onInstalled: { addListener: () => undefined },
     onMessage: {
       addListener: (listener: Listener) => {
         onMessage = listener
@@ -38,7 +37,6 @@ const fakeChrome = {
 
 function installChrome() {
   vi.stubGlobal('chrome', fakeChrome)
-  vi.stubGlobal('console', { ...console, log: () => undefined })
 }
 
 // The service worker registers its listeners on import, so chrome has to exist first.
