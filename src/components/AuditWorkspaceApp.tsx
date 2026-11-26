@@ -41,6 +41,7 @@ import type { ViolationsListState } from './ViolationsList'
 import { t } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { allRules } from '@/rules'
+import { parseAuditScope } from '@/utils/audit-report-parser'
 import { APP_VERSION } from '@/version'
 import type {
   AuditHistoryEntry,
@@ -498,7 +499,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
       const resolvedHumanReviewPreference = defaultIncludeHumanReview
       const resolvedAuditScope =
-        result?.auditScope ?? (preferences.auditScopePreference as AuditScope | undefined) ?? 'page'
+        result?.auditScope ?? parseAuditScope(preferences.auditScopePreference) ?? 'page'
       const savedState = getStoredPopupState(preferences[popupStateStorageKey], tab.url)
       const availableAuditIds = new Set(
         [result?.id, ...history.map((entry) => entry.id), ...siteHistory.map((entry) => entry.id)]
