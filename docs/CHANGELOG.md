@@ -6,6 +6,25 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 
 ## [Unreleased]
 
+## [2.0.0-beta.1] - 2026-08-13
+
+V2 Polaris Beta.
+
+### Added
+
+- modos de verificação automático, assistido e manual, com confiança, evidência e pergunta de revisão em cada resultado;
+- escopos de auditoria de página, site e jornada, com registro de páginas e etapas da sessão;
+- 34 recomendações incorporadas como verificações assistidas ou roteiros manuais, completando o catálogo de 146 itens;
+- faixa de nota com limite conservador e limite sustentado por falhas automáticas ou confirmadas;
+- anúncios acessíveis de status nas superfícies da extensão;
+- teste end-to-end com axe para o popup, o painel DevTools e o relatório;
+- Guardião Lab, extensão experimental e separada para explorar a árvore de acessibilidade do Chromium.
+
+### Changed
+
+- candidatos assistidos entram como revisão pendente e não contam como falha confirmada sem decisão humana;
+- regras de site e jornada só são executadas no escopo correspondente.
+
 ## [1.2.0-beta.9] - 2026-07-05
 
 ### Added

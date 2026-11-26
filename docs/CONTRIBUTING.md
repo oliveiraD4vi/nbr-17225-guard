@@ -1,47 +1,28 @@
 # Contribuindo
 
-Este guia descreve como contribuir com a extensão open-source do Guardião NBR 17225.
+Este guia descreve como propor mudanças na extensão Guardião NBR 17225.
 
-## Escopo atual
+## Escopo
 
-O Guardião trabalha com um catálogo de 146 itens: 96 requisitos normativos e 50 recomendações, revisados contra a referência pública da ABNT NBR 17225.
+O catálogo tem 146 itens da ABNT NBR 17225: 96 requisitos e 50 recomendações. Correções, testes e melhorias de UX dentro desse escopo são bem-vindas. Mudanças de catálogo precisam atualizar, no mesmo PR, a matriz normativa, os testes da regra e a rastreabilidade pública.
 
-Neste momento:
-
-- correções de implementação dentro desse escopo são bem-vindas;
-- melhorias de UX, performance, robustez e testes são bem-vindas;
-- mudanças de catálogo exigem matriz normativa, fixtures e rastreabilidade pública no mesmo lote.
-
-## Antes de abrir uma contribuição
-
-Leia estes arquivos:
-
-- `../README.md`
-- `RULES_ANALYSIS.md`
-- `RULES_CODE_MAPPING.md`
-- `RULES_NORMATIVE_MATRIX.md`
-- `FUTURE_RULES_PLAN.md`
-- `VERSIONING.md`
-
-Eles explicam o escopo atual, o mapeamento das regras e as divergências residuais já conhecidas.
+Antes de mexer em regras, leia [`RULES_NORMATIVE_MATRIX.md`](RULES_NORMATIVE_MATRIX.md) e [`HEURISTIC_EVIDENCE_REGISTER.md`](HEURISTIC_EVIDENCE_REGISTER.md). Eles registram o que cada verificação observa e o que continua dependendo de revisão humana.
 
 ## Ambiente local
 
-Pré-requisitos:
-
-- Node.js
-- pnpm
-- navegador Chromium compatível com Manifest V3
-
-Instalação:
+Requisitos: Node.js `^20.19.0` ou `>=22.12.0`, pnpm e um navegador Chromium com Manifest V3.
 
 ```bash
 pnpm install
 ```
 
-O `pnpm install` também executa `prepare` e habilita os hooks locais do Husky para este clone.
+O `pnpm install` executa `prepare` e ativa os hooks do Husky:
 
-Validação local:
+- `pre-commit`: aplica Prettier e ESLint aos arquivos staged;
+- `commit-msg`: valida a mensagem do commit;
+- `pre-push`: valida os commits enviados e executa `pnpm test` e `pnpm build`.
+
+Validação completa, a mesma exigida em todo PR:
 
 ```bash
 pnpm format:check
@@ -52,66 +33,70 @@ pnpm test
 pnpm build
 ```
 
-Validação automática no fluxo de Git:
+## Fluxo de trabalho
 
-- `pre-commit`: `pnpm stage-lint`
-- `pre-push`: `pnpm test` + `pnpm build`
+Cada mudança tem um ticket, uma branch e um PR.
 
-## Diretrizes de contribuição
+- Branch: `<tipo>/<TICKET>/<descricao-curta>`, por exemplo `fix/SEC-001/escapa-tooltip`.
+- O PR é integrado com squash. O título do PR vira o commit em `main` e segue o padrão abaixo.
+- A descrição do PR traz o ticket, um resumo do que mudou e por quê, e o que foi verificado manualmente. O que o CI já cobre não precisa ser repetido.
+- Mantenha cada PR com um único assunto. Refatorações vão separadas de mudanças de comportamento.
 
-- mantenha o texto da interface em português brasileiro UTF-8;
-- concentre novos textos no catálogo de i18n, evitando strings soltas em componentes;
-- preserve o escopo da V1 Farol;
-- prefira mudanças pequenas e bem delimitadas;
-- siga os padrões já existentes de tipagem, persistência e nomes de arquivos;
-- não misture refatoração ampla com correção funcional se isso puder ser separado;
-- ao mexer em auditoria, valide impacto em:
-  - persistência por aba;
-  - histórico por URL;
-  - comparação entre auditorias;
-  - herança de revisão humana;
-  - exportação.
+### Mensagens de commit
 
-## Como adicionar ou alterar uma regra
+O projeto usa Conventional Commits, validados por `commitlint.config.mjs`:
 
-Ao mexer em regra, trate a mudança como um fluxo completo do produto, não só como uma função nova no motor.
-
-Checklist recomendado:
-
-1. implemente ou ajuste a regra em `src/rules/`;
-2. registre a regra no agregador correto em `src/rules/index.ts`;
-3. mantenha `nbrReference`, severidade, nível WCAG e categoria de automação alinhados ao catálogo v1;
-4. crie a tupla de tradução antes de ligar a regra à UI:
-   - `src/i18n/rules-pt-BR.json` para nome, descrição, mensagens, sugestões e remediações;
-   - `src/i18n/pt-BR.json` para textos de interface, estados, alertas e exportações;
-5. use apenas chaves de catálogo no código, sem texto visível hardcoded;
-6. se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação;
-7. revise a documentação impactada em `RULES_CODE_MAPPING.md`, `RULES_ANALYSIS.md`, `RULES_NORMATIVE_MATRIX.md`, `FUTURE_RULES_PLAN.md` e `../README.md`;
-8. quando a matriz normativa mudar, abra ou referencie uma issue pública solicitando a atualização correspondente da Página do Projeto;
-9. se a alteração mudar, remover ou criar uma função de verificação, inclua no PR o link da issue relacionada à atualização da página pública de regras;
-10. valide a mudança com:
-
-```bash
-pnpm format:check
-pnpm lint
-pnpm verify:rules
-pnpm type-check
-pnpm test
-pnpm build
+```text
+tipo(escopo opcional): descrição curta
 ```
 
-## Modos e escopos
+- Tipos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`, `ci`, `perf`, `style` e `revert`.
+- Descrição em PT-BR, no presente ou imperativo, começando em minúscula e sem ponto final.
+- Cabeçalho com até 100 caracteres.
+- Corpo para motivação ou impacto que não caibam na descrição.
+- Rodapé para o ticket (`Refs: SEC-001`) e para breaking changes.
 
-Toda regra deve declarar ou herdar um modo `automatic`, `assisted` ou `manual`. Regras de múltiplas páginas ou etapas devem usar o escopo `site` ou `journey`; não devem inferir esse contexto a partir de uma única página.
+Uma mudança que quebra compatibilidade leva `!` no cabeçalho e é detalhada no rodapé:
 
-## Pull requests
+```text
+feat(schema)!: versiona modelo de violações
 
-Ao abrir um PR, descreva:
+BREAKING CHANGE: relatórios antigos passam pela migração ao serem importados.
+```
 
-- o problema;
-- a abordagem adotada;
-- os riscos conhecidos;
-- como validar a mudança;
-- se houve impacto em regra, UI, persistência, exportação ou comparação de histórico.
+## Diretrizes de código
 
-Isso reduz retrabalho de revisão e torna a mudança mais fácil de manter.
+- Textos visíveis ficam nos catálogos `src/i18n/pt-BR.json` e `src/i18n/rules-pt-BR.json`, nunca soltos em componentes.
+- Siga os padrões existentes de tipagem, persistência e nomes de arquivos.
+- Uma mudança na auditoria pode afetar a persistência por aba, o histórico por URL, a comparação entre auditorias, a herança de triagem e a exportação. Verifique cada um.
+
+## Regras
+
+### Adicionar ou alterar uma regra
+
+1. Implemente ou ajuste a regra em `src/rules/` e registre-a no agregador de `src/rules/index.ts`.
+2. Mantenha `nbrReference`, severidade, nível WCAG e categoria de automação alinhados ao catálogo de `scripts/verify-rules.mjs`.
+3. Declare ou herde um modo de verificação (`automatic`, `assisted` ou `manual`). Regras que dependem de várias páginas ou etapas usam o escopo `site` ou `journey` e não inferem esse contexto a partir de uma única página.
+4. Toda conclusão assistida preserva confiança, evidência e pergunta de revisão. Um candidato pendente nunca é apresentado como falha confirmada.
+5. Escreva nome, descrição, mensagem, sugestão e remediação em `src/i18n/rules-pt-BR.json`.
+6. Se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação.
+7. Cubra a regra com cenários positivo, negativo e limítrofe.
+8. Atualize a matriz normativa e, para heurísticas fracas, o registro de evidências.
+9. Mudanças na matriz exigem atualizar a Página do Projeto (`pnpm sync:rules` no repositório da página). Registre essa pendência no PR.
+
+### Retirar uma regra da execução
+
+Uma regra que gera falso positivo grave, infere intenção demais ou depende de contexto que o motor não observa deve sair da execução imediatamente:
+
+```ts
+readiness: 'not_ready',
+readinessReason: 'Motivo curto e verificável.',
+```
+
+A regra continua documentada, mas fica fora da auditoria e da nota. `pnpm verify:rules` recusa `not_ready` sem `readinessReason`.
+
+Para voltar à execução, a regra precisa ter sinal observável no DOM, CSS, ARIA ou metadados, falso positivo conhecido corrigido ou tratado como revisão humana, mensagem e remediação acionáveis, e cenários positivo e negativo cobertos. Ela também precisa ter sido auditada em `/`, `/rules.html` e `/privacy.html` da Página do Projeto.
+
+## Página do Projeto
+
+A [Página do Projeto](https://guardiaonbr.com.br) é mantida em um repositório separado. Problemas na página, inclusive na página de regras, devem ser abertos como issue neste repositório.

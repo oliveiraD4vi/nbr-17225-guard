@@ -1,334 +1,108 @@
 # Guardião NBR 17225
 
-Verificador de acessibilidade para navegadores Chromium, alinhado à V2 Polaris Beta do catálogo documental da ABNT NBR 17225:2025.
+Extensão para navegadores Chromium que audita a acessibilidade de páginas web segundo a ABNT NBR 17225:2025.
 
-## Visão geral
+O Guardião executa a auditoria na página inspecionada e organiza cada violação com referência normativa, severidade, elemento afetado e evidência. As verificações que dependem de julgamento aparecem como candidatos para revisão humana, nunca como falha confirmada. O resultado não certifica conformidade.
 
-O Guardião NBR 17225 executa auditorias diretamente na página inspecionada e organiza as violações com referência normativa, severidade, contexto do elemento afetado, triagem opcional e histórico local por URL.
+## O que a extensão faz
 
-## Principais capacidades
+- Audita a página com somente requisitos ou com requisitos e recomendações, no contexto de página, sessão de site ou jornada.
+- Separa os resultados em três modos: automático, assistido e manual. Cada candidato assistido traz evidência e uma pergunta de revisão.
+- Destaca os elementos na página e navega pelos itens prioritários.
+- Registra a triagem: confirmar, ignorar com motivo ou reabrir. As decisões são herdadas por auditorias equivalentes.
+- Mantém histórico local por URL e compara auditorias, separando mudança técnica de decisão de triagem.
+- Permite violações manuais a partir de um elemento selecionado, propostas de texto alternativo e uma prévia temporária de correções de contraste.
+- Exporta em JSON e CSV e importa relatórios JSON para continuar a análise em outro navegador.
+- Simula protanopia, deuteranopia, tritanopia e desfoque como apoio à inspeção visual.
 
-### Auditoria e diagnóstico
+A explicação de cada regra e da nota fica na Página do Projeto, em [`/rules.html`](https://guardiaonbr.com.br/rules.html) e [`/score.html`](https://guardiaonbr.com.br/score.html).
 
-- cobertura operacional de 146 regras revisadas contra a referência pública da ABNT NBR 17225: 96 requisitos normativos e 50 recomendações normativas;
-- execução por aba, com suporte a páginas HTTP, HTTPS e arquivos locais com permissão;
-- auditoria por escopo:
-  - somente requisitos;
-  - requisitos e recomendações;
-  - contexto de página, sessão de site ou sessão de jornada;
-- destaque visual dos itens na página, limpeza de destaques e navegação por prioridades;
-- grupos de violações por regra, severidade e categoria natural do motor, como `cores`, `formulários`, `cabeçalhos` e `teclado`;
-- filtro por categoria na listagem de violações;
-- leitura curta mais clara nos cards de violação, com resumo orientado por família de regra antes do detalhe técnico;
-- link de regra por violação, abrindo a explicação completa e a rastreabilidade na Página do Projeto;
-- explicação pública por regra, ajudando a entender expectativa normativa, sinal verificado, limite residual e foco de revisão;
-- board auxiliar para regras de contraste, com ajuste em tempo real, pré-visualização temporária na página auditada e restauração exata dos estilos originais;
-- criação de violações manuais a partir da seleção de um elemento na página, vinculadas a uma regra da NBR;
-- ações em massa para ignorar ocorrências semelhantes e reaplicar propostas de contraste compatíveis.
+## Cobertura
 
-### Triagem de violações
+O catálogo tem 146 itens revisados contra a referência pública da ABNT NBR 17225. Todos têm regra no motor.
 
-- origem explícita para violações automáticas e manuais;
-- estados persistidos por item: aberto, confirmado ou ignorado;
-- modos explícitos de verificação: automático, assistido e manual;
-- candidatos assistidos entram como revisão pendente, sem serem comunicados como falha confirmada;
-- possibilidade de confirmar ou ignorar qualquer candidato com preservação da evidência;
-- motivo obrigatório ao ignorar, com nota complementar opcional;
-- violações ignoradas permanecem no histórico, nas comparações e nas exportações, mas ficam fora da nota e dos números acionáveis;
-- drawer de itens ignorados, acessível pelo filtro de violações e com ação para reabrir;
-- anotações por item e decisões de triagem reaproveitadas entre auditorias equivalentes.
+| Situação                  | Quantidade |
+| ------------------------- | ---------: |
+| Requisitos normativos     |         96 |
+| Recomendações normativas  |         50 |
+| Totalmente automatizáveis |         46 |
+| Semi-automatizáveis       |         77 |
+| Não automatizáveis        |         23 |
 
-### Histórico e comparação
+A classificação entre requisito e recomendação vem da própria norma, não do nível WCAG nem da severidade técnica. Uma regra pode produzir uma conclusão automática, um candidato assistido ou um roteiro manual, então a quantidade de regras não indica conformidade. `pnpm verify:rules` confere o motor contra o catálogo.
 
-- histórico compacto de auditorias por URL;
-- herança de decisões de triagem, anotações, correções de contraste e propostas de texto alternativo entre auditorias equivalentes;
-- exclusão de entradas do histórico com confirmação explícita no painel DevTools;
-- comparação entre auditorias salvas, com cards expansíveis por tipo de mudança;
-- comparação detalhada por escopo comum, separando novas violações, itens não detectados novamente, persistências e decisões de triagem;
-- ignorar ou reabrir uma violação não é tratado como melhoria ou regressão técnica;
-- importação de relatórios JSON exportados pela própria extensão para retomar a análise em outro navegador ou computador;
-- exportação da auditoria em JSON e CSV;
-- exportação de comparações em Markdown, JSON e CSV.
+## Uso
 
-### Textos alternativos
+1. Abra o Chrome DevTools na página que deseja auditar e selecione o painel **Guardião NBR 17225**.
+2. Comece pelo escopo **Somente requisitos** e execute a auditoria.
+3. Revise as violações por regra, severidade ou categoria. O link de cada regra abre a explicação completa na Página do Projeto.
+4. Ignore com motivo o que não se aplica ao contexto. Violações abertas já contam como acionáveis, sem precisar de confirmação.
+5. Inclua recomendações quando a base obrigatória estiver compreendida.
+6. Use **Abrir relatório** para gerar um snapshot imprimível, ou exporte o JSON para continuar em outro ambiente.
 
-- leitura comparativa do texto alternativo atual em violações de imagem e mapa de imagem;
-- identificação da origem do texto atual, como `alt`, `aria-label`, `aria-labelledby`, `title`, nome acessível ou ausência de texto;
-- proposta editável de texto alternativo, preservada no histórico, na comparação, no relatório e na exportação JSON;
-- a proposta é registro de auditoria e não altera o DOM nem o código-fonte da página.
-
-### Apoio à decisão
-
-- faixa de nota com limite conservador e limite sustentado por falhas automáticas ou confirmadas, com peso 2 para erros e peso 1 para avisos;
-- cada regra penaliza a nota no máximo uma vez, independentemente do número de ocorrências semelhantes;
-- requisitos representam 100% da nota no escopo padrão e 90% quando recomendações são incluídas;
-- painel objetivo com violações acionáveis, tipos de problema, regras obrigatórias com falha, ignorados e volume total de ocorrências;
-- controles de escopo com linguagem orientada à ação, deixando explícito o que será incluído ou removido da leitura atual;
-- feedback visual para a nota, com leitura rápida de risco;
-- contadores acionáveis que excluem violações ignoradas sem apagar seu registro;
-- relatório detalhado ou resumido em página dedicada, com snapshot imprimível da auditoria visualizada;
-- painel do Chrome DevTools como superfície principal para auditar e revisar a página inspecionada;
-- popup enxuto com orientação de acesso ao DevTools e atalho para o relatório da auditoria atual;
-- exportação de resumo simples da auditoria diretamente pela aba de resumo.
-
-### Simulador de percepção visual
-
-- simulação de:
-  - protanopia;
-  - deuteranopia;
-  - tritanopia;
-  - desfoque;
-- aplicação direta sobre a página auditada;
-- uso complementar ao motor de regras, para inspeção visual assistida;
-- filtros apresentados como apoio técnico, sem alegar que reproduzem integralmente a experiência de uma pessoa com deficiência.
-
-### Governança técnica
-
-- verificação automática de cobertura entre catálogo documentado, requisitos incorporados e regras implementadas;
-- matriz normativa formal em `docs/RULES_NORMATIVE_MATRIX.md`;
-- registro dos lotes incorporados em `docs/FUTURE_RULES_PLAN.md`, incluindo as 34 recomendações implementadas como verificações assistidas ou roteiros manuais;
-- fixtures positivas, negativas e limítrofes para cada uma das 146 regras;
-- registro de evidências, falsos positivos, falsos negativos e limites residuais das heurísticas fracas;
-- centralização de textos visíveis em catálogo de i18n PT-BR UTF-8;
-- tema centralizado em variáveis CSS, compartilhado entre popup, relatório, painel DevTools e superfícies do Ant Design;
-- resolução correta dos tokens do Ant Design a partir das variáveis CSS, preservando consistência visual em CTAs, tags, modais, drawers, tooltips e popovers.
-
-### Resiliência de armazenamento
-
-- acesso ao armazenamento mediado pelo service worker quando a API não está exposta diretamente no painel DevTools;
-- tratamento orientado para `QuotaExceeded` no `chrome.storage.local`;
-- persistência enxuta do histórico, removendo dados derivados e reconstruindo agrupamentos na leitura sem descartar decisões de triagem, anotações ou correções de contraste;
-- aviso preventivo quando o armazenamento local se aproxima do limite, com leitura de uso atual, ação de compactação e orientação sobre retenção local;
-- importação de relatórios como caminho de continuidade quando o armazenamento local não for suficiente para reter todo o histórico indefinidamente;
-- opções de recuperação no painel DevTools:
-  - limpar o histórico da URL atual;
-  - excluir a auditoria mais antiga;
-  - compactar o armazenamento;
-  - manter a auditoria somente em memória até a próxima recarga.
-
-## Definição da Beta
-
-Produto: `2.0.0-beta.1`
-Manifest Chrome: `2.0.0`
-Nome: **V2 Polaris Beta**
-
-Escopo da Beta:
-
-- 146 regras documentadas e executadas no modo compatível com o contexto selecionado;
-- 96 requisitos e 50 recomendações;
-- nenhuma regra documentada permanece desativada;
-- escopo padrão com requisitos; recomendações entram por opção do usuário;
-- histórico local por página normalizada, preservando o caminho da URL e ignorando query string e hash;
-- explicações completas na Página do Projeto, principalmente em `/rules.html` e `/score.html`.
-
-## Cobertura de regras
-
-O escopo documentado atual contém 146 regras revisadas contra a referência pública da ABNT NBR 17225. Uma regra executada pode produzir uma conclusão automática, um candidato assistido ou um roteiro manual; quantidade de regras não representa certificação.
-
-| Situação                                 | Quantidade |
-| ---------------------------------------- | ---------: |
-| Itens documentados                       |        146 |
-| Regras implementadas no motor            |        146 |
-| Regras habilitadas por escopo compatível |        146 |
-| Regras desativadas                       |          0 |
-| Regras ausentes                          |          0 |
-| Requisitos normativos implementados      |         96 |
-| Recomendações normativas implementadas   |         50 |
-| Totalmente automatizáveis                |         46 |
-| Semi-automatizáveis                      |         77 |
-| Não automatizáveis                       |         23 |
-
-Importante:
-
-- `pnpm verify:rules` valida o motor contra o catálogo implementado atual;
-- regras de site e jornada só entram quando o contexto correspondente é selecionado;
-- a classificação `Requisito` ou `Recomendação` segue a própria ABNT NBR 17225, não o nível WCAG nem a severidade técnica da violação;
-- recomendações dependentes de julgamento permanecem assistidas ou manuais e não entram como falha confirmada sem decisão humana.
-
-Consulte também:
-
-- [docs/README.md](docs/README.md)
-- [RULES_ANALYSIS.md](docs/RULES_ANALYSIS.md)
-- [RULES_HEURISTIC_CLASSIFICATION.md](docs/RULES_HEURISTIC_CLASSIFICATION.md)
-- [RULES_CODE_MAPPING.md](docs/RULES_CODE_MAPPING.md)
-- [RULES_NORMATIVE_MATRIX.md](docs/RULES_NORMATIVE_MATRIX.md)
-- [FUTURE_RULES_PLAN.md](docs/FUTURE_RULES_PLAN.md)
-- [VERSIONING.md](docs/VERSIONING.md)
-- [RELEASES.md](docs/RELEASES.md)
-
-## Rastreabilidade pública
-
-A Página do Projeto possui uma página dedicada de rastreabilidade em `/rules.html`. Ela apresenta, para cada uma das 146 regras implementadas:
-
-- referência da ABNT NBR 17225;
-- recorte normativo interpretativo com referência à fonte pública;
-- função implementada na extensão;
-- trecho de código da regra;
-- link para o arquivo no repositório público;
-- classificação de automação;
-- limite residual da verificação.
-
-Essa página usa a matriz `docs/RULES_NORMATIVE_MATRIX.md` como fonte e não substitui a leitura da norma.
-
-## Fluxo recomendado de uso
-
-### 1. Rodar a auditoria de requisitos
-
-Comece com o escopo padrão `Somente requisitos`. Isso reduz ruído inicial e ajuda a priorizar não conformidades diretas.
-
-Abra o Chrome DevTools e use o painel `Guardião NBR 17225`. A auditoria, a triagem, o histórico e as propostas de correção ficam nessa superfície, junto da página inspecionada. O popup orienta esse acesso e permite abrir o relatório da auditoria atual.
-
-### 2. Revisar a aba de violações
-
-Use:
-
-- os grupos por regra;
-- o filtro por categoria;
-- a navegação por itens prioritários;
-- os resumos curtos dos cards para leitura rápida da violação;
-- o link da regra para abrir a explicação completa, os limites e a rastreabilidade em `https://guardiaonbr.com.br/rules.html`;
-- a board de contraste, quando aplicável;
-- a seção de texto alternativo nas violações de imagem, quando aplicável.
-
-### 3. Registrar decisões de triagem
-
-Quando uma violação não se aplicar ao contexto, use `Ignorar violação`, informe o motivo e acrescente uma observação quando necessário. Não é preciso confirmar cada item para que ele conte como falha: violações abertas já entram nos números acionáveis, enquanto as ignoradas permanecem documentadas e podem ser reabertas.
-
-### 4. Incluir recomendações
-
-Ative o escopo `Requisitos e recomendações` quando a base obrigatória já estiver compreendida. O Guardião amplia a auditoria atual sem criar um novo histórico só por causa dessa troca de escopo.
-
-### 5. Exportar ou importar contexto quando necessário
-
-Use `Abrir relatório` para gerar uma nova aba com snapshot da auditoria visualizada, adequada para leitura e impressão. O relatório pode ser consultado em modo detalhado ou resumido. Quando a auditoria precisar continuar em outro ambiente, exporte o relatório em JSON e depois use a importação pela aba de histórico ou pela tela inicial. Se a URL importada for a mesma da aba atual, o relatório volta pronto para comparação.
-
-Se o painel DevTools avisar que o armazenamento local está em atenção, compacte o histórico e exporte os relatórios que precisarem de retenção de longo prazo.
-
-### 6. Usar o simulador de percepção visual
-
-O simulador de percepção visual deve entrar como validação complementar, não como substituto da auditoria automática nem como reprodução completa da experiência de pessoas com deficiência. Um fluxo profissional de uso é:
-
-1. rodar a auditoria de requisitos;
-2. revisar violações de contraste, foco, componentes e leitura;
-3. ativar o simulador de percepção visual;
-4. inspecionar visualmente:
-   - contraste textual;
-   - contraste de componentes;
-   - diferenciação visual de estados;
-   - foco visível;
-   - legibilidade de blocos críticos;
-5. registrar observações nas anotações dos itens;
-6. reexecutar a auditoria após ajustes.
-
-Na prática, o simulador é mais útil em três momentos:
-
-- validação complementar de regras de cor e contraste;
-- revisão de áreas densas ou críticas da interface;
-- checagem final antes de comparar auditorias no histórico.
-
-## Verificação
-
-Para validar o mapeamento de regras contra o catálogo documental:
-
-```bash
-pnpm verify:rules
-```
-
-O script verifica:
-
-- existência de regra para cada `nbrReference` do catálogo v1;
-- consistência de nível WCAG;
-- consistência de categoria de automação;
-- duplicidade de referências;
-- presença de regras fora do catálogo adotado.
-
-## Escopo da ABNT NBR 17225 x escopo implementado
-
-Os 96 requisitos e as 50 recomendações identificadas no catálogo adotado estão representados operacionalmente. As regras que dependem de julgamento são apresentadas como candidatos assistidos ou roteiros manuais, nunca como conformidade ou falha automática.
-
-## Guardião Lab
-
-O diretório `lab/` contém uma extensão DevTools independente. Ela usa o domínio `Accessibility` do Chrome DevTools Protocol para explorar a árvore acessível, ordem de foco, nós ignorados e regiões vivas. O Lab declara a permissão `debugger` somente em seu próprio manifesto, encerra a conexão ao navegar ou fechar o painel e não persiste o conteúdo inspecionado. A prévia de leitura sintetizada não é apresentada como leitor de tela.
-
-## Origem, abertura e governança pública
-
-O Guardião NBR 17225 nasceu como projeto acadêmico e mantém a extensão como software open-source hoje e sempre.
-
-- Repositório principal da extensão: <https://github.com/oliveiraD4vi/nbr-17225-guard>
-- Issues públicas: <https://github.com/oliveiraD4vi/nbr-17225-guard/issues>
-- Domínio: `guardiaonbr.com.br`
-- Página do Projeto: `https://guardiaonbr.com.br`
-- Página pública de regras: `https://guardiaonbr.com.br/rules.html`
-- Explicação da nota: `https://guardiaonbr.com.br/score.html`
-- Política de privacidade: `https://guardiaonbr.com.br/privacy.html`
-
-A Página do Projeto é a vitrine oficial do projeto e não faz parte do código open-source da extensão. Bugs, pedidos de ajuste visual, problemas de conteúdo e solicitações de atualização da página de regras devem ser abertos como issue no GitHub público da extensão.
-
-Quando um PR alterar, remover ou criar uma função de verificação de regra, o PR deve referenciar a issue que solicita a atualização correspondente na Página do Projeto. A alteração da Página do Projeto é mantida separadamente.
-
-## Versionamento
-
-Produto: `2.0.0-beta.1`
-Manifest Chrome: `2.0.0`
-Nome: **V2 Polaris Beta**
-
-A política de nomes e evolução está documentada em `docs/VERSIONING.md`.
+O popup apenas orienta o acesso ao painel e abre o relatório da auditoria atual. Se o painel avisar que o armazenamento local está perto do limite, compacte o histórico e exporte os relatórios que precisam ser mantidos.
 
 ## Instalação
 
-Pré-requisitos:
-
-- Node.js 16+
-- pnpm
-- Chrome, Edge ou outro navegador Chromium compatível com Manifest V3
-
-Instalação:
+Requisitos: Node.js `^20.19.0` ou `>=22.12.0`, pnpm e um navegador Chromium com Manifest V3.
 
 ```bash
 pnpm install
 pnpm build
 ```
 
-Depois, carregue a pasta `dist/` em `chrome://extensions/` usando `Carregar extensão não empacotada`.
+Carregue a pasta `dist/` em `chrome://extensions/` com **Carregar sem compactação**.
 
-## Scripts
+## Desenvolvimento
 
 ```bash
-pnpm dev
-pnpm build
+pnpm dev           # servidor de desenvolvimento
+pnpm build         # type-check e build da extensão
 pnpm lint
-pnpm lint:fix
-pnpm format
 pnpm format:check
-pnpm stage-lint
 pnpm type-check
-pnpm verify:rules
-pnpm test:audit-history
-pnpm test:audit-history-utils
+pnpm verify:rules  # motor contra o catálogo normativo
 pnpm test
+pnpm test:a11y     # build e teste end-to-end com axe
 ```
-
-## Automação local de Git
-
-Após `pnpm install`, o Husky passa a controlar os hooks locais do repositório.
-
-- `pre-commit`:
-  - roda `pnpm stage-lint` para aplicar `prettier` e `eslint --fix` apenas nos arquivos staged.
-- `pre-push`:
-  - roda `pnpm test`;
-  - roda `pnpm build`.
-
-## Estrutura
 
 ```text
-nbr-17225-guard/
-|-- docs/                         # Documentação de regras, governança, versão e requisitos-fonte
-|-- scripts/                      # Verificações de cobertura e utilitários
-|-- src/
-|   |-- components/               # Popup, relatório, histórico e simulador
-|   |-- i18n/                     # Catálogos PT-BR UTF-8
-|   |-- rules/                    # Regras do motor de auditoria
-|   |-- styles/                   # Tema centralizado e estilos da interface
-|   |-- utils/                    # Persistência, histórico, comparação e exportação
-|-- public/                       # Manifesto e bootstrap do content script
+docs/        documentação de regras, contribuição e releases
+lab/         Guardião Lab (extensão experimental separada)
+public/      manifesto e bootstrap do content script
+scripts/     verificação de regras, testes e utilitários
+src/
+  components/  painel DevTools, popup, relatório e simulador
+  i18n/        catálogos PT-BR
+  rules/       regras do motor de auditoria
+  styles/      tema e estilos
+  utils/       persistência, histórico, comparação e exportação
+tests/       testes end-to-end e fixtures
 ```
+
+## Documentação
+
+- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md): fluxo de trabalho, commits e como alterar regras.
+- [`docs/RULES_NORMATIVE_MATRIX.md`](docs/RULES_NORMATIVE_MATRIX.md): cada regra relacionada à referência normativa e ao limite residual da verificação.
+- [`docs/HEURISTIC_EVIDENCE_REGISTER.md`](docs/HEURISTIC_EVIDENCE_REGISTER.md): evidências e limites das heurísticas fracas.
+- [`docs/RELEASES.md`](docs/RELEASES.md): política de versão e publicação.
+- [`docs/CHANGELOG.md`](docs/CHANGELOG.md): histórico de mudanças.
+- [`docs/ACCESSIBILITY_VALIDATION_PROTOCOL.md`](docs/ACCESSIBILITY_VALIDATION_PROTOCOL.md): protocolo de validação com pessoas com deficiência.
+
+## Guardião Lab
+
+O diretório [`lab/`](lab/README.md) contém uma extensão DevTools independente que usa o domínio `Accessibility` do Chrome DevTools Protocol para explorar a árvore de acessibilidade, a ordem de foco, os nós ignorados e as regiões vivas. Ela declara a permissão `debugger` somente no próprio manifesto e não faz parte do pacote principal.
+
+## Projeto
+
+O Guardião NBR 17225 nasceu como projeto acadêmico e a extensão é software livre.
+
+- Página do Projeto: <https://guardiaonbr.com.br>
+- Política de privacidade: <https://guardiaonbr.com.br/privacy.html>
+- Issues: <https://github.com/oliveiraD4vi/nbr-17225-guard/issues>
+
+A Página do Projeto é mantida em um repositório separado. Problemas na página, inclusive na página de regras, são abertos como issue neste repositório.
+
+## Licença
+
+[MIT](LICENSE)
