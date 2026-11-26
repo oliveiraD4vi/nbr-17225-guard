@@ -8,35 +8,29 @@ O projeto segue versionamento semântico:
 - `MINOR`: nova regra, relatório, filtro ou funcionalidade compatível;
 - `PATCH`: correção de bug, ajuste visual, refinamento de texto, redução de falso positivo ou melhoria interna sem quebra de contrato.
 
-Versões Beta usam `MAJOR.MINOR.PATCH-beta.N`, em que `N` cresce a cada pacote publicado. Executar uma regra na Beta significa que ela está habilitada para avaliação assistida, não que seja definitiva.
+O estágio de maturidade (Beta ou estável) e o nome da linha ficam em `src/version.ts`, fora do número da versão. Executar uma regra na Beta significa que ela está habilitada para avaliação assistida, não que seja definitiva.
 
 Cada versão `MAJOR` recebe um nome de navegação e orientação: V1 Farol, V2 Polaris, V3 Astrolábio, V4 Cartógrafo e V5 Horizonte. Versões `MINOR` e `PATCH` mantêm o nome da linha.
 
+Até `2.0.0-beta.1`, o estágio fazia parte da versão. Essa forma não convivia com a Chrome Web Store, que exige um `version` numérico sempre maior que o anterior. Por isso o projeto passou a usar só o número semântico.
+
 ## Arquivos de versão
 
-A versão aparece em três arquivos, que mudam juntos:
-
-- `package.json`: versão do projeto;
-- `public/manifest.json`: `version` numérico e `version_name` completo, com o sufixo Beta;
-- `src/version.ts`: versão exibida na interface.
-
-A Chrome Web Store exige que cada `version` do manifesto seja maior que a publicada anteriormente e aceita somente números e pontos nesse campo. Por isso o sufixo Beta fica em `version_name`.
+A versão é escrita apenas em `package.json`. O build a copia para o `version` do manifesto, monta o `version_name` com o estágio de `src/version.ts` (por exemplo, `2.0.1 Beta`), e a interface lê o mesmo valor.
 
 ## Preparar uma release
 
-1. Atualize os arquivos de versão e registre as mudanças em [`CHANGELOG.md`](CHANGELOG.md).
-2. Execute a validação completa descrita em [`CONTRIBUTING.md`](CONTRIBUTING.md).
-3. Crie uma tag anotada no commit da release:
+As versões são calculadas pelo [release-please](https://github.com/googleapis/release-please) a partir dos títulos dos PRs integrados em `main`: `feat` gera `MINOR`, `fix` e `perf` geram `PATCH`, e `!` ou `BREAKING CHANGE` geram `MAJOR`. A configuração fica em `release-please-config.json` e a última versão publicada, em `.release-please-manifest.json`.
 
-   ```bash
-   git tag -a v2.0.0-beta.1 -m "Release v2.0.0-beta.1"
-   ```
-
-4. Gere o ZIP com o conteúdo de `dist/` na raiz do pacote. Pacotes não são versionados no repositório.
+1. A cada push em `main`, o workflow `Release` mantém aberto o PR `chore(release): prepara <versão>`, com a nova versão em `package.json` e as entradas do [`CHANGELOG.md`](CHANGELOG.md).
+2. O PR de release é integrado ao fim de cada fase do roadmap, não a cada mudança.
+3. Depois da integração, o workflow cria a tag `v<versão>`, publica a release no GitHub e anexa `guardiao-nbr-17225-v<versão>.zip`, com o conteúdo de `dist/` na raiz.
+4. Atualize o espelho no GitLab com `main` e as tags.
+5. Sincronize e publique a Página do Projeto quando a release alterar regras, textos públicos ou a versão.
 
 ## Publicar na Chrome Web Store
 
-O pacote é enviado ao mesmo item da Chrome Web Store, preservando o identificador da extensão. Depois da aprovação, o Chrome distribui a atualização automaticamente quando a extensão está ociosa. Extensões carregadas em modo de desenvolvedor não recebem essas atualizações.
+O ZIP anexado à release é enviado ao mesmo item da Chrome Web Store, preservando o identificador da extensão. Depois da aprovação, o Chrome distribui a atualização automaticamente quando a extensão está ociosa. Extensões carregadas em modo de desenvolvedor não recebem essas atualizações.
 
 Uma tag ou um ZIP local não publicam nada: o pacote precisa ser enviado, revisado e publicado no painel da loja.
 

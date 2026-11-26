@@ -4,8 +4,6 @@ Todas as mudanças relevantes deste projeto devem ser registradas neste arquivo.
 
 O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento semântico quando aplicável.
 
-## [Unreleased]
-
 ## [2.0.0-beta.1] - 2026-08-13
 
 V2 Polaris Beta.
