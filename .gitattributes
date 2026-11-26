@@ -1,0 +1,7 @@
+# Keep LF everywhere. Prettier checks for LF, so a CRLF checkout fails format:check on Windows.
+* text=auto eol=lf
+
+*.png binary
+*.zip binary
+
+pnpm-lock.yaml linguist-generated=true -diff

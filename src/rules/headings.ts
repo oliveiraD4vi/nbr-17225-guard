@@ -27,7 +27,9 @@ function hasAssociatedHeadingContent(heading: HTMLElement): boolean {
     if (labelledRegion) {
       const regionText = getVisibleText(labelledRegion).replace(getVisibleText(heading), '').trim()
       if (regionText.length >= 16) return true
-      if (labelledRegion.querySelector('img, svg, canvas, ul, ol, dl, table, form, figure, video')) {
+      if (
+        labelledRegion.querySelector('img, svg, canvas, ul, ol, dl, table, form, figure, video')
+      ) {
         return true
       }
     }
