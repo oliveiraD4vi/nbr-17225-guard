@@ -77,8 +77,9 @@ export const VisionSimulator: React.FC<VisionSimulatorProps> = React.memo(({ onF
         </div>
 
         <div>
-          <label>{t('vision.intensity', { value: intensity })}</label>
+          <label id="vision-intensity-label">{t('vision.intensity', { value: intensity })}</label>
           <Slider
+            ariaLabelledByForHandle="vision-intensity-label"
             value={intensity}
             onChange={handleIntensityChange}
             disabled={!isActive || filterType === 'none'}
