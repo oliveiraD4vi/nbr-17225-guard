@@ -1,6 +1,13 @@
-# Registro de evidências das heurísticas fracas
+# Registro de evidências das heurísticas
 
-Este registro complementa `RULES_HEURISTIC_CLASSIFICATION.md`. Os itens abaixo nunca devem ser apresentados como conclusão automática. O motor registra um candidato, a evidência observada e uma pergunta de revisão.
+Cada regra implementada tem uma força heurística:
+
+- **Objetiva**: DOM, atributos, CSS ou metadados sustentam a conclusão com pouca ambiguidade.
+- **Assistida consistente**: o sinal é útil, mas a conclusão normativa depende de revisão humana ou de contexto.
+- **Assistida fraca**: a regra depende de contexto, fluxo entre páginas, intenção editorial, percepção humana ou de implementações muito variadas.
+- **Manual**: o motor só registra candidatos; a conclusão é humana.
+
+As 40 regras abaixo são assistidas fracas. Elas nunca são apresentadas como conclusão automática: o motor registra um candidato, a evidência observada e uma pergunta de revisão. A implementação de cada uma está na [matriz normativa](RULES_NORMATIVE_MATRIX.md).
 
 | Regra   | Evidência observada                                      | Falso positivo conhecido                                      | Falso negativo conhecido                                            | Limite residual                          |
 | ------- | -------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------- |
