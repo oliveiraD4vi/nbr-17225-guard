@@ -1,0 +1,17 @@
+name: Tarefa
+description: Melhoria, nova funcionalidade ou manutenção
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: why
+    attributes:
+      label: Problema ou motivação
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Critérios de conclusão
+      description: O que precisa ser verdade para a tarefa estar pronta.
+    validations:
+      required: true

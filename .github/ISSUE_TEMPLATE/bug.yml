@@ -1,0 +1,22 @@
+name: Bug
+description: A extensão se comporta de forma incorreta
+labels: ['bug']
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: O que aconteceu e o que era esperado?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Versão da extensão, navegador e sistema
+    validations:
+      required: true
