@@ -130,6 +130,9 @@ const showHumanReviewScopeToggle = false
 
 type PopupTabKey = 'summary' | 'violations' | 'history'
 
+/** Loading the stored audit on open, waiting for the user, or running or importing an audit. */
+type WorkspaceStatus = 'loading' | 'idle' | 'auditing'
+
 interface PopupStoredState {
   activeTabKey?: PopupTabKey
   isAuditMetaCollapsed?: boolean
@@ -411,8 +414,8 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
   const [includeRecommendations, setIncludeRecommendations] = useState(false)
   const [includeHumanReview, setIncludeHumanReview] = useState(defaultIncludeHumanReview)
   const [auditScope, setAuditScope] = useState<AuditScope>('page')
-  const [initialLoading, setInitialLoading] = useState(true)
-  const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState<WorkspaceStatus>('loading')
+  const isAuditing = status === 'auditing'
   const [activeTab, setActiveTab] = useState<AuditTargetTab | null>(null)
   const [activeTabKey, setActiveTabKey] = useState<PopupTabKey>('summary')
   const [isAuditMetaCollapsed, setIsAuditMetaCollapsed] = useState(false)
@@ -548,7 +551,8 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       setComparisonTargetId(undefined)
       setStorageDiagnostics(null)
     } finally {
-      setInitialLoading(false)
+      // A reload after navigation must not end an audit that is still running.
+      setStatus((current) => (current === 'loading' ? 'idle' : current))
     }
   }, [notify, resolveCurrentTab])
 
@@ -917,7 +921,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
   )
 
   useEffect(() => {
-    if (initialLoading || loading || showAboutView) return
+    if (status !== 'idle' || showAboutView) return
     if (typeof popupStoredState?.scrollTop !== 'number') return
 
     const restoreTimeout = window.setTimeout(() => {
@@ -925,14 +929,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     }, 80)
 
     return () => window.clearTimeout(restoreTimeout)
-  }, [
-    activeTabKey,
-    displayedAuditResult?.id,
-    initialLoading,
-    loading,
-    popupStoredState?.scrollTop,
-    showAboutView,
-  ])
+  }, [activeTabKey, displayedAuditResult?.id, status, popupStoredState?.scrollTop, showAboutView])
 
   const clearHighlightsOnPage = useCallback(
     async (showFeedback = false) => {
@@ -948,7 +945,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
   )
 
   const handleRunAudit = useCallback(async () => {
-    setLoading(true)
+    setStatus('auditing')
     try {
       await clearContrastPreviewsOnPage()
       await clearHighlightsOnPage(false)
@@ -1020,7 +1017,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       console.error('Erro ao executar auditoria:', error)
       notify.error(error instanceof Error ? error.message : t('popup.messages.auditRunError'))
     } finally {
-      setLoading(false)
+      setStatus('idle')
     }
   }, [
     clearContrastPreviewsOnPage,
@@ -1043,7 +1040,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         return
       }
 
-      setLoading(true)
+      setStatus('auditing')
       try {
         await clearHighlightsOnPage(false)
         const tab = activeTab ?? (await resolveCurrentTab())
@@ -1084,7 +1081,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         await extensionStorageSet({ includeRecommendationsPreference: false })
         notify.error(t('popup.messages.recommendationsLoadError'))
       } finally {
-        setLoading(false)
+        setStatus('idle')
       }
     },
     [
@@ -1115,7 +1112,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         return
       }
 
-      setLoading(true)
+      setStatus('auditing')
       try {
         await clearHighlightsOnPage(false)
         const tab = activeTab ?? (await resolveCurrentTab())
@@ -1151,7 +1148,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         await extensionStorageSet({ includeHumanReviewPreference: false })
         notify.error(t('popup.messages.humanReviewLoadError'))
       } finally {
-        setLoading(false)
+        setStatus('idle')
       }
     },
     [
@@ -1281,7 +1278,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       event.target.value = ''
       if (!file) return
 
-      setLoading(true)
+      setStatus('auditing')
       try {
         const rawContent = await file.text()
         const parsedPayload = JSON.parse(rawContent) as unknown
@@ -1325,7 +1322,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         console.error('Erro ao importar relatório:', error)
         notify.error(error instanceof Error ? error.message : t('popup.messages.importAuditError'))
       } finally {
-        setLoading(false)
+        setStatus('idle')
       }
     },
     [
@@ -2128,7 +2125,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         label: t('shared.actions.rerun'),
         icon: <ReloadOutlined />,
         onClick: handleRunAudit,
-        loading,
+        loading: isAuditing,
         disabled: !canRerunViewedAudit,
       },
       {
@@ -2178,7 +2175,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     displayedAuditResult,
     handleRunAudit,
     canRerunViewedAudit,
-    loading,
+    isAuditing,
     handleHighlightAll,
     isHistoricalView,
     handleNextPriorityIssue,
@@ -2357,13 +2354,13 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
           }}
           hidden
         />
-        {initialLoading || loading ? (
+        {status !== 'idle' ? (
           <PopupPanelSkeleton />
         ) : showAboutView || !displayedAuditResult ? (
           <Suspense fallback={<PopupPanelSkeleton />}>
             <AboutPanel
               hasAudit={Boolean(viewedAuditResult)}
-              loading={loading}
+              loading={isAuditing}
               onBack={() => setShowAboutView(false)}
               onImport={handleOpenImportPicker}
               onStart={() => {
@@ -2448,7 +2445,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
                       <Switch
                         aria-label={t('popup.scope.enableAction')}
                         checked={includeRecommendations}
-                        loading={loading}
+                        loading={isAuditing}
                         onChange={(checked) => {
                           void handleRecommendationsToggle(checked)
                         }}
@@ -2471,7 +2468,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
                         <Switch
                           aria-label={t('popup.scope.humanReviewAction')}
                           checked={includeHumanReview}
-                          loading={loading}
+                          loading={isAuditing}
                           onChange={(checked) => {
                             void handleHumanReviewToggle(checked)
                           }}
