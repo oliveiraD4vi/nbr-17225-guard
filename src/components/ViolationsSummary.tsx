@@ -70,7 +70,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
     }
 
     if (!result) {
-      return <Empty description={t('summary.empty')} style={{ marginTop: '50px' }} />
+      return <Empty description={t('summary.empty')} style={{ marginTop: '3.125rem' }} />
     }
 
     const hasViolations = result.totalViolations > 0
@@ -207,7 +207,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
                   : t('summary.descriptionWithoutIssues')}
               </p>
             </div>
-            <Space className="summary-actions" size={8}>
+            <Space className="summary-actions" size="small">
               {downloadItems.length > 0 && (
                 <Dropdown menu={{ items: downloadItems }} trigger={['click']}>
                   <Button icon={<DownloadOutlined />}>
@@ -339,7 +339,7 @@ export const ViolationsSummary: React.FC<ViolationsSummaryProps> = React.memo(
           {!hasViolations && (
             <div className="success-message">
               <CheckCircleOutlined
-                style={{ fontSize: '40px', color: 'var(--guard-color-success-text)' }}
+                style={{ fontSize: '2.5rem', color: 'var(--guard-color-success-text)' }}
               />
               <p>{t('summary.success')}</p>
             </div>

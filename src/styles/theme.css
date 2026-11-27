@@ -32,6 +32,31 @@
   --guard-color-score-gradient: linear-gradient(90deg, #ef4444 0%, #f59e0b 55%, #22c55e 100%);
   --guard-color-shadow: rgba(15, 23, 42, 0.08);
   --guard-color-shadow-strong: rgba(15, 23, 42, 0.14);
+  --guard-color-text-inverse: #ffffff;
+  --guard-color-surface-translucent: rgba(255, 255, 255, 0.6);
+  --guard-color-scrollbar-track: #f1f5f9;
+  --guard-color-info-text: #1d4ed8;
+  --guard-color-info-text-strong: #1e40af;
+  --guard-color-info-heading: #1e3a8a;
+  --guard-color-success-accent: #16a34a;
+  --guard-color-success-border-soft: #bbf7d0;
+  --guard-color-warning-highlight: #fef3c7;
+  --guard-color-warning-text-strong: #92400e;
+  --guard-color-caution-text: #9a3412;
+  --guard-color-danger-soft: #fee2e2;
+  --guard-color-pinned-ring: rgba(249, 115, 22, 0.18);
+  --guard-color-meter-track: rgba(148, 163, 184, 0.22);
+  --guard-color-swatch-border: rgba(15, 23, 42, 0.12);
+  --guard-color-code-bg: #07111d;
+  --guard-color-code-border: #233044;
+  --guard-color-code-text: #dbeafe;
+  --guard-color-code-icon: #93c5fd;
+  --guard-color-code-focus-bg: #0b1726;
+  --guard-color-code-focus-border: #5ba6a0;
+  --guard-color-shadow-soft: rgba(15, 23, 42, 0.06);
+  --guard-color-shadow-raised: rgba(15, 23, 42, 0.16);
+  --guard-color-shadow-floating: rgba(15, 23, 42, 0.2);
+  --guard-color-primary-shadow: rgba(15, 118, 110, 0.28);
 }
 
 .ant-tag.ant-tag-gold {

@@ -2291,7 +2291,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         title={t('popup.manualFinding.title')}
         onClose={handleCloseManualFindingModal}
         placement="right"
-        width={420}
+        width="26.25rem"
         className="manual-finding-drawer"
         footer={
           <div className="manual-finding-drawer-footer">
@@ -2487,7 +2487,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         footer={null}
         getContainer={false}
         centered
-        width={480}
+        width="30rem"
       >
         <Space direction="vertical" size={12} className="quota-modal-content">
           <Alert

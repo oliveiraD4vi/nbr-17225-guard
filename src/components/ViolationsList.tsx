@@ -1053,7 +1053,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
         onClick={(event) => event.stopPropagation()}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <Space wrap size={8} className="violation-finding-state-tags">
+        <Space wrap size="small" className="violation-finding-state-tags">
           {violation.inheritedFromHistory && <Tag color="blue">{t('shared.states.inherited')}</Tag>}
           <Tag color="blue">{findingOriginLabel}</Tag>
           <Tag color={getFindingStatusTagColor(violation.findingStatus)}>
@@ -1070,7 +1070,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
             {violation.ignoreNote && <p>{violation.ignoreNote}</p>}
           </div>
         )}
-        <Space wrap size={8}>
+        <Space wrap size="small">
           {findingActions.map((action) => (
             <Button
               key={action.targetStatus}
@@ -1559,7 +1559,7 @@ const ViolationCard: React.FC<ViolationCardProps> = React.memo(
                 title={t('violations.contrastBoardTitle')}
                 footer={null}
                 onCancel={handleCloseContrastModal}
-                width={400}
+                width="25rem"
                 className="contrast-board-modal"
                 destroyOnHidden
                 focusTriggerAfterClose={false}

@@ -13,9 +13,9 @@ export const SummarySkeleton: React.FC = React.memo(() => (
           marginTop: 16,
         }}
       >
-        <Skeleton.Button active block style={{ width: '100%', height: 92 }} />
-        <Skeleton.Button active block style={{ width: '100%', height: 92 }} />
-        <Skeleton.Button active block style={{ width: '100%', height: 92 }} />
+        <Skeleton.Button active block style={{ width: '100%', height: '5.75rem' }} />
+        <Skeleton.Button active block style={{ width: '100%', height: '5.75rem' }} />
+        <Skeleton.Button active block style={{ width: '100%', height: '5.75rem' }} />
       </div>
       <div
         style={{
@@ -25,8 +25,8 @@ export const SummarySkeleton: React.FC = React.memo(() => (
           marginTop: 16,
         }}
       >
-        <Skeleton.Button active block style={{ width: '100%', height: 120 }} />
-        <Skeleton.Button active block style={{ width: '100%', height: 120 }} />
+        <Skeleton.Button active block style={{ width: '100%', height: '7.5rem' }} />
+        <Skeleton.Button active block style={{ width: '100%', height: '7.5rem' }} />
       </div>
     </Card>
   </div>
@@ -47,8 +47,8 @@ export const PopupPanelSkeleton: React.FC = React.memo(() => (
 export const ReportSkeleton: React.FC = React.memo(() => (
   <Space direction="vertical" size="large" style={{ width: '100%' }}>
     <Skeleton active paragraph={{ rows: 1 }} title={{ width: '32%' }} />
-    <Skeleton.Button active block style={{ width: '100%', height: 88 }} />
-    <Skeleton.Button active block style={{ width: '100%', height: 220 }} />
-    <Skeleton.Button active block style={{ width: '100%', height: 280 }} />
+    <Skeleton.Button active block style={{ width: '100%', height: '5.5rem' }} />
+    <Skeleton.Button active block style={{ width: '100%', height: '13.75rem' }} />
+    <Skeleton.Button active block style={{ width: '100%', height: '17.5rem' }} />
   </Space>
 ))

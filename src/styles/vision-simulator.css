@@ -12,10 +12,10 @@
 
 .vision-simulator label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   font-weight: 500;
   color: var(--guard-color-text-primary);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .vision-simulator .ant-select {
@@ -23,31 +23,31 @@
 }
 
 .vision-simulator .ant-slider {
-  margin: 12px 0;
+  margin: 0.75rem 0;
 }
 
 .simulator-info {
   background: var(--guard-color-surface-muted);
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
   border-left: 3px solid var(--guard-color-primary);
 }
 
 .simulator-info summary {
   cursor: pointer;
   color: var(--guard-color-text-primary);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.4;
 }
 
 .simulator-info-content {
-  margin-top: 8px;
+  margin-top: 0.5rem;
 }
 
 .simulator-info p {
-  margin: 8px 0;
-  font-size: 12px;
+  margin: 0.5rem 0;
+  font-size: 0.75rem;
   color: var(--guard-color-text-secondary);
   line-height: 1.5;
 }
