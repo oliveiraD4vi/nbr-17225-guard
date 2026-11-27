@@ -24,6 +24,13 @@ function isTransparentColor(value: string): boolean {
   )
 }
 
+// Large text is 18pt, or 14pt when bold. Computed font sizes are in CSS pixels (1pt = 4/3px).
+function isLargeText(styles: CSSStyleDeclaration): boolean {
+  const fontSize = Number.parseFloat(styles.fontSize)
+  const isBold = Number.parseInt(styles.fontWeight, 10) >= 700
+  return fontSize >= 24 || (isBold && fontSize >= 18.66)
+}
+
 export const textContrastRule: Rule = {
   id: 'text-contrast',
   nbrReference: '5.11.3',
@@ -52,12 +59,7 @@ export const textContrastRule: Rule = {
       const textHex = rgbToHex(textColor)
       const bgHex = rgbToHex(bgColor)
       const ratio = getContrastRatio(textHex, bgHex)
-      const fontSize = parseFloat(window.getComputedStyle(parent).fontSize)
-      const fontWeight = window.getComputedStyle(parent).fontWeight
-      const isLargeText =
-        fontSize >= 18 ||
-        (fontSize >= 14 && (fontWeight === 'bold' || parseInt(fontWeight, 10) >= 700))
-      const minRatio = isLargeText ? 3 : 4.5
+      const minRatio = isLargeText(window.getComputedStyle(parent)) ? 3 : 4.5
 
       if (ratio < minRatio) {
         violations.push(
@@ -184,13 +186,9 @@ export const enhancedTextContrastRule: Rule = {
       const textHex = rgbToHex(styles.color)
       const bgHex = rgbToHex(getEffectiveBackgroundColor(parent))
       const ratio = getContrastRatio(textHex, bgHex)
-      const fontSize = parseFloat(styles.fontSize)
-      const fontWeight = styles.fontWeight
-      const isLargeText =
-        fontSize >= 18 ||
-        (fontSize >= 14 && (fontWeight === 'bold' || parseInt(fontWeight, 10) >= 700))
-      const minimumRatio = isLargeText ? 3 : 4.5
-      const enhancedRatio = isLargeText ? 4.5 : 7
+      const largeText = isLargeText(styles)
+      const minimumRatio = largeText ? 3 : 4.5
+      const enhancedRatio = largeText ? 4.5 : 7
 
       if (ratio >= minimumRatio && ratio < enhancedRatio) {
         violations.push(
