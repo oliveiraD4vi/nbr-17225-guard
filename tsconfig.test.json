@@ -7,8 +7,8 @@
   "include": [
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
+    "src/**/*.scenarios.ts",
     "tests/*.ts",
-    "tests/unit/**/*.ts",
     "tests/rules/**/*.ts"
   ],
   "exclude": []

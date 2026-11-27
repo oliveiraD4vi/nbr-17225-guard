@@ -80,7 +80,7 @@ BREAKING CHANGE: relatórios antigos passam pela migração ao serem importados.
 4. Toda conclusão assistida preserva confiança, evidência e pergunta de revisão. Um candidato pendente nunca é apresentado como falha confirmada.
 5. Escreva nome, descrição, mensagem, sugestão e remediação em `src/i18n/rules-pt-BR.json`.
 6. Se a regra exigir novos campos em `Violation`, atualize tipos, persistência, histórico, comparação e exportação.
-7. Cubra a regra com cenários positivo, negativo e limítrofe.
+7. Descreva a regra em `src/rules/<módulo>.scenarios.ts`: marcação que passa e marcação que a regra aponta, como violação (`finding`) ou candidato para revisão (`review`). Os cenários rodam no Chromium, e `coverage.test.ts` recusa uma regra do catálogo sem os dois casos.
 8. Atualize a matriz normativa e, para heurísticas fracas, o registro de evidências.
 9. Mudanças na matriz exigem atualizar a Página do Projeto (`pnpm sync:rules` no repositório da página). Registre essa pendência na issue e no PR.
 

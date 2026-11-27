@@ -19,7 +19,7 @@ A explicação de cada regra e da nota fica na Página do Projeto, em [`/rules.h
 
 ## Cobertura
 
-O catálogo tem 146 itens revisados contra a referência pública da ABNT NBR 17225. Todos têm regra no motor.
+O catálogo tem 146 itens revisados contra a referência pública da ABNT NBR 17225. Todos têm regra no motor, e cada regra é executada no Chromium contra marcação que deve passar e marcação que ela deve apontar.
 
 | Situação                  | Quantidade |
 | ------------------------- | ---------: |
@@ -62,7 +62,7 @@ pnpm lint
 pnpm format:check
 pnpm type-check
 pnpm verify:rules  # motor contra o catálogo normativo
-pnpm test
+pnpm test          # testes unitários, de componentes e das regras no Chromium
 pnpm test:a11y     # build e teste end-to-end com axe
 ```
 
@@ -77,7 +77,7 @@ src/
   rules/       regras do motor de auditoria
   styles/      tema e estilos
   utils/       persistência, histórico, comparação e exportação
-tests/       testes end-to-end e fixtures
+tests/       teste end-to-end, configuração dos testes e executor de cenários das regras
 ```
 
 ## Documentação
