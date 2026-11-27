@@ -197,6 +197,17 @@ function targetMeetsSize(
   return hasEquivalentCarouselControl(target, measuredTargets, minimumSize)
 }
 
+// The enhanced criterion has no spacing exception: only the target's own size, or an
+// equivalent control of that size, satisfies it.
+function targetMeetsEnhancedSize(
+  target: MeasuredTarget,
+  measuredTargets: MeasuredTarget[],
+): boolean {
+  const minimumSize = 44
+  if (target.rect.width >= minimumSize && target.rect.height >= minimumSize) return true
+  return hasEquivalentCarouselControl(target, measuredTargets, minimumSize)
+}
+
 export const buttonSemanticRule: Rule = {
   id: 'button-semantic',
   nbrReference: '5.8.1',
@@ -287,7 +298,7 @@ export const enhancedTargetSizeRule: Rule = {
     measuredTargets.forEach((target) => {
       if (
         targetMeetsSize(target, measuredTargets, 24) &&
-        !targetMeetsSize(target, measuredTargets, 44)
+        !targetMeetsEnhancedSize(target, measuredTargets)
       ) {
         violations.push(
           createViolation(enhancedTargetSizeRule, {
