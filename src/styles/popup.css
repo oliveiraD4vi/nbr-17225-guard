@@ -1025,6 +1025,11 @@
     padding: 0.75rem;
   }
 
+  /* The three tabs must fit: on overflow Ant Design puts a menu button inside the tablist. */
+  .popup-content .ant-tabs-tab + .ant-tabs-tab {
+    margin-inline-start: 1rem;
+  }
+
   .tab-status-strip {
     grid-template-columns: minmax(0, 1fr);
   }
