@@ -17,12 +17,27 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2023,
       globals: globals.browser,
     },
     rules: {
       // The extension runs inside users' pages: only warnings and errors belong in their console.
       'no-console': ['error', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
+    files: ['**/*.{js,mjs}'],
+    extends: [js.configs.recommended],
+    languageOptions: {
+      ecmaVersion: 2023,
+      globals: globals.node,
+    },
+  },
+  {
+    // Scripts that run in the browser: the lab extension and the content script loader.
+    files: ['lab/*.js', 'public/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.webextensions },
     },
   },
   {

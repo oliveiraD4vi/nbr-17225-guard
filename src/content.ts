@@ -29,7 +29,7 @@ if (!contentScope.__nbrGuardContentLoaded) {
 
   window.addEventListener('pagehide', clearContrastPreviews)
 
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
     switch (request.action) {
       case 'PING':
         sendResponse({ status: 'OK' })
