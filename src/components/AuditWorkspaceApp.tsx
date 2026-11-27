@@ -133,6 +133,12 @@ type PopupTabKey = 'summary' | 'violations' | 'history'
 /** Loading the stored audit on open, waiting for the user, or running or importing an audit. */
 type WorkspaceStatus = 'loading' | 'idle' | 'auditing'
 
+interface ComparisonChoice {
+  historyKey: string
+  baselineId?: string
+  targetId?: string
+}
+
 interface PopupStoredState {
   activeTabKey?: PopupTabKey
   isAuditMetaCollapsed?: boolean
@@ -426,8 +432,23 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
   const [showAboutView, setShowAboutView] = useState(false)
   const [historyEntryPendingDeletion, setHistoryEntryPendingDeletion] =
     useState<AuditHistoryEntry | null>(null)
-  const [comparisonBaselineId, setComparisonBaselineId] = useState<string | undefined>(undefined)
-  const [comparisonTargetId, setComparisonTargetId] = useState<string | undefined>(undefined)
+  // Only the person's own choice is stored; it applies while the history it was made on is current.
+  const [comparisonChoice, setComparisonChoice] = useState<ComparisonChoice>()
+  const historyKey = useMemo(() => auditHistory.map((entry) => entry.id).join('|'), [auditHistory])
+  const currentChoice = comparisonChoice?.historyKey === historyKey ? comparisonChoice : undefined
+  const comparisonTargetId = currentChoice?.targetId ?? auditHistory[0]?.id
+  const comparisonBaselineId =
+    currentChoice?.baselineId ?? auditHistory[1]?.id ?? auditHistory[0]?.id
+  const chooseComparison = useCallback(
+    (choice: Pick<ComparisonChoice, 'baselineId' | 'targetId'>) =>
+      setComparisonChoice({
+        historyKey,
+        baselineId: comparisonBaselineId,
+        targetId: comparisonTargetId,
+        ...choice,
+      }),
+    [comparisonBaselineId, comparisonTargetId, historyKey],
+  )
   const [quotaIssue, setQuotaIssue] = useState<{
     url: string
     scope: 'audit' | 'history' | 'review'
@@ -528,8 +549,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       setIsAuditMetaCollapsed(Boolean(savedState?.isAuditMetaCollapsed))
       setShowAboutView(false)
       setPriorityIndex(0)
-      setComparisonTargetId(history[0]?.id)
-      setComparisonBaselineId(history[1]?.id || history[0]?.id)
     } catch (error) {
       if (isExtensionContextInvalidatedError(error)) {
         notify.warning(t('popup.messages.extensionContextInvalidated'))
@@ -547,8 +566,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       setIsAuditMetaCollapsed(false)
       setShowAboutView(false)
       setPriorityIndex(0)
-      setComparisonBaselineId(undefined)
-      setComparisonTargetId(undefined)
       setStorageDiagnostics(null)
     } finally {
       // A reload after navigation must not end an audit that is still running.
@@ -982,8 +999,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
           selectedHistoryId: null,
           violationsListState: undefined,
         })
-        setComparisonTargetId(history[0]?.id)
-        setComparisonBaselineId(history[1]?.id || history[0]?.id)
         notify.success(
           t('popup.messages.auditCompleted', {
             count:
@@ -1296,8 +1311,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
           if (importedInCurrentUrl) {
             setAuditHistory(refreshedHistory)
             handleSelectHistory(persisted.entry.id)
-            setComparisonTargetId(refreshedHistory[0]?.id)
-            setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
             handleTabChange('history')
             setShowAboutView(false)
             notify.success(t('popup.messages.importReadyForComparison'))
@@ -1559,8 +1572,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         ) {
           setSelectedHistoryId(null)
         }
-        setComparisonTargetId(refreshedHistory[0]?.id)
-        setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
       }
 
       await refreshStorageDiagnostics(historyUrl)
@@ -2077,8 +2088,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         await quotaRetryRef.current()
         const refreshedHistory = await getAuditHistoryForUrl(quotaIssue.url)
         setAuditHistory(refreshedHistory)
-        setComparisonTargetId(refreshedHistory[0]?.id)
-        setComparisonBaselineId(refreshedHistory[1]?.id || refreshedHistory[0]?.id)
         await refreshStorageDiagnostics(quotaIssue.url)
         setQuotaIssue(null)
         setIsQuotaModalOpen(false)
@@ -2243,8 +2252,8 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
             comparisonTrend={comparisonTrend}
             onSelectHistory={handleSelectHistory}
             onDeleteHistoryEntry={setHistoryEntryPendingDeletion}
-            onComparisonBaselineChange={setComparisonBaselineId}
-            onComparisonTargetChange={setComparisonTargetId}
+            onComparisonBaselineChange={(baselineId) => chooseComparison({ baselineId })}
+            onComparisonTargetChange={(targetId) => chooseComparison({ targetId })}
             onExportMarkdown={handleExportComparisonReport}
             onExportJson={handleExportComparisonJson}
             onExportCsv={handleExportComparisonCsv}
@@ -2285,6 +2294,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     selectedHistoryId,
     handleSelectHistory,
     comparisonEntries,
+    chooseComparison,
     comparisonBaselineId,
     comparisonTargetId,
     comparisonSummary,
@@ -2811,8 +2821,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
           if (selectedHistoryId === historyEntryPendingDeletion.id) {
             handleSelectHistory(null)
           }
-          setComparisonTargetId(updatedHistory[0]?.id)
-          setComparisonBaselineId(updatedHistory[1]?.id || updatedHistory[0]?.id)
           setHistoryEntryPendingDeletion(null)
           notify.success(t('popup.messages.historyDeleted'))
         }}

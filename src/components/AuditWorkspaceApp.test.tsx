@@ -60,10 +60,21 @@ const audit: AuditResult = {
   violationsBySeverity: { error: [], warning: [] },
 }
 
+const olderAudit: AuditResult = {
+  ...audit,
+  id: 'audit-0',
+  timestamp: 1690000000000,
+  totalViolations: 0,
+  violations: [],
+}
+
 const sentToPage: Array<{ tabId: number; message: { action: string } }> = []
 
 function installChrome() {
-  const storage: Record<string, unknown> = { auditResultsByTab: { [tab.id]: audit } }
+  const storage: Record<string, unknown> = {
+    auditResultsByTab: { [tab.id]: audit },
+    auditHistoryByUrl: { [pageUrl]: [audit, olderAudit] },
+  }
   sentToPage.length = 0
 
   vi.stubGlobal('chrome', {
@@ -154,5 +165,25 @@ describe('AuditWorkspaceApp', () => {
 
     const panel = await screen.findByRole('tabpanel')
     expect(within(panel).getAllByText(/Texto alternativo em imagens/).length).toBeGreaterThan(0)
+  })
+
+  it('compares the latest audit with the previous one by default', async () => {
+    const user = userEvent.setup()
+    render(<AuditWorkspaceApp targetTab={tab} />)
+
+    await user.click(
+      await screen.findByRole('tab', { name: t('popup.tabs.history', { count: 2 }) }),
+    )
+
+    const selectedLabel = async (name: string) =>
+      (await screen.findByRole('combobox', { name })).closest('.ant-select')?.textContent
+    const optionLabel = (entry: AuditResult) =>
+      t('popup.history.optionLabel', {
+        date: new Date(entry.timestamp).toLocaleString('pt-BR'),
+        count: entry.totalViolations,
+      })
+
+    expect(await selectedLabel(t('shared.labels.base'))).toBe(optionLabel(olderAudit))
+    expect(await selectedLabel(t('shared.labels.compareWith'))).toBe(optionLabel(audit))
   })
 })
