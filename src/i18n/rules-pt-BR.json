@@ -174,19 +174,22 @@
       "name": "Rótulo de campo descritivo",
       "description": "Rótulos devem descrever claramente o dado solicitado",
       "suggestion": "Substitua rótulos vagos por identificação específica do dado esperado.",
-      "remediation": "<label for=\"email\">E-mail para contato</label>"
+      "remediation": "<label for=\"email\">E-mail para contato</label>",
+      "message": "Campo com rótulo potencialmente genérico: \"{{label}}\"."
     },
     "predictableHelpText": {
       "name": "Textos de ajuda previsíveis",
       "description": "Campos complexos devem expor ajuda e instruções de forma consistente",
       "suggestion": "Associe instruções com aria-describedby ou ajuda textual próxima ao campo.",
-      "remediation": "<small id=\"senha-ajuda\">Use ao menos 8 caracteres.</small><input aria-describedby=\"senha-ajuda\" />"
+      "remediation": "<small id=\"senha-ajuda\">Use ao menos 8 caracteres.</small><input aria-describedby=\"senha-ajuda\" />",
+      "message": "Campo \"{{field}}\" sem texto de ajuda associado."
     },
     "descriptiveError": {
       "name": "Mensagem de erro descritiva",
       "description": "Mensagens de erro devem explicar claramente o problema encontrado",
       "suggestion": "Explique qual campo falhou e por qual motivo.",
-      "remediation": "Informe o erro de forma específica, como \"O CPF deve conter 11 dígitos\"."
+      "remediation": "Informe o erro de forma específica, como \"O CPF deve conter 11 dígitos\".",
+      "message": "Mensagem de erro pouco descritiva: \"{{text}}\"."
     },
     "correctionSuggestion": {
       "name": "Sugestão de correção",
@@ -199,7 +202,8 @@
       "name": "Prevenção de erro para formulários críticos",
       "description": "Ações críticas devem prever revisão, confirmação ou cancelamento",
       "suggestion": "Inclua revisão, confirmação reversível ou etapa de validação antes da ação final.",
-      "remediation": "Ofereça tela de revisão ou confirmação antes de concluir a operação crítica."
+      "remediation": "Ofereça tela de revisão ou confirmação antes de concluir a operação crítica.",
+      "message": "Ação crítica \"{{action}}\" sem indício de revisão ou confirmação."
     },
     "dataReentry": {
       "name": "Reentrada de dados",
@@ -212,13 +216,15 @@
       "name": "Validação sensorial ou por movimento",
       "description": "Validações não devem depender apenas de percepção sensorial ou movimento",
       "suggestion": "Complemente instruções com texto objetivo, não dependente de cor, posição ou movimento.",
-      "remediation": "Exemplo: \"Campos obrigatórios estão marcados com * e descritos como obrigatórios\"."
+      "remediation": "Exemplo: \"Campos obrigatórios estão marcados com * e descritos como obrigatórios\".",
+      "message": "Instrução com dependência sensorial detectada: \"{{text}}\"."
     },
     "sensoryCharacteristics": {
       "name": "Características sensoriais",
       "description": "Instruções não devem depender apenas de forma, cor, tamanho ou posição",
       "suggestion": "Use referências textuais inequívocas, como nome do campo, botão ou etapa.",
-      "remediation": "Prefira \"Selecione o botão Confirmar\" em vez de \"clique no botão verde\"."
+      "remediation": "Prefira \"Selecione o botão Confirmar\" em vez de \"clique no botão verde\".",
+      "message": "Instrução dependente de característica sensorial: \"{{text}}\"."
     },
     "presentationOrder": {
       "name": "Ordem de apresentação",
@@ -241,7 +247,8 @@
       "name": "Uso de cores",
       "description": "Cor não deve ser o único meio de transmitir informação",
       "suggestion": "Adicione texto, ícone, estado programático ou outro indicador além da cor.",
-      "remediation": "Combine cor com rótulo, ícone ou mensagem textual explícita."
+      "remediation": "Combine cor com rótulo, ícone ou mensagem textual explícita.",
+      "message": "Indício de informação transmitida apenas por cor: \"{{text}}\"."
     },
     "graphicContrast": {
       "name": "Contraste para objetos gráficos",
@@ -303,7 +310,8 @@
       "name": "Idioma das partes da página",
       "description": "Trechos em idioma diferente devem ser marcados com lang apropriado",
       "suggestion": "Marque trechos em outro idioma com o atributo lang correspondente.",
-      "remediation": "<span lang=\"en\">Download</span>"
+      "remediation": "<span lang=\"en\">Download</span>",
+      "message": "Trecho com possível conteúdo em idioma diferente sem marcação de lang: \"{{text}}\"."
     },
     "readingOrder": {
       "name": "Ordem de leitura",
@@ -319,7 +327,8 @@
       "name": "Texto visível no nome acessível",
       "description": "O nome acessível deve conter o texto visível do controle",
       "suggestion": "Alinhe o texto visível com o nome acessível exposto ao leitor de tela.",
-      "remediation": "<button aria-label=\"Baixar regulamento\">Baixar regulamento</button>"
+      "remediation": "<button aria-label=\"Baixar regulamento\">Baixar regulamento</button>",
+      "message": "Nome acessível não contém o texto visível do controle \"{{text}}\"."
     },
     "statusMessage": {
       "name": "Mensagens de status",
@@ -332,7 +341,8 @@
       "name": "Semântica de componentes customizados",
       "description": "Componentes customizados interativos devem expor função semântica apropriada",
       "suggestion": "Aplique role coerente e comportamento compatível, ou substitua por elemento nativo.",
-      "remediation": "<div role=\"button\" tabindex=\"0\">Abrir</div>"
+      "remediation": "<div role=\"button\" tabindex=\"0\">Abrir</div>",
+      "message": "Componente customizado interativo sem role semântica: <{{tag}}>."
     },
     "audioTranscript": {
       "name": "Alternativa em texto para áudio",
@@ -840,6 +850,216 @@
       "message": "Atualização automática detectada via meta refresh.",
       "suggestion": "Evite atualização automática ou ofereça mecanismo de controle ao usuário.",
       "remediation": "<meta http-equiv=\"refresh\" content=\"30\"> requer alternativa controlável."
+    }
+  },
+  "recommendations": {
+    "candidate": {
+      "message": "Candidato para revisão: {{rule}}.",
+      "remediation": "Registre a evidência observada e confirme o comportamento com teclado e tecnologia assistiva quando aplicável."
+    },
+    "focusUsage": {
+      "name": "Uso de foco",
+      "description": "Recomenda que o foco seja usado de forma coerente com a tarefa e o contexto.",
+      "evidence": "A página contém foco programático ou elemento retirado da sequência natural.",
+      "reviewQuestion": "O foco é movido somente quando isso ajuda a pessoa a continuar a tarefa?"
+    },
+    "additionalContent": {
+      "name": "Conteúdo adicional",
+      "description": "Recomenda que conteúdo exibido por hover ou foco seja previsível e operável.",
+      "evidence": "Foi encontrado um controle com conteúdo adicional associado.",
+      "reviewQuestion": "O conteúdo adicional pode ser percebido, mantido e dispensado por teclado?"
+    },
+    "keyboardShortcuts": {
+      "name": "Atalhos de teclado",
+      "description": "Recomenda atalhos previsíveis, documentados e sem conflito com tecnologias assistivas.",
+      "evidence": "A página declara um atalho de teclado.",
+      "reviewQuestion": "O atalho está documentado e pode ser desativado ou remapeado quando necessário?"
+    },
+    "fullKeyboardAccessibility": {
+      "name": "Acessibilidade por teclado total",
+      "description": "Recomenda que toda funcionalidade seja concluída somente por teclado.",
+      "evidence": "A página possui elementos focalizáveis e exige um roteiro completo de teclado.",
+      "reviewQuestion": "Todas as tarefas podem ser concluídas com Tab, Shift+Tab, setas, Enter, Espaço e Escape?"
+    },
+    "simultaneousInput": {
+      "name": "Mecanismos de entrada simultâneos",
+      "description": "Recomenda preservar o uso combinado de teclado, ponteiro, toque e voz.",
+      "evidence": "A página contém uma superfície com gesto, arraste ou evento de ponteiro.",
+      "reviewQuestion": "É possível alternar mecanismos de entrada durante a mesma tarefa sem perder contexto?"
+    },
+    "customComponentBehavior": {
+      "name": "Comportamento de componentes customizados",
+      "description": "Recomenda comportamento de teclado compatível com o padrão do componente.",
+      "evidence": "Foi encontrado um widget ARIA composto.",
+      "reviewQuestion": "Os comandos, o foco interno e o fechamento seguem o padrão esperado para esse papel?"
+    },
+    "sectionHeadings": {
+      "name": "Seções com cabeçalhos",
+      "description": "Recomenda cabeçalhos que identifiquem seções extensas de conteúdo.",
+      "evidence": "Uma seção extensa não contém cabeçalho programaticamente identificável.",
+      "reviewQuestion": "A seção precisa de um cabeçalho para ser localizada e compreendida com mais facilidade?"
+    },
+    "uniqueRegions": {
+      "name": "Regiões únicas",
+      "description": "Recomenda nomes distintos para regiões com a mesma função estrutural.",
+      "evidence": "Duas regiões expõem a mesma combinação de papel e nome acessível.",
+      "reviewQuestion": "As regiões equivalentes precisam de nomes distintos para evitar ambiguidade?"
+    },
+    "tableTitle": {
+      "name": "Título de tabela",
+      "description": "Recomenda um título visível que identifique o propósito da tabela.",
+      "evidence": "Uma tabela de dados não contém elemento caption.",
+      "reviewQuestion": "A tabela possui um título visível e suficiente, mesmo que esteja associado por outro mecanismo?"
+    },
+    "complexTableDescription": {
+      "name": "Descrição para tabelas complexas",
+      "description": "Recomenda uma explicação da estrutura e do uso de tabelas complexas.",
+      "evidence": "Uma tabela com várias linhas e colunas não possui aria-describedby.",
+      "reviewQuestion": "A complexidade da tabela exige uma descrição de estrutura, navegação ou leitura?"
+    },
+    "standaloneLinkPurpose": {
+      "name": "Propósito do link sem contexto",
+      "description": "Recomenda que o propósito de cada link seja compreensível isoladamente.",
+      "evidence": "Foi encontrado um link cujo nome isolado é genérico.",
+      "reviewQuestion": "O nome acessível comunica o destino ou a ação sem depender do parágrafo ao redor?"
+    },
+    "consistentLinkIdentification": {
+      "name": "Links com identificação consistente",
+      "description": "Recomenda nomes consistentes para links equivalentes no site.",
+      "evidence": "A sessão de site contém links que devem ser comparados entre páginas equivalentes.",
+      "reviewQuestion": "Links com o mesmo destino ou função mantêm uma identificação consistente em toda a sessão?"
+    },
+    "complementaryLinkText": {
+      "name": "Texto complementar do link",
+      "description": "Recomenda informação complementar quando formato ou comportamento do destino for relevante.",
+      "evidence": "Um link usa apenas conteúdo gráfico ou não expõe texto visível suficiente.",
+      "reviewQuestion": "O link comunica formato, tamanho, abertura ou contexto adicional quando essas informações são necessárias?"
+    },
+    "adjacentLinks": {
+      "name": "Links adjacentes",
+      "description": "Recomenda evitar links adjacentes redundantes para o mesmo destino.",
+      "evidence": "Dois links adjacentes no mesmo contêiner apontam para o mesmo destino.",
+      "reviewQuestion": "Os links podem ser combinados em um único alvo sem prejudicar a compreensão?"
+    },
+    "skipBlockLinks": {
+      "name": "Links para contornar blocos de conteúdo",
+      "description": "Recomenda mecanismos para chegar diretamente às áreas principais.",
+      "evidence": "A página tem navegação extensa e conteúdo principal, mas nenhum link interno visível foi encontrado.",
+      "reviewQuestion": "Existe outro mecanismo de teclado que permite contornar os blocos repetidos?"
+    },
+    "siteLocation": {
+      "name": "Localização em conjunto de páginas",
+      "description": "Recomenda indicar a localização atual de forma consistente no site.",
+      "evidence": "A sessão de site contém uma navegação que precisa ser comparada entre páginas.",
+      "reviewQuestion": "A pessoa consegue identificar a página ou etapa atual de forma consistente em todo o conjunto?"
+    },
+    "pageControlConsistency": {
+      "name": "Identificação consistente na página",
+      "description": "Recomenda identificação coerente para controles com a mesma função.",
+      "evidence": "Controles com o mesmo nome acessível expõem indícios de ações diferentes.",
+      "reviewQuestion": "Os controles realmente têm funções diferentes e, nesse caso, precisam de nomes distintos?"
+    },
+    "predictableContextChange": {
+      "name": "Mudança de contexto previsível",
+      "description": "Recomenda avisar mudanças de contexto antes que ocorram.",
+      "evidence": "Foi encontrado um controle com indício de ação automática no foco ou na entrada.",
+      "reviewQuestion": "A mudança é anunciada ou iniciada somente depois de uma ação explícita da pessoa?"
+    },
+    "controlFeedback": {
+      "name": "Controles com retorno",
+      "description": "Recomenda retorno perceptível após o acionamento de um controle.",
+      "evidence": "A página possui controles acionáveis cujo retorno precisa ser observado em uso.",
+      "reviewQuestion": "Cada acionamento produz retorno visual e programático suficiente, inclusive em carregamento e erro?"
+    },
+    "errorPrevention": {
+      "name": "Prevenção de erro",
+      "description": "Recomenda revisar, confirmar ou desfazer dados antes da conclusão.",
+      "evidence": "A jornada contém um formulário com dados fornecidos pela pessoa.",
+      "reviewQuestion": "Antes da conclusão, os dados podem ser revisados, corrigidos, confirmados ou desfeitos?"
+    },
+    "enhancedAuthentication": {
+      "name": "Autenticação acessível aprimorada",
+      "description": "Recomenda alternativas que reduzam dependência de memória ou transcrição.",
+      "evidence": "A jornada contém autenticação por senha ou código de uso único.",
+      "reviewQuestion": "Há alternativa sem teste cognitivo e o gerenciador de senhas e a colagem permanecem disponíveis?"
+    },
+    "focusIndicatorArea": {
+      "name": "Área do indicador de foco visível",
+      "description": "Recomenda indicador de foco com área e espessura suficientes.",
+      "evidence": "A página possui controles cujo indicador deve ser medido no estado de foco.",
+      "reviewQuestion": "A área visível do indicador tem espessura, perímetro e contraste suficientes em todos os controles?"
+    },
+    "definitions": {
+      "name": "Definições de significado",
+      "description": "Recomenda explicar termos incomuns, técnicos ou ambíguos.",
+      "evidence": "O conteúdo usa marcação associada a termo, abreviação ou expressão técnica.",
+      "reviewQuestion": "Os termos incomuns ou ambíguos têm definição disponível no mesmo contexto ou em glossário?"
+    },
+    "readingLevel": {
+      "name": "Nível de linguagem",
+      "description": "Recomenda linguagem compatível com o público e apoio para conteúdo complexo.",
+      "evidence": "O conteúdo principal é extenso e requer avaliação editorial de linguagem.",
+      "reviewQuestion": "A linguagem é adequada ao público ou existe uma versão, resumo ou apoio mais simples?"
+    },
+    "pronunciation": {
+      "name": "Pronúncia identificada",
+      "description": "Recomenda identificar pronúncia quando ela for necessária para compreender o conteúdo.",
+      "evidence": "Foi encontrada uma sequência em letras maiúsculas que pode exigir pronúncia específica.",
+      "reviewQuestion": "A pronúncia é necessária para evitar ambiguidade e, nesse caso, está explicada?"
+    },
+    "extendedAudioDescription": {
+      "name": "Audiodescrição estendida para vídeo",
+      "description": "Recomenda audiodescrição estendida quando as pausas do vídeo não forem suficientes.",
+      "evidence": "A página contém vídeo que precisa ser examinado em reprodução.",
+      "reviewQuestion": "A audiodescrição comum é suficiente ou o conteúdo exige pausas e descrição estendida?"
+    },
+    "signLanguage": {
+      "name": "Janela de Libras para conteúdo em áudio",
+      "description": "Recomenda alternativa em Libras para conteúdo sonoro relevante.",
+      "evidence": "A página contém mídia com possível informação sonora.",
+      "reviewQuestion": "O conteúdo sonoro relevante oferece uma alternativa adequada em Libras quando prevista para o público?"
+    },
+    "cleanAudio": {
+      "name": "Áudio sem ruído",
+      "description": "Recomenda fala distinguível de ruído de fundo e efeitos sonoros.",
+      "evidence": "A página contém áudio cuja relação entre fala e ruído precisa ser ouvida.",
+      "reviewQuestion": "A fala permanece compreensível e distinguível do ruído de fundo em toda a mídia?"
+    },
+    "liveAudioTranscript": {
+      "name": "Transcrição para áudio ao vivo",
+      "description": "Recomenda transcrição textual para conteúdo de áudio ao vivo.",
+      "evidence": "A página contém mídia que pode representar uma transmissão ao vivo.",
+      "reviewQuestion": "Quando o áudio é ao vivo, uma transcrição equivalente é disponibilizada com atraso aceitável?"
+    },
+    "interactionAnimation": {
+      "name": "Animações acionadas por interação",
+      "description": "Recomenda permitir desativar animações acionadas por interação.",
+      "evidence": "Foi encontrado um elemento com indício de animação declarada.",
+      "reviewQuestion": "A animação acionada por interação pode ser desativada e respeita prefers-reduced-motion?"
+    },
+    "intermittentFlash": {
+      "name": "Flash intermitente",
+      "description": "Recomenda evitar flashes intermitentes mesmo abaixo do limite técnico.",
+      "evidence": "A página contém animação ou vídeo que precisa de inspeção temporal e visual.",
+      "reviewQuestion": "O conteúdo evita flashes intermitentes e mudanças luminosas que possam provocar desconforto?"
+    },
+    "interruptions": {
+      "name": "Interrupções",
+      "description": "Recomenda adiar ou suprimir interrupções, exceto quando essenciais.",
+      "evidence": "A jornada contém diálogo ou anúncio assertivo que pode interromper a tarefa.",
+      "reviewQuestion": "A interrupção é essencial ou pode ser adiada, suprimida ou consultada depois?"
+    },
+    "reauthentication": {
+      "name": "Reautenticação",
+      "description": "Recomenda preservar dados e contexto depois de nova autenticação.",
+      "evidence": "A jornada contém autenticação ou sinal de sessão expirada.",
+      "reviewQuestion": "Depois da reautenticação, os dados preenchidos e a etapa da tarefa são preservados?"
+    },
+    "inactivity": {
+      "name": "Tempo de inatividade",
+      "description": "Recomenda informar e permitir ajustar perda de dados por inatividade.",
+      "evidence": "A jornada contém um sinal de limite de sessão, atualização ou temporizador.",
+      "reviewQuestion": "A pessoa é avisada e consegue preservar os dados antes que a inatividade encerre a sessão?"
     }
   }
 }

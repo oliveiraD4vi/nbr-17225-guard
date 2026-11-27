@@ -66,7 +66,7 @@ BREAKING CHANGE: relatórios antigos passam pela migração ao serem importados.
 
 ## Diretrizes de código
 
-- Textos visíveis ficam nos catálogos `src/i18n/pt-BR.json` e `src/i18n/rules-pt-BR.json`, nunca soltos em componentes.
+- Textos visíveis ficam nos catálogos `src/i18n/pt-BR.json` e `src/i18n/rules-pt-BR.json`, nunca soltos em componentes ou regras. As chaves de `t()` são tipadas a partir dos catálogos: uma chave inexistente não compila.
 - Siga os padrões existentes de tipagem, persistência e nomes de arquivos.
 - Uma mudança na auditoria pode afetar a persistência por aba, o histórico por URL, a comparação entre auditorias, a herança de triagem e a exportação. Verifique cada um.
 

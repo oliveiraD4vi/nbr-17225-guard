@@ -4,7 +4,7 @@ import { Button, ConfigProvider, Empty, Layout, Segmented, Space, Tag } from 'an
 import { DownloadOutlined, PrinterOutlined } from '@ant-design/icons'
 import ptBR from 'antd/locale/pt_BR'
 import { ReportSkeleton } from './components/LoadingSkeletons'
-import { t } from './i18n'
+import { t, type TextKey } from './i18n'
 import { isNormativeRequirement } from './normative'
 import type { AuditResult, Violation } from './types'
 import { buildAuditSummaryJson, buildExportableAuditResult } from './utils/audit-export'
@@ -80,7 +80,7 @@ function getFindingLabel(violation: Violation): string {
 function getAlternativeTextSourceLabel(
   source: NonNullable<Violation['alternativeTextReview']>['currentSource'],
 ): string {
-  const sourceKeys: Record<typeof source, string> = {
+  const sourceKeys: Record<typeof source, TextKey> = {
     alt: 'violations.alternativeTextSources.alt',
     'aria-label': 'violations.alternativeTextSources.ariaLabel',
     'aria-labelledby': 'violations.alternativeTextSources.ariaLabelledBy',
