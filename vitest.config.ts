@@ -25,6 +25,9 @@ export default mergeConfig(
             include: ['src/**/*.test.tsx'],
             environment: 'jsdom',
             setupFiles: ['tests/setup.ts', 'tests/setup-dom.ts'],
+            // A full user flow through Ant Design takes about two seconds in jsdom, and more while
+            // the rules project keeps Chromium busy; the default 5 s leaves no margin for that.
+            testTimeout: 15_000,
           },
         },
         {

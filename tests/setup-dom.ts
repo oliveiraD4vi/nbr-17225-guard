@@ -20,4 +20,9 @@ window.ResizeObserver = class {
   disconnect() {}
 }
 
+// jsdom does not implement pseudo-element styles and logs an error for each request; Ant Design asks
+// for them when it measures scrollbars. Styles of the element itself are what the tests need.
+const getElementStyle = window.getComputedStyle.bind(window)
+window.getComputedStyle = (element: Element) => getElementStyle(element)
+
 afterEach(cleanup)
