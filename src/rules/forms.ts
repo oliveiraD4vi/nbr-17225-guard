@@ -366,13 +366,12 @@ export const submitButtonRule: Rule = {
         form.querySelectorAll<HTMLElement>('button, input[type="submit"], [role="button"]'),
       ).filter(isElementVisible)
       const hasClearSubmit = submitControls.some((control) => {
-        if (control instanceof HTMLInputElement && control.type === 'submit') return true
-        const type = control.getAttribute('type')?.toLowerCase()
+        // A <button> without a type submits its form, so the property is read, not the attribute.
+        const submits =
+          (control instanceof HTMLInputElement || control instanceof HTMLButtonElement) &&
+          control.type === 'submit'
         const text = getVisibleText(control).toLowerCase()
-        return (
-          type === 'submit' ||
-          /\b(enviar|salvar|confirmar|concluir|continuar|finalizar)\b/.test(text)
-        )
+        return submits || /\b(enviar|salvar|confirmar|concluir|continuar|finalizar)\b/.test(text)
       })
 
       if (!hasClearSubmit) {
