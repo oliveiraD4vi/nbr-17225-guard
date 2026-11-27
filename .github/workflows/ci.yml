@@ -31,6 +31,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm type-check
       - run: pnpm verify:rules
+      # The rule scenarios run in Chromium.
+      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm build
 
