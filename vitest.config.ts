@@ -13,7 +13,7 @@ export default mergeConfig(
           extends: true,
           test: {
             name: 'unit',
-            include: ['src/**/*.test.ts', 'tests/unit/**/*.test.ts'],
+            include: ['src/**/*.test.ts'],
             exclude: ['src/rules/**'],
             setupFiles: ['tests/setup.ts'],
           },

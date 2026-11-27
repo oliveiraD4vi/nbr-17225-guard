@@ -24,7 +24,6 @@
     "test": "vitest run",
     "verify:rules": "node scripts/verify-rules.mjs",
     "type-check": "tsc -b",
-    "fixtures:build": "node scripts/build-rule-fixtures.mjs",
     "test:a11y": "pnpm build && playwright test",
     "test:watch": "vitest"
   },
