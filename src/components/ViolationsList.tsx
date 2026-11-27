@@ -34,7 +34,7 @@ import {
   UnorderedListOutlined,
 } from '@ant-design/icons'
 import { PROJECT_RULES_URL } from '@/config/links'
-import { t } from '@/i18n'
+import { t, type TextKey } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { getRuleTopicCategory, type RuleTopicCategory } from '@/rules'
 import type {
@@ -152,7 +152,7 @@ function getSeverityColor(severity: Violation['severity']): string {
 function getAlternativeTextSourceLabel(
   source: NonNullable<Violation['alternativeTextReview']>['currentSource'],
 ): string {
-  const sourceKeys: Record<typeof source, string> = {
+  const sourceKeys: Record<typeof source, TextKey> = {
     alt: 'violations.alternativeTextSources.alt',
     'aria-label': 'violations.alternativeTextSources.ariaLabel',
     'aria-labelledby': 'violations.alternativeTextSources.ariaLabelledBy',
@@ -276,7 +276,7 @@ function getReadableFindingCopy(
 } {
   const family = getRuleExplanationFamily(topicCategory)
   const target = getViolationTargetLabel(violation)
-  const baseKey = `violations.families.${family}`
+  const baseKey = `violations.families.${family}` as const
 
   return {
     headline: t(`${baseKey}.headline`),

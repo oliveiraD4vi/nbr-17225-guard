@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { t } from '@/i18n'
+import { t, type TextKey } from '@/i18n'
 import type { AuditHistoryEntry } from '@/types'
 import {
   clearAuditHistoryForUrl,
@@ -15,6 +15,12 @@ export interface QuotaIssue {
   url: string
   scope: 'audit' | 'history' | 'review'
   hasUnsavedChanges: boolean
+}
+
+interface StorageWarning {
+  titleKey: TextKey
+  descriptionKey: TextKey
+  type: 'error' | 'warning'
 }
 
 export type QuotaRecoveryStrategy = 'current-url' | 'oldest-audit' | 'global'
@@ -130,7 +136,7 @@ export function useStorageQuota({ tabId, notify, onHistoryChange }: StorageQuota
     [notify, onHistoryChange, refreshDiagnostics, tabId],
   )
 
-  const warning = useMemo(() => {
+  const warning = useMemo((): StorageWarning | null => {
     if (!diagnostics || diagnostics.level === 'ok') return null
 
     const isCritical = diagnostics.level === 'critical'
@@ -139,7 +145,7 @@ export function useStorageQuota({ tabId, notify, onHistoryChange }: StorageQuota
       descriptionKey: isCritical
         ? 'popup.storage.criticalDescription'
         : 'popup.storage.warningDescription',
-      type: isCritical ? ('error' as const) : ('warning' as const),
+      type: isCritical ? 'error' : 'warning',
     }
   }, [diagnostics])
 

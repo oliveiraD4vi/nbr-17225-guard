@@ -186,7 +186,9 @@ export const descriptiveFieldLabelRule: Rule = {
         })
         .map((field) => field as unknown as HTMLElement),
       (field) =>
-        `Campo com rótulo potencialmente genérico: "${getAssociatedLabelText(field as HTMLInputElement).trim()}".`,
+        t('rules.contentFormsMedia.descriptiveFieldLabel.message', {
+          label: getAssociatedLabelText(field as HTMLInputElement).trim(),
+        }),
       t('rules.contentFormsMedia.descriptiveFieldLabel.suggestion'),
       t('rules.contentFormsMedia.descriptiveFieldLabel.remediation'),
       'descriptive-label',
@@ -221,7 +223,12 @@ export const predictableHelpTextRule: Rule = {
         })
         .map((field) => field as unknown as HTMLElement),
       (field) =>
-        `Campo "${getAssociatedLabelText(field as HTMLInputElement) || field.getAttribute('name') || getElementIdAttribute(field)}" sem texto de ajuda associado.`,
+        t('rules.contentFormsMedia.predictableHelpText.message', {
+          field:
+            getAssociatedLabelText(field as HTMLInputElement) ||
+            field.getAttribute('name') ||
+            getElementIdAttribute(field),
+        }),
       t('rules.contentFormsMedia.predictableHelpText.suggestion'),
       t('rules.contentFormsMedia.predictableHelpText.remediation'),
       'predictable-help',
@@ -249,7 +256,8 @@ export const descriptiveErrorRule: Rule = {
         const text = getVisibleText(element).trim().toLowerCase()
         return !!text && vagueErrors.some((message) => text === message || text.endsWith(message))
       }),
-      (element) => `Mensagem de erro pouco descritiva: "${getVisibleText(element)}".`,
+      (element) =>
+        t('rules.contentFormsMedia.descriptiveError.message', { text: getVisibleText(element) }),
       t('rules.contentFormsMedia.descriptiveError.suggestion'),
       t('rules.contentFormsMedia.descriptiveError.remediation'),
       'descriptive-error',
@@ -313,7 +321,9 @@ export const criticalFormPreventionRule: Rule = {
         return !/revisar|confirmar|voltar|cancelar/.test(surroundingText)
       }),
       (element) =>
-        `Ação crítica "${getAccessibleName(element)}" sem indício de revisão ou confirmação.`,
+        t('rules.contentFormsMedia.criticalFormPrevention.message', {
+          action: getAccessibleName(element),
+        }),
       t('rules.contentFormsMedia.criticalFormPrevention.suggestion'),
       t('rules.contentFormsMedia.criticalFormPrevention.remediation'),
       'critical-form',
@@ -374,7 +384,8 @@ export const sensoryValidationRule: Rule = {
       Array.from(
         document.querySelectorAll<HTMLElement>('label, legend, p, span, small, .help, .hint'),
       ).filter((element) => hasActionableSensoryInstruction(getVisibleText(element))),
-      (element) => `Instrução com dependência sensorial detectada: "${getVisibleText(element)}".`,
+      (element) =>
+        t('rules.contentFormsMedia.sensoryValidation.message', { text: getVisibleText(element) }),
       t('rules.contentFormsMedia.sensoryValidation.suggestion'),
       t('rules.contentFormsMedia.sensoryValidation.remediation'),
       'sensory-validation',
@@ -400,7 +411,9 @@ export const sensoryCharacteristicsRule: Rule = {
         ),
       ),
       (element) =>
-        `Instrução dependente de característica sensorial: "${getVisibleText(element)}".`,
+        t('rules.contentFormsMedia.sensoryCharacteristics.message', {
+          text: getVisibleText(element),
+        }),
       t('rules.contentFormsMedia.sensoryCharacteristics.suggestion'),
       t('rules.contentFormsMedia.sensoryCharacteristics.remediation'),
       'sensory-characteristics',
@@ -506,7 +519,7 @@ export const colorUsageRule: Rule = {
         ),
       ),
       (element) =>
-        `Indício de informação transmitida apenas por cor: "${getVisibleText(element)}".`,
+        t('rules.contentFormsMedia.colorUsage.message', { text: getVisibleText(element) }),
       t('rules.contentFormsMedia.colorUsage.suggestion'),
       t('rules.contentFormsMedia.colorUsage.remediation'),
       'color-usage',
@@ -834,7 +847,9 @@ export const pagePartLanguageRule: Rule = {
         return getElementLanguage(element) === pageLang && text.split(/\s+/).length >= 5
       }),
       (element) =>
-        `Trecho com possível conteúdo em idioma diferente sem marcação de lang: "${getVisibleText(element).slice(0, 80)}".`,
+        t('rules.contentFormsMedia.pagePartLanguage.message', {
+          text: getVisibleText(element).slice(0, 80),
+        }),
       t('rules.contentFormsMedia.pagePartLanguage.suggestion'),
       t('rules.contentFormsMedia.pagePartLanguage.remediation'),
       'page-part-language',
@@ -888,7 +903,7 @@ export const visibleTextInNameRule: Rule = {
         return !!visible && !!accessible && !accessible.includes(visible)
       }),
       (element) =>
-        `Nome acessível não contém o texto visível do controle "${getVisibleText(element)}".`,
+        t('rules.contentFormsMedia.visibleTextInName.message', { text: getVisibleText(element) }),
       t('rules.contentFormsMedia.visibleTextInName.suggestion'),
       t('rules.contentFormsMedia.visibleTextInName.remediation'),
       'visible-text-name',
@@ -949,7 +964,9 @@ export const customComponentSemanticRule: Rule = {
         return !element.getAttribute('role')
       }),
       (element) =>
-        `Componente customizado interativo sem role semântica: <${element.tagName.toLowerCase()}>.`,
+        t('rules.contentFormsMedia.customComponentSemantic.message', {
+          tag: element.tagName.toLowerCase(),
+        }),
       t('rules.contentFormsMedia.customComponentSemantic.suggestion'),
       t('rules.contentFormsMedia.customComponentSemantic.remediation'),
       'custom-component-semantics',

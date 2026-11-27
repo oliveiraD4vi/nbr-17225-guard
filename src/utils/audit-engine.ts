@@ -1,7 +1,7 @@
 ﻿/**
  * Motor de auditoria de acessibilidade
  */
-import { t } from '@/i18n'
+import { t, type TextKeyPrefix } from '@/i18n'
 import { getNormativeRuleType } from '@/normative'
 import type {
   AuditHistoryEntry,
@@ -77,7 +77,15 @@ const STORAGE_WARNING_RATIO = 0.7
 const STORAGE_CRITICAL_RATIO = 0.85
 const FALLBACK_STORAGE_QUOTA_BYTES = 10 * 1024 * 1024
 
-const sessionRulePresentation: Record<string, { i18nPrefix: string; wcagLevel: WCAGLevel }> = {
+type SessionRuleTextPrefix = TextKeyPrefix<'name'> &
+  TextKeyPrefix<'description'> &
+  TextKeyPrefix<'suggestion'> &
+  TextKeyPrefix<'remediation'>
+
+const sessionRulePresentation: Record<
+  string,
+  { i18nPrefix: SessionRuleTextPrefix; wcagLevel: WCAGLevel }
+> = {
   'location-alternatives': {
     i18nPrefix: 'rules.navigation.locationAlternatives',
     wcagLevel: 'A',

@@ -41,7 +41,7 @@ import { useStorageQuota } from './useStorageQuota'
 import { useContrastPreview } from './useContrastPreview'
 import { useAccessibleMessage } from './AccessibleStatusAnnouncer'
 import type { ViolationsListState } from './ViolationsList'
-import { t } from '@/i18n'
+import { t, type TextKey } from '@/i18n'
 import { isNormativeRequirement } from '@/normative'
 import { allRules } from '@/rules'
 import { parseAuditScope } from '@/utils/audit-report-parser'
@@ -347,7 +347,7 @@ function buildAuditCsv(result: AuditResult): string {
 function getQuotaAlertDescriptionKey(
   scope: 'audit' | 'history' | 'review',
   hasUnsavedChanges: boolean,
-): string {
+): TextKey {
   if (!hasUnsavedChanges) return 'popup.quota.alertDescription'
 
   if (scope === 'audit') return 'popup.quota.alertDescriptionUnsavedAudit'
@@ -355,7 +355,7 @@ function getQuotaAlertDescriptionKey(
   return 'popup.quota.alertDescriptionUnsavedReview'
 }
 
-function getQuotaModalAlertDescriptionKey(scope: 'audit' | 'history' | 'review'): string {
+function getQuotaModalAlertDescriptionKey(scope: 'audit' | 'history' | 'review'): TextKey {
   if (scope === 'audit') return 'popup.quota.modalAlertDescriptionAudit'
   if (scope === 'history') return 'popup.quota.modalAlertDescriptionHistory'
   return 'popup.quota.modalAlertDescriptionReview'
