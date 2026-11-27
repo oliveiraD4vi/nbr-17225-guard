@@ -458,12 +458,34 @@ export function getAccessibleName(element: HTMLElement): string {
   const visibleText = getVisibleText(element)
   if (visibleText) return visibleText
 
+  // Controls can be named by text that is only visually hidden (a screen-reader-only label).
   if (element.matches('button, a, [role="button"], [role="link"], [role="tab"]')) {
-    const textContent = element.textContent?.replace(/\s+/g, ' ').trim()
-    if (textContent) return textContent
+    return getTextExposedToAssistiveTechnology(element).replace(/\s+/g, ' ').trim()
   }
 
   return ''
+}
+
+function getTextExposedToAssistiveTechnology(element: Element): string {
+  if (
+    element instanceof HTMLElement &&
+    (element.hidden || nonRenderableTags.has(element.tagName))
+  ) {
+    return ''
+  }
+  if (element.getAttribute('aria-hidden') === 'true') return ''
+  const style = window.getComputedStyle(element)
+  if (style.display === 'none' || style.visibility === 'hidden') return ''
+
+  return Array.from(element.childNodes)
+    .map((node) =>
+      node.nodeType === Node.TEXT_NODE
+        ? (node.textContent ?? '')
+        : node instanceof Element
+          ? getTextExposedToAssistiveTechnology(node)
+          : '',
+    )
+    .join('')
 }
 
 function getLabelledByText(element: Element): string {
