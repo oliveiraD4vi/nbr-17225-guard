@@ -36,6 +36,7 @@ import {
   UpOutlined,
 } from '@ant-design/icons'
 import { PopupPanelSkeleton } from './LoadingSkeletons'
+import { useStorageQuota } from './useStorageQuota'
 import { useAccessibleMessage } from './AccessibleStatusAnnouncer'
 import type { ViolationsListState } from './ViolationsList'
 import { t } from '@/i18n'
@@ -56,21 +57,15 @@ import type {
 import { compareAuditResults, type AuditReviewChangeField } from '@/utils/audit-comparison'
 import { buildAuditSummaryJson, buildExportableAuditResult } from '@/utils/audit-export'
 import {
-  clearAuditHistoryForUrl,
-  compactAuditStorage,
-  deleteOldestAuditHistoryEntry,
   deleteAuditHistoryEntry,
   ensureContentScriptReady,
   getDisplayResultForScope,
   getAuditHistoryForSite,
   getAuditHistoryForUrl,
   getAuditResult,
-  getAuditStorageDiagnostics,
   getAuditTargetTab,
-  type AuditStorageDiagnostics,
   type AuditTargetTab,
   importAuditReportToHistory,
-  isAuditStorageQuotaError,
   parseImportedAuditReport,
   runAccessibilityAudit,
   saveAuditResult,
@@ -404,7 +399,6 @@ function formatStorageSize(bytes: number): string {
 }
 
 export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab }) => {
-  const quotaRetryRef = useRef<(() => Promise<unknown>) | null>(null)
   const importInputRef = useRef<HTMLInputElement | null>(null)
   const popupContentRef = useRef<HTMLDivElement | null>(null)
   const scrollPersistTimeoutRef = useRef<number | null>(null)
@@ -449,20 +443,32 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       }),
     [comparisonBaselineId, comparisonTargetId, historyKey],
   )
-  const [quotaIssue, setQuotaIssue] = useState<{
-    url: string
-    scope: 'audit' | 'history' | 'review'
-    hasUnsavedChanges: boolean
-  } | null>(null)
-  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false)
-  const [quotaRecoveryLoading, setQuotaRecoveryLoading] = useState(false)
-  const [storageDiagnostics, setStorageDiagnostics] = useState<AuditStorageDiagnostics | null>(null)
-  const [storageMaintenanceLoading, setStorageMaintenanceLoading] = useState(false)
   const [manualFindingDraft, setManualFindingDraft] = useState<ManualFindingDraft | null>(null)
   const [isManualFindingModalOpen, setIsManualFindingModalOpen] = useState(false)
   const [manualFindingSaving, setManualFindingSaving] = useState(false)
   const [manualFindingForm] = Form.useForm<ManualFindingFormValues>()
   const { announcer, notify } = useAccessibleMessage()
+
+  const handleHistoryRefreshed = useCallback((_url: string, history: AuditHistoryEntry[]) => {
+    setAuditHistory(history)
+    setSelectedHistoryId((selectedId) =>
+      selectedId && !history.some((entry) => entry.id === selectedId) ? null : selectedId,
+    )
+  }, [])
+  const {
+    diagnostics: storageDiagnostics,
+    warning: storageWarning,
+    refreshDiagnostics: refreshStorageDiagnostics,
+    persist: persistWithQuotaHandling,
+    issue: quotaIssue,
+    isModalOpen: isQuotaModalOpen,
+    openModal: openQuotaModal,
+    closeModal: closeQuotaModal,
+    recover: handleResolveQuotaIssue,
+    isRecovering: quotaRecoveryLoading,
+    compact: compactStorage,
+    isCompacting: storageMaintenanceLoading,
+  } = useStorageQuota({ tabId: activeTab?.id, notify, onHistoryChange: handleHistoryRefreshed })
   const appIconUrl = useMemo(() => chrome.runtime.getURL('icons/icon.png'), [])
 
   const closeVisionSimulator = useCallback(() => {
@@ -493,21 +499,11 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     )
   }, [])
 
-  const refreshStorageDiagnostics = useCallback(async (url?: string) => {
-    try {
-      const diagnostics = await getAuditStorageDiagnostics(url)
-      setStorageDiagnostics(diagnostics)
-    } catch (error) {
-      console.error('Erro ao calcular uso do armazenamento local:', error)
-      setStorageDiagnostics(null)
-    }
-  }, [])
-
   const loadAuditForCurrentTab = useCallback(async () => {
     try {
       const tab = await resolveCurrentTab()
       setActiveTab(tab)
-      const [result, preferences, history, siteHistory, diagnostics] = await Promise.all([
+      const [result, preferences, history, siteHistory] = await Promise.all([
         getAuditResult(tab.id, tab.url),
         extensionStorageGet([
           'includeRecommendationsPreference',
@@ -517,7 +513,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         ]),
         getAuditHistoryForUrl(tab.url),
         getAuditHistoryForSite(tab.url),
-        getAuditStorageDiagnostics(tab.url),
+        refreshStorageDiagnostics(tab.url),
       ])
       const resolvedPreference =
         result?.includeRecommendations ?? Boolean(preferences.includeRecommendationsPreference)
@@ -542,7 +538,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       setIncludeRecommendations(resolvedPreference)
       setIncludeHumanReview(resolvedHumanReviewPreference)
       setAuditScope(resolvedAuditScope)
-      setStorageDiagnostics(diagnostics)
       setPopupStoredState(savedState)
       setSelectedHistoryId(restoredHistoryId)
       setActiveTabKey(savedState?.activeTabKey ?? 'summary')
@@ -566,43 +561,11 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       setIsAuditMetaCollapsed(false)
       setShowAboutView(false)
       setPriorityIndex(0)
-      setStorageDiagnostics(null)
     } finally {
       // A reload after navigation must not end an audit that is still running.
       setStatus((current) => (current === 'loading' ? 'idle' : current))
     }
-  }, [notify, resolveCurrentTab])
-
-  const persistWithQuotaHandling = useCallback(
-    async <T,>(
-      operation: () => Promise<T>,
-      issue: {
-        url: string
-        scope: 'audit' | 'history' | 'review'
-        hasUnsavedChanges: boolean
-      },
-    ): Promise<T | null> => {
-      try {
-        const result = await operation()
-        await refreshStorageDiagnostics(issue.url)
-        setQuotaIssue(null)
-        setIsQuotaModalOpen(false)
-        quotaRetryRef.current = null
-        return result
-      } catch (error) {
-        if (isAuditStorageQuotaError(error)) {
-          await refreshStorageDiagnostics(issue.url)
-          quotaRetryRef.current = operation
-          setQuotaIssue(issue)
-          setIsQuotaModalOpen(true)
-          return null
-        }
-
-        throw error
-      }
-    },
-    [refreshStorageDiagnostics],
-  )
+  }, [notify, refreshStorageDiagnostics, resolveCurrentTab])
 
   useEffect(() => {
     void loadAuditForCurrentTab()
@@ -1538,59 +1501,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
   }, [comparisonBaselineId, comparisonEntries, comparisonTargetId])
 
   const comparisonTrend = useMemo(() => getComparisonTrend(comparisonSummary), [comparisonSummary])
-  const storageWarning = useMemo(() => {
-    if (!storageDiagnostics || storageDiagnostics.level === 'ok') return null
-
-    const descriptionKey =
-      storageDiagnostics.level === 'critical'
-        ? 'popup.storage.criticalDescription'
-        : 'popup.storage.warningDescription'
-    const titleKey =
-      storageDiagnostics.level === 'critical'
-        ? 'popup.storage.criticalTitle'
-        : 'popup.storage.warningTitle'
-
-    return {
-      descriptionKey,
-      titleKey,
-      type: storageDiagnostics.level === 'critical' ? ('error' as const) : ('warning' as const),
-    }
-  }, [storageDiagnostics])
-
-  const handleCompactStorageNow = useCallback(async () => {
-    setStorageMaintenanceLoading(true)
-    try {
-      await compactAuditStorage(activeTab?.id)
-      const historyUrl = activeTab?.url || viewedAuditResult?.url
-      const refreshedHistory = historyUrl ? await getAuditHistoryForUrl(historyUrl) : []
-
-      if (historyUrl) {
-        setAuditHistory(refreshedHistory)
-        if (
-          selectedHistoryId &&
-          !refreshedHistory.some((entry) => entry.id === selectedHistoryId)
-        ) {
-          setSelectedHistoryId(null)
-        }
-      }
-
-      await refreshStorageDiagnostics(historyUrl)
-      notify.success(t('popup.messages.storageCompacted'))
-    } catch (error) {
-      console.error('Erro ao compactar armazenamento local:', error)
-      notify.error(t('popup.messages.storageCompactError'))
-    } finally {
-      setStorageMaintenanceLoading(false)
-    }
-  }, [
-    activeTab?.id,
-    activeTab?.url,
-    notify,
-    refreshStorageDiagnostics,
-    selectedHistoryId,
-    viewedAuditResult?.url,
-  ])
-
   const handleExportComparisonReport = useCallback(() => {
     if (!comparisonSummary || !comparisonTrend) {
       notify.warning(t('popup.messages.comparisonSelectWarning'))
@@ -2071,44 +1981,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     ],
   )
 
-  const handleResolveQuotaIssue = useCallback(
-    async (strategy: 'current-url' | 'oldest-audit' | 'global') => {
-      if (!quotaIssue || !quotaRetryRef.current) return
-
-      setQuotaRecoveryLoading(true)
-      try {
-        if (strategy === 'current-url') {
-          await clearAuditHistoryForUrl(quotaIssue.url)
-        } else if (strategy === 'oldest-audit') {
-          await deleteOldestAuditHistoryEntry()
-        } else {
-          await compactAuditStorage(activeTab?.id)
-        }
-
-        await quotaRetryRef.current()
-        const refreshedHistory = await getAuditHistoryForUrl(quotaIssue.url)
-        setAuditHistory(refreshedHistory)
-        await refreshStorageDiagnostics(quotaIssue.url)
-        setQuotaIssue(null)
-        setIsQuotaModalOpen(false)
-        quotaRetryRef.current = null
-        notify.success(t('popup.messages.quotaRecovered'))
-      } catch (error) {
-        console.error('Erro ao recuperar quota do storage:', error)
-        if (isAuditStorageQuotaError(error)) {
-          notify.error(t('popup.messages.quotaRecoveryFailed'))
-          return
-        }
-        notify.error(
-          error instanceof Error ? error.message : t('popup.messages.quotaRecoveryFailed'),
-        )
-      } finally {
-        setQuotaRecoveryLoading(false)
-      }
-    },
-    [activeTab?.id, notify, quotaIssue, refreshStorageDiagnostics],
-  )
-
   const handleNextPriorityIssue = useCallback(async () => {
     if (isHistoricalView) {
       notify.info(t('popup.messages.historyHighlightUnavailable'))
@@ -2493,11 +2365,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
                   {quotaIssue && !isQuotaModalOpen && (
                     <div className="tab-status-item tab-status-item-toggle">
                       <span className="tab-status-label">{t('popup.quota.resumeLabel')}</span>
-                      <Button
-                        danger
-                        className="quota-resume-button"
-                        onClick={() => setIsQuotaModalOpen(true)}
-                      >
+                      <Button danger className="quota-resume-button" onClick={openQuotaModal}>
                         {t('popup.quota.actions.reopen')}
                       </Button>
                     </div>
@@ -2564,7 +2432,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
                     size="small"
                     loading={storageMaintenanceLoading}
                     onClick={() => {
-                      void handleCompactStorageNow()
+                      void compactStorage(activeTab?.url || viewedAuditResult?.url)
                     }}
                   >
                     {t('popup.storage.actions.compactNow')}
@@ -2840,7 +2708,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       <Modal
         open={Boolean(quotaIssue) && isQuotaModalOpen}
         title={t('popup.quota.modalTitle')}
-        onCancel={() => setIsQuotaModalOpen(false)}
+        onCancel={closeQuotaModal}
         footer={null}
         getContainer={false}
         centered
@@ -2886,9 +2754,7 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
             >
               {t('popup.quota.actions.compactGlobal')}
             </Button>
-            <Button onClick={() => setIsQuotaModalOpen(false)}>
-              {t('popup.quota.actions.dismiss')}
-            </Button>
+            <Button onClick={closeQuotaModal}>{t('popup.quota.actions.dismiss')}</Button>
           </div>
         </Space>
       </Modal>
