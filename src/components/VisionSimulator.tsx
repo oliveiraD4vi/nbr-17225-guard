@@ -62,7 +62,7 @@ export const VisionSimulator: React.FC<VisionSimulatorProps> = React.memo(({ onF
           </Button>
         </Tooltip>
 
-        <Divider style={{ margin: '8px 0' }} />
+        <Divider style={{ margin: '0.5rem 0' }} />
 
         <div>
           <label id="vision-filter-type-label">{t('vision.filterType')}:</label>
