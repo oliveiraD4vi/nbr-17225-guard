@@ -1,22 +1,11 @@
 import AxeBuilder from '@axe-core/playwright'
-import { chromium, expect, test } from '@playwright/test'
-import { mkdtemp, rm } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { expect, test } from '@playwright/test'
+import { launchExtension } from './extension-context'
 
 test('popup e superfícies estáticas não apresentam violações críticas ou sérias', async () => {
-  const userDataDir = await mkdtemp(join(tmpdir(), 'guardiao-a11y-'))
-  const extensionPath = resolve(process.cwd(), 'dist')
-  const context = await chromium.launchPersistentContext(userDataDir, {
-    headless: true,
-    channel: 'chromium',
-    args: [`--disable-extensions-except=${extensionPath}`, `--load-extension=${extensionPath}`],
-  })
+  const { context, extensionId, close } = await launchExtension()
 
   try {
-    let [serviceWorker] = context.serviceWorkers()
-    serviceWorker ??= await context.waitForEvent('serviceworker', { timeout: 20_000 })
-    const extensionId = new URL(serviceWorker.url()).host
     const page = await context.newPage()
 
     for (const path of ['src/popup.html', 'src/devtools-panel.html', 'src/report.html']) {
@@ -60,7 +49,6 @@ test('popup e superfícies estáticas não apresentam violações críticas ou s
     )
     expect(focusOutline).not.toBe('none')
   } finally {
-    await context.close()
-    await rm(userDataDir, { recursive: true, force: true })
+    await close()
   }
 })

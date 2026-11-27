@@ -598,13 +598,16 @@ function renderViolationGroups(
   })
 
   return (
+    // One group opens at a time, but not through accordion mode: its tablist markup turns invalid
+    // once a panel opens, while plain headers are disclosure buttons with aria-expanded.
     <Collapse
-      accordion
-      activeKey={activeGroupKey}
+      activeKey={activeGroupKey ? [activeGroupKey] : []}
       items={items}
-      onChange={(key) => {
-        const nextKey = Array.isArray(key) ? String(key[0] ?? '') : String(key)
-        updateListState({ openGroupKey: nextKey || undefined })
+      onChange={(keys) => {
+        const openedKey = (Array.isArray(keys) ? keys : [keys])
+          .map(String)
+          .find((key) => key !== activeGroupKey)
+        updateListState({ openGroupKey: openedKey })
       }}
     />
   )

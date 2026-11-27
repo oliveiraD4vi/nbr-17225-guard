@@ -40,6 +40,18 @@
   border-color: #b45309 !important;
 }
 
+.ant-tag.ant-tag-volcano {
+  color: var(--guard-color-danger-text) !important;
+  background: var(--guard-color-danger-bg) !important;
+  border-color: var(--guard-color-danger-border) !important;
+}
+
+.ant-tag.ant-tag-green {
+  color: var(--guard-color-success-text) !important;
+  background: var(--guard-color-success-bg) !important;
+  border-color: var(--guard-color-success-border) !important;
+}
+
 .ant-empty .ant-empty-description {
   color: var(--guard-color-text-secondary) !important;
 }
