@@ -5,17 +5,16 @@
 
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
+import { getAccessibleName, getAssociatedDescriptionText } from '@/utils/accessible-name'
+import { getElementIdAttribute } from '@/utils/element-identity'
+import { createViolation } from '@/utils/violation-factory'
 import {
-  createViolation,
-  getAccessibleName,
-  getAssociatedDescriptionText,
-  getElementIdAttribute,
   getFocusableElements,
   getVisibleText,
   isElementFullyInViewport,
   isElementPartiallyInViewport,
   isElementVisible,
-} from '@/utils'
+} from '@/utils/visibility'
 
 export const keyboardAccessibilityRule: Rule = {
   id: 'keyboard-accessibility',

@@ -76,7 +76,7 @@ import {
   saveAuditResult,
   updateStoredAuditResult,
 } from '@/utils/audit-engine'
-import { createManualViolation } from '@/utils'
+import { createManualViolation } from '@/utils/violation-factory'
 import { areSimilarViolations } from '@/utils/audit-bulk-actions'
 import { getAuditUrlStorageKey, hydrateAuditResult } from '@/utils/audit-history'
 import { applyFindingStatusUpdate, type FindingStatusUpdate } from '@/utils/audit-triage'

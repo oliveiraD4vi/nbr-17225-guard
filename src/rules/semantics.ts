@@ -1,12 +1,9 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import {
-  createViolation,
-  getAccessibleName,
-  getAssociatedLabelText,
-  getElementIdAttribute,
-  isElementVisible,
-} from '@/utils'
+import { getAccessibleName, getAssociatedLabelText } from '@/utils/accessible-name'
+import { getElementIdAttribute } from '@/utils/element-identity'
+import { createViolation } from '@/utils/violation-factory'
+import { isElementVisible } from '@/utils/visibility'
 
 function isLikelyValidLanguageTag(value: string): boolean {
   return /^[a-z]{2,3}(-[a-z0-9]{2,8})*$/i.test(value.trim())

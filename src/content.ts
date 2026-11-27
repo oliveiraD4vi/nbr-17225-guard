@@ -11,14 +11,10 @@ import {
   type VisionSimulationFilter,
 } from './types'
 import { getRuleVerificationMode } from './utils/audit-contract'
-import {
-  getAccessibleName,
-  getElementSelector,
-  getVisibleText,
-  isGuardInjectedElement,
-  isElementVisible,
-  rgbToHex,
-} from './utils'
+import { getAccessibleName } from '@/utils/accessible-name'
+import { rgbToHex } from '@/utils/color-contrast'
+import { getElementSelector, isGuardInjectedElement } from '@/utils/element-identity'
+import { getVisibleText, isElementVisible } from '@/utils/visibility'
 import { MANUAL_FINDING_SELECTION_HOST_ID } from './utils/manual-findings'
 import {
   applyInlinePreviewStyle,

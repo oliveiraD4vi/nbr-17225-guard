@@ -1,13 +1,9 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import {
-  createViolation,
-  getAssociatedDescriptionText,
-  getAssociatedLabelText,
-  getElementIdAttribute,
-  getVisibleText,
-  isElementVisible,
-} from '@/utils'
+import { getAssociatedDescriptionText, getAssociatedLabelText } from '@/utils/accessible-name'
+import { getElementIdAttribute } from '@/utils/element-identity'
+import { createViolation } from '@/utils/violation-factory'
+import { getVisibleText, isElementVisible } from '@/utils/visibility'
 
 const formFieldsSelector =
   'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), select, textarea'

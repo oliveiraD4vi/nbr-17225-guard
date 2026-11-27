@@ -1,6 +1,7 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation, getAccessibleName } from '@/utils'
+import { getAccessibleName } from '@/utils/accessible-name'
+import { createViolation } from '@/utils/violation-factory'
 
 function createWarnings(
   rule: Rule,

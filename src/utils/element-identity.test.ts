@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import { beforeEach, describe, it, vi } from 'vitest'
-import { getElementIdAttribute, getElementSelector, isGuardInjectedElement } from '@/utils'
+import {
+  getElementIdAttribute,
+  getElementSelector,
+  isGuardInjectedElement,
+} from '@/utils/element-identity'
 
 class FakeHTMLElement {
   parentElement = null

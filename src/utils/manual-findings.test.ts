@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it, vi } from 'vitest'
 import type { AuditHistoryEntry, ManualFindingDraft, Rule, Violation } from '@/types'
-import { createManualViolation } from '@/utils'
+import { createManualViolation } from '@/utils/violation-factory'
 import {
   getManualFindingReapplyCandidates,
   mergeResolvedManualFindings,

@@ -1,6 +1,8 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation, getAccessibleName, getVisibleText, isElementVisible } from '@/utils'
+import { getAccessibleName } from '@/utils/accessible-name'
+import { createViolation } from '@/utils/violation-factory'
+import { getVisibleText, isElementVisible } from '@/utils/visibility'
 
 const normalizeText = (value: string): string =>
   value
