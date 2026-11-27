@@ -443,10 +443,11 @@ export const presentationOrderRule: Rule = {
 
     document.querySelectorAll<HTMLElement>(interactiveSelector).forEach((element) => {
       if (!isElementVisible(element)) return
-      const style = window.getComputedStyle(element)
+      // `order` moves an item inside its flex or grid parent, so the parent's layout is what counts.
+      const parentDisplay = window.getComputedStyle(element.parentElement as HTMLElement).display
       if (
-        (style.display.includes('flex') || style.display.includes('grid')) &&
-        style.order !== '0'
+        (parentDisplay.includes('flex') || parentDisplay.includes('grid')) &&
+        window.getComputedStyle(element).order !== '0'
       ) {
         violations.push(
           createViolation(presentationOrderRule, {
