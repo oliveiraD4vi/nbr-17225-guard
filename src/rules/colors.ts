@@ -5,14 +5,9 @@
 
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import {
-  createViolation,
-  getContrastRatio,
-  getEffectiveBackgroundColor,
-  isElementPerceptiblyVisible,
-  isElementVisible,
-  rgbToHex,
-} from '@/utils'
+import { getContrastRatio, getEffectiveBackgroundColor, rgbToHex } from '@/utils/color-contrast'
+import { createViolation } from '@/utils/violation-factory'
+import { isElementPerceptiblyVisible, isElementVisible } from '@/utils/visibility'
 
 function isTransparentColor(value: string): boolean {
   const normalized = value.trim().toLowerCase()

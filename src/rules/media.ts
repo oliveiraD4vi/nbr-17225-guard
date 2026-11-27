@@ -1,6 +1,6 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation } from '@/utils'
+import { createViolation } from '@/utils/violation-factory'
 
 export const audioControlRule: Rule = {
   id: 'audio-control',

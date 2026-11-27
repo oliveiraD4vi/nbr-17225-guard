@@ -1,5 +1,7 @@
 import type { Rule, Violation } from '@/types'
-import { createViolation, getAccessibleName, getVisibleText, isElementVisible } from '@/utils'
+import { getAccessibleName } from '@/utils/accessible-name'
+import { createViolation } from '@/utils/violation-factory'
+import { getVisibleText, isElementVisible } from '@/utils/visibility'
 
 function visibleElements(selector: string): HTMLElement[] {
   return Array.from(document.querySelectorAll<HTMLElement>(selector)).filter(isElementVisible)

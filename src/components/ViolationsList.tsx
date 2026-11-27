@@ -43,7 +43,7 @@ import type {
   IgnoreReason,
   Violation,
 } from '@/types'
-import { getContrastRatio } from '@/utils'
+import { getContrastRatio } from '@/utils/color-contrast'
 import { countSimilarViolations } from '@/utils/audit-bulk-actions'
 import {
   type FindingStatusUpdate,

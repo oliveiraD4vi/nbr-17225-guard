@@ -5,7 +5,9 @@
 
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation, getAccessibleName, isElementVisible } from '@/utils'
+import { getAccessibleName } from '@/utils/accessible-name'
+import { createViolation } from '@/utils/violation-factory'
+import { isElementVisible } from '@/utils/visibility'
 
 function normalizeImageText(value: string): string {
   return value

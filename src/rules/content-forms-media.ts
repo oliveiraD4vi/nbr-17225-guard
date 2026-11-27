@@ -1,19 +1,15 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
 import {
-  createViolation,
   getAccessibleName,
   getAssociatedDescriptionText,
   getAssociatedLabelText,
-  getContrastRatio,
-  getEffectiveBackgroundColor,
-  getElementIdAttribute,
   getElementLanguage,
-  getFocusableElements,
-  getVisibleText,
-  isElementVisible,
-  rgbToHex,
-} from '@/utils'
+} from '@/utils/accessible-name'
+import { getContrastRatio, getEffectiveBackgroundColor, rgbToHex } from '@/utils/color-contrast'
+import { getElementIdAttribute } from '@/utils/element-identity'
+import { createViolation } from '@/utils/violation-factory'
+import { getFocusableElements, getVisibleText, isElementVisible } from '@/utils/visibility'
 
 function createWarnings(
   rule: Rule,

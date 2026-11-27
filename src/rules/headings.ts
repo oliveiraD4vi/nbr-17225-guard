@@ -5,7 +5,8 @@
 
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation, getVisibleText } from '@/utils'
+import { createViolation } from '@/utils/violation-factory'
+import { getVisibleText } from '@/utils/visibility'
 
 function getHeadingLevel(heading: HTMLElement): number {
   return Number(heading.tagName.replace(/^H/i, ''))

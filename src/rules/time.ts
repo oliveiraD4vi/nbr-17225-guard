@@ -1,6 +1,7 @@
 import { t } from '@/i18n'
 import type { Rule, Violation } from '@/types'
-import { createViolation, getVisibleText, isElementVisible } from '@/utils'
+import { createViolation } from '@/utils/violation-factory'
+import { getVisibleText, isElementVisible } from '@/utils/visibility'
 
 export const timeLimitRule: Rule = {
   id: 'time-limit',
