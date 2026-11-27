@@ -10,9 +10,15 @@
 }
 
 .popup-header {
+  display: flex;
+  align-items: center;
+  /* Ant Design gives the header a fixed height; a wrapped title on a narrow panel needs more. */
+  height: auto;
+  min-height: 4rem;
+  line-height: normal;
   background: var(--guard-color-surface);
   color: var(--guard-color-text-primary);
-  padding: 0 0.5rem !important;
+  padding: 0.5rem !important;
   border-bottom: 1px solid var(--guard-color-border);
   box-shadow: none;
 }
@@ -31,15 +37,12 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex: 1 1 auto;
   min-width: 0;
-  position: relative;
-  height: 100%;
 }
 
 .header-row > .ant-space {
-  position: absolute;
-  top: 0;
-  right: 0;
+  flex: 0 0 auto;
 }
 
 .header-eyebrow {
@@ -64,6 +67,12 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: flex-start;
+}
+
+.header-title-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .header-stage-tag {
@@ -1007,7 +1016,6 @@
 }
 
 @media (max-width: 40em) {
-  .header-row,
   .audit-meta-header {
     flex-direction: column;
     align-items: stretch;
