@@ -11,6 +11,9 @@ O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento
 
 * **painel:** ajusta o cabeçalho ao conteúdo em larguras estreitas ([68e28f8](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/68e28f8a8bfe972ce17f3809c8846a3527def91c)), closes [#24](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/24)
 * **painel:** mantém as abas do painel dentro da barra em 320 px ([c3f9281](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/c3f92812bca0814daee0f6c61e3b155baa6120fa)), closes [#24](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/24)
+* **painel:** etiquetas verde e vulcão atingem contraste de 4,5:1 ([50175dd](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/50175ddaabc21e235c100b3544ecf20f7c0f5ecb)), closes [#24](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/24)
+* **painel:** o painel DevTools reflui em 320 px, sem a largura mínima de 360 px ([50175dd](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/50175ddaabc21e235c100b3544ecf20f7c0f5ecb)), closes [#24](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/24)
+* **violações:** grupos de regras passam a ser botões de expansão, no lugar de um tablist inválido ([50175dd](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/50175ddaabc21e235c100b3544ecf20f7c0f5ecb)), closes [#24](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/24)
 
 ## [2.0.2](https://github.com/oliveiraD4vi/nbr-17225-guard/compare/v2.0.1...v2.0.2) (2026-11-27)
 
