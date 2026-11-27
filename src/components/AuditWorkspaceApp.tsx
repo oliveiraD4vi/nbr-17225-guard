@@ -36,6 +36,7 @@ import {
   UpOutlined,
 } from '@ant-design/icons'
 import { PopupPanelSkeleton } from './LoadingSkeletons'
+import { useManualFindingDraft } from './useManualFindingDraft'
 import { useStorageQuota } from './useStorageQuota'
 import { useAccessibleMessage } from './AccessibleStatusAnnouncer'
 import type { ViolationsListState } from './ViolationsList'
@@ -50,7 +51,6 @@ import type {
   AuditScope,
   ContrastPreviewItem,
   ContrastPreviewResult,
-  ManualFindingDraft,
   Violation,
   VisionSimulationFilter,
 } from '@/types'
@@ -77,11 +77,6 @@ import { getAuditUrlStorageKey, hydrateAuditResult } from '@/utils/audit-history
 import { applyFindingStatusUpdate, type FindingStatusUpdate } from '@/utils/audit-triage'
 import { extensionStorageGet, extensionStorageSet } from '@/utils/extension-storage'
 import { isExtensionContextInvalidatedError } from '@/utils/extension-runtime'
-import {
-  getManualFindingDraftTabKey,
-  MANUAL_FINDING_DRAFTS_STORAGE_KEY,
-  sanitizeManualFindingDraft,
-} from '@/utils/manual-findings'
 import '../styles/popup.css'
 
 const { Header, Content, Footer } = Layout
@@ -144,15 +139,6 @@ interface PopupStoredState {
 }
 
 type PopupStateByUrl = Record<string, PopupStoredState>
-
-interface ManualFindingFormValues {
-  ruleId?: string
-  severity?: Violation['severity']
-  message?: string
-  suggestion?: string
-  remediationAdvice?: string
-  userNote?: string
-}
 
 interface AuditWorkspaceAppProps {
   targetTab: AuditTargetTab
@@ -443,10 +429,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       }),
     [comparisonBaselineId, comparisonTargetId, historyKey],
   )
-  const [manualFindingDraft, setManualFindingDraft] = useState<ManualFindingDraft | null>(null)
-  const [isManualFindingModalOpen, setIsManualFindingModalOpen] = useState(false)
-  const [manualFindingSaving, setManualFindingSaving] = useState(false)
-  const [manualFindingForm] = Form.useForm<ManualFindingFormValues>()
   const { announcer, notify } = useAccessibleMessage()
 
   const handleHistoryRefreshed = useCallback((_url: string, history: AuditHistoryEntry[]) => {
@@ -601,79 +583,6 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     ],
     [],
   )
-
-  const clearManualFindingDraftForTab = useCallback(
-    async (tabId = activeTab?.id) => {
-      if (!tabId) return
-
-      const data = await extensionStorageGet(MANUAL_FINDING_DRAFTS_STORAGE_KEY)
-      const draftsByTab = {
-        ...((data[MANUAL_FINDING_DRAFTS_STORAGE_KEY] as
-          | Record<string, ManualFindingDraft>
-          | undefined) ?? {}),
-      }
-      delete draftsByTab[getManualFindingDraftTabKey(tabId)]
-
-      await extensionStorageSet({
-        [MANUAL_FINDING_DRAFTS_STORAGE_KEY]: draftsByTab,
-      })
-    },
-    [activeTab?.id],
-  )
-
-  const openManualFindingDraft = useCallback(
-    (draft: ManualFindingDraft) => {
-      setManualFindingDraft(draft)
-      setIsManualFindingModalOpen(true)
-      manualFindingForm.resetFields()
-    },
-    [manualFindingForm],
-  )
-
-  const loadManualFindingDraftForTab = useCallback(
-    async (tab: AuditTargetTab) => {
-      const data = await extensionStorageGet(MANUAL_FINDING_DRAFTS_STORAGE_KEY)
-      const rawDraft = (
-        data[MANUAL_FINDING_DRAFTS_STORAGE_KEY] as Record<string, ManualFindingDraft> | undefined
-      )?.[getManualFindingDraftTabKey(tab.id)]
-      const draft = sanitizeManualFindingDraft(rawDraft, tab.id)
-
-      if (!draft) {
-        setManualFindingDraft(null)
-        setIsManualFindingModalOpen(false)
-        return
-      }
-
-      if (tab.url && getAuditUrlStorageKey(draft.url) !== getAuditUrlStorageKey(tab.url)) {
-        await clearManualFindingDraftForTab(tab.id)
-        setManualFindingDraft(null)
-        setIsManualFindingModalOpen(false)
-        return
-      }
-
-      openManualFindingDraft(draft)
-    },
-    [clearManualFindingDraftForTab, openManualFindingDraft],
-  )
-
-  useEffect(() => {
-    if (!activeTab?.id) return
-    void loadManualFindingDraftForTab(activeTab)
-  }, [activeTab, loadManualFindingDraftForTab])
-
-  useEffect(() => {
-    if (!activeTab?.id) return undefined
-
-    const handleManualFindingDraftChange = (request: { action?: string; tabId?: number }) => {
-      if (request.action !== 'MANUAL_FINDING_DRAFT_CHANGED' || request.tabId !== activeTab.id) {
-        return
-      }
-      void loadManualFindingDraftForTab(activeTab)
-    }
-
-    chrome.runtime.onMessage.addListener(handleManualFindingDraftChange)
-    return () => chrome.runtime.onMessage.removeListener(handleManualFindingDraftChange)
-  }, [activeTab, loadManualFindingDraftForTab])
 
   const viewedAuditResult = useMemo(() => {
     if (!selectedHistoryId) return auditResult
@@ -1352,45 +1261,21 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
     }
   }, [isHistoricalView, notify, sendMessageToActiveTab])
 
-  const handleManualFindingRuleChange = useCallback(
-    (ruleId: string) => {
-      const selectedRule = allRules.find((rule) => rule.id === ruleId)
-      if (!selectedRule) return
-
-      manualFindingForm.setFieldsValue({ severity: selectedRule.severity })
-    },
-    [manualFindingForm],
-  )
-
-  const handleCloseManualFindingModal = useCallback(() => {
-    setIsManualFindingModalOpen(false)
-  }, [])
-
-  const handleCancelManualFindingDraft = useCallback(async () => {
-    if (manualFindingDraft?.tabId) {
-      await clearManualFindingDraftForTab(manualFindingDraft.tabId)
-    }
-
-    setManualFindingDraft(null)
-    setIsManualFindingModalOpen(false)
-    manualFindingForm.resetFields()
-  }, [clearManualFindingDraftForTab, manualFindingDraft?.tabId, manualFindingForm])
-
-  const handleReselectManualFindingElement = useCallback(async () => {
-    if (manualFindingDraft?.tabId) {
-      await clearManualFindingDraftForTab(manualFindingDraft.tabId)
-    }
-
-    setManualFindingDraft(null)
-    setIsManualFindingModalOpen(false)
-    manualFindingForm.resetFields()
-    await handleStartManualFindingSelection()
-  }, [
-    clearManualFindingDraftForTab,
-    handleStartManualFindingSelection,
-    manualFindingDraft?.tabId,
-    manualFindingForm,
-  ])
+  const {
+    draft: manualFindingDraft,
+    form: manualFindingForm,
+    isOpen: isManualFindingModalOpen,
+    isSaving: manualFindingSaving,
+    close: handleCloseManualFindingModal,
+    cancel: handleCancelManualFindingDraft,
+    reselect: handleReselectManualFindingElement,
+    selectRule: handleManualFindingRuleChange,
+    save: saveManualFinding,
+  } = useManualFindingDraft({
+    tab: activeTab,
+    notify,
+    startSelection: handleStartManualFindingSelection,
+  })
 
   const handleSaveManualFinding = useCallback(async () => {
     if (!auditResult || isHistoricalView || !activeTab?.id || !manualFindingDraft) {
@@ -1398,17 +1283,16 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       return
     }
 
-    setManualFindingSaving(true)
-    try {
-      const values = await manualFindingForm.validateFields()
+    const tabId = activeTab.id
+    await saveManualFinding(async (values, draft) => {
       const selectedRule = allRules.find((rule) => rule.id === values.ruleId)
       if (!selectedRule) {
         notify.error(t('popup.messages.manualFindingRuleMissing'))
-        return
+        return false
       }
 
       const manualViolation = createManualViolation(selectedRule, {
-        draft: manualFindingDraft,
+        draft,
         message: values.message ?? '',
         suggestion: values.suggestion ?? '',
         remediationAdvice: values.remediationAdvice ?? '',
@@ -1424,43 +1308,30 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
       syncAuditResultUpdate(updatedResult)
       const persisted = await persistWithQuotaHandling(
         async () => {
-          await updateStoredAuditResult(updatedResult, activeTab.id)
+          await updateStoredAuditResult(updatedResult, tabId)
           return true
         },
         { url: updatedResult.url, scope: 'review', hasUnsavedChanges: true },
       )
       if (persisted === null) {
         notify.warning(t('popup.messages.quotaUnsavedReview'))
-        return
+        return false
       }
 
-      await clearManualFindingDraftForTab(manualFindingDraft.tabId)
-      setManualFindingDraft(null)
-      setIsManualFindingModalOpen(false)
-      manualFindingForm.resetFields()
       setActiveTabKey('violations')
       void persistPopupState({ activeTabKey: 'violations' })
       notify.success(t('popup.messages.manualFindingSaved'))
-    } catch (error) {
-      if (typeof error === 'object' && error && 'errorFields' in error) {
-        return
-      }
-
-      console.error('Erro ao salvar violação manual:', error)
-      notify.error(t('popup.messages.manualFindingSaveError'))
-    } finally {
-      setManualFindingSaving(false)
-    }
+      return true
+    })
   }, [
     activeTab?.id,
     auditResult,
-    clearManualFindingDraftForTab,
     isHistoricalView,
     manualFindingDraft,
-    manualFindingForm,
     notify,
     persistPopupState,
     persistWithQuotaHandling,
+    saveManualFinding,
     syncAuditResultUpdate,
   ])
 
