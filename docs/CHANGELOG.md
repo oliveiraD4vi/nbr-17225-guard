@@ -4,6 +4,18 @@ Todas as mudanças relevantes deste projeto devem ser registradas neste arquivo.
 
 O formato segue, de forma simples, a ideia de "Keep a Changelog" e versionamento semântico quando aplicável.
 
+## [2.0.2](https://github.com/oliveiraD4vi/nbr-17225-guard/compare/v2.0.1...v2.0.2) (2026-11-27)
+
+
+### Fixed
+
+* **alvos:** não aplica a exceção de espaçamento ao tamanho aprimorado ([72c8021](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/72c8021f454f880720cff235bbf32d06ca9d3ff8)), closes [#20](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/20)
+* **contraste:** mede texto grande em pontos, não em pixels ([4bf8f32](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/4bf8f326d2246be57b07aab8909e21d178ab1698)), closes [#20](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/20)
+* **formularios:** reconhece o botão sem type como envio do formulário ([d15ea03](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/d15ea031063dba9cce640d9c699930c1655c8728)), closes [#20](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/20)
+* **ordem:** detecta itens reordenados com order no flex e no grid ([3ffa240](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/3ffa2409d907715611245964debfa1ba7254ef3e)), closes [#20](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/20)
+* **regras:** ignora conteúdo aria-hidden no nome de links e botões ([754f346](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/754f3467c34aaa1d27f898f63a937f2eec660c4a)), closes [#20](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/20)
+* **regras:** não nomeia regiões e tabelas pelo próprio conteúdo ([89544ac](https://github.com/oliveiraD4vi/nbr-17225-guard/commit/89544acadd45525c0e35beda8c8926c811f53400)), closes [#20](https://github.com/oliveiraD4vi/nbr-17225-guard/issues/20)
+
 ## [2.0.1](https://github.com/oliveiraD4vi/nbr-17225-guard/compare/v2.0.0-beta.1...v2.0.1) (2026-11-26)
 
 
