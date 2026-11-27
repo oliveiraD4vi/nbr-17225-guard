@@ -31,6 +31,41 @@ const VISION_FILTER_HOST_ID = 'nbr-vision-filter-host'
 const visuallyHiddenClassPattern =
   /\b(sr-only|screen-reader|screenreader|visually-hidden|hidden-visually|a11y-hidden)\b/i
 const nonRenderableTags = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'HEAD'])
+const namedByAuthorSelector = [
+  'table',
+  'nav',
+  'main',
+  'aside',
+  'header',
+  'footer',
+  'section',
+  'article',
+  'form',
+  'ul',
+  'ol',
+  'fieldset',
+  'figure',
+  'dialog',
+  ...[
+    'table',
+    'grid',
+    'treegrid',
+    'navigation',
+    'main',
+    'complementary',
+    'banner',
+    'contentinfo',
+    'region',
+    'search',
+    'form',
+    'list',
+    'group',
+    'dialog',
+    'alertdialog',
+    'figure',
+    'article',
+  ].map((role) => `[role="${role}"]`),
+].join(', ')
 const alternativeTextRuleIds = new Set([
   'image-alt-text',
   'image-functional-alt',
@@ -410,6 +445,15 @@ export function getAccessibleName(element: HTMLElement): string {
 
   const title = element.getAttribute('title')
   if (title?.trim()) return title.trim()
+
+  // Landmarks, tables, lists, groups and dialogs are never named by their content (WAI-ARIA
+  // "name from author"); only a native caption names them.
+  if (element.matches(namedByAuthorSelector)) {
+    const caption = element.querySelector<HTMLElement>(
+      ':scope > caption, :scope > legend, :scope > figcaption',
+    )
+    return caption ? getVisibleText(caption) : ''
+  }
 
   const visibleText = getVisibleText(element)
   if (visibleText) return visibleText
