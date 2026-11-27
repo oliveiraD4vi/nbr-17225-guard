@@ -9,7 +9,9 @@
     "src/**/*.test.tsx",
     "src/**/*.scenarios.ts",
     "tests/*.ts",
-    "tests/rules/**/*.ts"
+    "tests/rules/**/*.ts",
+    "tests/e2e/**/*.ts",
+    "playwright.config.ts"
   ],
   "exclude": []
 }

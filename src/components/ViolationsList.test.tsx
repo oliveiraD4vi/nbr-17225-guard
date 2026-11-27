@@ -44,7 +44,7 @@ function ControlledViolationsList(props: ComponentProps<typeof ViolationsList>) 
 
 // Violations are grouped by rule, and each card opens to show its actions.
 async function openViolation(user: ReturnType<typeof userEvent.setup>, ruleName: string) {
-  await user.click(screen.getByRole('tab', { name: new RegExp(ruleName) }))
+  await user.click(screen.getByRole('button', { name: new RegExp(ruleName) }))
   const card = document.querySelector<HTMLElement>(
     'button.violation-item-header[aria-expanded="false"]',
   )
