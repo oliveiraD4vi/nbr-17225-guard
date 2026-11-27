@@ -1967,8 +1967,10 @@ export const AuditWorkspaceApp: React.FC<AuditWorkspaceAppProps> = ({ targetTab 
         <div className="header-row">
           <div className="header-content">
             <h1 className="header-title">
-              <img src={appIconUrl} alt="" className="header-title-icon" aria-hidden="true" />
-              <span>{t('shared.brand.name')}</span>
+              <span className="header-title-name">
+                <img src={appIconUrl} alt="" className="header-title-icon" aria-hidden="true" />
+                {t('shared.brand.name')}
+              </span>
               <Tag className="header-stage-tag" color="gold">
                 {t('shared.states.beta')}
                 <span className="header-version-tag">v{APP_VERSION}</span>
