@@ -4,6 +4,12 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
     "types": ["vite/client", "chrome", "node"]
   },
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/*.ts", "tests/unit/**/*.ts"],
+  "include": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "tests/*.ts",
+    "tests/unit/**/*.ts",
+    "tests/rules/**/*.ts"
+  ],
   "exclude": []
 }
